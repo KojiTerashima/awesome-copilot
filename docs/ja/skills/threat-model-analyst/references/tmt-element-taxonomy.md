@@ -1,187 +1,181 @@
-# TMT Element Taxonomy — Code to Threat Model DFD Reference
+# TMT 要素分類 — コードから脅威モデルへの DFD リファレンス
 
-Complete reference for identifying DFD elements from source code analysis.
-Aligns with Microsoft Threat Modeling Tool (TMT) element types for TM7 compatibility.
-This is the **single authoritative file** for all TMT type classifications.
+ソース コード分析から DFD 要素を特定するための完全なリファレンス。
+TM7 との互換性を確保するために、Microsoft Threat Modeling Tool (TMT) 要素タイプと調整します。
+これは、すべての TMT タイプ分類に対する **単一の権限のあるファイル**です。
 
-**Diagram styling & rendering rules** are in: [diagram-conventions.md](./diagram-conventions.md)
-**This file covers:** What to look for in code, how to classify it, and how to name it.
-
----
-
-## 1. Element Types
-
-**NOTE:** TMT IDs (e.g., `SE.P.TMCore.OSProcess`) are for classification reference only. **Do NOT use TMT IDs as Mermaid node IDs.** Use concise, readable PascalCase IDs (e.g., `WebServer`, `SqlDatabase`).
-
-### 1.1 Process Types
-
-| TMT ID | Name | Code Patterns to Identify |
-|--------|------|---------------------------|
-| `SE.P.TMCore.OSProcess` | OS Process | Native executables, system processes, spawned processes |
-| `SE.P.TMCore.Thread` | Thread | Thread pools, `Task`, `pthread`, worker threads |
-| `SE.P.TMCore.WinApp` | Native Application | Win32 apps, C/C++ executables, desktop apps |
-| `SE.P.TMCore.NetApp` | Managed Application | .NET apps, C# services, F# programs |
-| `SE.P.TMCore.ThickClient` | Thick Client | Desktop GUI apps, WPF, WinForms, Electron |
-| `SE.P.TMCore.BrowserClient` | Browser Client | SPAs, JavaScript apps, WebAssembly |
-| `SE.P.TMCore.WebServer` | Web Server | IIS, Apache, Nginx, Express, Kestrel |
-| `SE.P.TMCore.WebApp` | Web Application | ASP.NET, Django, Rails, Spring MVC |
-| `SE.P.TMCore.WebSvc` | Web Service | REST APIs, SOAP, GraphQL endpoints |
-| `SE.P.TMCore.VM` | Virtual Machine | VMs, containers, Docker |
-| `SE.P.TMCore.Win32Service` | Win32 Service | Windows services, `ServiceBase` |
-| `SE.P.TMCore.KernelThread` | Kernel Thread | Kernel modules, drivers, ring-0 code |
-| `SE.P.TMCore.Modern` | Windows Store Process | UWP apps, Windows Store apps, sandboxed apps |
-| `SE.P.TMCore.PlugIn` | Browser and ActiveX Plugins | Browser extensions, ActiveX, BHO plugins |
-| `SE.P.TMCore.NonMS` | Applications Running on a non Microsoft OS | Linux apps, macOS apps, Unix processes |
-
-### 1.2 External Interactor Types
-
-| TMT ID | Name | Code Patterns to Identify |
-|--------|------|---------------------------|
-| `SE.EI.TMCore.Browser` | Browser | Browser clients, user agents, web UI consumers |
-| `SE.EI.TMCore.AuthProvider` | Authorization Provider | OAuth servers, OIDC providers, IdP, SAML |
-| `SE.EI.TMCore.WebSvc` | External Web Service | External APIs, vendor services, SaaS endpoints |
-| `SE.EI.TMCore.User` | Human User | End users, operators, administrators |
-| `SE.EI.TMCore.Megaservice` | Megaservice | Large cloud platforms (Azure, AWS, GCP services) |
-| `SE.EI.TMCore.WebApp` | External Web Application | Third-party web apps, external portals |
-| `SE.EI.TMCore.CRT` | Windows Runtime | WinRT APIs, Windows runtime components |
-| `SE.EI.TMCore.NFX` | Windows .NET Runtime | .NET Framework, CLR, BCL |
-| `SE.EI.TMCore.WinRT` | Windows RT Runtime | Windows RT platform, ARM Windows apps |
-
-### 1.3 Data Store Types
-
-| TMT ID | Name | Code Patterns to Identify |
-|--------|------|---------------------------|
-| `SE.DS.TMCore.CloudStorage` | Cloud Storage | Azure Blob, S3, GCS |
-| `SE.DS.TMCore.SQL` | SQL Database | PostgreSQL, MySQL, SQL Server, SQLite |
-| `SE.DS.TMCore.NoSQL` | Non-Relational DB | MongoDB, CosmosDB, Redis, Cassandra |
-| `SE.DS.TMCore.FS` | File System | Local files, NFS, shared drives |
-| `SE.DS.TMCore.Cache` | Cache | Redis, Memcached, in-memory caches |
-| `SE.DS.TMCore.ConfigFile` | Configuration File | `.env`, `appsettings.json`, YAML configs |
-| `SE.DS.TMCore.Cookie` | Cookies | HTTP cookies, session cookies |
-| `SE.DS.TMCore.Registry` | Registry Hive | Windows Registry, system configuration stores |
-| `SE.DS.TMCore.HTML5LS` | HTML5 Local Storage | `localStorage`, `sessionStorage`, IndexedDB |
-| `SE.DS.TMCore.Device` | Device | Hardware devices, USB, peripheral storage |
-
-### 1.4 Data Flow Types
-
-| TMT ID | Name | Code Patterns to Identify |
-|--------|------|---------------------------|
-| `SE.DF.TMCore.HTTP` | HTTP | `fetch()`, `axios`, `HttpClient`, REST without TLS |
-| `SE.DF.TMCore.HTTPS` | HTTPS | TLS-secured REST, `https://` endpoints |
-| `SE.DF.TMCore.Binary` | Binary | gRPC, Protobuf, raw binary protocols |
-| `SE.DF.TMCore.NamedPipe` | Named Pipe | IPC via named pipes |
-| `SE.DF.TMCore.SMB` | SMB | SMB/CIFS file shares |
-| `SE.DF.TMCore.UDP` | UDP | UDP sockets, datagram protocols |
-| `SE.DF.TMCore.SSH` | SSH | SSH tunnels, SFTP, SCP |
-| `SE.DF.TMCore.LDAP` | LDAP | LDAP queries, AD lookups |
-| `SE.DF.TMCore.LDAPS` | LDAPS | Secure LDAP over TLS |
-| `SE.DF.TMCore.IPsec` | IPsec | VPN tunnels, IPsec-secured connections |
-| `SE.DF.TMCore.RPC` | RPC or DCOM | COM+, DCOM, RPC calls, WCF net.tcp |
-| `SE.DF.TMCore.ALPC` | ALPC | Advanced Local Procedure Call, Windows IPC |
-| `SE.DF.TMCore.IOCTL` | IOCTL Interface | Device I/O control, driver communication |
-
-### 1.5 Trust Boundary Types
-
-**Line Boundaries:**
-
-| TMT ID | Name | Code Indicators |
-|--------|------|-----------------|
-| `SE.TB.L.TMCore.Internet` | Internet Boundary | Public endpoints, API gateways |
-| `SE.TB.L.TMCore.Machine` | Machine Boundary | Process boundaries, VM separation |
-| `SE.TB.L.TMCore.Kernel` | Kernel/User Mode | Drivers, ring 0/3 transitions |
-| `SE.TB.L.TMCore.AppContainer` | AppContainer | UWP sandboxes, app containers |
-
-**Border Boundaries:**
-
-| TMT ID | Name | Code Indicators |
-|--------|------|-----------------|
-| `SE.TB.B.TMCore.CorpNet` | CorpNet | Corporate network, VPN perimeter |
-| `SE.TB.B.TMCore.Sandbox` | Sandbox | Sandboxed execution environments |
-| `SE.TB.B.TMCore.IEB` | Internet Explorer Boundaries | IE zones, IE security settings |
-| `SE.TB.B.TMCore.NonIEB` | Other Browsers Boundaries | Chrome, Firefox, Edge security contexts |
+**図のスタイル設定とレンダリング ルール** は次の場所にあります: [diagram-conventions.md](./diagram-conventions.md)
+**このファイルの内容は次のとおりです。** コード内で何を探すか、コードを分類する方法、コードに名前を付ける方法。
 
 ---
 
-## 2. Trust Boundary Detection
+## 1. 要素の種類
 
-Create a trust boundary (`subgraph`) when code crosses:
+**注:** TMT ID (例: `SE.P.TMCore.OSProcess`) は分類の参照のみを目的としています。 **TMT ID を Mermaid ノード ID として使用しないでください。** 簡潔で読みやすい PascalCase ID (例: `WebServer`、`SqlDatabase`) を使用してください。
 
-| Boundary Type | Code Indicators |
-|---------------|-----------------|
-| **Internet/Public** | Public endpoints, API gateways, load balancers |
-| **Machine** | Process boundaries, host separation |
-| **Kernel/User Mode** | Kernel calls, drivers, syscalls |
-| **AppContainer** | UWP sandboxes, containerized apps |
-| **CorpNet** | Corporate network perimeter, VPN |
-| **Sandbox** | Sandboxed execution environments |
+### 1.1 プロセスの種類
+
+| TMT ID |名前 |識別するコード パターン |
+|----------|------|--------------------------|
+| `SE.P.TMCore.OSProcess` | OSプロセス |ネイティブ実行可能ファイル、システム プロセス、生成されたプロセス |
+| `SE.P.TMCore.Thread` |スレッド |スレッド プール、`Task`、`pthread`、ワーカー スレッド |
+| `SE.P.TMCore.WinApp` |ネイティブ アプリケーション | Win32 アプリ、C/C++ 実行可能ファイル、デスクトップ アプリ |
+| `SE.P.TMCore.NetApp` |マネージド アプリケーション | .NET アプリ、C# サービス、F# プログラム |
+| `SE.P.TMCore.ThickClient` |シッククライアント |デスクトップ GUI アプリ、WPF、WinForms、Electron |
+| `SE.P.TMCore.BrowserClient` |ブラウザクライアント | SPA、JavaScript アプリ、WebAssembly |
+| `SE.P.TMCore.WebServer` |ウェブサーバー | IIS、Apache、Nginx、Express、Kestrel |
+| `SE.P.TMCore.WebApp` |ウェブアプリケーション | ASP.NET、Django、Rails、Spring MVC |
+| `SE.P.TMCore.WebSvc` |ウェブサービス | REST API、SOAP、GraphQL エンドポイント |
+| `SE.P.TMCore.VM` |仮想マシン | VM、コンテナ、Docker |
+| `SE.P.TMCore.Win32Service` | Win32 サービス | Windows サービス、`ServiceBase` |
+| `SE.P.TMCore.KernelThread` |カーネルスレッド |カーネル モジュール、ドライバー、リング 0 コード |
+| `SE.P.TMCore.Modern` | Windows ストアのプロセス | UWP アプリ、Windows ストア アプリ、サンドボックス アプリ |
+| `SE.P.TMCore.PlugIn` |ブラウザと ActiveX プラグイン |ブラウザ拡張機能、ActiveX、BHO プラグイン |
+| `SE.P.TMCore.NonMS` | Microsoft 以外の OS で実行されるアプリケーション | Linux アプリ、macOS アプリ、Unix プロセス |
+
+### 1.2 外部インタラクターのタイプ| TMT ID |名前 |識別するコード パターン |
+|----------|------|--------------------------|
+| `SE.EI.TMCore.Browser` |ブラウザ |ブラウザ クライアント、ユーザー エージェント、Web UI コンシューマー |
+| `SE.EI.TMCore.AuthProvider` |認可プロバイダ | OAuth サーバー、OIDC プロバイダー、IdP、SAML |
+| `SE.EI.TMCore.WebSvc` |外部 Web サービス |外部 API、ベンダー サービス、SaaS エンドポイント |
+| `SE.EI.TMCore.User` |人間のユーザー |エンドユーザー、オペレーター、管理者 |
+| `SE.EI.TMCore.Megaservice` |メガサービス |大規模なクラウド プラットフォーム (Azure、AWS、GCP サービス) |
+| `SE.EI.TMCore.WebApp` |外部 Web アプリケーション |サードパーティ Web アプリ、外部ポータル |
+| `SE.EI.TMCore.CRT` | Windows ランタイム | WinRT API、Windows ランタイム コンポーネント |
+| `SE.EI.TMCore.NFX` | Windows .NET ランタイム | .NET フレームワーク、CLR、BCL |
+| `SE.EI.TMCore.WinRT` | Windows RT ランタイム | Windows RT プラットフォーム、ARM Windows アプリ |
+
+### 1.3 データストアの種類
+
+| TMT ID |名前 |識別するコード パターン |
+|----------|------|--------------------------|
+| `SE.DS.TMCore.CloudStorage` |クラウドストレージ | Azure BLOB、S3、GCS |
+| `SE.DS.TMCore.SQL` | SQL データベース | PostgreSQL、MySQL、SQL Server、SQLite |
+| `SE.DS.TMCore.NoSQL` |非リレーショナル DB | MongoDB、CosmosDB、Redis、Cassandra |
+| `SE.DS.TMCore.FS` |ファイルシステム |ローカル ファイル、NFS、共有ドライブ |
+| `SE.DS.TMCore.Cache` |キャッシュ | Redis、Memcached、メモリ内キャッシュ |
+| `SE.DS.TMCore.ConfigFile` |設定ファイル | `.env`、`appsettings.json`、YAML 構成 |
+| `SE.DS.TMCore.Cookie` |クッキー | HTTP Cookie、セッション Cookie |
+| `SE.DS.TMCore.Registry` |レジストリ ハイブ | Windows レジストリ、システム構成ストア |
+| `SE.DS.TMCore.HTML5LS` | HTML5 ローカル ストレージ | `localStorage`、`sessionStorage`、インデックス付き DB |
+| `SE.DS.TMCore.Device` |デバイス |ハードウェア デバイス、USB、周辺機器ストレージ |
+
+### 1.4 データ フローの種類| TMT ID |名前 |識別するコード パターン |
+|----------|------|--------------------------|
+| `SE.DF.TMCore.HTTP` | HTTP | `fetch()`、`axios`、`HttpClient`、TLS を使用しない REST |
+| `SE.DF.TMCore.HTTPS` | HTTPS | TLS で保護された REST、`https://` エンドポイント |
+| `SE.DF.TMCore.Binary` |バイナリ | gRPC、Protobuf、生のバイナリ プロトコル |
+| `SE.DF.TMCore.NamedPipe` |名前付きパイプ |名前付きパイプ経由の IPC |
+| `SE.DF.TMCore.SMB` |中小企業 | SMB/CIFS ファイル共有 |
+| `SE.DF.TMCore.UDP` | UDP | UDP ソケット、データグラム プロトコル |
+| `SE.DF.TMCore.SSH` | SSH | SSH トンネル、SFTP、SCP |
+| `SE.DF.TMCore.LDAP` | LDAP | LDAP クエリ、AD ルックアップ |
+| `SE.DF.TMCore.LDAPS` | LDAP | TLS 経由の安全な LDAP |
+| `SE.DF.TMCore.IPsec` | IPsec | VPN トンネル、IPsec で保護された接続 |
+| `SE.DF.TMCore.RPC` | RPC または DCOM | COM+、DCOM、RPC 呼び出し、WCF net.tcp |
+| `SE.DF.TMCore.ALPC` |アルＰＣ |高度なローカル プロシージャ コール、Windows IPC |
+| `SE.DF.TMCore.IOCTL` | IOCTL インターフェイス |デバイスI/O制御、ドライバ通信 |
+
+### 1.5 信頼境界の種類
+
+**線の境界:**
+
+| TMT ID |名前 |コードインジケータ |
+|------|------|------|
+| `SE.TB.L.TMCore.Internet` |インターネットの境界 |パブリック エンドポイント、API ゲートウェイ |
+| `SE.TB.L.TMCore.Machine` |マシンの境界 |プロセス境界、VM 分離 |
+| `SE.TB.L.TMCore.Kernel` |カーネル/ユーザーモード |ドライバー、リング 0/3 トランジション |
+| `SE.TB.L.TMCore.AppContainer` |アプリコンテナ | UWP サンドボックス、アプリ コンテナー |
+
+**境界線の境界:**
+
+| TMT ID |名前 |コードインジケータ |
+|------|------|------|
+| `SE.TB.B.TMCore.CorpNet` |コープネット |企業ネットワーク、VPN 境界 |
+| `SE.TB.B.TMCore.Sandbox` |サンドボックス |サンドボックス化された実行環境 |
+| `SE.TB.B.TMCore.IEB` | Internet Explorer の境界 | IE ゾーン、IE セキュリティ設定 |
+| `SE.TB.B.TMCore.NonIEB` |他のブラウザの境界 | Chrome、Firefox、Edge のセキュリティ コンテキスト |
 
 ---
 
-## 3. Data Flow Detection
+## 2. 信頼境界の検出
 
-Look for these patterns to identify flows:
+コードが交差する場合は信頼境界 (`subgraph`) を作成します。
 
-| Flow Type | Code Patterns |
-|-----------|---------------|
-| **HTTP/HTTPS** | `fetch()`, `axios`, `HttpClient`, REST calls |
-| **SQL Database** | ORM queries, SQL connections, `DbContext` |
-| **Message Queue** | Pub/sub, queue send/receive, Dapr pub/sub |
-| **File I/O** | File read/write, blob upload/download |
-| **gRPC** | Protobuf calls, gRPC streams |
-| **Named Pipe** | IPC via named pipes |
-| **SSH** | SSH tunnels, SFTP, SCP transfers |
-| **LDAP/LDAPS** | Directory queries, AD lookups |
+|境界タイプ |コードインジケータ |
+|---------------|---------------|
+| **インターネット/公共** |パブリック エンドポイント、API ゲートウェイ、ロード バランサー |
+| **機械** |プロセス境界、ホスト分離 |
+| **カーネル/ユーザー モード** |カーネルコール、ドライバー、システムコール |
+| **AppContainer** | UWP サンドボックス、コンテナー化されたアプリ |
+| **コーポネット** |企業ネットワーク境界、VPN |
+| **サンドボックス** |サンドボックス化された実行環境 |
 
 ---
 
-## 4. Code Analysis Checklist
+## 3. データ フローの検出
 
-When analyzing code, systematically identify:
-
-1. **Entry Points** → External Interactors + inbound flows
-   - API controllers, event handlers, webhook endpoints
-
-2. **Services/Logic** → Processes
-   - Business logic classes, service layers, workers
-
-3. **Data Access** → Data Stores + flows
-   - Repository classes, DB contexts, cache clients
-
-4. **External Calls** → External Interactors + outbound flows
-   - HTTP clients, SDK integrations, third-party APIs
-
-5. **Security Boundaries** → Trust Boundaries
-   - Auth middleware, network segments, deployment units
-
-6. **Kubernetes Pod Composition** → Sidecar co-location
-   - Look for Helm charts, K8s manifests, deployment YAMLs
-   - Common sidecars: Dapr, MISE, Envoy, Istio proxy, Linkerd, log collectors
-   - **Apply rules from `diagram-conventions.md` Rule 1** — annotate host nodes, never create standalone sidecar nodes
+フローを識別するには、次のパターンを探してください。|フロータイプ |コードパターン |
+|----------|------|
+| **HTTP/HTTPS** | `fetch()`、`axios`、`HttpClient`、REST 呼び出し |
+| **SQL データベース** | ORM クエリ、SQL 接続、`DbContext` |
+| **メッセージ キュー** |パブリッシュ/サブスクライブ、キュー送信/受信、Dapr パブリッシュ/サブスクライブ |
+| **ファイル I/O** |ファイルの読み取り/書き込み、BLOB のアップロード/ダウンロード |
+| **gRPC** | Protobuf 呼び出し、gRPC ストリーム |
+| **名前付きパイプ** |名前付きパイプ経由の IPC |
+| **SSH** | SSH トンネル、SFTP、SCP 転送 |
+| **LDAP/LDAPS** |ディレクトリ クエリ、AD ルックアップ |
 
 ---
 
-## 5. Naming Conventions
+## 4. コード分析チェックリスト
 
-See [diagram-conventions.md](./diagram-conventions.md) Naming Conventions section for the full table with quoting rules.
+コードを分析するときは、以下を体系的に特定します。
+
+1. **エントリ ポイント** → 外部インタラクター + インバウンド フロー
+   - API コントローラー、イベント ハンドラー、Webhook エンドポイント
+
+2. **サービス/ロジック** → プロセス
+   - ビジネス ロジック クラス、サービス層、ワーカー
+
+3. **データ アクセス** → データ ストア + フロー
+   - リポジトリクラス、DBコンテキスト、キャッシュクライアント
+
+4. **外部呼び出し** → 外部インタラクター + アウトバウンドフロー
+   - HTTP クライアント、SDK 統合、サードパーティ API
+
+5. **セキュリティ境界** → 信頼境界
+   - 認証ミドルウェア、ネットワークセグメント、展開ユニット
+
+6. **Kubernetes ポッドの構成** → サイドカーのコロケーション
+   - Helm チャート、K8 マニフェスト、デプロイメント YAML を探します
+   - 共通サイドカー: Dapr、MISE、Envoy、Istio プロキシ、Linkerd、ログ コレクター
+   - **`diagram-conventions.md` ルール 1 のルールを適用します** - ホスト ノードに注釈を付け、スタンドアロンのサイドカー ノードを作成しない
 
 ---
 
-## 6. Output Files
+## 5. 命名規則
 
-Generate **TWO files** for maximum flexibility:
+引用符ルールを含む完全な表については、[diagram-conventions.md](./diagram-conventions.md) の命名規則セクションを参照してください。
 
-### File 1: Pure Mermaid (`.mmd`)
-- Raw Mermaid code only, no markdown wrapper
-- Used for: CLI tools, editors, CI/CD, direct rendering
+---
 
-### File 2: Markdown (`.md`)
-- Mermaid in ` ```mermaid ` code fence
-- Include element, flow, and boundary summary tables
-- Used for: GitHub, VS Code, documentation
+## 6. 出力ファイル
 
-### Format Comparison
+柔軟性を最大限に高めるために **2 つのファイル**を生成します:
 
-| Format | Extension | Contents | Best For |
-|--------|-----------|----------|----------|
-| Pure Mermaid | `.mmd` | Raw diagram code | CLI, editors, tools |
-| Markdown | `.md` | Diagram + tables | GitHub, docs, viewing |
+### ファイル 1: ピュアマーメイド (`.mmd`)
+- 生の Mermaid コードのみ、マークダウン ラッパーなし
+- 用途: CLI ツール、エディター、CI/CD、ダイレクト レンダリング
+
+### ファイル 2: マークダウン (`.md`)
+- ` ```mermaid ` コードフェンスの中の人魚
+- 要素、フロー、および境界の概要テーブルを含める
+- 用途: GitHub、VS Code、ドキュメント
+
+### フォーマットの比較
+
+|フォーマット |拡張子 |目次 |最適な用途 |
+|----------|----------|----------|----------|
+|ピュアマーメイド | `.mmd` |生の図コード | CLI、エディタ、ツール |
+|マークダウン | `.md` |図+表 | GitHub、ドキュメント、表示 |

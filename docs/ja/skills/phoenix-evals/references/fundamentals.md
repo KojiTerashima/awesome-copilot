@@ -1,76 +1,62 @@
-# Fundamentals
+# 基本
 
-Application-specific tests for AI systems. Code first, LLM for nuance, human for truth.
+AI システムのアプリケーション固有のテスト。コードが先、LLM はニュアンス、人間は真実を知る。
 
-## Evaluator Types
+## 評価者のタイプ
 
-| Type | Speed | Cost | Use Case |
+|タイプ |スピード |コスト |使用例 |
 | ---- | ----- | ---- | -------- |
-| **Code** | Fast | Cheap | Regex, JSON, format, exact match |
-| **LLM** | Medium | Medium | Subjective quality, complex criteria |
-| **Human** | Slow | Expensive | Ground truth, calibration |
+| **コード** |速い |安い |正規表現、JSON、形式、完全一致 |
+| **LLM** |中 |中 |主観的な品質、複雑な基準 |
+| **人間** |遅い |高価 |グラウンドトゥルース、キャリブレーション |
 
-**Decision:** Code first → LLM only when code can't capture criteria → Human for calibration.
+**決定:** 最初にコードを作成 → コードが基準を捕捉できない場合のみ LLM → 人間による調整。
 
-## Score Structure
+## スコア構造
 
-| Property | Required | Description |
+|プロパティ |必須 |説明 |
 | -------- | -------- | ----------- |
-| `name` | Yes | Evaluator name |
-| `kind` | Yes | `"code"`, `"llm"`, `"human"` |
-| `score` | No* | 0-1 numeric |
-| `label` | No* | `"pass"`, `"fail"` |
-| `explanation` | No | Rationale |
+| `name` |はい |評価者名 |
+| `kind` |はい | `"code"`、`"llm"`、`"human"` |
+| `score` |いいえ* | 0 ～ 1 の数値 |
+| `label` |いいえ* | `"pass"`、`"fail"` |
+| `explanation` |いいえ |理論的根拠 |
 
-*One of `score` or `label` required.
+*`score` または `label` のいずれかが必要です。
 
-## Binary > Likert
+## バイナリ > リッカート
 
-Use pass/fail, not 1-5 scales. Clearer criteria, easier calibration.
+1 ～ 5 のスケールではなく、合格/不合格を使用します。基準が明確になり、キャリブレーションが簡単になります。「」パイソン
+# 1 つのリッカート スケールの代わりに複数のバイナリ チェック
+評価者 = [
+    AnswersQuestion(), # はい/いいえ
+    UsesContext()、# はい/いいえ
+    NoHallucination()、# はい/いいえ
+】
+「」## クイック パターン
 
-```python
-# Multiple binary checks instead of one Likert scale
-evaluators = [
-    AnswersQuestion(),    # Yes/No
-    UsesContext(),        # Yes/No
-    NoHallucination(),    # Yes/No
-]
-```
+### コード評価者「」パイソン
+phoenix.evals からインポート create_evaluator
 
-## Quick Patterns
+@create_evaluator(name="引用あり", kind="コード")
+def has_quote(出力: str) -> ブール:
+    return bool(re.search(r'\[\d+\]', 出力))
+「」### LLM 評価者「」パイソン
+phoenix.evals より、ClassificationEvaluator、LLM をインポート
 
-### Code Evaluator
+評価者 = 分類評価者(
+    名前=「役に立つ」、
+    プロンプト_テンプレート="...",
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
+    選択肢={"役に立たない": 0, "役に立った": 1}
+）
+「」### 実験を実行する「」パイソン
+phoenix.client.experiments から run_experiment をインポート
 
-```python
-from phoenix.evals import create_evaluator
-
-@create_evaluator(name="has_citation", kind="code")
-def has_citation(output: str) -> bool:
-    return bool(re.search(r'\[\d+\]', output))
-```
-
-### LLM Evaluator
-
-```python
-from phoenix.evals import ClassificationEvaluator, LLM
-
-evaluator = ClassificationEvaluator(
-    name="helpfulness",
-    prompt_template="...",
-    llm=LLM(provider="openai", model="gpt-4o"),
-    choices={"not_helpful": 0, "helpful": 1}
-)
-```
-
-### Run Experiment
-
-```python
-from phoenix.client.experiments import run_experiment
-
-experiment = run_experiment(
-    dataset=dataset,
-    task=my_task,
-    evaluators=[evaluator1, evaluator2],
-)
-print(experiment.aggregate_scores)
-```
+実験 = run_experiment(
+    データセット=データセット、
+    task=my_task、
+    評価者=[評価者1, 評価者2],
+）
+print(実験.aggregate_scores)
+「」

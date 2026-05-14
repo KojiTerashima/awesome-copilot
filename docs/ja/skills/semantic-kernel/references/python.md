@@ -1,15 +1,15 @@
-# Semantic Kernel for Python
+# Python のセマンティック カーネル
 
-Use this reference when the target project is written in Python.
+対象プロジェクトが Python で記述されている場合は、このリファレンスを使用します。
 
-## Authoritative sources
+## 信頼できる情報源
 
-- Repository: <https://github.com/microsoft/semantic-kernel/tree/main/python>
-- Samples: <https://github.com/microsoft/semantic-kernel/tree/main/python/samples>
+- リポジトリ: <https://github.com/microsoft/semantic-kernel/tree/main/python>
+- サンプル: <https://github.com/microsoft/semantic-kernel/tree/main/python/samples>
 
-## Python-specific guidance
+## Python 固有のガイダンス
 
-- Use modern async patterns throughout kernel operations.
-- Add type hints and keep APIs explicit even in dynamic code.
-- Follow standard Python packaging and environment practices for dependencies and tooling.
-- Check the latest Python samples before introducing new APIs, plugins, or orchestration patterns.
+- カーネル操作全体で最新の非同期パターンを使用します。
+- 型ヒントを追加し、動的コードでも API を明示的に保ちます。
+- 依存関係とツールについては、標準の Python パッケージ化と環境の実践に従います。
+- 新しい API、プラグイン、またはオーケストレーション パターンを導入する前に、最新の Python サンプルを確認してください。

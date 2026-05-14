@@ -2,36 +2,32 @@
 name: react19-source-patterns
 description: 'Reference for React 19 source-file migration patterns, including API changes, ref handling, and context updates.'
 ---
+# React 19 のソース移行パターン
 
-# React 19 Source Migration Patterns
+React 19 に必要なすべてのソースファイルの移行に関するリファレンス。
 
-Reference for every source-file migration required for React 19.
+## クイックリファレンステーブル
 
-## Quick Reference Table
-
-| Pattern | Action | Reference |
+|パターン |アクション |参考資料 |
 |---|---|---|
-| `ReactDOM.render(...)` | → `createRoot().render()` | See references/api-migrations.md |
-| `ReactDOM.hydrate(...)` | → `hydrateRoot(...)` | See references/api-migrations.md |
-| `unmountComponentAtNode` | → `root.unmount()` | Inline fix |
-| `ReactDOM.findDOMNode` | → direct ref | Inline fix |
-| `forwardRef(...)` wrapper | → ref as direct prop | See references/api-migrations.md |
-| `Component.defaultProps = {}` | → ES6 default params | See references/api-migrations.md |
-| `useRef()` no arg | → `useRef(null)` | Inline fix  add `null` |
-| Legacy Context | → `createContext` | [→ api-migrations.md#legacy-context](references/api-migrations.md#legacy-context) |
-| String refs `this.refs.x` | → `createRef()` | [→ api-migrations.md#string-refs](references/api-migrations.md#string-refs) |
-| `import React from 'react'` (unused) | Remove | Only if no `React.` usage in file |
+| `ReactDOM.render(...)` | → `createRoot().render()` | References/api-migrations.md を参照してください。
+| `ReactDOM.hydrate(...)` | → `hydrateRoot(...)` | References/api-migrations.md を参照してください。
+| `unmountComponentAtNode` | →`root.unmount()` |インライン修正 |
+| `ReactDOM.findDOMNode` | → 直接参照 |インライン修正 |
+| `forwardRef(...)` ラッパー | → 直接プロップとして参照 | References/api-migrations.md を参照してください。
+| `Component.defaultProps = {}` | → ES6 デフォルトパラメータ | References/api-migrations.md を参照してください。
+| `useRef()` 引数なし | →`useRef(null)` |インライン修正を追加 `null` |
+|レガシーコンテキスト | →`createContext` | [→ api-migrations.md#legacy-context](references/api-migrations.md#legacy-context) |
+|文字列参照 `this.refs.x` | →`createRef()` | [→ api-migrations.md#string-refs](references/api-migrations.md#string-refs) |
+| `import React from 'react'` (未使用) |削除 |ファイル内で `React.` が使用されていない場合のみ |
 
-## PropTypes Rule
+## PropTypes ルール
 
-Do **not** remove `.propTypes` assignments. The `prop-types` package still works as a standalone validator. React 19 only removes the built-in runtime checking from the React package  the package itself remains valid.
+`.propTypes` の割り当てを**削除しないでください**。 `prop-types` パッケージは引き続きスタンドアロンのバリデーターとして機能します。 React 19 では、React パッケージから組み込みのランタイム チェックが削除されるだけで、パッケージ自体は有効なままです。
 
-Add this comment above any `.propTypes` block:
-```jsx
+このコメントを `.propTypes` ブロックの上に追加します。```jsx
 // NOTE: React 19 no longer runs propTypes validation at runtime.
 // PropTypes kept for documentation and IDE tooling only.
-```
+```## Read the Reference
 
-## Read the Reference
-
-For full before/after code for each migration, read **`references/api-migrations.md`**. It contains the complete patterns including edge cases for `forwardRef` with `useImperativeHandle`, `defaultProps` null vs undefined behavior, and legacy context provider/consumer cross-file migrations.
+各移行の完全な前後のコードについては、**`references/api-migrations.md`** を参照してください。これには、`forwardRef` と `useImperativeHandle`、`defaultProps` の null と未定義の動作、レガシー コンテキスト プロバイダー/コンシューマーのファイル間の移行などのエッジ ケースを含む完全なパターンが含まれています。

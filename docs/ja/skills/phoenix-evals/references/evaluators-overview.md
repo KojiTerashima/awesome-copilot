@@ -1,40 +1,36 @@
-# Evaluators: Overview
+# 評価者: 概要
 
-When and how to build automated evaluators.
+自動エバリュエーターをいつ、どのように構築するか。
 
-## Decision Framework
-
-```
-Should I Build an Evaluator?
+## 意思決定の枠組み「」
+エバリュエーターを構築する必要がありますか?
         │
         ▼
-Can I fix it with a prompt change?
-    YES → Fix the prompt first
-    NO  → Is this a recurring issue?
-          YES → Build evaluator
-          NO  → Add to watchlist
-```
+早急に変更すれば解決できるでしょうか？
+    はい → 最初にプロンプトを修正します
+    いいえ → これは繰り返し発生する問題ですか?
+          はい → ビルド評価者
+          いいえ → ウォッチリストに追加
+「」**時期尚早に自動化しないでください。** 多くの問題は簡単な即時修正で済みます。
 
-**Don't automate prematurely.** Many issues are simple prompt fixes.
+## 評価者の要件
 
-## Evaluator Requirements
+1. **明確な基準** - 「良いかどうか」ではなく、具体的です。
+2. **ラベル付きテストセット** - 人間によるラベルを含む 100 以上の例
+3. **測定された精度** - 導入前に TPR/TNR を把握する
 
-1. **Clear criteria** - Specific, not "Is it good?"
-2. **Labeled test set** - 100+ examples with human labels
-3. **Measured accuracy** - Know TPR/TNR before deploying
+## 評価者のライフサイクル
 
-## Evaluator Lifecycle
+1. **発見** - エラー分析によりパターンが明らかになる
+2. **設計** - 基準とテスト ケースを定義する
+3. **実装** - コードまたは LLM エバリュエーターをビルドする
+4. **校正** - 人間のラベルに対して検証します
+5. **デプロイ** - 実験/CI パイプラインに追加します
+6. **モニター** - 時間の経過に伴う精度の追跡
+7. **保守** - 製品の進化に応じて更新します
 
-1. **Discover** - Error analysis reveals pattern
-2. **Design** - Define criteria and test cases
-3. **Implement** - Build code or LLM evaluator
-4. **Calibrate** - Validate against human labels
-5. **Deploy** - Add to experiment/CI pipeline
-6. **Monitor** - Track accuracy over time
-7. **Maintain** - Update as product evolves
+## 自動化してはいけないもの
 
-## What NOT to Automate
-
-- **Rare issues** - <5 instances? Watchlist, don't build
-- **Quick fixes** - Fixable by prompt change? Fix it
-- **Evolving criteria** - Stabilize definition first
+- **まれな問題** - インスタンスが 5 件未満ですか?ウォッチリスト、構築しないでください
+- **クイック修正** - プロンプト変更によって修正可能ですか?修正してください
+- **進化する基準** - まず定義を安定させる

@@ -1,91 +1,79 @@
-# EMBEDDING Spans
+# 埋め込みスパン
 
-## Purpose
+## 目的
 
-EMBEDDING spans represent vector generation operations (text-to-vector conversion for semantic search).
+EMBEDDING スパンは、ベクトル生成操作 (セマンティック検索のためのテキストからベクトルへの変換) を表します。
 
-## Required Attributes
+## 必須の属性
 
-| Attribute | Type | Description | Required |
-|-----------|------|-------------|----------|
-| `openinference.span.kind` | String | Must be "EMBEDDING" | Yes |
-| `embedding.model_name` | String | Embedding model identifier | Recommended |
+|属性 |タイプ |説明 |必須 |
+|----------|------|---------------|----------|
+| `openinference.span.kind` |文字列 | 「埋め込み」である必要があります |はい |
+| `embedding.model_name` |文字列 |埋め込みモデル識別子 |おすすめ |
 
-## Attribute Reference
+## 属性参照
 
-### Single Embedding
+### 単一の埋め込み
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `embedding.model_name` | String | Embedding model identifier |
-| `embedding.text` | String | Input text to embed |
-| `embedding.vector` | String (JSON array) | Generated embedding vector |
+|属性 |タイプ |説明 |
+|----------|------|---------------|
+| `embedding.model_name` |文字列 |埋め込みモデル識別子 |
+| `embedding.text` |文字列 |埋め込むテキストを入力 |
+| `embedding.vector` |文字列 (JSON 配列) |生成された埋め込みベクトル |
 
-**Example:**
-```json
+**例：**```json
 {
   "embedding.model_name": "text-embedding-ada-002",
-  "embedding.text": "What is machine learning?",
+  "embedding.text": "機械学習とは何ですか?",
   "embedding.vector": "[0.023, -0.012, 0.045, ..., 0.001]"
 }
-```
+「」### バッチ埋め込み
 
-### Batch Embeddings
+|属性パターン |タイプ |説明 |
+|---------------------|------|---------------|
+| `embedding.embeddings.{i}.embedding.text` |文字列 |インデックス i のテキスト |
+| `embedding.embeddings.{i}.embedding.vector` |文字列 (JSON 配列) |インデックス i のベクトル |
 
-| Attribute Pattern | Type | Description |
-|-------------------|------|-------------|
-| `embedding.embeddings.{i}.embedding.text` | String | Text at index i |
-| `embedding.embeddings.{i}.embedding.vector` | String (JSON array) | Vector at index i |
-
-**Example:**
-```json
+**例：**```json
 {
   "embedding.model_name": "text-embedding-ada-002",
-  "embedding.embeddings.0.embedding.text": "First document",
+  "embedding.embeddings.0.embedding.text": "最初のドキュメント",
   "embedding.embeddings.0.embedding.vector": "[0.1, 0.2, 0.3, ..., 0.5]",
-  "embedding.embeddings.1.embedding.text": "Second document",
+  "embedding.embeddings.1.embedding.text": "2 番目のドキュメント",
   "embedding.embeddings.1.embedding.vector": "[0.6, 0.7, 0.8, ..., 0.9]"
 }
-```
+「」### ベクトル形式
 
-### Vector Format
+JSON 配列文字列として保存されたベクトル:
+- 寸法: 通常、384、768、1536、または 3072
+- 形式: `"[0.123, -0.456, 0.789, ...]"`
+- 精度: 通常、小数点以下 3 ～ 6 桁
 
-Vectors stored as JSON array strings:
-- Dimensions: Typically 384, 768, 1536, or 3072
-- Format: `"[0.123, -0.456, 0.789, ...]"`
-- Precision: Usually 3-6 decimal places
+**ストレージに関する考慮事項:**
+- ベクトルが大きいと、トレース サイズが大幅に増加する可能性があります
+- 運用環境ではベクターを省略することを検討してください (デバッグ用に `embedding.text` を保持します)
+- 実際の類似性検索には別のベクトルデータベースを使用します
 
-**Storage Considerations:**
-- Large vectors can significantly increase trace size
-- Consider omitting vectors in production (keep `embedding.text` for debugging)
-- Use separate vector database for actual similarity search
+## 例
 
-## Examples
-
-### Single Embedding
-
-```json
+### 単一の埋め込み```json
 {
-  "openinference.span.kind": "EMBEDDING",
+  "openinference.span.kind": "埋め込み",
   "embedding.model_name": "text-embedding-ada-002",
-  "embedding.text": "What is machine learning?",
+  "embedding.text": "機械学習とは何ですか?",
   "embedding.vector": "[0.023, -0.012, 0.045, ..., 0.001]",
-  "input.value": "What is machine learning?",
+  "input.value": "機械学習とは何ですか?",
   "output.value": "[0.023, -0.012, 0.045, ..., 0.001]"
 }
-```
-
-### Batch Embeddings
-
-```json
+「」### バッチ埋め込み```json
 {
-  "openinference.span.kind": "EMBEDDING",
+  "openinference.span.kind": "埋め込み",
   "embedding.model_name": "text-embedding-ada-002",
-  "embedding.embeddings.0.embedding.text": "First document",
+  "embedding.embeddings.0.embedding.text": "最初のドキュメント",
   "embedding.embeddings.0.embedding.vector": "[0.1, 0.2, 0.3]",
-  "embedding.embeddings.1.embedding.text": "Second document",
+  "embedding.embeddings.1.embedding.text": "2 番目のドキュメント",
   "embedding.embeddings.1.embedding.vector": "[0.4, 0.5, 0.6]",
-  "embedding.embeddings.2.embedding.text": "Third document",
+  "embedding.embeddings.2.embedding.text": "3 番目のドキュメント",
   "embedding.embeddings.2.embedding.vector": "[0.7, 0.8, 0.9]"
 }
-```
+「」

@@ -1,98 +1,94 @@
-# HTTP & Networking Reference
+# HTTP とネットワークのリファレンス
 
-Comprehensive reference for HTTP protocol, networking concepts, and web communication.
+HTTP プロトコル、ネットワーキングの概念、Web 通信に関する包括的なリファレンス。
 
-## HTTP (HyperText Transfer Protocol)
+## HTTP (ハイパーテキスト転送プロトコル)
 
-Protocol for transferring hypertext between client and server. Foundation of data communication on the web.
+クライアントとサーバー間でハイパーテキストを転送するためのプロトコル。ウェブ上のデータ通信の基礎。
 
-### HTTP Versions
+### HTTP バージョン
 
-- **HTTP/1.1** (1997): Text-based, persistent connections, pipelining
-- **HTTP/2** (2015): Binary protocol, multiplexing, server push, header compression
-- **HTTP/3** (2022): Based on QUIC (UDP), improved performance, better handling of packet loss
+- **HTTP/1.1** (1997): テキストベースの永続的な接続、パイプライン化
+- **HTTP/2** (2015): バイナリ プロトコル、多重化、サーバー プッシュ、ヘッダー圧縮
+- **HTTP/3** (2022): QUIC (UDP) に基づいており、パフォーマンスが向上し、パケット損失の処理が改善されています。
 
-## Request Methods
+## リクエストメソッド
 
-| Method | Purpose | Idempotent | Safe | Cacheable |
-|--------|---------|------------|------|-----------|
-| GET | Retrieve resource | Yes | Yes | Yes |
-| POST | Create resource | No | No | Rarely |
-| PUT | Update/replace resource | Yes | No | No |
-| PATCH | Partial update | No | No | No |
-| DELETE | Delete resource | Yes | No | No |
-| HEAD | Like GET but no body | Yes | Yes | Yes |
-| OPTIONS | Get allowed methods | Yes | Yes | No |
-| CONNECT | Establish tunnel | No | No | No |
-| TRACE | Echo request | Yes | Yes | No |
+|方法 |目的 |冪等 |安全 |キャッシュ可能 |
+|----------|-----------|---------------|------|-----------|
+|入手 |リソースを取得 |はい |はい |はい |
+|投稿 |リソースの作成 |いいえ |いいえ |めったに |
+|置く |リソースの更新/置換 |はい |いいえ |いいえ |
+|パッチ |部分更新 |いいえ |いいえ |いいえ |
+|削除 |リソースの削除 |はい |いいえ |いいえ |
+|頭 | GET に似ていますが、本文はありません |はい |はい |はい |
+|オプション |許可されたメソッドを取得する |はい |はい |いいえ |
+|接続 |トンネルを確立する |いいえ |いいえ |いいえ |
+|トレース |エコーリクエスト |はい |はい |いいえ |
 
-**Safe**: Doesn't modify server state  
-**Idempotent**: Multiple identical requests have same effect as single request
+**安全**: サーバーの状態を変更しません  
+**冪等**: 複数の同一のリクエストは単一のリクエストと同じ効果があります。
 
-## Status Codes
+## ステータスコード
 
-### 1xx Informational
+### 1xx 情報
 
-| Code | Message | Meaning |
-|------|---------|---------|
-| 100 | Continue | Client should continue request |
-| 101 | Switching Protocols | Server switching protocols |
+|コード |メッセージ |意味 |
+|------|--------|----------|
+| 100 |続ける |クライアントはリクエストを続行する必要があります |
+| 101 |プロトコルの切り替え |サーバー切り替えプロトコル |
 
-### 2xx Success
+### 2xx 成功
 
-| Code | Message | Meaning |
-|------|---------|---------|
-| 200 | OK | Request succeeded |
-| 201 | Created | Resource created |
-| 202 | Accepted | Accepted but not processed |
-| 204 | No Content | Success but no content to return |
-| 206 | Partial Content | Partial resource (range request) |
+|コード |メッセージ |意味 |
+|------|--------|----------|
+| 200 | OK |リクエストは成功しました |
+| 201 |作成された |リソースが作成されました |
+| 202 |承認済み |受け入れられましたが処理されていません |
+| 204 |コンテンツなし |成功しましたが、返されるコンテンツがありません |
+| 206 |部分的なコンテンツ |部分リソース (範囲リクエスト) |
 
-### 3xx Redirection
+### 3xx リダイレクト
 
-| Code | Message | Meaning |
-|------|---------|---------|
-| 301 | Moved Permanently | Resource permanently moved |
-| 302 | Found | Temporary redirect |
-| 303 | See Other | Response at different URI |
-| 304 | Not Modified | Resource not modified (cache) |
-| 307 | Temporary Redirect | Like 302 but keep method |
-| 308 | Permanent Redirect | Like 301 but keep method |
+|コード |メッセージ |意味 |
+|------|--------|----------|
+| 301 |永久に移動されました |リソースが永久に移動されました |
+| 302 |見つかりました |一時的なリダイレクト |
+| 303 |その他を見る |異なる URI での応答 |
+| 304 |変更されていません |リソースは変更されていません (キャッシュ) |
+| 307 |一時的なリダイレクト | 302 と同様ですが、メソッドを保持します。
+| 308 |永続的なリダイレクト | 301 と同様ですが、メソッドを保持します。
 
-### 4xx Client Errors
+### 4xx クライアント エラー|コード |メッセージ |意味 |
+|------|--------|----------|
+| 400 |不正なリクエスト |無効な構文 |
+| 401 |不正 |認証が必要です |
+| 403 |禁止 |アクセスが拒否されました |
+| 404 |見つかりません |リソースが見つかりません |
+| 405 |許可されていないメソッド |メソッドはサポートされていません |
+| 408 |リクエストのタイムアウト |リクエストに時間がかかりすぎました |
+| 409 |紛争 |リクエストが状態と競合しています |
+| 410 |消えた |リソースが永久になくなりました |
+| 413 |ペイロードが大きすぎます |リクエスト本文が大きすぎます |
+| 414 | URI が長すぎます | URI が長すぎます |
+| 415 |サポートされていないメディア タイプ |サポートされていないメディア タイプ |
+| 422 |処理できないエンティティ |セマンティック エラー |
+| 429 |リクエストが多すぎます |レート制限を超えました |
 
-| Code | Message | Meaning |
-|------|---------|---------|
-| 400 | Bad Request | Invalid syntax |
-| 401 | Unauthorized | Authentication required |
-| 403 | Forbidden | Access denied |
-| 404 | Not Found | Resource not found |
-| 405 | Method Not Allowed | Method not supported |
-| 408 | Request Timeout | Request took too long |
-| 409 | Conflict | Request conflicts with state |
-| 410 | Gone | Resource permanently gone |
-| 413 | Payload Too Large | Request body too large |
-| 414 | URI Too Long | URI too long |
-| 415 | Unsupported Media Type | Media type not supported |
-| 422 | Unprocessable Entity | Semantic errors |
-| 429 | Too Many Requests | Rate limit exceeded |
+### 5xx サーバー エラー
 
-### 5xx Server Errors
+|コード |メッセージ |意味 |
+|------|--------|----------|
+| 500 |内部サーバーエラー |一般的なサーバー エラー |
+| 501 |未実装 |メソッドはサポートされていません |
+| 502 |不正なゲートウェイ |上流からの無効な応答 |
+| 503 |サービスが利用できません |サーバーが一時的に利用不可 |
+| 504 |ゲートウェイのタイムアウト |アップストリームのタイムアウト |
+| 505 | HTTP バージョンはサポートされていません | HTTP バージョンはサポートされていません |
 
-| Code | Message | Meaning |
-|------|---------|---------|
-| 500 | Internal Server Error | Generic server error |
-| 501 | Not Implemented | Method not supported |
-| 502 | Bad Gateway | Invalid response from upstream |
-| 503 | Service Unavailable | Server temporarily unavailable |
-| 504 | Gateway Timeout | Upstream timeout |
-| 505 | HTTP Version Not Supported | HTTP version not supported |
+## HTTP ヘッダー
 
-## HTTP Headers
-
-### Request Headers
-
-```http
+### リクエストヘッダー```http
 GET /api/users HTTP/1.1
 Host: example.com
 User-Agent: Mozilla/5.0
@@ -105,26 +101,22 @@ If-None-Match: "etag-value"
 If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
 Origin: https://example.com
 Referer: https://example.com/page
-```
+```**一般的なリクエスト ヘッダー**:
+- `Accept`: クライアントが受け入れるメディア タイプ
+- `Accept-Encoding`: エンコード形式(圧縮)
+- `Accept-Language`: 優先言語
+- `Authorization`: 認証資格情報
+- `Cache-Control`: ディレクティブのキャッシュ
+- `Cookie`: サーバーに送信された Cookie
+- `Content-Type`: リクエストボディの種類
+- `Host`: ターゲットホストとポート
+- `If-Modified-Since`: 条件付きリクエスト
+- `If-None-Match`: 条件付きリクエスト(ETag)
+- `Origin`: リクエストの送信元 (CORS)
+- `Referer`: 前のページの URL
+- `User-Agent`: クライアント情報
 
-**Common Request Headers**:
-- `Accept`: Media types client accepts
-- `Accept-Encoding`: Encoding formats (compression)
-- `Accept-Language`: Preferred languages
-- `Authorization`: Authentication credentials
-- `Cache-Control`: Caching directives
-- `Cookie`: Cookies sent to server
-- `Content-Type`: Type of request body
-- `Host`: Target host and port
-- `If-Modified-Since`: Conditional request
-- `If-None-Match`: Conditional request (ETag)
-- `Origin`: Origin of request (CORS)
-- `Referer`: Previous page URL
-- `User-Agent`: Client information
-
-### Response Headers
-
-```http
+### 応答ヘッダー```http
 HTTP/1.1 200 OK
 Date: Mon, 04 Mar 2026 12:00:00 GMT
 Server: nginx/1.18.0
@@ -139,41 +131,37 @@ Set-Cookie: sessionId=xyz789; HttpOnly; Secure; SameSite=Strict
 Strict-Transport-Security: max-age=31536000; includeSubDomains
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
-```
-
-**Common Response Headers**:
-- `Access-Control-*`: CORS headers
-- `Cache-Control`: Caching directives
-- `Content-Encoding`: Content compression
-- `Content-Length`: Body size in bytes
-- `Content-Type`: Media type of body
-- `Date`: Response date/time
-- `ETag`: Resource version identifier
-- `Expires`: Expiration date
-- `Last-Modified`: Last modification date
-- `Location`: Redirect URL
-- `Server`: Server software
-- `Set-Cookie`: Set cookies
+```**一般的な応答ヘッダー**:
+- `Access-Control-*`: CORS ヘッダー
+- `Cache-Control`: ディレクティブのキャッシュ
+- `Content-Encoding`: コンテンツの圧縮
+- `Content-Length`: 本体サイズ (バイト単位)
+- `Content-Type`: ボディのメディアタイプ
+- `Date`: 応答日時
+- `ETag`: リソースのバージョン識別子
+- `Expires`: 有効期限
+- `Last-Modified`: 最終更新日
+- `Location`: リダイレクト URL
+- `Server`: サーバー ソフトウェア
+- `Set-Cookie`: Cookie を設定します
 - `Strict-Transport-Security`: HSTS
-- `X-Content-Type-Options`: MIME type sniffing
-- `X-Frame-Options`: Clickjacking protection
+- `X-Content-Type-Options`: MIME タイプ スニッフィング
+- `X-Frame-Options`: クリックジャッキング保護
 
-## CORS (Cross-Origin Resource Sharing)
+## CORS (クロスオリジンリソース共有)
 
-Mechanism to allow cross-origin requests.
+クロスオリジンリクエストを許可するメカニズム。
 
-### Simple Requests
+### 簡単なリクエスト
 
-Automatically allowed if:
-- Method: GET, HEAD, or POST
-- Safe headers only
-- Content-Type: `application/x-www-form-urlencoded`, `multipart/form-data`, or `text/plain`
+次の場合に自動的に許可されます。
+- メソッド: GET、HEAD、または POST
+- 安全なヘッダーのみ
+- Content-Type: `application/x-www-form-urlencoded`、`multipart/form-data`、または `text/plain`
 
-### Preflight Requests
+### プリフライトリクエスト
 
-For complex requests, browser sends OPTIONS request first:
-
-```http
+複雑なリクエストの場合、ブラウザは最初に OPTIONS リクエストを送信します。```http
 OPTIONS /api/users HTTP/1.1
 Origin: https://example.com
 Access-Control-Request-Method: POST
@@ -187,48 +175,44 @@ Access-Control-Allow-Methods: GET, POST, PUT, DELETE
 Access-Control-Allow-Headers: Content-Type, Authorization
 Access-Control-Allow-Credentials: true
 Access-Control-Max-Age: 86400
-```
+```### CORS ヘッダー
 
-### CORS Headers
+**リクエスト**:
+- `Origin`: リクエストの送信元
+- `Access-Control-Request-Method`: 意図した方法
+- `Access-Control-Request-Headers`: 意図されたヘッダー
 
-**Request**:
-- `Origin`: Request origin
-- `Access-Control-Request-Method`: Intended method
-- `Access-Control-Request-Headers`: Intended headers
+**応答**:
+- `Access-Control-Allow-Origin`: 許可されたオリジン (* または特定)
+- `Access-Control-Allow-Methods`: 許可されるメソッド
+- `Access-Control-Allow-Headers`: 許可されるヘッダー
+- `Access-Control-Allow-Credentials`: 資格情報を許可します
+- `Access-Control-Max-Age`: プリフライト キャッシュ期間
+- `Access-Control-Expose-Headers`: クライアントがアクセスできるヘッダー
 
-**Response**:
-- `Access-Control-Allow-Origin`: Allowed origins (* or specific)
-- `Access-Control-Allow-Methods`: Allowed methods
-- `Access-Control-Allow-Headers`: Allowed headers
-- `Access-Control-Allow-Credentials`: Allow credentials
-- `Access-Control-Max-Age`: Preflight cache duration
-- `Access-Control-Expose-Headers`: Headers accessible to client
+## キャッシング
 
-## Caching
+### キャッシュ制御ディレクティブ
 
-### Cache-Control Directives
+**ディレクティブのリクエスト**:
+- `no-cache`: キャッシュを使用する前にサーバーで検証します
+- `no-store`: キャッシュをまったく行わない
+- `max-age=N`: 最大経過時間 (秒単位)
+- `max-stale=N`: 古い応答を最大 N 秒間受け入れます
+- `min-fresh=N`: 少なくとも N 秒間は新鮮です
+- `only-if-cached`: キャッシュされた応答のみを使用します
 
-**Request Directives**:
-- `no-cache`: Validate with server before using cache
-- `no-store`: Don't cache at all
-- `max-age=N`: Max age in seconds
-- `max-stale=N`: Accept stale response up to N seconds
-- `min-fresh=N`: Fresh for at least N seconds
-- `only-if-cached`: Use only cached response
+**応答ディレクティブ**:
+- `public`: 任意のキャッシュでキャッシュ可能
+- `private`: ブラウザのみでキャッシュ可能
+- `no-cache`: 使用前に検証する必要があります
+- `no-store`: キャッシュしないでください
+- `max-age=N`: N 秒間新鮮
+- `s-maxage=N`: 共有キャッシュの最大保存期間
+- `must-revalidate`: 古い場合は検証する必要があります
+- `immutable`: 内容は変更されません
 
-**Response Directives**:
-- `public`: Cacheable by any cache
-- `private`: Cacheable by browser only
-- `no-cache`: Must validate before use
-- `no-store`: Don't cache
-- `max-age=N`: Fresh for N seconds
-- `s-maxage=N`: Max age for shared caches
-- `must-revalidate`: Must validate when stale
-- `immutable`: Content won't change
-
-### Examples
-
-```http
+### 例```http
 # Cache for 1 hour
 Cache-Control: public, max-age=3600
 
@@ -240,60 +224,45 @@ Cache-Control: private, max-age=3600, must-revalidate
 
 # Cache forever (with versioned URLs)
 Cache-Control: public, max-age=31536000, immutable
-```
+```### 条件付きリクエスト
 
-### Conditional Requests
-
-Use ETags or Last-Modified for efficient caching:
-
-```http
+効率的なキャッシュのために ETags または Last-Modified を使用します。```http
 GET /resource HTTP/1.1
 If-None-Match: "etag-value"
 If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
-```
-
-If not modified:
-```http
+```変更されていない場合:```http
 HTTP/1.1 304 Not Modified
 ETag: "etag-value"
-```
-
-## Cookies
-
-```http
+```## クッキー```http
 # Server sets cookie
 Set-Cookie: sessionId=abc123; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=3600
 
 # Client sends cookie
 Cookie: sessionId=abc123; userId=456
-```
+```### クッキーの属性
 
-### Cookie Attributes
+- `Path=/`: Cookie パスのスコープ
+- `Domain=example.com`: Cookie ドメインのスコープ
+- `Max-Age=N`: N 秒後に期限切れになります
+- `Expires=date`: 特定の日付で期限切れになります
+- `Secure`: HTTPS 経由でのみ送信されます
+- `HttpOnly`: JavaScript からはアクセスできません
+- `SameSite=Strict|Lax|None`: CSRF 保護
 
-- `Path=/`: Cookie path scope
-- `Domain=example.com`: Cookie domain scope
-- `Max-Age=N`: Expire after N seconds
-- `Expires=date`: Expire at specific date
-- `Secure`: Only sent over HTTPS
-- `HttpOnly`: Not accessible via JavaScript
-- `SameSite=Strict|Lax|None`: CSRF protection
+## REST (表現型状態転送)
 
-## REST (Representational State Transfer)
+Web サービスのアーキテクチャ スタイル。
 
-Architectural style for web services.
+### REST の原則
 
-### REST Principles
+1. **クライアントとサーバー**: 懸念事項の分離
+2. **ステートレス**: 各リクエストには必要な情報がすべて含まれています
+3. **キャッシュ可能**: 応答はキャッシュ可能性を定義する必要があります
+4. **統一インターフェイス**: 標準化された通信
+5. **階層化システム**: クライアントはエンドサーバーに接続されているかどうかを知りません
+6. **コード オン デマンド** (オプション): サーバーは実行可能コードを送信できます。
 
-1. **Client-Server**: Separation of concerns
-2. **Stateless**: Each request contains all needed info
-3. **Cacheable**: Responses must define cacheability
-4. **Uniform Interface**: Standardized communication
-5. **Layered System**: Client doesn't know if connected to end server
-6. **Code on Demand** (optional): Server can send executable code
-
-### RESTful API Design
-
-```
+### RESTful API 設計```
 GET    /users           # List users
 GET    /users/123       # Get user 123
 POST   /users           # Create user
@@ -303,11 +272,7 @@ DELETE /users/123       # Delete user 123
 
 GET    /users/123/posts # List posts by user 123
 GET    /posts?author=123 # Alternative: filter posts
-```
-
-### HTTP Content Negotiation
-
-```http
+```### HTTP コンテンツ ネゴシエーション```http
 # Client requests JSON
 Accept: application/json
 
@@ -316,82 +281,74 @@ Content-Type: application/json
 
 # Client can accept multiple formats
 Accept: application/json, application/xml;q=0.9, text/plain;q=0.8
-```
+```## ネットワーキングの基礎
 
-## Networking Fundamentals
+### TCP (伝送制御プロトコル)
 
-### TCP (Transmission Control Protocol)
+信頼性の高いデータ配信を保証する接続指向プロトコル。
 
-Connection-oriented protocol ensuring reliable data delivery.
+**TCP ハンドシェイク** (3 方向):
+1. クライアント → サーバー: SYN
+2. サーバー → クライアント: SYN-ACK
+3. クライアント → サーバー: ACK
 
-**TCP Handshake** (3-way):
-1. Client → Server: SYN
-2. Server → Client: SYN-ACK
-3. Client → Server: ACK
+**特徴**:
+- 確実な配信（再送信）
+- 注文されたデータ
+- エラーチェック
+- フロー制御
+- 接続指向
 
-**Features**:
-- Reliable delivery (retransmission)
-- Ordered data
-- Error checking
-- Flow control
-- Connection-oriented
+### UDP (ユーザー データグラム プロトコル)
 
-### UDP (User Datagram Protocol)
+高速データ伝送のためのコネクションレス型プロトコル。
 
-Connectionless protocol for fast data transmission.
+**特徴**:
+- 高速 (ハンドシェイクなし)
+- 配送保証なし
+- 注文なし
+- オーバーヘッドの低減
+- ストリーミング、ゲーム、DNS に使用
 
-**Features**:
-- Fast (no handshake)
-- No guaranteed delivery
-- No ordering
-- Lower overhead
-- Used for streaming, gaming, DNS
+### DNS (ドメインネームシステム)
 
-### DNS (Domain Name System)
-
-Translates domain names to IP addresses.
-
-```
+ドメイン名を IP アドレスに変換します。```
 example.com → 93.184.216.34
-```
+```**DNS レコードの種類**:
+- `A`：IPv4アドレス
+- `AAAA`: IPv6アドレス
+- `CNAME`: 正規名（エイリアス）
+- `MX`：メール交換
+- `TXT`: テキストレコード
+- `NS`: ネームサーバー
 
-**DNS Record Types**:
-- `A`: IPv4 address
-- `AAAA`: IPv6 address
-- `CNAME`: Canonical name (alias)
-- `MX`: Mail exchange
-- `TXT`: Text record
-- `NS`: Name server
+### IP アドレス指定
 
-### IP Addressing
+**IPv4**: `192.168.1.1` (32 ビット)  
+**IPv6**: `2001:0db8:85a3:0000:0000:8a2e:0370:7334` (128 ビット)
 
-**IPv4**: `192.168.1.1` (32-bit)  
-**IPv6**: `2001:0db8:85a3:0000:0000:8a2e:0370:7334` (128-bit)
+### ポート
 
-### Ports
-
-- **Well-known ports** (0-1023):
+- **既知のポート** (0-1023):
   - 80: HTTP
   - 443: HTTPS
   - 21: FTP
   - 22: SSH
   - 25: SMTP
-  - 53: DNS
-- **Registered ports** (1024-49151)
-- **Dynamic ports** (49152-65535)
+  - 53:DNS
+- **登録済みポート** (1024-49151)
+- **動的ポート** (49152-65535)
 
-### Bandwidth & Latency
+### 帯域幅と遅延
 
-**Bandwidth**: Amount of data transferred per unit time (Mbps, Gbps)  
-**Latency**: Time delay in data transmission (milliseconds)
+**帯域幅**: 単位時間あたりに転送されるデータ量 (Mbps、Gbps)  
+**Latency**: データ送信の遅延時間 (ミリ秒)
 
-**Round Trip Time (RTT)**: Time for request to reach server and response to return
+**ラウンドトリップ時間 (RTT)**: リクエストがサーバーに到達し、レスポンスが返されるまでの時間
 
-## WebSockets
+## Webソケット
 
-Full-duplex communication over single TCP connection.
-
-```javascript
+単一の TCP 接続を介した全二重通信。```javascript
 // Client
 const ws = new WebSocket('wss://example.com/socket');
 
@@ -414,15 +371,11 @@ ws.onclose = () => {
 
 // Close connection
 ws.close();
-```
+```**使用例**: チャット、リアルタイム更新、ゲーム、共同編集
 
-**Use Cases**: Chat, real-time updates, gaming, collaborative editing
+## サーバー送信イベント (SSE)
 
-## Server-Sent Events (SSE)
-
-Server pushes updates to client over HTTP.
-
-```javascript
+サーバーは HTTP 経由で更新をクライアントにプッシュします。```javascript
 // Client
 const eventSource = new EventSource('/events');
 
@@ -454,85 +407,83 @@ data: Second message
 
 event: custom-event
 data: Custom message data
-```
+```## ベストプラクティス
 
-## Best Practices
+### やるべきこと
+- ✅ どこでも HTTPS を使用する
+- ✅ 適切なキャッシュ戦略を実装する
+- ✅ 適切な HTTP メソッドを使用する
+- ✅ 意味のあるステータスコードを返す
+- ✅ レート制限を実装する
+- ✅ 圧縮（gzip、brotli）を使用する
+- ✅ 適切な CORS ヘッダーを設定する
+- ✅ 適切なエラー処理を実装する
+- ✅ 接続プーリングを使用する
+- ✅ ネットワークパフォーマンスを監視
 
-### Do's
-- ✅ Use HTTPS everywhere
-- ✅ Implement proper caching strategies
-- ✅ Use appropriate HTTP methods
-- ✅ Return meaningful status codes
-- ✅ Implement rate limiting
-- ✅ Use compression (gzip, brotli)
-- ✅ Set proper CORS headers
-- ✅ Implement proper error handling
-- ✅ Use connection pooling
-- ✅ Monitor network performance
+### やってはいけないこと
+- ❌ 機密データには HTTP を使用する
+- ❌ CORS セキュリティを無視する
+- ❌ 間違ったステータス コードを返す (エラーの場合は 200)
+- ❌ 機密データをキャッシュする
+- ❌ 大きな非圧縮応答を送信する
+- ❌ SSL/TLS 証明書の検証をスキップ
+- ❌ 資格情報を URL に保存する
+- ❌ エラー時に内部サーバーの詳細が公開される
+- ❌ 同期リクエストを使用する
 
-### Don'ts
-- ❌ Use HTTP for sensitive data
-- ❌ Ignore CORS security
-- ❌ Return wrong status codes (200 for errors)
-- ❌ Cache sensitive data
-- ❌ Send large uncompressed responses
-- ❌ Skip SSL/TLS certificate validation
-- ❌ Store credentials in URLs
-- ❌ Expose internal server details in errors
-- ❌ Use synchronous requests
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Ajax
+**対象となる重要な用語**:
+- アヤックス
 - ALPN
-- Bandwidth
-- Cacheable
-- Cookie
-- CORS
-- CORS-safelisted request header
-- CORS-safelisted response header
-- Crawler
-- Effective connection type
-- Fetch directive
-- Fetch metadata request header
-- Forbidden request header
-- Forbidden response header name
+- 帯域幅
+- キャッシュ可能
+- クッキー
+- コルス
+- CORS セーフリストに登録されたリクエスト ヘッダー
+- CORS セーフリストに登録された応答ヘッダー
+- クローラー
+- 有効接続タイプ
+- フェッチディレクティブ
+- メタデータリクエストヘッダーの取得
+- 禁止されたリクエストヘッダー
+- 禁止されたレスポンスヘッダ名
 - FTP
-- General header
-- HOL blocking
+- 一般ヘッダー
+- HOL ブロック
 - HTTP
-- HTTP content
-- HTTP header
+- HTTPコンテンツ
+- HTTPヘッダー
 - HTTP/2
 - HTTP/3
 - HTTPS
 - HTTPS RR
-- Idempotent
+- べき等
 - IMAP
-- Latency
-- Packet
-- POP3
-- Proxy server
-- QUIC
-- Rate limit
-- Request header
-- Response header
-- REST
-- Round Trip Time (RTT)
+- レイテンシー
+- パケット
+- ポップ3
+- プロキシサーバー
+- クイック
+- レート制限
+- リクエストヘッダー
+- レスポンスヘッダー
+- 休憩
+- 往復時間 (RTT)
 - RTCP
 - RTP
-- Safe (HTTP Methods)
+- 安全 (HTTP メソッド)
 - SMTP
 - TCP
-- TCP handshake
-- TCP slow start
+- TCPハンドシェイク
+- TCP スロースタート
 - UDP
-- WebSockets
+- WebSocket
 
-## Additional Resources
+## 追加のリソース
 
-- [MDN HTTP Guide](https://developer.mozilla.org/en-US/docs/Web/HTTP)
-- [HTTP/2 Spec](https://http2.github.io/)
-- [HTTP/3 Explained](https://http3-explained.haxx.se/)
-- [REST API Tutorial](https://restfulapi.net/)
+- [MDN HTTP ガイド](https://developer.mozilla.org/en-US/docs/Web/HTTP)
+- [HTTP/2仕様](https://http2.github.io/)
+- [HTTP/3 の説明](https://http3-explained.haxx.se/)
+- [REST API チュートリアル](https://restfulapi.net/)

@@ -1,344 +1,290 @@
-# Tooling — Ruff-Only Setup and Code Quality
+# ツール — Ruff のみのセットアップとコード品質
 
-## Table of Contents
-1. [Use Only Ruff (Replaces black, isort, flake8)](#1-use-only-ruff-replaces-black-isort-flake8)
-2. [Ruff Configuration in pyproject.toml](#2-ruff-configuration-in-pyprojecttoml)
-3. [mypy Configuration](#3-mypy-configuration)
-4. [pre-commit Configuration](#4-pre-commit-configuration)
-5. [pytest and Coverage Configuration](#5-pytest-and-coverage-configuration)
-6. [Dev Dependencies in pyproject.toml](#6-dev-dependencies-in-pyprojecttoml)
-7. [CI Lint Job — Ruff Only](#7-ci-lint-job--ruff-only)
-8. [Migration Guide — Removing black and isort](#8-migration-guide--removing-black-and-isort)
+## 目次
+1. [Ruff のみを使用 (black、isort、flake8 を置き換える)](#1-use-only-ruff-replaces-black-isort-flake8)
+2. [pyproject.toml の Ruff 設定](#2-ruff-configuration-in-pyprojecttoml)
+3. [mypy 構成](#3-mypy-configuration)
+4. [コミット前の構成](#4-コミット前の構成)
+5. [pytest とカバレッジ構成](#5-pytest-and-coverage-configuration)
+6. [pyproject.toml の開発依存関係](#6-dev-dependency-in-pyprojecttoml)
+7. [CI lint ジョブ — Ruff のみ](#7-ci-lint-job--ruff-only)
+8. [移行ガイド — black と isort の削除](#8-migration-guide--removing-black-and-isort)
 
 ---
 
-## 1. Use Only Ruff (Replaces black, isort, flake8)
+## 1. Ruff のみを使用します (black、isort、flake8 を置き換えます)
 
-**Decision:** Use `ruff` as the single linting and formatting tool. Remove `black` and `isort`.
+**決定:** `ruff` を単一の lint および書式設定ツールとして使用します。 `black` と `isort` を削除します。
 
-| Old (avoid) | New (use) | What it does |
+|古い (避ける) |新品(使用) |何をするのか |
 |---|---|---|
-| `black` | `ruff format` | Code formatting |
-| `isort` | `ruff check --select I` | Import sorting |
-| `flake8` | `ruff check` | Style and error linting |
-| `pyupgrade` | `ruff check --select UP` | Upgrade syntax to modern Python |
-| `bandit` | `ruff check --select S` | Security linting |
-| All of the above | `ruff` | One tool, one config section |
+| `black` | `ruff format` |コードのフォーマット |
+| `isort` | `ruff check --select I` |インポートの並べ替え |
+| `flake8` | `ruff check` |スタイルとエラーのリンティング |
+| `pyupgrade` | `ruff check --select UP` |構文を最新の Python にアップグレードする |
+| `bandit` | `ruff check --select S` |セキュリティリンティング |
+|上記のすべて | `ruff` | 1 つのツール、1 つの構成セクション |
 
-**Why ruff?**
-- 10–100× faster than the tools it replaces (written in Rust).
-- Single config section in `pyproject.toml` — no `.flake8`, `.isort.cfg`, `pyproject.toml[tool.black]` sprawl.
-- Actively maintained by Astral; follows the same rules as the tools it replaces.
-- `ruff format` is black-compatible — existing black-formatted code passes without changes.
+**なぜラフなのですか?**
+- 代替ツール (Rust で書かれた) よりも 10 ～ 100 倍高速です。
+- `pyproject.toml` の単一の設定セクション — `.flake8`、`.isort.cfg`、`pyproject.toml[tool.black]` のスプロールなし。
+- Astral によって積極的に保守されています。置き換えられるツールと同じルールに従います。
+- `ruff format` は黒と互換性があります。つまり、既存の黒でフォーマットされたコードは変更せずに渡されます。
 
 ---
 
-## 2. Ruff Configuration in pyproject.toml
+## 2. pyproject.toml の Ruff 設定```トムル
+[ツール.ラフ]
+target-version = "py310" # サポートされる最小の Python バージョン
+line-length = 88 # 黒互換のデフォルト
+src = ["src", "テスト"]
 
-```toml
-[tool.ruff]
-target-version = "py310"        # Minimum supported Python version
-line-length    = 88             # black-compatible default
-src            = ["src", "tests"]
-
-[tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear (opinionated but very useful)
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade (modernise syntax)
-    "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking (move imports to TYPE_CHECKING block)
-    "ANN", # flake8-annotations (enforce type hints — remove if too strict)
-    "S",   # flake8-bandit (security)
-    "N",   # pep8-naming
-]
-ignore = [
-    "ANN101",  # Missing type annotation for `self`
-    "ANN102",  # Missing type annotation for `cls`
-    "S101",    # Use of `assert` — necessary in tests
-    "S603",    # subprocess without shell=True — often intentional
-    "B008",    # Do not perform function calls in default arguments (false positives in FastAPI/Typer)
-]
+[ツール.ruff.lint]
+選択 = [
+    "E"、# pycodestyle エラー
+    "W"、# pycodestyle 警告
+    "F"、# パイフレーク
+    「私」、# isort
+    "B"、# flake8-bugbear (意見はありますが、非常に便利です)
+    "C4"、# flake8-comprehensions
+    "UP"、# pyupgrade (最新の構文)
+    「SIM」、#flake8-simplify
+    "TCH"、# flake8-type-checking (インポートを TYPE_CHECKING ブロックに移動)
+    "ANN"、# flake8-annotations (型ヒントを強制します - 厳密すぎる場合は削除します)
+    "S"、# flake8-bandit (セキュリティ)
+    "N"、# pep8-naming
+】
+無視 = [
+    "ANN101", # `self` の型アノテーションがありません
+    "ANN102", # `cls` の型アノテーションがありません
+    "S101"、# `assert` の使用 — テストで必要
+    "S603"、 # シェル = True のないサブプロセス — 多くの場合、意図的です
+    "B008", # デフォルト引数で関数呼び出しを実行しないでください (FastAPI/Typer での誤検知)
+】
 
 [tool.ruff.lint.isort]
-known-first-party = ["your_package"]
+既知のファーストパーティ = ["your_package"]
 
-[tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "ANN", "D"]   # Allow assert and skip annotations/docstrings in tests
+[tool.ruff.lint.ファイルごとの無視]
+"tests/**" = ["S101", "ANN", "D"] # テストでアノテーション/docstring のアサートとスキップを許可します
 
 [tool.ruff.format]
-quote-style              = "double"   # black-compatible
-indent-style             = "space"
-skip-magic-trailing-comma = false
-line-ending              = "auto"
-```
+quote-style = "double" # 黒互換
+インデントスタイル = "スペース"
+スキップマジック末尾のカンマ = false
+行末 = "自動"
+「」### 便利な ruff コマンド「」バッシュ
+# lint の問題をチェックする (変更なし)
+ラフチェック。
 
-### Useful ruff commands
+# 修正可能な問題を自動修正する
+ruff check --fix 。
 
-```bash
-# Check for lint issues (no changes)
-ruff check .
+# フォーマットコード (黒を置き換えます)
+ラフフォーマット。
 
-# Auto-fix fixable issues
-ruff check --fix .
+# ファイルを変更せずにフォーマットをチェックする (CI モード)
+ruff 形式 --check 。
 
-# Format code (replaces black)
-ruff format .
+# 1 つのコマンドで lint チェックとフォーマット チェックの両方を実行します (CI の場合)
+ラフチェック。 && ラフ形式 --check 。
+「」---
 
-# Check formatting without changing files (CI mode)
-ruff format --check .
-
-# Run both lint and format check in one command (for CI)
-ruff check . && ruff format --check .
-```
-
----
-
-## 3. mypy Configuration
-
-```toml
-[tool.mypy]
-python_version          = "3.10"
-strict                  = true
-warn_return_any         = true
-warn_unused_ignores     = true
-warn_redundant_casts    = true
-disallow_untyped_defs   = true
+## 3. mypy の設定```トムル
+[ツール.mypy]
+python_version = "3.10"
+厳密 = 真
+warn_return_any = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
 disallow_incomplete_defs = true
-check_untyped_defs      = true
-no_implicit_optional    = true
-show_error_codes        = true
+check_untyped_defs = true
+no_implicit_optional = true
+show_error_codes = true
 
-# Ignore missing stubs for third-party packages that don't ship types
+# タイプを同梱しないサードパーティパッケージの欠落したスタブを無視します
 [[tool.mypy.overrides]]
 module = ["redis.*", "pydantic_settings.*"]
 ignore_missing_imports = true
-```
-
-### Running mypy — handle both src and flat layouts
-
-```bash
-# src layout:
+「」### mypy の実行 — src レイアウトとフラット レイアウトの両方を処理する「」バッシュ
+# ソースレイアウト:
 mypy src/your_package/
 
-# flat layout:
+# フラットレイアウト:
 mypy your_package/
-```
-
-In CI, detect layout dynamically:
-
-```yaml
-- name: Run mypy
-  run: |
-    if [ -d "src" ]; then
+「」CI でレイアウトを動的に検出します。```ヤムル
+- 名前: mypy を実行します。
+  実行: |
+    if [ -d "src" ];それから
         mypy src/
-    else
+    それ以外の場合
         mypy your_package/
-    fi
-```
+    フィ
+「」---
 
----
-
-## 4. pre-commit Configuration
-
-```yaml
+## 4. コミット前の構成```ヤムル
 # .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.4    # Pin to a specific release; update periodically with `pre-commit autoupdate`
-    hooks:
-      - id: ruff
-        args: [--fix]       # Auto-fix what can be fixed
-      - id: ruff-format     # Format (replaces black hook)
+リポジトリ:
+  - リポジトリ: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4 # 特定のリリースに固定します。 `pre-commit autoupdate` を使用して定期的に更新します
+    フック:
+      - ID: ラフ
+        args: [--fix] # 修正できるものは自動修正します
+      - id: ruff-format # フォーマット (黒いフックを置き換えます)
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
-    hooks:
-      - id: mypy
-        additional_dependencies:
-          - types-requests
-          - types-redis
-          # Add stubs for any typed dependency used in your package
+  - リポジトリ: https://github.com/pre-commit/mirrors-mypy
+    リビジョン: v1.10.0
+    フック:
+      - ID: mypy
+        追加の依存関係:
+          - タイプリクエスト
+          - タイプ-redis
+          # パッケージで使用される型付き依存関係のスタブを追加します
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-toml
-      - id: check-yaml
-      - id: check-merge-conflict
-      - id: check-added-large-files
-        args: ["--maxkb=500"]
-```
+  - リポジトリ: https://github.com/pre-commit/pre-commit-hooks
+    リビジョン: v4.6.0
+    フック:
+      - ID: 末尾の空白
+      - ID: ファイルの終わりの修正者
+      - ID: チェックトム
+      - ID: check-yaml
+      - ID: チェックマージ競合
+      - ID: 追加された大きなファイルをチェック
+        引数: ["--maxkb=500"]
+「」### ❌ これらのフックを取り外します (ラフに置き換えます)```ヤムル
+# 削除するか、追加しないでください:
+- リポジトリ: https://github.com/psf/black # ruff-format に置き換えられました
+- リポジトリ: https://github.com/PyCQA/isort # ruff lint I ルールに置き換えられます
+- リポジトリ: https://github.com/PyCQA/flake8 # ruff check に置き換えられました
+- リポジトリ: https://github.com/PyCQA/autoflake # ruff check F401 に置き換えられました
+「」＃＃＃ 設定「」バッシュ
+pip install プリコミット
+pre-commit install # git フックをインストールします — コミットごとに実行します
+pre-commit run --all-files # すべてのファイルに対して手動で実行します
+pre-commit autoupdate # すべてのフックを最新の固定バージョンに更新します
+「」---
 
-### ❌ Remove these hooks (replaced by ruff)
-
-```yaml
-# DELETE or never add:
-- repo: https://github.com/psf/black           # replaced by ruff-format
-- repo: https://github.com/PyCQA/isort          # replaced by ruff lint I rules
-- repo: https://github.com/PyCQA/flake8         # replaced by ruff check
-- repo: https://github.com/PyCQA/autoflake      # replaced by ruff check F401
-```
-
-### Setup
-
-```bash
-pip install pre-commit
-pre-commit install     # Installs git hook — runs on every commit
-pre-commit run --all-files  # Run manually on all files
-pre-commit autoupdate  # Update all hooks to latest pinned versions
-```
-
----
-
-## 5. pytest and Coverage Configuration
-
-```toml
+## 5. pytest とカバレッジ設定```トムル
 [tool.pytest.ini_options]
-testpaths    = ["tests"]
-addopts      = "-ra -q --strict-markers --cov=your_package --cov-report=term-missing"
-asyncio_mode = "auto"    # Enables async tests without @pytest.mark.asyncio decorator
+テストパス = ["テスト"]
+addopts = "-ra -q --strict-markers --cov=your_package --cov-report=term-missing"
+asyncio_mode = "auto" # @pytest.mark.asyncio デコレータなしで非同期テストを有効にします
 
-[tool.coverage.run]
-source   = ["your_package"]
-branch   = true
-omit     = ["**/__main__.py", "**/cli.py"]  # omit entry points from coverage
+[ツール.カバレッジ.実行]
+ソース = ["あなたのパッケージ"]
+ブランチ = true
+omit = ["**/__main__.py", "**/cli.py"] # カバレッジからエントリ ポイントを省略します
 
-[tool.coverage.report]
-show_missing   = true
-skip_covered   = false
-fail_under     = 85        # Fail CI if coverage drops below 85%
-exclude_lines  = [
-    "pragma: no cover",
-    "if TYPE_CHECKING:",
-    "raise NotImplementedError",
-    "@abstractmethod",
-]
-```
+[ツール.カバレッジ.レポート]
+show_missing = true
+スキップ_カバー = false
+failed_under = 85 # カバレッジが 85% を下回る場合、CI は失敗します
+exclude_lines = [
+    "プラグマ: カバーなし",
+    "TYPE_CHECKING の場合:",
+    "NotImplementedError を発生させる",
+    "@abstractメソッド",
+】
+「」### asyncio_mode = "auto" — @pytest.mark.asyncio を削除します
 
-### asyncio_mode = "auto" — remove @pytest.mark.asyncio
-
-With `asyncio_mode = "auto"` set in `pyproject.toml`, **do not** add `@pytest.mark.asyncio`
-to test functions. The decorator is redundant and will raise a warning in modern pytest-asyncio.
-
-```python
-# WRONG — the decorator is deprecated when asyncio_mode = "auto":
+`asyncio_mode = "auto"` が `pyproject.toml` に設定されている場合は、**`@pytest.mark.asyncio` を追加しないでください**
+機能をテストするため。デコレータは冗長であるため、最新の pytest-asyncio では警告が表示されます。「」パイソン
+# 誤り — asyncio_mode = "auto" の場合、デコレーターは非推奨になります。
 @pytest.mark.asyncio
 async def test_async_operation():
-    result = await my_async_func()
-    assert result == expected
+    結果 = my_async_func() を待ちます
+    アサート結果 == 期待される
 
-# CORRECT — just use async def:
+# 正しい — async def を使用するだけです。
 async def test_async_operation():
-    result = await my_async_func()
-    assert result == expected
-```
+    結果 = my_async_func() を待ちます
+    アサート結果 == 期待される
+「」---
 
----
+## 6. pyproject.toml の開発依存関係
 
-## 6. Dev Dependencies in pyproject.toml
-
-Declare all dev/test tools in an `[extras]` group named `dev`.
-
-```toml
-[project.optional-dependencies]
-dev = [
+すべての開発/テスト ツールを `dev` という名前の `[extras]` グループで宣言します。```トムル
+[プロジェクト.オプションの依存関係]
+開発 = [
     "pytest>=8",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5",
-    "ruff>=0.4",
+    "ラフ>=0.4"、
     "mypy>=1.10",
-    "pre-commit>=3.7",
-    "httpx>=0.27",       # If testing HTTP transport
-    "respx>=0.21",       # If mocking httpx in tests
-]
-redis = [
+    "事前コミット>=3.7",
+    "httpx>=0.27", # HTTP トランスポートをテストする場合
+    "respx>=0.21", # テストで httpx をモックする場合
+】
+レディス = [
     "redis>=5",
-]
-docs = [
+】
+ドキュメント = [
     "mkdocs-material>=9",
     "mkdocstrings[python]>=0.25",
-]
-```
-
-Install dev dependencies:
-
-```bash
+】
+「」開発依存関係をインストールします。「」バッシュ
 pip install -e ".[dev]"
-pip install -e ".[dev,redis]"   # Include optional extras
-```
+pip install -e ".[dev,redis]" # オプションの追加機能を含める
+「」---
 
----
+## 7. CI リント ジョブ — Ruff のみ
 
-## 7. CI Lint Job — Ruff Only
+個別の `black`、`isort`、`flake8` ステップを 1 つの `ruff` ステップに置き換えます。```ヤムル
+# .github/workflows/ci.yml — lint ジョブ
+糸くず:
+  名前: リントとタイプチェック
+  実行: ubuntu-最新
+  手順:
+    - 使用:actions/checkout@v4
 
-Replace the separate `black`, `isort`, and `flake8` steps with a single `ruff` step.
+    - 使用:actions/setup-python@v5
+      と:
+        Python バージョン: "3.11"
 
-```yaml
-# .github/workflows/ci.yml  — lint job
-lint:
-  name: Lint & Type Check
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v4
+    - 名前: 開発依存関係のインストール
+      実行: pip install -e ".[dev]"
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
+    # シングルステップ: ruff が black + isort + flake8 を置き換えます
+    - 名前：ラフ・リント
+      実行：ラフチェック。
 
-    - name: Install dev dependencies
-      run: pip install -e ".[dev]"
+    - 名前: ruff フォーマットチェック
+      実行: ruff 形式 --check 。
 
-    # Single step: ruff replaces black + isort + flake8
-    - name: ruff lint
-      run: ruff check .
-
-    - name: ruff format check
-      run: ruff format --check .
-
-    - name: mypy
-      run: |
-        if [ -d "src" ]; then
+    - 名前：マイピー
+      実行: |
+        if [ -d "src" ];それから
             mypy src/
-        else
-            mypy $(basename $(ls -d */))/ 2>/dev/null || mypy .
-        fi
-```
+        それ以外の場合
+            mypy $(basename $(ls -d */))/ 2>/dev/null ||マイピー 。
+        フィ
+「」---
 
----
+## 8. 移行ガイド — black と isort の削除
 
-## 8. Migration Guide — Removing black and isort
+`black` と `isort` を使用した既存のプロジェクトを変換する場合:「」バッシュ
+# 1. black と isort を開発依存関係から削除する
+pipアンインストールブラックアイソート
 
-If you are converting an existing project that used `black` and `isort`:
+# 2. pyproject.toml から black および isort config セクションを削除します。
+# [tool.black] ← このセクションを削除
+# [tool.isort] ← このセクションを削除
 
-```bash
-# 1. Remove black and isort from dev dependencies
-pip uninstall black isort
+# 3. ruff を開発依存関係に追加します (構成についてはセクション 2 を参照)
 
-# 2. Remove black and isort config sections from pyproject.toml
-# [tool.black]  ← delete this section
-# [tool.isort]  ← delete this section
+# 4. ruff format を実行して、既存のコードに互換性があることを確認する
+ruff 形式 --check 。
+# ruff 形式は黒と互換性があります。出力は同一である必要があります
 
-# 3. Add ruff to dev dependencies (see Section 2 for config)
+# 5. .pre-commit-config.yaml を更新します (セクション 4 を参照)
+# 黒いフックとイソソートフックを削除します。ラフおよびラフ形式のフックを追加する
 
-# 4. Run ruff format to confirm existing code is already compatible
-ruff format --check .
-# ruff format is black-compatible; output should be identical
+# 6. CI を更新する (セクション 7 を参照)
+# black、isort、flake8 ステップを削除します。 ruff チェック + ruff フォーマットを追加 --check
 
-# 5. Update .pre-commit-config.yaml (see Section 4)
-# Remove black and isort hooks; add ruff and ruff-format hooks
-
-# 6. Update CI (see Section 7)
-# Remove black, isort, flake8 steps; add ruff check + ruff format --check
-
-# 7. Reinstall pre-commit hooks
-pre-commit uninstall
-pre-commit install
-pre-commit run --all-files   # Verify clean
-```
+# 7. プリコミットフックを再インストールする
+コミット前のアンインストール
+プリコミットインストール
+pre-commit run --all-files # クリーンであることを確認する
+「」

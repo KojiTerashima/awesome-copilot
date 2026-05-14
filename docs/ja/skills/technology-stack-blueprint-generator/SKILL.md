@@ -2,241 +2,232 @@
 name: technology-stack-blueprint-generator
 description: 'Comprehensive technology stack blueprint generator that analyzes codebases to create detailed architectural documentation. Automatically detects technology stacks, programming languages, and implementation patterns across multiple platforms (.NET, Java, JavaScript, React, Python). Generates configurable blueprints with version information, licensing details, usage patterns, coding conventions, and visual diagrams. Provides implementation-ready templates and maintains architectural consistency for guided development.'
 ---
+# 包括的なテクノロジー スタック ブループリント ジェネレーター
 
-# Comprehensive Technology Stack Blueprint Generator
+## 構成変数
+${PROJECT_TYPE="自動検出|.NET|Java|JavaScript|React.js|React Native|Angular|Python|その他"} <!-- 主なテクノロジー -->
+${DEPTH_LEVEL="Basic|Standard|Comprehensive|Implementation-Ready"} <!-- 分析の深さ -->
+${INCLUDE_VERSIONS=true|false} <!-- バージョン情報を含める -->
+${INCLUDE_LICENSES=true|false} <!-- ライセンス情報を含める -->
+${INCLUDE_DIAGRAMS=true|false} <!-- アーキテクチャ図の生成 -->
+${INCLUDE_USAGE_PATTERNS=true|false} <!-- コードの使用パターンを含める -->
+${INCLUDE_CONVENTIONS=true|false} <!-- ドキュメントのコーディング規約 -->
+${OUTPUT_FORMAT="Markdown|JSON|YAML|HTML"} <!-- 出力形式を選択 -->
+${CATEGORIZATION="テクノロジーの種類|レイヤー|目的"} <!-- 編成方法 -->
 
-## Configuration Variables
-${PROJECT_TYPE="Auto-detect|.NET|Java|JavaScript|React.js|React Native|Angular|Python|Other"} <!-- Primary technology -->
-${DEPTH_LEVEL="Basic|Standard|Comprehensive|Implementation-Ready"} <!-- Analysis depth -->
-${INCLUDE_VERSIONS=true|false} <!-- Include version information -->
-${INCLUDE_LICENSES=true|false} <!-- Include license information -->
-${INCLUDE_DIAGRAMS=true|false} <!-- Generate architecture diagrams -->
-${INCLUDE_USAGE_PATTERNS=true|false} <!-- Include code usage patterns -->
-${INCLUDE_CONVENTIONS=true|false} <!-- Document coding conventions -->
-${OUTPUT_FORMAT="Markdown|JSON|YAML|HTML"} <!-- Select output format -->
-${CATEGORIZATION="Technology Type|Layer|Purpose"} <!-- Organization method -->
+## 生成されたプロンプト
 
-## Generated Prompt
+「コードベースを分析し、一貫したコード生成を促進するためにテクノロジーと実装パターンを徹底的に文書化する ${DEPTH_LEVEL} テクノロジー スタック ブループリントを生成します。次のアプローチを使用します。
 
-"Analyze the codebase and generate a ${DEPTH_LEVEL} technology stack blueprint that thoroughly documents technologies and implementation patterns to facilitate consistent code generation. Use the following approach:
+### 1. テクノロジーの特定フェーズ
+- ${PROJECT_TYPE == "自動検出" ? "プロジェクト ファイル、構成ファイル、および依存関係のコードベースをスキャンして、使用されているすべてのテクノロジ スタックを特定します" : "${PROJECT_TYPE} テクノロジに焦点を当てます"}
+- ファイル拡張子と内容を調べてすべてのプログラミング言語を識別します
+- 構成ファイル (package.json、.csproj、pom.xml など) を分析して依存関係を抽出します。
+- ビルド スクリプトとパイプライン定義を調べてツール情報を得る
+- ${INCLUDE_VERSIONS ? "パッケージ ファイルと構成から正確なバージョン情報を抽出します" : "バージョンの詳細をスキップします"}
+- ${INCLUDE_LICENSES ? "すべての依存関係のライセンス情報を文書化します" : ""}
 
-### 1. Technology Identification Phase
-- ${PROJECT_TYPE == "Auto-detect" ? "Scan the codebase for project files, configuration files, and dependencies to determine all technology stacks in use" : "Focus on ${PROJECT_TYPE} technologies"}
-- Identify all programming languages by examining file extensions and content
-- Analyze configuration files (package.json, .csproj, pom.xml, etc.) to extract dependencies
-- Examine build scripts and pipeline definitions for tooling information
-- ${INCLUDE_VERSIONS ? "Extract precise version information from package files and configuration" : "Skip version details"}
-- ${INCLUDE_LICENSES ? "Document license information for all dependencies" : ""}
+### 2. コア技術の分析
 
-### 2. Core Technologies Analysis
+${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "自動検出" ? "#### .NET スタック分析 (検出された場合)
+- 対象フレームワークと言語バージョン（プロジェクトファイルから検出）
+- バージョンと目的のコメントを含むすべての NuGet パッケージのリファレンス
+- プロジェクトの構造と組織パターン
+- 構成アプローチ (appsettings.json、IOptions など)
+- 認証メカニズム (ID、JWT など)
+- API 設計パターン (REST、GraphQL、最小限の API など)
+- データ アクセス アプローチ (EF Core、Dapper など)
+- 依存性注入パターン
+- ミドルウェア パイプライン コンポーネント" : ""}${PROJECT_TYPE == "Java" || PROJECT_TYPE == "自動検出" ? 「#### Java スタック分析 (検出された場合)」
+- JDKのバージョンとコアフレームワーク
+- バージョンと目的を含むすべての Maven/Gradle 依存関係
+- パッケージ構造の構成
+- Spring Boot の使用法と構成
+- 注釈パターン
+- 依存性注入アプローチ
+- データアクセス技術（JPA、JDBCなど）
+- API設計(Spring MVC、JAX-RSなど)" : ""}
 
-${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "Auto-detect" ? "#### .NET Stack Analysis (if detected)
-- Target frameworks and language versions (detect from project files)
-- All NuGet package references with versions and purpose comments
-- Project structure and organization patterns
-- Configuration approach (appsettings.json, IOptions, etc.)
-- Authentication mechanisms (Identity, JWT, etc.)
-- API design patterns (REST, GraphQL, minimal APIs, etc.)
-- Data access approaches (EF Core, Dapper, etc.)
-- Dependency injection patterns
-- Middleware pipeline components" : ""}
+${PROJECT_TYPE == "JavaScript" || PROJECT_TYPE == "自動検出" ? 「#### JavaScript スタック分析 (検出された場合)」
+- ECMAScript のバージョンとトランスパイラーの設定
+- すべての npm 依存関係は目的別に分類されています
+- モジュールシステム(ESM、CommonJS)
+- 構成を使用してツール (Webpack、Vite など) を構築します
+- TypeScript の使用法と設定
+- フレームワークとパターンのテスト" : ""}
 
-${PROJECT_TYPE == "Java" || PROJECT_TYPE == "Auto-detect" ? "#### Java Stack Analysis (if detected)
-- JDK version and core frameworks
-- All Maven/Gradle dependencies with versions and purpose
-- Package structure organization
-- Spring Boot usage and configurations
-- Annotation patterns
-- Dependency injection approach
-- Data access technologies (JPA, JDBC, etc.)
-- API design (Spring MVC, JAX-RS, etc.)" : ""}
+${PROJECT_TYPE == "React.js" || PROJECT_TYPE == "自動検出" ? 「#### 反応分析 (検出された場合)
+- React のバージョンとキー パターン (フックとクラス コンポーネント)
+- 状態管理アプローチ (Context、Redux、Zustand など)
+- コンポーネントライブラリの使用 (マテリアル-UI、チャクラなど)
+- ルーティングの実装
+- フォーム処理戦略
+- API統合パターン
+- コンポーネントのテスト手法" : ""}
 
-${PROJECT_TYPE == "JavaScript" || PROJECT_TYPE == "Auto-detect" ? "#### JavaScript Stack Analysis (if detected)
-- ECMAScript version and transpiler settings
-- All npm dependencies categorized by purpose
-- Module system (ESM, CommonJS)
-- Build tooling (webpack, Vite, etc.) with configuration
-- TypeScript usage and configuration
-- Testing frameworks and patterns" : ""}
+${PROJECT_TYPE == "Python" || PROJECT_TYPE == "自動検出" ? "#### Python 分析 (検出された場合)
+- 使用される Python のバージョンと主要な言語機能
+- パッケージの依存関係と仮想環境のセットアップ
+- Web フレームワークの詳細 (Django、Flask、FastAPI)
+- ORM の使用パターン
+- プロジェクト構造の組織化
+- API 設計パターン" : ""}
 
-${PROJECT_TYPE == "React.js" || PROJECT_TYPE == "Auto-detect" ? "#### React Analysis (if detected)
-- React version and key patterns (hooks vs class components)
-- State management approach (Context, Redux, Zustand, etc.)
-- Component library usage (Material-UI, Chakra, etc.)
-- Routing implementation
-- Form handling strategies
-- API integration patterns
-- Testing approach for components" : ""}
-
-${PROJECT_TYPE == "Python" || PROJECT_TYPE == "Auto-detect" ? "#### Python Analysis (if detected)
-- Python version and key language features used
-- Package dependencies and virtual environment setup
-- Web framework details (Django, Flask, FastAPI)
-- ORM usage patterns
-- Project structure organization
-- API design patterns" : ""}
-
-### 3. Implementation Patterns & Conventions
+### 3. 実装パターンと規約
 ${INCLUDE_CONVENTIONS ? 
-"Document coding conventions and patterns for each technology area:
+「各技術分野のコーディング規約とパターンを文書化します。
 
-#### Naming Conventions
-- Class/type naming patterns
-- Method/function naming patterns
-- Variable naming conventions
-- File naming and organization conventions
-- Interface/abstract class patterns
+#### 命名規則
+- クラス/型の命名パターン
+- メソッド/関数の命名パターン
+- 変数の命名規則
+- ファイルの命名と編成の規則
+- インターフェース/抽象クラスのパターン
 
-#### Code Organization
-- File structure and organization
-- Folder hierarchy patterns
-- Component/module boundaries
-- Code separation and responsibility patterns
+#### コード構成
+- ファイルの構造と構成
+- フォルダー階層パターン
+- コンポーネント/モジュールの境界
+- コードの分離と責任のパターン
 
-#### Common Patterns
-- Error handling approaches
-- Logging patterns
-- Configuration access
-- Authentication/authorization implementation
-- Validation strategies
-- Testing patterns" : ""}
+#### 一般的なパターン
+- エラー処理のアプローチ
+- ロギングパターン
+- 設定アクセス
+- 認証・認可の実装
+- 検証戦略
+- パターンのテスト" : ""}
 
-### 4. Usage Examples
+### 4. 使用例
 ${INCLUDE_USAGE_PATTERNS ? 
-"Extract representative code examples showing standard implementation patterns:
+「標準的な実装パターンを示す代表的なコード例を抽出します。#### API 実装例
+- 標準コントローラー/エンドポイントの実装
+- 要求 DTO パターン
+- 応答のフォーマット
+- 検証アプローチ
+- エラー処理
 
-#### API Implementation Examples
-- Standard controller/endpoint implementation
-- Request DTO pattern
-- Response formatting
-- Validation approach
-- Error handling
+#### データ アクセスの例
+- リポジトリパターンの実装
+- エンティティ/モデルの定義
+- クエリパターン
+- トランザクション処理
 
-#### Data Access Examples
-- Repository pattern implementation
-- Entity/model definitions
-- Query patterns
-- Transaction handling
+#### サービス層の例
+- サービスクラスの実装
+- ビジネスロジックの構成
+- 横断的な懸念事項の統合
+- 依存性注入の使用法
 
-#### Service Layer Examples
-- Service class implementation
-- Business logic organization
-- Cross-cutting concerns integration
-- Dependency injection usage
+#### UI コンポーネントの例 (該当する場合)
+- コンポーネントの構造
+- 状態管理パターン
+- イベント処理
+- API 統合パターン" : ""}
 
-#### UI Component Examples (if applicable)
-- Component structure
-- State management pattern
-- Event handling
-- API integration pattern" : ""}
+### 5. テクノロジースタックマップ
+${DEPTH_LEVEL == "包括的" || DEPTH_LEVEL == "実装準備完了" ? 
+「以下を含む包括的なテクノロジー マップを作成します。
 
-### 5. Technology Stack Map
-${DEPTH_LEVEL == "Comprehensive" || DEPTH_LEVEL == "Implementation-Ready" ? 
-"Create a comprehensive technology map including:
+#### コア フレームワークの使用法
+- プロジェクト内での主要なフレームワークとその具体的な使用法
+- フレームワーク固有の構成とカスタマイズ
+- 拡張ポイントとカスタマイズ
 
-#### Core Framework Usage
-- Primary frameworks and their specific usage in the project
-- Framework-specific configurations and customizations
-- Extension points and customizations
+#### 統合ポイント
+- さまざまなテクノロジーコンポーネントがどのように統合されるか
+- コンポーネント間の認証フロー
+- フロントエンドとバックエンド間のデータフロー
+- サードパーティのサービス統合パターン
 
-#### Integration Points
-- How different technology components integrate
-- Authentication flow between components
-- Data flow between frontend and backend
-- Third-party service integration patterns
+#### 開発ツール
+- IDE の設定と規則
+- コード分析ツール
+- 設定付きのリンターとフォーマッタ
+- パイプラインの構築とデプロイメント
+- テストのフレームワークとアプローチ
 
-#### Development Tooling
-- IDE settings and conventions
-- Code analysis tools
-- Linters and formatters with configuration
-- Build and deployment pipeline
-- Testing frameworks and approaches
+#### インフラストラクチャ
+- 導入環境の詳細
+- コンテナ技術
+- クラウドサービスの活用
+- インフラストラクチャの監視とログ記録" : ""}
 
-#### Infrastructure
-- Deployment environment details
-- Container technologies
-- Cloud services utilized
-- Monitoring and logging infrastructure" : ""}
-
-### 6. Technology-Specific Implementation Details
-
-${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "Auto-detect" ? 
-"#### .NET Implementation Details (if detected)
-- **Dependency Injection Pattern**:
-  - Service registration approach (Scoped/Singleton/Transient patterns)
-  - Configuration binding patterns
+### 6. テクノロジー固有の実装の詳細${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "自動検出" ? 
+「#### .NET 実装の詳細 (検出された場合)」
+- **依存性注入パターン**:
+  - サービス登録アプローチ (スコープ付き/シングルトン/一時的なパターン)
+  - 構成バインディングパターン
   
-- **Controller Patterns**:
-  - Base controller usage
-  - Action result types and patterns
-  - Route attribute conventions
-  - Filter usage (authorization, validation, etc.)
+- **コントローラー パターン**:
+  - ベースコントローラーの使用法
+  - アクション結果の種類とパターン
+  - ルート属性の規則
+  - フィルタの使用法 (認可、検証など)
   
-- **Data Access Patterns**:
-  - ORM configuration and usage
-  - Entity configuration approach
-  - Relationship definitions
-  - Query patterns and optimization approaches
+- **データ アクセス パターン**:
+  - ORMの設定と使用法
+  - エンティティ構成アプローチ
+  - 関係の定義
+  - クエリパターンと最適化アプローチ
   
-- **API Design Patterns** (if used):
-  - Endpoint organization
-  - Parameter binding approaches
-  - Response type handling
+- **API デザイン パターン** (使用する場合):
+  - エンドポイントの組織
+  - パラメータバインディングアプローチ
+  - 応答タイプの処理
   
-- **Language Features Used**:
-  - Detect specific language features from code
-  - Identify common patterns and idioms
-  - Note any specific version-dependent features" : ""}
+- **使用される言語機能**:
+  - コードから特定の言語機能を検出する
+  - 一般的なパターンとイディオムを特定する
+  - バージョンに依存する特定の機能に注意してください" : ""}
 
-${PROJECT_TYPE == "React.js" || PROJECT_TYPE == "Auto-detect" ? 
-"#### React Implementation Details (if detected)
-- **Component Structure**:
-  - Function vs class components
-  - Props interface definitions
-  - Component composition patterns
+${PROJECT_TYPE == "React.js" || PROJECT_TYPE == "自動検出" ? 
+「#### React 実装の詳細 (検出された場合)
+- **コンポーネント構造**:
+  - 関数コンポーネントとクラスコンポーネント
+  - Props インターフェース定義
+  - コンポーネントの構成パターン
   
-- **Hook Usage Patterns**:
-  - Custom hook implementation style
-  - useState patterns
-  - useEffect cleanup approaches
-  - Context usage patterns
+- **フックの使用パターン**:
+  - カスタムフック実装スタイル
+  - useState パターン
+  - useEffect クリーンアップアプローチ
+  - コンテキストの使用パターン
   
-- **State Management**:
-  - Local vs global state decisions
-  - State management library patterns
-  - Store configuration
-  - Selector patterns
+- **状態管理**:
+  - ローカル状態とグローバル状態の決定
+  - 状態管理ライブラリのパターン
+  - ストア構成
+  - セレクターパターン
   
-- **Styling Approach**:
-  - CSS methodology (CSS modules, styled-components, etc.)
-  - Theme implementation
-  - Responsive design patterns" : ""}
+- **スタイリングアプローチ**:
+  - CSS 方法論 (CSS モジュール、スタイル付きコンポーネントなど)
+  - テーマの実装
+  - レスポンシブ デザイン パターン" : ""}
 
-### 7. Blueprint for New Code Implementation
-${DEPTH_LEVEL == "Implementation-Ready" ? 
-"Based on the analysis, provide a detailed blueprint for implementing new features:
+### 7. 新しいコード実装の青写真
+${DEPTH_LEVEL == "実装準備完了" ? 
+「分析に基づいて、新機能を実装するための詳細な青写真を提供します。
 
-- **File/Class Templates**: Standard structure for common component types
-- **Code Snippets**: Ready-to-use code patterns for common operations
-- **Implementation Checklist**: Standard steps for implementing features end-to-end
-- **Integration Points**: How to connect new code with existing systems
-- **Testing Requirements**: Standard test patterns for different component types
-- **Documentation Requirements**: Standard doc patterns for new features" : ""}
+- **ファイル/クラス テンプレート**: 一般的なコンポーネント タイプの標準構造
+- **コード スニペット**: 一般的な操作にすぐに使用できるコード パターン
+- **実装チェックリスト**: 機能をエンドツーエンドで実装するための標準手順
+- **統合ポイント**: 新しいコードを既存のシステムに接続する方法
+- **テスト要件**: さまざまなコンポーネントタイプの標準テストパターン
+- **ドキュメント要件**: 新機能の標準ドキュメント パターン" : ""}${INCLUDE_DIAGRAMS ? 
+"### 8. テクノロジー関係図
+- **スタック図**: 完全なテクノロジースタックを視覚的に表現したもの
+- **依存関係フロー**: さまざまなテクノロジーがどのように相互作用するか
+- **コンポーネントの関係**: 主要コンポーネントが互いにどのように依存しているか
+- **データ フロー**: データがテクノロジー スタックをどのように流れるか" : ""}
 
-${INCLUDE_DIAGRAMS ? 
-"### 8. Technology Relationship Diagrams
-- **Stack Diagram**: Visual representation of the complete technology stack
-- **Dependency Flow**: How different technologies interact
-- **Component Relationships**: How major components depend on each other
-- **Data Flow**: How data flows through the technology stack" : ""}
+### ${INCLUDE_DIAGRAMS ? 「9」：「8」}。テクノロジーに関する意思決定のコンテキスト
+- テクノロジーを選択する明白な理由を文書化する
+- 置き換え対象としてマークされているレガシーまたは非推奨のテクノロジーに注意してください
+- テクノロジーの制約と境界を特定する
+- テクノロジーのアップグレード パスと互換性に関する考慮事項を文書化する
 
-### ${INCLUDE_DIAGRAMS ? "9" : "8"}. Technology Decision Context
-- Document apparent reasons for technology choices
-- Note any legacy or deprecated technologies marked for replacement
-- Identify technology constraints and boundaries
-- Document technology upgrade paths and compatibility considerations
+出力を ${OUTPUT_FORMAT} としてフォーマットし、${CATEGORIZATION} によってテクノロジーを分類します。
 
-Format the output as ${OUTPUT_FORMAT} and categorize technologies by ${CATEGORIZATION}.
-
-Save the output as 'Technology_Stack_Blueprint.${OUTPUT_FORMAT == "Markdown" ? "md" : OUTPUT_FORMAT.toLowerCase()}'
-"
+出力を 'Technology_Stack_Blueprint.${OUTPUT_FORMAT == "Markdown" ? として保存します。 "md" : OUTPUT_FORMAT.toLowerCase()}'
+」

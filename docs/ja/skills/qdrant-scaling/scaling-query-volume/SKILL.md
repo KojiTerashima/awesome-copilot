@@ -2,22 +2,21 @@
 name: qdrant-scaling-query-volume
 description: "Guides Qdrant query volume scaling. Use when someone asks 'query returns too many results', 'scroll performance', 'large limit values', 'paginating search results', 'fetching many vectors', or 'high cardinality results'."
 ---
+# クエリボリュームのスケーリング
 
-# Scaling for Query Volume
+問題: クエリに大きな制限 (例: 1000) があり、複数のシャード (例: 10) がある場合、単純に各シャードは 1000 件の結果全体を返さなければなりません。つまり、転送およびマージされた合計 10,000 のスコア ポイントが返されます。データは自動シャード全体にランダムに分散されるため、これは無駄です。
 
-Problem: When a query has a large limit (e.g. 1000) and there are multiple shards (e.g. 10), naively each shard must return the full 1000 results — totaling 10,000 scored points transferred and merged. This is wasteful since data is randomly distributed across auto-shards.
+## 核となるアイデア
 
-## Core idea
+すべてのシャードに最大の制限を求めるのではなく、ポアソン分布統計によって計算されたより小さな制限を各シャードに求めてから、マージします。自動シャーディングによりランダムで独立したデータ分散が保証されるため、これは安全です。
 
-Instead of asking every shard for the full limit, ask each shard for a smaller limit computed via Poisson distribution statistics, then merge. This is safe because auto-sharding guarantees random, independent data distribution.
+## アクティブ化すると
 
-## When it activates
+- 1 つ以上のシャード
+- 自動シャーディングが使用されています (クエリされたすべてのシャードが同じシャード キーを共有します)
+- リクエストの制限 + オフセット >= SHARD_QUERY_SUBSAMPLING_LIMIT (128)
+- クエリは正確ではありません
 
-- More than 1 shard
-- Auto-sharding is in use (all queried shards share the same shard key)
-- The request's limit + offset >= SHARD_QUERY_SUBSAMPLING_LIMIT (128)
-- The query is not exact
+## 重要なトレードオフ
 
-## Key tradeoff
-
- The strategy trades a small probability of slightly incomplete results for a large reduction in inter-shard data transfer, especially for high-limit queries across many shards. The 1.2x safety factor and the 99.9% Poisson threshold keep the error rate very low — comparable to inaccuracies already introduced by approximate vector indices like HNSW.
+ この戦略では、結果がわずかに不完全になる可能性が低いことと引き換えに、シャード間のデータ転送 (特に多くのシャードにわたる上限のクエリの場合) を大幅に削減します。 1.2x の安全率と 99.9% のポアソンしきい値により、エラー率が非常に低く抑えられます。これは、HNSW のような近似ベクトル インデックスによってすでに導入されている不正確さに匹敵します。

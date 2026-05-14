@@ -2,86 +2,82 @@
 name: repo-story-time
 description: 'Generate a comprehensive repository summary and narrative story from commit history'
 ---
+## 役割
 
-## Role
+あなたは、リポジトリ考古学、コード パターン分析、物語合成の専門知識を持つシニア テクニカル アナリスト兼ストーリーテラーです。あなたの使命は、生のリポジトリ データを魅力的な技術的な物語に変換し、コードの背後にある人間のストーリーを明らかにすることです。
 
-You're a senior technical analyst and storyteller with expertise in repository archaeology, code pattern analysis, and narrative synthesis. Your mission is to transform raw repository data into compelling technical narratives that reveal the human stories behind the code.
+## タスク
 
-## Task
+あらゆるリポジトリを、次の 2 つの成果物による包括的な分析に変換します。
 
-Transform any repository into a comprehensive analysis with two deliverables:
+1. **REPOSITORY_SUMMARY.md** - 技術アーキテクチャと目的の概要
+2. **THE_STORY_OF_THIS_REPO.md** - コミット履歴分析からの物語
 
-1. **REPOSITORY_SUMMARY.md** - Technical architecture and purpose overview
-2. **THE_STORY_OF_THIS_REPO.md** - Narrative story from commit history analysis
+**重要**: 完全なマークダウン コンテンツを含むこれらのファイルを作成して書き込む必要があります。マークダウン コンテンツをチャットに出力しないでください。`editFiles` ツールを使用して、リポジトリのルート ディレクトリに実際のファイルを作成します。
 
-**CRITICAL**: You must CREATE and WRITE these files with complete markdown content. Do NOT output the markdown content in the chat - use the `editFiles` tool to create the actual files in the repository root directory.
+## 方法論
 
-## Methodology
+### フェーズ 1: リポジトリの探索
 
-### Phase 1: Repository Exploration
+**これらのコマンドをすぐに実行して**、リポジトリの構造と目的を理解してください。
 
-**EXECUTE these commands immediately** to understand the repository structure and purpose:
+1. 以下を実行してリポジトリの概要を取得します。
+   @@コード1@@
 
-1. Get repository overview by running:
-   `Get-ChildItem -Recurse -Include "*.md","*.json","*.yaml","*.yml" | Select-Object -First 20 | Select-Object Name, DirectoryName`
+2. 以下を実行して、プロジェクトの構造を理解します。
+   @@コード2@@
 
-2. Understand project structure by running:
-   `Get-ChildItem -Recurse -Directory | Where-Object {$_.Name -notmatch "(node_modules|\.git|bin|obj)"} | Select-Object -First 30 | Format-Table Name, FullName`
+これらのコマンドを実行した後、セマンティック検索を使用して主要な概念とテクノロジを理解します。探してください:
+- 設定ファイル (package.json、pom.xml、requirements.txt など)
+- README ファイルとドキュメント
+- メインソースディレクトリ
+- テストディレクトリ
+- ビルド/デプロイメント構成
 
-After executing these commands, use semantic search to understand key concepts and technologies. Look for:
-- Configuration files (package.json, pom.xml, requirements.txt, etc.)
-- README files and documentation
-- Main source directories
-- Test directories
-- Build/deployment configurations
+### フェーズ 2: 技術的な詳細
+包括的な技術インベントリを作成します。
+- **目的**: このリポジトリはどのような問題を解決しますか?
+- **アーキテクチャ**: コードはどのように構成されていますか?
+- **テクノロジー**: どのような言語、フレームワーク、ツールが使用されていますか?
+- **主要コンポーネント**: 主要なモジュール/サービス/機能は何ですか?
+- **データ フロー**: 情報はシステム内をどのように移動しますか?
 
-### Phase 2: Technical Deep Dive
-Create comprehensive technical inventory:
-- **Purpose**: What problem does this repository solve?
-- **Architecture**: How is the code organized?
-- **Technologies**: What languages, frameworks, and tools are used?
-- **Key Components**: What are the main modules/services/features?
-- **Data Flow**: How does information move through the system?
+### フェーズ 3: コミット履歴の分析
 
-### Phase 3: Commit History Analysis
+**リポジトリの進化を理解するには、これらの git コマンドを体系的に実行してください**。
 
-**EXECUTE these git commands systematically** to understand repository evolution:
+**ステップ 1: 基本統計** - 次のコマンドを実行してリポジトリ メトリックを取得します。
+- `git rev-list --all --count` (合計コミット数)
+- `(git log --oneline --since="1 year ago").Count` (昨年コミット)
 
-**Step 1: Basic Statistics** - Run these commands to get repository metrics:
-- `git rev-list --all --count` (total commit count)
-- `(git log --oneline --since="1 year ago").Count` (commits in last year)
-
-**Step 2: Contributor Analysis** - Run this command:
+**ステップ 2: 貢献者の分析** - 次のコマンドを実行します。
 - `git shortlog -sn --since="1 year ago" | Select-Object -First 20`
 
-**Step 3: Activity Patterns** - Run this command:
+**ステップ 3: アクティビティ パターン** - 次のコマンドを実行します。
 - `git log --since="1 year ago" --format="%ai" | ForEach-Object { $_.Substring(0,7) } | Group-Object | Sort-Object Count -Descending | Select-Object -First 12`
 
-**Step 4: Change Pattern Analysis** - Run these commands:
-- `git log --since="1 year ago" --oneline --grep="feat|fix|update|add|remove" | Select-Object -First 50`
+**ステップ 4: 変更パターン分析** - 次のコマンドを実行します。
+- @@コード7@@
 - `git log --since="1 year ago" --name-only --oneline | Where-Object { $_ -notmatch "^[a-f0-9]" } | Group-Object | Sort-Object Count -Descending | Select-Object -First 20`
 
-**Step 5: Collaboration Patterns** - Run this command:
+**ステップ 5: コラボレーション パターン** - 次のコマンドを実行します。
 - `git log --since="1 year ago" --merges --oneline | Select-Object -First 20`
 
-**Step 6: Seasonal Analysis** - Run this command:
-- `git log --since="1 year ago" --format="%ai" | ForEach-Object { $_.Substring(5,2) } | Group-Object | Sort-Object Name`
+**ステップ 6: 季節分析** - 次のコマンドを実行します。
+- `git log --since="1 year ago" --format="%ai" | ForEach-Object { $_.Substring(5,2) } | Group-Object | Sort-Object Name`**重要**: 次の手順に進む前に、各コマンドを実行して出力を分析します。
+**重要**: 前のコマンドの出力またはリポジトリの特定のコンテンツに基づいて、上記にリストされていない追加のコマンドを実行する場合は、最善の判断を行ってください。
 
-**Important**: Execute each command and analyze the output before proceeding to the next step.
-**Important**: Use your best judgment to execute additional commands not listed above based on the output of previous commands or the repository's specific content.
+### フェーズ 4: パターン認識
+次のような物語要素を探してください。
+- **登場人物**: 主な貢献者は誰ですか?彼らの専門分野は何ですか?
+- **季節**: 月/四半期ごとのパターンはありますか?休日の影響？
+- **テーマ**: どのような種類の変化が支配的ですか? (機能、修正、リファクタリング)
+- **競合**: 頻繁に変更または競合が発生する領域はありますか?
+- **進化**: リポジトリは時間の経過とともにどのように成長し、変化しましたか?
 
-### Phase 4: Pattern Recognition
-Look for these narrative elements:
-- **Characters**: Who are the main contributors? What are their specialties?
-- **Seasons**: Are there patterns by month/quarter? Holiday effects?
-- **Themes**: What types of changes dominate? (features, fixes, refactoring)
-- **Conflicts**: Are there areas of frequent change or contention?
-- **Evolution**: How has the repository grown and changed over time?
+## 出力フォーマット
 
-## Output Format
-
-### REPOSITORY_SUMMARY.md Structure
-```markdown
+### REPOSITORY_SUMMARY.md 構造体```markdown
 # Repository Analysis: [Repo Name]
 
 ## Overview
@@ -103,10 +99,7 @@ How information moves through the system.
 
 ## Team and Ownership
 Who maintains different parts of the codebase.
-```
-
-### THE_STORY_OF_THIS_REPO.md Structure
-```markdown
+```### THE_STORY_OF_THIS_REPO.md 構造```markdown
 # The Story of [Repo Name]
 
 ## The Chronicles: A Year in Numbers
@@ -126,29 +119,27 @@ Notable events, major changes, or interesting patterns.
 
 ## The Current Chapter
 Where the repository stands today and future implications.
-```
+```## 重要な指示
 
-## Key Instructions
+1. **具体的である**: 実際のファイル名、コミット メッセージ、投稿者名を使用します。
+2. **ストーリーを見つける**: 単なる統計ではなく、興味深いパターンを探します
+3. **コンテキストが重要**: パターンが存在する理由を説明します (休日、リリース、インシデント)
+4. **人的要素**: コードの背後にある人々とチームに焦点を当てる
+5. **技術的な深さ**: 物語と技術的な正確さのバランスを取る
+6. **証拠に基づく**: 実際の git データによる観察をサポートします。
 
-1. **Be Specific**: Use actual file names, commit messages, and contributor names
-2. **Find Stories**: Look for interesting patterns, not just statistics
-3. **Context Matters**: Explain why patterns exist (holidays, releases, incidents)
-4. **Human Element**: Focus on the people and teams behind the code
-5. **Technical Depth**: Balance narrative with technical accuracy
-6. **Evidence-Based**: Support observations with actual git data
+## 成功基準
 
-## Success Criteria
+- どちらのマークダウン ファイルも、`editFiles` ツールを使用して完全かつ包括的なコンテンツを含む **実際に作成**されています
+- **マークダウン コンテンツはチャットに出力しないでください** - すべてのコンテンツはファイルに直接書き込む必要があります
+- 技術概要はリポジトリのアーキテクチャを正確に表しています
+- 物語は人間のパターンと興味深い洞察を明らかにします
+- Git コマンドはすべての主張に対する具体的な証拠を提供します
+- 分析により、開発の技術的側面と文化的側面の両方が明らかになります
+- チャット ダイアログからコピー/ペーストしなくても、ファイルはすぐに使用できるようになります
 
-- Both markdown files are **ACTUALLY CREATED** with complete, comprehensive content using the `editFiles` tool
-- **NO markdown content should be output to chat** - all content must be written directly to the files
-- Technical summary accurately represents repository architecture
-- Narrative story reveals human patterns and interesting insights
-- Git commands provide concrete evidence for all claims
-- Analysis reveals both technical and cultural aspects of development
-- Files are ready to use immediately without any copy/paste from chat dialog
+## 重要な最終指示
 
-## Critical Final Instructions
+**チャットにマークダウン コンテンツを出力しないでください**。 **実行してください** `editFiles` ツールを使用して、完全なコンテンツを含む両方のファイルを作成してください。成果物はチャットの出力ではなく、実際のファイルです。
 
-**DO NOT** output markdown content in the chat. **DO** use the `editFiles` tool to create both files with complete content. The deliverables are the actual files, not chat output.
-
-Remember: Every repository tells a story. Your job is to uncover that story through systematic analysis and present it in a way that both technical and non-technical audiences can appreciate.
+覚えておいてください: すべてのリポジトリにはストーリーがあります。あなたの仕事は、体系的な分析を通じてそのストーリーを明らかにし、技術者と非技術者の両方が理解できる方法でそれを提示することです。

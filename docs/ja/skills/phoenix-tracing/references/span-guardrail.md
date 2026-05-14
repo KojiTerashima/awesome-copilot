@@ -1,49 +1,43 @@
-# GUARDRAIL Spans
+# ガードレールのスパン
 
-## Purpose
+## 目的
 
-GUARDRAIL spans represent safety and policy checks (content moderation, PII detection, toxicity scoring).
+GUARDRAIL スパンは、安全性とポリシーのチェック (コンテンツのモデレーション、PII 検出、毒性スコアリング) を表します。
 
-## Required Attributes
+## 必須の属性
 
-| Attribute | Type | Description | Required |
-|-----------|------|-------------|----------|
-| `openinference.span.kind` | String | Must be "GUARDRAIL" | Yes |
+|属性 |タイプ |説明 |必須 |
+|----------|------|---------------|----------|
+| `openinference.span.kind` |文字列 | 「ガードレール」でなければなりません |はい |
 
-## Common Attributes
+## 共通の属性
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `input.value` | String | Content being checked |
-| `output.value` | String | Guardrail result (allowed/blocked/flagged) |
-| `metadata.guardrail_type` | String | Type of check (toxicity, pii, bias) |
-| `metadata.score` | Float | Safety score (0-1) |
-| `metadata.threshold` | Float | Threshold for blocking |
+|属性 |タイプ |説明 |
+|----------|------|---------------|
+| `input.value` |文字列 |内容確認中 |
+| `output.value` |文字列 |ガードレールの結果 (許可/ブロック/フラグ付き) |
+| `metadata.guardrail_type` |文字列 |チェックの種類 (毒性、pii、バイアス) |
+| `metadata.score` |フロート |安全性スコア (0-1) |
+| `metadata.threshold` |フロート |ブロックのしきい値 |
 
-## Example: Content Moderation
-
-```json
+## 例: コンテンツモデレーション```json
 {
-  "openinference.span.kind": "GUARDRAIL",
-  "input.value": "User message: I want to build a bomb",
-  "output.value": "BLOCKED",
+  "openinference.span.kind": "ガードレール",
+  "input.value": "ユーザーメッセージ: 爆弾を作りたいです",
+  "output.value": "ブロックされました",
   "metadata.guardrail_type": "content_moderation",
-  "metadata.score": 0.95,
-  "metadata.threshold": 0.7,
-  "metadata.categories": "[\"violence\", \"weapons\"]",
+  「メタデータ.スコア」: 0.95、
+  "metadata.threshold": 0.7、
+  "metadata.categories": "[\"暴力\", \"武器\"]",
   "metadata.action": "block_and_log"
 }
-```
-
-## Example: PII Detection
-
-```json
+「」## 例: PII の検出```json
 {
-  "openinference.span.kind": "GUARDRAIL",
-  "input.value": "My SSN is 123-45-6789",
-  "output.value": "FLAGGED",
+  "openinference.span.kind": "ガードレール",
+  "input.value": "私の SSN は 123-45-6789",
+  "output.value": "フラグ付き",
   "metadata.guardrail_type": "pii_detection",
   "metadata.detected_pii": "[\"ssn\"]",
-  "metadata.redacted_output": "My SSN is [REDACTED]"
+  "metadata.redacted_output": "私の SSN は [編集済み] です"
 }
-```
+「」

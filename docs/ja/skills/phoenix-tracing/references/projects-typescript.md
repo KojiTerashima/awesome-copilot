@@ -1,54 +1,39 @@
-# Phoenix Tracing: Projects (TypeScript)
+# Phoenix Tracing: プロジェクト (TypeScript)
 
-**Organize traces by application using projects (Phoenix's top-level grouping).**
+**プロジェクトを使用してアプリケーションごとにトレースを整理します (Phoenix の最上位グループ)。**
 
-## Overview
+## 概要
 
-Projects group traces for a single application or experiment.
+プロジェクトは、単一のアプリケーションまたは実験のトレースをグループ化します。
 
-**Use for:** Environments (dev/staging/prod), A/B testing, versioning
+**用途:** 環境 (開発/ステージング/本番)、A/B テスト、バージョン管理
 
-## Setup
+## セットアップ
 
-### Environment Variable (Recommended)
+### 環境変数 (推奨)「」バッシュ
+エクスポート PHOENIX_PROJECT_NAME="my-app-prod"
+「」
 
-```bash
-export PHOENIX_PROJECT_NAME="my-app-prod"
-```
-
-```typescript
+```タイプスクリプト
 process.env.PHOENIX_PROJECT_NAME = "my-app-prod";
 import { register } from "@arizeai/phoenix-otel";
-register();  // Uses "my-app-prod"
-```
-
-### Code
-
-```typescript
+登録する（）;  // 「my-app-prod」を使用します
+「」### コード```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
-register({ projectName: "my-app-prod" });
-```
+register({ プロジェクト名: "my-app-prod" });
+「」## 使用例
 
-## Use Cases
-
-**Environments:**
-```typescript
-// Dev, staging, prod
-register({ projectName: "my-app-dev" });
-register({ projectName: "my-app-staging" });
-register({ projectName: "my-app-prod" });
-```
-
-**A/B Testing:**
-```typescript
-// Compare models
-register({ projectName: "chatbot-gpt4" });
-register({ projectName: "chatbot-claude" });
-```
-
-**Versioning:**
-```typescript
-// Track versions
-register({ projectName: "my-app-v1" });
-register({ projectName: "my-app-v2" });
-```
+**環境:**```タイプスクリプト
+// 開発、ステージング、本番
+register({ プロジェクト名: "my-app-dev" });
+register({ プロジェクト名: "my-app-staging" });
+register({ プロジェクト名: "my-app-prod" });
+「」**A/B テスト:**```タイプスクリプト
+// モデルを比較する
+register({ プロジェクト名: "chatbot-gpt4" });
+register({ プロジェクト名: "チャットボット クロード" });
+「」**バージョン管理:**```タイプスクリプト
+// バージョンを追跡する
+register({ プロジェクト名: "my-app-v1" });
+register({ プロジェクト名: "my-app-v2" });
+「」

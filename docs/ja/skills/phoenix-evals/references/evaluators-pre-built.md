@@ -1,75 +1,61 @@
-# Evaluators: Pre-Built
+# エバリュエーター: 事前構築済み
 
-Use for exploration only. Validate before production.
+探索のみに使用してください。本番前に検証します。
 
-## Python
+## パイソン「」パイソン
+phoenix.evals から LLM をインポート
+phoenix.evals.metrics からインポート FaithhoodEvaluator
 
-```python
-from phoenix.evals import LLM
-from phoenix.evals.metrics import FaithfulnessEvaluator
+llm = LLM(プロバイダー = "openai", モデル = "gpt-4o")
+忠実度_eval = 忠実度評価者(llm=llm)
+「」**注意**: `HallucinationEvaluator` は非推奨です。代わりに `FaithfulnessEvaluator` を使用してください。
+スコア 1.0 = 忠実な「忠実」/「不忠実」ラベルを使用します。
 
-llm = LLM(provider="openai", model="gpt-4o")
-faithfulness_eval = FaithfulnessEvaluator(llm=llm)
-```
+## TypeScript```タイプスクリプト
+import { createHallucinationEvaluator } から "@arizeai/phoenix-evals";
+import { openai } から "@ai-sdk/openai";
 
-**Note**: `HallucinationEvaluator` is deprecated. Use `FaithfulnessEvaluator` instead.
-It uses "faithful"/"unfaithful" labels with score 1.0 = faithful.
+consthallucinationEval = createHallucinationEvaluator({モデル:openai("gpt-4o") });
+「」## 利用可能 (2.0)
 
-## TypeScript
-
-```typescript
-import { createHallucinationEvaluator } from "@arizeai/phoenix-evals";
-import { openai } from "@ai-sdk/openai";
-
-const hallucinationEval = createHallucinationEvaluator({ model: openai("gpt-4o") });
-```
-
-## Available (2.0)
-
-| Evaluator | Type | Description |
+|評価者 |タイプ |説明 |
 | --------- | ---- | ----------- |
-| `FaithfulnessEvaluator` | LLM | Is the response faithful to the context? |
-| `CorrectnessEvaluator` | LLM | Is the response correct? |
-| `DocumentRelevanceEvaluator` | LLM | Are retrieved documents relevant? |
-| `ToolSelectionEvaluator` | LLM | Did the agent select the right tool? |
-| `ToolInvocationEvaluator` | LLM | Did the agent invoke the tool correctly? |
-| `ToolResponseHandlingEvaluator` | LLM | Did the agent handle the tool response well? |
-| `MatchesRegex` | Code | Does output match a regex pattern? |
-| `PrecisionRecallFScore` | Code | Precision/recall/F-score metrics |
-| `exact_match` | Code | Exact string match |
+| `FaithfulnessEvaluator` | LLM |応答はコンテキストに忠実ですか? |
+| `CorrectnessEvaluator` | LLM |対応は正しいでしょうか？ |
+| `DocumentRelevanceEvaluator` | LLM |取得した文書は関連性がありますか? |
+| `ToolSelectionEvaluator` | LLM |エージェントは正しいツールを選択しましたか? |
+| `ToolInvocationEvaluator` | LLM |エージェントはツールを正しく起動しましたか? |
+| `ToolResponseHandlingEvaluator` | LLM |エージェントはツールの応答に適切に対応しましたか? |
+| `MatchesRegex` |コード |出力は正規表現パターンと一致しますか? |
+| `PrecisionRecallFScore` |コード |精度/再現率/F スコアのメトリクス |
+| `exact_match` |コード |文字列の完全一致 |
 
-Legacy evaluators (`HallucinationEvaluator`, `QAEvaluator`, `RelevanceEvaluator`,
-`ToxicityEvaluator`, `SummarizationEvaluator`) are in `phoenix.evals.legacy` and deprecated.
+従来のエバリュエーター (`HallucinationEvaluator`、`QAEvaluator`、`RelevanceEvaluator`、
+`ToxicityEvaluator`、`SummarizationEvaluator`) は `phoenix.evals.legacy` に含まれており、非推奨です。
 
-## When to Use
+## いつ使用するか
 
-| Situation | Recommendation |
+|状況 |推薦 |
 | --------- | -------------- |
-| Exploration | Find traces to review |
-| Find outliers | Sort by scores |
-| Production | Validate first (>80% human agreement) |
-| Domain-specific | Build custom |
+|探検 |確認するトレースを検索 |
+|外れ値を見つける |スコア順に並べ替え |
+|制作 |最初に検証します (人間の同意が 80% 以上) |
+|ドメイン固有 |カスタムビルド |
 
-## Exploration Pattern
+## 探索パターン「」パイソン
+phoenix.evalsからのインポートevaluate_dataframe
 
-```python
-from phoenix.evals import evaluate_dataframe
+results_df =evaluate_dataframe(dataframe=トレース、評価者=[忠実度_eval])
 
-results_df = evaluate_dataframe(dataframe=traces, evaluators=[faithfulness_eval])
-
-# Score columns contain dicts — extract numeric scores
-scores = results_df["faithfulness_score"].apply(
-    lambda x: x.get("score", 0.0) if isinstance(x, dict) else 0.0
-)
-low_scores = results_df[scores < 0.5]   # Review these
-high_scores = results_df[scores > 0.9]  # Also sample
-```
-
-## Validation Required
-
-```python
-from sklearn.metrics import classification_report
+# スコア列には辞書が含まれています - 数値スコアを抽出します
+スコア = results_df["忠実度_スコア"].apply(
+    ラムダ x: x.get("スコア", 0.0) if isinstance(x, dict) else 0.0
+）
+low_scores = results_df[scores < 0.5] # これらを確認してください
+high_scores = results_df[scores > 0.9] # サンプルも
+「」## 検証が必要です「」パイソン
+sklearn.metricsインポートclassification_reportから
 
 print(classification_report(human_labels, evaluator_results["label"]))
-# Target: >80% agreement
-```
+# 目標: >80% の同意
+「」

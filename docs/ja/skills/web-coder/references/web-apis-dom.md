@@ -1,14 +1,13 @@
-# Web APIs & DOM Reference
+# Web API と DOM リファレンス
 
-Comprehensive reference for the Document Object Model (DOM) and Web APIs available in modern browsers.
+最新のブラウザで使用できるドキュメント オブジェクト モデル (DOM) と Web API の包括的なリファレンス。
 
-## Document Object Model (DOM)
+## ドキュメント オブジェクト モデル (DOM)
 
-### What is the DOM?
-The DOM is a programming interface for HTML and XML documents. It represents the page structure as a tree of objects that can be manipulated with JavaScript.
+### DOM とは何ですか?
+DOM は、HTML および XML ドキュメントのプログラミング インターフェイスです。これは、JavaScript で操作できるオブジェクトのツリーとしてページ構造を表します。
 
-**DOM Tree Structure**:
-```
+**DOM ツリー構造**:```
 Document
 └── html
     ├── head
@@ -18,21 +17,17 @@ Document
         ├── header
         ├── main
         └── footer
-```
+```### DOM ノードの種類
 
-### DOM Node Types
+|ノードタイプ |説明 |例 |
+|----------|---------------|----------|
+|要素 | HTML要素 | `<div>`、`<p>` |
+|テキスト |テキストの内容 |要素内のテキスト |
+|コメント | HTML コメント | `<!-- comment -->` |
+|ドキュメント |ルートドキュメント | `document` |
+|ドキュメントフラグメント |軽量ドキュメント |バッチ操作の場合 |
 
-| Node Type | Description | Example |
-|-----------|-------------|---------|
-| Element | HTML element | `<div>`, `<p>` |
-| Text | Text content | Text inside elements |
-| Comment | HTML comment | `<!-- comment -->` |
-| Document | Root document | `document` |
-| DocumentFragment | Lightweight document | For batch operations |
-
-### Selecting Elements
-
-```javascript
+### 要素の選択```javascript
 // By ID
 const element = document.getElementById('myId');
 
@@ -53,11 +48,7 @@ const all = document.querySelectorAll('.myClass');
 document.body; // Body element
 document.head; // Head element
 document.documentElement; // <html> element
-```
-
-### Traversing the DOM
-
-```javascript
+```### DOM の横断```javascript
 const element = document.querySelector('#myElement');
 
 // Parent
@@ -79,11 +70,7 @@ element.closest('.container');
 
 // Check if element contains another
 parent.contains(child); // true/false
-```
-
-### Creating and Modifying Elements
-
-```javascript
+```### 要素の作成と変更```javascript
 // Create element
 const div = document.createElement('div');
 const text = document.createTextNode('Hello');
@@ -127,11 +114,7 @@ parent.removeChild(element); // Old way
 
 // Clone element
 const clone = element.cloneNode(true); // true = deep clone (with children)
-```
-
-### Element Properties
-
-```javascript
+```### 要素のプロパティ```javascript
 // Dimensions and position
 element.offsetWidth; // Width including border
 element.offsetHeight; // Height including border
@@ -154,13 +137,9 @@ element.scrollIntoView(); // Scroll element into view
 
 // Check visibility
 element.checkVisibility(); // Modern API
-```
+```## イベント処理
 
-## Event Handling
-
-### Adding Event Listeners
-
-```javascript
+### イベントリスナーの追加```javascript
 // addEventListener (modern, recommended)
 element.addEventListener('click', handleClick);
 element.addEventListener('click', handleClick, { once: true }); // Remove after first trigger
@@ -178,25 +157,21 @@ element.addEventListener('scroll', handleScroll, {
 
 // Remove event listener
 element.removeEventListener('click', handleClick);
-```
+```### 一般的なイベント
 
-### Common Events
+|カテゴリー |イベント |
+|----------|----------|
+|マウス | `click`、`dblclick`、`mousedown`、`mouseup`、`mousemove`、`mouseenter`、`mouseleave`、`contextmenu` |
+|キーボード | `keydown`、`keyup`、`keypress` (非推奨) |
+|フォーム | `submit`、`change`、`input`、`focus`、`blur`、`invalid` |
+|ウィンドウ | `load`、`DOMContentLoaded`、`resize`、`scroll`、`beforeunload`、`unload` |
+|タッチ | `touchstart`、`touchmove`、`touchend`、`touchcancel` |
+|ドラッグ | `drag`、`dragstart`、`dragend`、`dragover`、`drop` |
+|メディア | `play`、`pause`、`ended`、`timeupdate`、`loadeddata` |
+|アニメーション | `animationstart`、`animationend`、`animationiteration` |
+|移行 | `transitionstart`、`transitionend` |
 
-| Category | Events |
-|----------|--------|
-| Mouse | `click`, `dblclick`, `mousedown`, `mouseup`, `mousemove`, `mouseenter`, `mouseleave`, `contextmenu` |
-| Keyboard | `keydown`, `keyup`, `keypress` (deprecated) |
-| Form | `submit`, `change`, `input`, `focus`, `blur`, `invalid` |
-| Window | `load`, `DOMContentLoaded`, `resize`, `scroll`, `beforeunload`, `unload` |
-| Touch | `touchstart`, `touchmove`, `touchend`, `touchcancel` |
-| Drag | `drag`, `dragstart`, `dragend`, `dragover`, `drop` |
-| Media | `play`, `pause`, `ended`, `timeupdate`, `loadeddata` |
-| Animation | `animationstart`, `animationend`, `animationiteration` |
-| Transition | `transitionstart`, `transitionend` |
-
-### Event Object
-
-```javascript
+### イベントオブジェクト```javascript
 element.addEventListener('click', (event) => {
   // Target elements
   event.target; // Element that triggered event
@@ -221,28 +196,20 @@ element.addEventListener('click', (event) => {
   event.stopPropagation(); // Stop bubbling
   event.stopImmediatePropagation(); // Stop other listeners
 });
-```
+```### イベントの委任
 
-### Event Delegation
-
-Handle events on parent instead of individual children:
-
-```javascript
+個々の子ではなく親でイベントを処理します。```javascript
 // Instead of adding listener to each button
 document.querySelector('.container').addEventListener('click', (event) => {
   if (event.target.matches('button')) {
     console.log('Button clicked:', event.target);
   }
 });
-```
+```## Web ストレージ API
 
-## Web Storage APIs
+### ローカルストレージ
 
-### LocalStorage
-
-Persistent storage (no expiration):
-
-```javascript
+永続ストレージ (有効期限なし):```javascript
 // Set item
 localStorage.setItem('key', 'value');
 localStorage.setItem('user', JSON.stringify({ name: 'John' }));
@@ -269,27 +236,19 @@ for (let i = 0; i < localStorage.length; i++) {
   const value = localStorage.getItem(key);
   console.log(key, value);
 }
-```
+```### セッションストレージ
 
-### SessionStorage
-
-Storage cleared when tab closes:
-
-```javascript
+タブを閉じるとストレージがクリアされます:```javascript
 // Same API as localStorage
 sessionStorage.setItem('key', 'value');
 sessionStorage.getItem('key');
 sessionStorage.removeItem('key');
 sessionStorage.clear();
-```
+```**ストレージ制限**: オリジンあたり最大 5 ～ 10MB
 
-**Storage Limits**: ~5-10MB per origin
+## API を取得する
 
-## Fetch API
-
-Modern API for HTTP requests:
-
-```javascript
+HTTP リクエスト用の最新の API:```javascript
 // Basic GET request
 fetch('https://api.example.com/data')
   .then(response => response.json())
@@ -345,13 +304,9 @@ const json = await response.json(); // JSON
 const blob = await response.blob(); // Binary data
 const arrayBuffer = await response.arrayBuffer(); // ArrayBuffer
 const formData = await response.formData(); // FormData
-```
+```## その他の重要な Web API
 
-## Other Important Web APIs
-
-### Console API
-
-```javascript
+### コンソール API```javascript
 console.log('Message'); // Log message
 console.error('Error'); // Error message (red)
 console.warn('Warning'); // Warning message (yellow)
@@ -363,11 +318,7 @@ console.time('timer'); // Start timer
 console.timeEnd('timer'); // End timer and log duration
 console.clear(); // Clear console
 console.assert(condition, 'Error message'); // Assert condition
-```
-
-### Timers
-
-```javascript
+```### タイマー```javascript
 // Execute once after delay
 const timeoutId = setTimeout(() => {
   console.log('Executed after 1 second');
@@ -390,11 +341,7 @@ function animate() {
   requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);
-```
-
-### URL API
-
-```javascript
+```### URL API```javascript
 const url = new URL('https://example.com:8080/path?query=value#hash');
 
 url.protocol; // 'https:'
@@ -414,11 +361,7 @@ url.searchParams.has('query'); // true/false
 
 // Convert to string
 url.toString(); // Full URL
-```
-
-### FormData API
-
-```javascript
+```### フォームデータ API```javascript
 // Create FormData from form
 const form = document.querySelector('form');
 const formData = new FormData(form);
@@ -442,13 +385,9 @@ fetch('/api/upload', {
   method: 'POST',
   body: formData // Don't set Content-Type header
 });
-```
+```### 交差点オブザーバー API
 
-### Intersection Observer API
-
-Detect when element enters viewport:
-
-```javascript
+要素がビューポートに入ったときを検出します。```javascript
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -464,13 +403,9 @@ const observer = new IntersectionObserver((entries) => {
 observer.observe(element);
 observer.unobserve(element);
 observer.disconnect(); // Stop observing all
-```
+```### ミューテーションオブザーバー API
 
-### Mutation Observer API
-
-Watch for DOM changes:
-
-```javascript
+DOM の変更を監視します。```javascript
 const observer = new MutationObserver((mutations) => {
   mutations.forEach(mutation => {
     console.log('DOM changed:', mutation.type);
@@ -485,11 +420,7 @@ observer.observe(element, {
 });
 
 observer.disconnect(); // Stop observing
-```
-
-### Geolocation API
-
-```javascript
+```### 地理位置情報 API```javascript
 navigator.geolocation.getCurrentPosition(
   (position) => {
     console.log(position.coords.latitude);
@@ -508,13 +439,9 @@ navigator.geolocation.getCurrentPosition(
 // Watch position (continuous updates)
 const watchId = navigator.geolocation.watchPosition(callback);
 navigator.geolocation.clearWatch(watchId);
-```
+```### ウェブワーカー
 
-### Web Workers
-
-Run JavaScript in background thread:
-
-```javascript
+バックグラウンド スレッドで JavaScript を実行します。```javascript
 // Main thread
 const worker = new Worker('worker.js');
 
@@ -535,13 +462,9 @@ self.onmessage = (event) => {
   console.log('From main:', event.data);
   self.postMessage({ result: 'Done' });
 };
-```
+```### キャンバス API
 
-### Canvas API
-
-Draw graphics:
-
-```javascript
+グラフィックを描画する:```javascript
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
@@ -565,13 +488,9 @@ img.onload = () => {
   ctx.drawImage(img, 0, 0);
 };
 img.src = 'image.jpg';
-```
+```### インデックス付きDB
 
-### IndexedDB
-
-Client-side database for large amounts of structured data:
-
-```javascript
+大量の構造化データ用のクライアント側データベース:```javascript
 // Open database
 const request = indexedDB.open('MyDatabase', 1);
 
@@ -596,59 +515,57 @@ objectStore.add({ id: 1, name: 'John' });
 // Get data
 const request = objectStore.get(1);
 request.onsuccess = () => console.log(request.result);
-```
+```## ベストプラクティス
 
-## Best Practices
+### やるべきこと
+- ✅ インライン イベント ハンドラーでは `addEventListener` を使用します
+- ✅ 不要になったイベントリスナーを削除します
+- ✅ 動的コンテンツにイベント委任を使用する
+- ✅ DOM クエリを変数にキャッシュします
+- ✅ プレーンテキストには `textContent` を使用します (`innerHTML` より安全です)
+- ✅ バッチ DOM 操作には DocumentFragment を使用します
+- ✅ デバウンス/スロットルスクロールおよびサイズ変更ハンドラー
+- ✅ アニメーションには `requestAnimationFrame` を使用します
+- ✅ ユーザー入力を検証し、サニタイズします
 
-### Do's
-- ✅ Use `addEventListener` over inline event handlers
-- ✅ Remove event listeners when no longer needed
-- ✅ Use event delegation for dynamic content
-- ✅ Cache DOM queries in variables
-- ✅ Use `textContent` for plain text (safer than `innerHTML`)
-- ✅ Use DocumentFragment for batch DOM operations
-- ✅ Debounce/throttle scroll and resize handlers
-- ✅ Use `requestAnimationFrame` for animations
-- ✅ Validate and sanitize user input
+### やってはいけないこと
+- ❌ 信頼できないデータには `innerHTML` を使用します (XSS リスク)
+- ❌ ループ内で DOM を繰り返しクエリする
+- ❌ タイトなループで DOM を変更する (バッチ操作)
+- ❌ `document.write()` を使用します (非推奨)
+- ❌ 同期 XMLHttpRequest を使用する
+- ❌ 機密データを localStorage に保存する
+- ❌ 非同期コードのエラー処理を無視する
+- ❌ 重い計算を行うメインスレッドをブロックする
 
-### Don'ts
-- ❌ Use `innerHTML` with untrusted data (XSS risk)
-- ❌ Query DOM repeatedly in loops
-- ❌ Modify DOM in tight loops (batch operations)
-- ❌ Use `document.write()` (deprecated)
-- ❌ Use synchronous XMLHttpRequest
-- ❌ Store sensitive data in localStorage
-- ❌ Ignore error handling in async code
-- ❌ Block main thread with heavy computations
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
+**対象となる重要な用語**:
 - API
-- Application context
-- Beacon
-- Blink
-- Blink element
-- Browser
-- Browsing context
-- Buffer
-- Canvas
-- DOM (Document Object Model)
-- Document environment
-- Event
-- Expando
-- Global object
-- Global scope
-- Hoisting
-- IndexedDB
-- Interpolation
-- Node (DOM)
-- Shadow tree
-- WindowProxy
-- Wrapper
+- アプリケーションコンテキスト
+- ビーコン
+- 点滅
+- 点滅要素
+- ブラウザ
+- コンテキストの閲覧
+- バッファー
+- キャンバス
+- DOM (ドキュメント オブジェクト モデル)
+- ドキュメント環境
+- イベント
+- エキスパンド
+- グローバルオブジェクト
+- グローバルな範囲
+- 吊り上げ
+- インデックス付きDB
+- 補間
+- ノード (DOM)
+- シャドウツリー
+- ウィンドウプロキシ
+- ラッパー
 
-## Additional Resources
+## 追加のリソース
 
-- [MDN DOM Reference](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)
-- [MDN Web APIs](https://developer.mozilla.org/en-US/docs/Web/API)
+- [MDN DOM リファレンス](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model)
+- [MDN Web API](https://developer.mozilla.org/en-US/docs/Web/API)
 - [JavaScript.info DOM](https://javascript.info/document)

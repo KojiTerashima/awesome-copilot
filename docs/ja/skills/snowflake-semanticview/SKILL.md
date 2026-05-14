@@ -2,82 +2,65 @@
 name: snowflake-semanticview
 description: Create, alter, and validate Snowflake semantic views using Snowflake CLI (snow). Use when asked to build or troubleshoot semantic views/semantic layer definitions with CREATE/ALTER SEMANTIC VIEW, to validate semantic-view DDL against Snowflake via CLI, or to guide Snowflake CLI installation and connection setup.
 ---
+# スノーフレーク セマンティック ビュー
 
-# Snowflake Semantic Views
+## ワンタイムセットアップ
 
-## One-Time Setup
+- 新しいターミナルを開いて `snow --help` を実行して、Snowflake CLI のインストールを確認します。
+- Snowflake CLI が見つからない場合、またはユーザーがインストールできない場合は、https://docs.snowflake.com/en/developer-guide/snowflake-cli/installation/installation に誘導します。
+- https://docs.snowflake.com/en/developer-guide/snowflake-cli/connecting/configure-connections#add-a-connection に従って `snow connection add` を使用して Snowflake 接続を構成します。
+- すべての検証および実行ステップで構成された接続を使用します。
 
-- Verify Snowflake CLI installation by opening a new terminal and running `snow --help`.
-- If Snowflake CLI is missing or the user cannot install it, direct them to https://docs.snowflake.com/en/developer-guide/snowflake-cli/installation/installation.
-- Configure a Snowflake connection with `snow connection add` per https://docs.snowflake.com/en/developer-guide/snowflake-cli/connecting/configure-connections#add-a-connection.
-- Use the configured connection for all validation and execution steps.
+## 各セマンティック ビュー リクエストのワークフロー
 
-## Workflow For Each Semantic View Request
-
-1. Confirm the target database, schema, role, warehouse, and final semantic view name.
-2. Confirm the model follows a star schema (facts with conformed dimensions).
-3. Draft the semantic view DDL using the official syntax:
+1. ターゲットデータベース、スキーマ、ロール、ウェアハウス、および最終的なセマンティックビュー名を確認します。
+2. モデルがスター スキーマ (寸法が一致したファクト) に従っていることを確認します。
+3. 公式構文を使用してセマンティック ビュー DDL を作成します。
    - https://docs.snowflake.com/en/sql-reference/sql/create-semantic-view
-4. Populate synonyms and comments for each dimension, fact, and metric:
-   - Read Snowflake table/view/column comments first (preferred source):
+4. 各ディメンション、ファクト、メトリックの同義語とコメントを入力します。
+   - 最初に Snowflake のテーブル/ビュー/列のコメントを読んでください (ソースを推奨):
      - https://docs.snowflake.com/en/sql-reference/sql/comment
-   - If comments or synonyms are missing, ask whether you can create them, whether the user wants to provide text, or whether you should draft suggestions for approval.
-5. Use SELECT statements with DISTINCT and LIMIT (maximum 1000 rows) to discover relationships between fact and dimension tables, identify column data types, and create more meaningful comments and synonyms for columns.
-6. Create a temporary validation name (for example, append `__tmp_validate`) while keeping the same database and schema.
-7. Always validate by sending the DDL to Snowflake via Snowflake CLI before finalizing:
-   - Use `snow sql` to execute the statement with the configured connection.
-   - If flags differ by version, check `snow sql --help` and use the connection option shown there.
-8. If validation fails, iterate on the DDL and re-run the validation step until it succeeds.
-9. Apply the final DDL (create or alter) using the real semantic view name.
-10. Run a sample query against the final semantic view to confirm it works as expected. It has a different SQL syntax as can be seen here: https://docs.snowflake.com/en/user-guide/views-semantic/querying#querying-a-semantic-view
-Example:
-
-```SQL
+   - コメントや同義語が欠落している場合は、コメントや同義語を作成できるかどうか、ユーザーがテキストを提供したいかどうか、または承認のために提案を下書きする必要があるかどうかを尋ねます。
+5. DISTINCT および LIMIT (最大 1000 行) を指定した SELECT ステートメントを使用して、ファクト表とディメンション表の間の関係を検出し、列のデータ型を識別し、列に対してより意味のあるコメントと同義語を作成します。
+6. 同じデータベースとスキーマを維持しながら、一時的な検証名を作成します (たとえば、`__tmp_validate` を追加します)。
+7. 最終的に完了する前に、Snowflake CLI 経由で DDL を Snowflake に送信して常に検証します。
+   - `snow sql` を使用して、構成された接続でステートメントを実行します。
+   - バージョンによってフラグが異なる場合は、`snow sql --help` を確認し、そこに示されている接続オプションを使用してください。
+8. 検証が失敗した場合は、DDL を反復処理し、成功するまで検証ステップを再実行します。
+9. 実際のセマンティック ビュー名を使用して、最終的な DDL (作成または変更) を適用します。
+10. 最終的なセマンティック ビューに対してサンプル クエリを実行して、期待どおりに動作することを確認します。ここで見られるように、異なる SQL 構文があります: https://docs.snowflake.com/en/user-guide/views-semantic/querying#querying-a-semantic-view
+例:```SQL
 SELECT * FROM SEMANTIC_VIEW(
     my_semview_name
     DIMENSIONS customer.customer_market_segment
     METRICS orders.order_average_value
 )
 ORDER BY customer_market_segment;
-```
+```11. 検証中に作成された一時的なセマンティック ビューをクリーンアップします。
 
-11. Clean up any temporary semantic view created during validation.
+## 同義語とコメント (必須)
 
-## Synonyms And Comments (Required)
-
-- Use the semantic view syntax for synonyms and comments:
-
-```
+- 同義語とコメントにはセマンティック ビュー構文を使用します。```
 WITH SYNONYMS [ = ] ( 'synonym' [ , ... ] )
 COMMENT = 'comment_about_dim_fact_or_metric'
-```
-
-- Treat synonyms as informational only; do not use them to reference dimensions, facts, or metrics elsewhere.
-- Use Snowflake comments as the preferred and first source for synonyms and comments:
+```- 同義語は情報提供のみとして扱います。他の場所のディメンション、ファクト、または指標を参照するためにこれらを使用しないでください。
+- Snowflake コメントを同義語とコメントの優先および最初のソースとして使用します。
   - https://docs.snowflake.com/en/sql-reference/sql/comment
-- If Snowflake comments are missing, ask whether you can create them, whether the user wants to provide text, or whether you should draft suggestions for approval.
-- Do not invent synonyms or comments without user approval.
+- Snowflake コメントが見つからない場合は、コメントを作成できるかどうか、ユーザーがテキストを提供したいかどうか、または承認のために提案の下書きを作成する必要があるかどうかを尋ねます。
+- ユーザーの承認なしに同義語やコメントを作成しないでください。
 
-## Validation Pattern (Required)
+## 検証パターン (必須)
 
-- Never skip validation. Always execute the DDL against Snowflake with Snowflake CLI before presenting it as final.
-- Prefer a temporary name for validation to avoid clobbering the real view.
+- 検証をスキップしないでください。最終的なものとして提示する前に、必ず Snowflake CLI を使用して Snowflake に対して DDL を実行してください。
+- 実際のビューの破壊を避けるために、検証には一時的な名前を使用することを推奨します。
 
-## Example CLI Validation (Template)
-
-```bash
+## CLI 検証の例 (テンプレート)```bash
 # Replace placeholders with real values.
 snow sql -q "<CREATE OR ALTER SEMANTIC VIEW ...>" --connection <connection_name>
-```
-
-If the CLI uses a different connection flag in your version, run:
-
-```bash
+```CLI が使用しているバージョンで別の接続フラグを使用している場合は、次を実行します。```bash
 snow sql --help
-```
+```## 注意事項
 
-## Notes
-
-- Treat installation and connection setup as one-time steps, but confirm they are done before the first validation.
-- Keep the final semantic view definition identical to the validated temporary definition except for the name.
-- Do not omit synonyms or comments; consider them required for completeness even if optional in syntax.
+- インストールと接続のセットアップを 1 回限りの手順として扱いますが、最初の検証の前にそれらが完了していることを確認してください。
+- 最終的なセマンティック ビュー定義は、名前を除いて検証された一時定義と同一にしてください。
+- 同義語やコメントを省略しないでください。構文上はオプションであっても、完全を期すためには必須であると考えてください。

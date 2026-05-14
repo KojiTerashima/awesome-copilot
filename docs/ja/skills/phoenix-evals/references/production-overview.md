@@ -1,92 +1,78 @@
-# Production: Overview
+# 制作：概要
 
-CI/CD evals vs production monitoring - complementary approaches.
+CI/CD 評価と実稼働モニタリング - 補完的なアプローチ。
 
-## Two Evaluation Modes
+## 2 つの評価モード
 
-| Aspect | CI/CD Evals | Production Monitoring |
+|側面 | CI/CD 評価 |生産監視 |
 | ------ | ----------- | -------------------- |
-| **When** | Pre-deployment | Post-deployment, ongoing |
-| **Data** | Fixed dataset | Sampled traffic |
-| **Goal** | Prevent regression | Detect drift |
-| **Response** | Block deploy | Alert & analyze |
+| **いつ** |導入前 |導入後、進行中 |
+| **データ** |固定データセット |サンプリングされたトラフィック |
+| **目標** |回帰を防ぐ |ドリフトを検出 |
+| **応答** |デプロイをブロックする |アラートと分析 |
 
-## CI/CD Evaluations
-
-```python
-# Fast, deterministic checks
+## CI/CD の評価「」パイソン
+# 高速かつ決定的なチェック
 ci_evaluators = [
-    has_required_format,
-    no_pii_leak,
-    safety_check,
-    regression_test_suite,
-]
+    has_required_format、
+    no_pii_leak、
+    安全性チェック、
+    regression_test_suite、
+】
 
-# Small but representative dataset (~100 examples)
-run_experiment(ci_dataset, task, ci_evaluators)
-```
+# 小さいながらも代表的なデータセット (約 100 個の例)
+run_experiment(ci_dataset, タスク, ci_evaluators)
+「」しきい値を設定します: 回帰 = 0.95、安全性 = 1.0、形式 = 0.98。
 
-Set thresholds: regression=0.95, safety=1.0, format=0.98.
+## 生産監視
 
-## Production Monitoring
+### パイソン「」パイソン
+phoenix.clientインポートクライアントから
+from datetime import datetime、timedelta
 
-### Python
+client = クライアント()
 
-```python
-from phoenix.client import Client
-from datetime import datetime, timedelta
+# 最近のトレースのサンプル (過去 1 時間)
+トレース = client.traces.get_traces(
+    project_identifier="私のアプリ",
+    start_time=datetime.now() - timedelta(時間=1)、
+    include_spans=True、
+    制限=100、
+）
 
-client = Client()
+# サンプリングされたトラフィックに対してエバリュエーターを実行する
+トレース内のトレースの場合:
+    results = run_evaluators_async(trace,production_evaluators)
+    ある場合(r["score"] < 0.5 結果の r ):
+        alert_on_failure(トレース、結果)
+「」### TypeScript```タイプスクリプト
+import { getTraces } から "@arizeai/phoenix-client/traces";
+import { getSpans } から "@arizeai/phoenix-client/spans";
 
-# Sample recent traces (last hour)
-traces = client.traces.get_traces(
-    project_identifier="my-app",
-    start_time=datetime.now() - timedelta(hours=1),
-    include_spans=True,
-    limit=100,
-)
-
-# Run evaluators on sampled traffic
-for trace in traces:
-    results = run_evaluators_async(trace, production_evaluators)
-    if any(r["score"] < 0.5 for r in results):
-        alert_on_failure(trace, results)
-```
-
-### TypeScript
-
-```typescript
-import { getTraces } from "@arizeai/phoenix-client/traces";
-import { getSpans } from "@arizeai/phoenix-client/spans";
-
-// Sample recent traces (last hour)
-const { traces } = await getTraces({
-  project: { projectName: "my-app" },
-  startTime: new Date(Date.now() - 60 * 60 * 1000),
-  includeSpans: true,
-  limit: 100,
+// 最近のトレースのサンプル (過去 1 時間)
+const { トレース } = await getTraces({
+  プロジェクト: { プロジェクト名: "my-app" },
+  startTime: 新しい日付(Date.now() - 60 * 60 * 1000)、
+  includeSpans: true、
+  制限: 100、
 });
 
-// Or sample spans directly for evaluation
-const { spans } = await getSpans({
-  project: { projectName: "my-app" },
-  startTime: new Date(Date.now() - 60 * 60 * 1000),
-  limit: 100,
+// または、評価のために直接サンプル スパンを使用することもできます
+const { スパン } = await getSpans({
+  プロジェクト: { プロジェクト名: "my-app" },
+  startTime: 新しい日付(Date.now() - 60 * 60 * 1000)、
+  制限: 100、
 });
 
-// Run evaluators on sampled traffic
-for (const span of spans) {
-  const results = await runEvaluators(span, productionEvaluators);
+// サンプリングされたトラフィックに対してエバリュエーターを実行します
+for (スパンの定数スパン) {
+  const results = await runEvaluators(span,productionEvaluators);
   if (results.some((r) => r.score < 0.5)) {
-    await alertOnFailure(span, results);
+    awaitalertOnFailure(スパン, 結果);
   }
 }
-```
+「」優先順位付け: エラー → 負のフィードバック → ランダム サンプル。
 
-Prioritize: errors → negative feedback → random sample.
-
-## Feedback Loop
-
-```
-Production finds failure → Error analysis → Add to CI dataset → Prevents future regression
-```
+## フィードバック ループ「」
+本番環境で障害が検出される → エラー分析 → CI データセットに追加 → 将来の回帰を防止
+「」

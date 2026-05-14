@@ -1,24 +1,22 @@
-# FreeCAD Workbenches and Advanced Topics
+# FreeCAD ワークベンチと高度なトピック
 
-Reference guide for workbench creation, macros, FEM scripting, Path/CAM scripting, and advanced recipes.
+ワークベンチの作成、マクロ、FEM スクリプト、パス/CAM スクリプト、および高度なレシピに関するリファレンス ガイド。
 
-## Official Wiki References
+## 公式 Wiki リファレンス
 
-- [Workbench creation](https://wiki.freecad.org/Workbench_creation)
-- [Script tutorial](https://wiki.freecad.org/Scripts)
-- [Macros recipes](https://wiki.freecad.org/Macros_recipes)
-- [FEM scripting](https://wiki.freecad.org/FEM_Tutorial_Python)
-- [Path scripting](https://wiki.freecad.org/Path_scripting)
-- [Raytracing scripting](https://wiki.freecad.org/Raytracing_API_example)
-- [Svg namespace](https://wiki.freecad.org/Svg_Namespace)
+- [ワークベンチの作成](https://wiki.freecad.org/Workbench_creation)
+- [スクリプトチュートリアル](https://wiki.freecad.org/Scripts)
+- [マクロレシピ](https://wiki.freecad.org/Macros_recipes)
+- [FEM スクリプト](https://wiki.freecad.org/FEM_Tutorial_Python)
+- [パス スクリプティング](https://wiki.freecad.org/Path_scripting)
+- [レイトレーシング スクリプト](https://wiki.freecad.org/Raytracing_API_example)
+- [Svg 名前空間](https://wiki.freecad.org/Svg_Namespace)
 - [Python](https://wiki.freecad.org/Python)
 - [PythonOCC](https://wiki.freecad.org/PythonOCC)
 
-## Custom Workbench — Full Template
+## カスタム ワークベンチ — 完全なテンプレート
 
-### Directory Structure
-
-```
+### ディレクトリ構造```
 MyWorkbench/
 ├── __init__.py          # Empty or minimal
 ├── Init.py              # Runs at FreeCAD startup (no GUI)
@@ -30,21 +28,13 @@ MyWorkbench/
 │   │   └── MyCommand.svg
 │   └── translations/    # Optional i18n
 └── README.md
-```
-
-### Init.py
-
-```python
+```### Init.py```python
 # Runs at FreeCAD startup (before GUI)
 # Register importers/exporters, add module paths, etc.
 import FreeCAD
 FreeCAD.addImportType("My Format (*.myf)", "MyImporter")
 FreeCAD.addExportType("My Format (*.myf)", "MyExporter")
-```
-
-### InitGui.py
-
-```python
+```### InitGui.py```python
 import FreeCADGui
 
 class MyWorkbench(FreeCADGui.Workbench):
@@ -100,11 +90,7 @@ class MyWorkbench(FreeCADGui.Workbench):
         return "Gui::PythonWorkbench"
 
 FreeCADGui.addWorkbench(MyWorkbench)
-```
-
-### MyCommands.py
-
-```python
+```### MyCommands.py```python
 import FreeCAD
 import FreeCADGui
 import os
@@ -147,13 +133,9 @@ class CmdEditObject:
 # Register commands
 FreeCADGui.addCommand("My_CreateBox", CmdCreateBox())
 FreeCADGui.addCommand("My_EditObject", CmdEditObject())
-```
+```### ワークベンチのインストール
 
-### Installing a Workbench
-
-Place the workbench folder in one of:
-
-```python
+ワークベンチ フォルダーを次のいずれかに配置します。```python
 # User macro folder
 FreeCAD.getUserMacroDir(True)
 
@@ -162,11 +144,7 @@ os.path.join(FreeCAD.getUserAppDataDir(), "Mod")
 
 # System mod folder
 os.path.join(FreeCAD.getResourceDir(), "Mod")
-```
-
-## FEM Scripting
-
-```python
+```## FEM スクリプト作成```python
 import FreeCAD
 import ObjectsFem
 import Fem
@@ -224,11 +202,7 @@ fea.setup_ccx()
 fea.write_inp_file()
 fea.ccx_run()
 fea.load_results()
-```
-
-## Path/CAM Scripting
-
-```python
+```## パス/CAM スクリプト```python
 import Path
 import FreeCAD
 
@@ -251,23 +225,15 @@ path_obj.Path = path
 # G-code output
 gcode = path.toGCode()
 print(gcode)
-```
+```## 一般的なレシピ
 
-## Common Recipes
-
-### Mirror a Shape
-
-```python
+### シェイプをミラーリングする```python
 import Part
 import FreeCAD
 shape = obj.Shape
 mirrored = shape.mirror(FreeCAD.Vector(0,0,0), FreeCAD.Vector(1,0,0))  # mirror about YZ
 Part.show(mirrored, "Mirrored")
-```
-
-### Array of Shapes
-
-```python
+```### 形状の配列```python
 import Part
 import FreeCAD
 
@@ -284,11 +250,7 @@ def linear_array(shape, direction, count, spacing):
 
 result = linear_array(obj.Shape, FreeCAD.Vector(1,0,0), 5, 15.0)
 Part.show(result, "Array")
-```
-
-### Circular/Polar Array
-
-```python
+```### 円形/極配列```python
 import Part
 import FreeCAD
 import math
@@ -307,31 +269,19 @@ def polar_array(shape, axis, center, count):
 
 result = polar_array(obj.Shape, FreeCAD.Vector(0,0,1), FreeCAD.Vector(0,0,0), 8)
 Part.show(result, "PolarArray")
-```
-
-### Measure Distance Between Shapes
-
-```python
+```### 図形間の距離を測定する```python
 dist = shape1.distToShape(shape2)
 # Returns: (min_distance, [(point_on_shape1, point_on_shape2), ...], ...)
 min_dist = dist[0]
 closest_points = dist[1]  # List of (Vector, Vector) pairs
-```
-
-### Create a Tube/Pipe
-
-```python
+```### チューブ/パイプを作成する```python
 import Part
 
 outer_cyl = Part.makeCylinder(outer_radius, height)
 inner_cyl = Part.makeCylinder(inner_radius, height)
 tube = outer_cyl.cut(inner_cyl)
 Part.show(tube, "Tube")
-```
-
-### Assign Color to Faces
-
-```python
+```### 面に色を割り当てる```python
 # Set per-face colors
 obj.ViewObject.DiffuseColor = [
     (1.0, 0.0, 0.0, 0.0),   # Face1 = red
@@ -342,11 +292,7 @@ obj.ViewObject.DiffuseColor = [
 
 # Or set single color for whole object
 obj.ViewObject.ShapeColor = (0.8, 0.2, 0.2)
-```
-
-### Batch Export All Objects
-
-```python
+```### すべてのオブジェクトを一括エクスポート```python
 import FreeCAD
 import Part
 import os
@@ -364,11 +310,7 @@ else:
             filepath = os.path.join(export_dir, f"{obj.Name}.step")
             Part.export([obj], filepath)
             FreeCAD.Console.PrintMessage(f"Exported {filepath}\n")
-```
-
-### Timer / Progress Bar
-
-```python
+```### タイマー / プログレスバー```python
 from PySide2 import QtWidgets, QtCore
 
 # Simple progress dialog
@@ -382,11 +324,7 @@ for i in range(total_steps):
     progress.setValue(i)
 
 progress.setValue(total_steps)
-```
-
-### Run a Macro Programmatically
-
-```python
+```### プログラムでマクロを実行する```python
 import FreeCADGui
 import runpy
 

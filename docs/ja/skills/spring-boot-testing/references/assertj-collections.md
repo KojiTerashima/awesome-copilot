@@ -1,17 +1,15 @@
-# AssertJ Collections
+# AssertJ コレクション
 
-AssertJ assertions for collections: `List`, `Set`, `Map`, arrays, and streams.
+コレクションの AssertJ アサーション: `List`、`Set`、`Map`、配列、およびストリーム。
 
-## When to Use This Reference
+## このリファレンスを使用する場合
 
-- The value under test is a `List`, `Set`, `Map`, array, or `Stream`
-- You need to assert on multiple elements, their order, or specific fields within them
-- You are using `extracting()`, `filteredOn()`, `containsExactly()`, or similar collection methods
-- Asserting a single scalar or single object → use [assertj-basics.md](assertj-basics.md) instead
+- テスト対象の値が `List`、`Set`、`Map`、配列、または `Stream` である
+- 複数の要素、その順序、またはその中の特定のフィールドをアサートする必要がある
+- `extracting()`、`filteredOn()`、`containsExactly()`、または同様の収集方法を使用している
+- 単一のスカラーまたは単一のオブジェクトをアサート → 代わりに [assertj-basics.md](assertj-basics.md) を使用してください
 
-## Basic Collection Checks
-
-```java
+## 基本的なコレクション チェック```java
 List<Order> orders = orderService.findAll();
 
 assertThat(orders).isNotEmpty();
@@ -19,11 +17,7 @@ assertThat(orders).isEmpty();
 assertThat(orders).hasSize(3);
 assertThat(orders).hasSizeGreaterThan(0);
 assertThat(orders).hasSizeLessThanOrEqualTo(10);
-```
-
-## Containment Assertions
-
-```java
+```## 封じ込めアサーション```java
 // Contains (any order, allows extras)
 assertThat(orders).contains(order1, order2);
 
@@ -38,21 +32,13 @@ assertThat(statuses).containsAnyOf("NEW", "CANCELLED");
 
 // Does not contain
 assertThat(statuses).doesNotContain("DELETED");
-```
+```## フィールドの抽出
 
-## Extracting Fields
-
-Extract a single field from each element before asserting:
-
-```java
+アサートする前に、各要素から 1 つのフィールドを抽出します。```java
 assertThat(orders)
   .extracting(Order::getStatus)
   .containsExactly("NEW", "PENDING", "COMPLETED");
-```
-
-Extract multiple fields as tuples:
-
-```java
+```複数のフィールドをタプルとして抽出します。```java
 assertThat(orders)
   .extracting(Order::getId, Order::getStatus)
   .containsExactly(
@@ -60,11 +46,7 @@ assertThat(orders)
     tuple(2L, "PENDING"),
     tuple(3L, "COMPLETED")
   );
-```
-
-## Filtering Before Asserting
-
-```java
+```## アサート前のフィルタリング```java
 assertThat(orders)
   .filteredOn(order -> order.getStatus().equals("PENDING"))
   .hasSize(2)
@@ -75,11 +57,7 @@ assertThat(orders)
 assertThat(orders)
   .filteredOn("status", "PENDING")
   .hasSize(2);
-```
-
-## Predicate Checks
-
-```java
+```## 述語チェック```java
 assertThat(orders).allMatch(o -> o.getTotal().compareTo(BigDecimal.ZERO) > 0);
 assertThat(orders).anyMatch(o -> o.getStatus().equals("COMPLETED"));
 assertThat(orders).noneMatch(o -> o.getStatus().equals("DELETED"));
@@ -87,13 +65,9 @@ assertThat(orders).noneMatch(o -> o.getStatus().equals("DELETED"));
 // With description for failure messages
 assertThat(orders)
   .allSatisfy(o -> assertThat(o.getId()).isPositive());
-```
+```## 要素ごとに順序付けされたアサーション
 
-## Per-Element Ordered Assertions
-
-Assert each element in order with individual conditions:
-
-```java
+各要素を個別の条件で順番にアサートします。```java
 assertThat(orders).satisfiesExactly(
   first  -> assertThat(first.getStatus()).isEqualTo("NEW"),
   second -> assertThat(second.getStatus()).isEqualTo("PENDING"),
@@ -102,23 +76,15 @@ assertThat(orders).satisfiesExactly(
     assertThat(third.getTotal()).isGreaterThan(BigDecimal.ZERO);
   }
 );
-```
-
-## Nested / Flat Collections
-
-```java
+```## ネストされた/フラットなコレクション```java
 // flatExtracting: flatten one level of nested collections
 assertThat(orders)
   .flatExtracting(Order::getItems)
   .extracting(OrderItem::getProduct)
   .contains("Laptop", "Mouse");
-```
+```## 再帰的なフィールドの比較
 
-## Recursive Field Comparison
-
-Compare elements by fields instead of object identity:
-
-```java
+オブジェクト ID ではなくフィールドによって要素を比較します。```java
 assertThat(orders)
   .usingRecursiveFieldByFieldElementComparator()
   .containsExactlyInAnyOrder(expectedOrder1, expectedOrder2);
@@ -127,11 +93,7 @@ assertThat(orders)
 assertThat(orders)
   .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id", "createdAt")
   .containsExactly(expectedOrder1, expectedOrder2);
-```
-
-## Map Assertions
-
-```java
+```## マップアサーション```java
 Map<String, Integer> stockByProduct = inventoryService.getStock();
 
 assertThat(stockByProduct)
@@ -144,40 +106,26 @@ assertThat(stockByProduct)
 
 assertThat(stockByProduct)
   .hasEntrySatisfying("Laptop", qty -> assertThat(qty).isGreaterThan(0));
-```
-
-## Array Assertions
-
-```java
+```## 配列アサーション```java
 String[] roles = user.getRoles();
 
 assertThat(roles).hasSize(2);
 assertThat(roles).contains("ADMIN");
 assertThat(roles).containsExactlyInAnyOrder("USER", "ADMIN");
-```
-
-## Set Assertions
-
-```java
+```## アサーションを設定する```java
 Set<String> tags = product.getTags();
 
 assertThat(tags).contains("electronics", "sale");
 assertThat(tags).doesNotContain("expired");
 assertThat(tags).hasSizeGreaterThanOrEqualTo(1);
-```
-
-## Static Import
-
-```java
+```## 静的インポート```java
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.Assertions.entry;
-```
+```## 重要なポイント
 
-## Key Points
-
-1. **`containsExactly` vs `containsExactlyInAnyOrder`** — use the former when order matters
-2. **`extracting()` before containment checks** — avoids implementing `equals()` on domain objects
-3. **`filteredOn()` + `extracting()`** — compose to assert a subset of a collection precisely
-4. **`satisfiesExactly()`** — use when each element needs different assertions
-5. **`usingRecursiveFieldByFieldElementComparator()`** — preferred over `equals()` for DTOs and records
+1. **`containsExactly` vs `containsExactlyInAnyOrder`** — 順序が重要な場合は前者を使用します
+2. **`extracting()` 包含チェックの前** — ドメイン オブジェクトへの `equals()` の実装を回避します
+3. **`filteredOn()` + `extracting()`** — コレクションのサブセットを正確にアサートするように構成します
+4. **`satisfiesExactly()`** — 各要素が異なるアサーションを必要とする場合に使用します
+5. **`usingRecursiveFieldByFieldElementComparator()`** — DTO およびレコードでは `equals()` よりも優先されます

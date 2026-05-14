@@ -6,19 +6,18 @@ allowed-tools:
   - Grep
   - Glob
 ---
+# Qdrant の検索品質
 
-# Qdrant Search Quality
+まず、問題が埋め込みモデルにあるのか、Qdrant 構成にあるのか、クエリ戦略にあるのかを判断します。ほとんどの品質問題は、Qdrant 自体ではなく、モデルまたはデータに起因します。検索品質が低い場合は、パラメーターを調整する前に、チャンクがどのように Qdrant に渡されるかを検査してください。文の途中で分割すると、品質が 30 ～ 40% 低下する可能性があります。
 
-First determine whether the problem is the embedding model, Qdrant configuration, or the query strategy. Most quality issues come from the model or data, not from Qdrant itself. If search quality is low, inspect how chunks are being passed to Qdrant before tuning any parameters. Splitting mid-sentence can drop quality 30-40%.
-
-- Start by testing with exact search to isolate the problem [Search API](https://search.qdrant.tech/md/documentation/search/search/?s=search-api)
-
-
-## Diagnosis and Tuning
-
-Isolate the source of quality issues, tune HNSW parameters, and choose the right embedding model. [Diagnosis and Tuning](diagnosis/SKILL.md)
+- 問題を切り分けるために完全一致検索でテストすることから始めます [検索 API](https://search.qdrant.tech/md/documentation/search/search/?s=search-api)
 
 
-## Search Strategies
+## 診断とチューニング
 
-Hybrid search, reranking, relevance feedback, and exploration APIs for improving result quality. [Search Strategies](search-strategies/SKILL.md)
+品質問題の原因を特定し、HNSW パラメータを調整し、適切な埋め込みモデルを選択します。 [診断とチューニング](diagnosis/SKILL.md)
+
+
+## 検索戦略
+
+結果の品質を向上させるためのハイブリッド検索、再ランキング、関連性フィードバック、探索 API。 [検索戦略](search-strategies/SKILL.md)

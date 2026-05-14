@@ -1,155 +1,121 @@
-# componentWillMount Migration Reference
+#componentWillMount 移行リファレンス
 
-## Case A - Initializes State {#case-a}
+## ケース A - 状態を初期化します {#case-a}
 
-The method only calls `this.setState()` with static or computed values that do not depend on async operations.
+このメソッドは、非同期操作に依存しない静的値または計算値を使用して `this.setState()` のみを呼び出します。
 
-**Before:**
-
-```jsx
+**前に：**```jsx
 class UserList extends React.Component {
-  componentWillMount() {
-    this.setState({ items: [], loading: false, page: 1 });
+  コンポーネントウィルマウント() {
+    this.setState({ 項目: []、読み込み: false、ページ: 1 });
   }
   render() { ... }
 }
-```
-
-**After - move to constructor:**
-
-```jsx
+「」**後 - コンストラクターに移動:**```jsx
 class UserList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { items: [], loading: false, page: 1 };
+  コンストラクター(小道具) {
+    スーパー(小道具);
+    this.state = { 項目: []、読み込み: false、ページ: 1 };
   }
   render() { ... }
 }
-```
-
-**If constructor already exists**, merge the state:
-
-```jsx
+「」**コンストラクターが既に存在する場合**、状態をマージします。```jsx
 class UserList extends React.Component {
-  constructor(props) {
-    super(props);
-    // Existing state merged with componentWillMount state:
+  コンストラクター(小道具) {
+    スーパー(小道具);
+    // 既存の状態は、componentWillMount 状態とマージされます。
     this.state = {
-      ...this.existingState,  // whatever was already here
-      items: [],
-      loading: false,
-      page: 1,
+      ...this.existingState, // すでにここにあるものは何でも
+      アイテム: []、
+      ロード: false、
+      ページ: 1、
     };
   }
 }
-```
+「」---
 
----
+## ケース B - 副作用が発生する {#case-b}
 
-## Case B - Runs a Side Effect {#case-b}
+このメソッドは、データのフェッチ、サブスクリプションのセットアップ、外部 API との対話、または DOM の操作を行います。
 
-The method fetches data, sets up subscriptions, interacts with external APIs, or touches the DOM.
-
-**Before:**
-
-```jsx
+**前に：**```jsx
 class UserDashboard extends React.Component {
-  componentWillMount() {
+  コンポーネントウィルマウント() {
     this.subscription = this.props.eventBus.subscribe(this.handleEvent);
-    fetch(`/api/users/${this.props.userId}`)
+    フェッチ(`/api/users/${this.props.userId}`)
       .then(r => r.json())
-      .then(user => this.setState({ user, loading: false }));
-    this.setState({ loading: true });
+      .then(user => this.setState({ user,loading: false }));
+    this.setState({読み込み中: true });
   }
 }
-```
-
-**After - move to componentDidMount:**
-
-```jsx
+「」**後 - コンポーネントDidMountに移動:**```jsx
 class UserDashboard extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { loading: true, user: null }; // initial state here
+  コンストラクター(小道具) {
+    スーパー(小道具);
+    this.state = { 読み込み中: true、ユーザー: null }; // ここでの初期状態
   }
 
-  componentDidMount() {
-    // All side effects move here - runs after first render
+  コンポーネントDidMount() {
+    // すべての副作用はここに移動します - 最初のレンダリング後に実行されます
     this.subscription = this.props.eventBus.subscribe(this.handleEvent);
-    fetch(`/api/users/${this.props.userId}`)
+    フェッチ(`/api/users/${this.props.userId}`)
       .then(r => r.json())
-      .then(user => this.setState({ user, loading: false }));
+      .then(user => this.setState({ user,loading: false }));
   }
 
-  componentWillUnmount() {
-    // Always pair subscriptions with cleanup
+  コンポーネントウィルアンマウント() {
+    // サブスクリプションとクリーンアップを常に組み合わせます
     this.subscription?.unsubscribe();
   }
 }
-```
-
-**Why this is safe:** In React 18 concurrent mode, `componentWillMount` can be called multiple times before mounting. Side effects inside it can fire multiple times. `componentDidMount` is guaranteed to fire exactly once after mount.
+「」**これが安全な理由:** React 18 同時モードでは、マウントする前に `componentWillMount` を複数回呼び出すことができます。内部の副作用は複数回発生する可能性があります。 `componentDidMount` は、マウント後に 1 回だけ起動することが保証されています。
 
 ---
 
-## Case C - Derives Initial State from Props {#case-c}
+## ケース C - 小道具から初期状態を導出する {#case-c}
 
-The method reads `this.props` to compute an initial state value.
+このメソッドは `this.props` を読み取り、初期状態値を計算します。
 
-**Before:**
-
-```jsx
+**前に：**```jsx
 class PriceDisplay extends React.Component {
-  componentWillMount() {
+  コンポーネントウィルマウント() {
     this.setState({
-      formattedPrice: `$${this.props.price.toFixed(2)}`,
+      フォーマット済み価格: `$${this.props.price.toFixed(2)}`、
       isDiscount: this.props.price < this.props.originalPrice,
     });
   }
 }
-```
-
-**After - constructor with props:**
-
-```jsx
+「」**後 - 小道具を備えたコンストラクター:**```jsx
 class PriceDisplay extends React.Component {
-  constructor(props) {
-    super(props);
+  コンストラクター(小道具) {
+    スーパー(小道具);
     this.state = {
-      formattedPrice: `$${props.price.toFixed(2)}`,
-      isDiscount: props.price < props.originalPrice,
+      フォーマット済み価格: `$${props.price.toFixed(2)}`、
+      isDiscount: props.price < props.originalPrice、
     };
   }
 }
-```
-
-**Note:** If this initial state needs to UPDATE when props change later, that's a `getDerivedStateFromProps` case - see `componentWillReceiveProps.md` Case B.
+「」**注意:** プロパティが後で変更されたときにこの初期状態を更新する必要がある場合、それは `getDerivedStateFromProps` のケースです - `componentWillReceiveProps.md` ケース B を参照してください。
 
 ---
 
-## Multiple Patterns in One Method
+## 1 つのメソッドで複数のパターンを使用
 
-If a single `componentWillMount` does both state init AND side effects:
-
-```jsx
-// Mixed - state init + fetch
-componentWillMount() {
-  this.setState({ loading: true, items: [] });              // Case A
-  fetch('/api/items').then(r => r.json())                   // Case B
-    .then(items => this.setState({ items, loading: false }));
+単一の `componentWillMount` が状態の初期化と副作用の両方を行う場合:```jsx
+// 混合 - 状態の初期化 + フェッチ
+コンポーネントウィルマウント() {
+  this.setState({ 読み込み: true、項目: [] });              // ケースA
+  fetch('/api/items').then(r => r.json()) // ケース B
+    .then(items => this.setState({ items, 読み込み中: false }));
 }
-```
-
-Split them:
-
-```jsx
-constructor(props) {
-  super(props);
-  this.state = { loading: true, items: [] }; // Case A → constructor
+「」それらを分割します。```jsx
+コンストラクター(小道具) {
+  スーパー(小道具);
+  this.state = { 読み込み中: true、項目: [] }; // ケースA → コンストラクター
 }
 
-componentDidMount() {
-  fetch('/api/items').then(r => r.json())    // Case B → componentDidMount
-    .then(items => this.setState({ items, loading: false }));
+コンポーネントDidMount() {
+  fetch('/api/items').then(r => r.json()) // ケース B →ComponentDidMount
+    .then(items => this.setState({ items, 読み込み中: false }));
 }
-```
+「」

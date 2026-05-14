@@ -2,35 +2,32 @@
 name: freecad-scripts
 description: 'Expert skill for writing FreeCAD Python scripts, macros, and automation. Use when asked to create FreeCAD models, parametric objects, Part/Mesh/Sketcher scripts, workbench tools, GUI dialogs with PySide, Coin3D scenegraph manipulation, or any FreeCAD Python API task. Covers FreeCAD scripting basics, geometry creation, FeaturePython objects, interface tools, and macro development.'
 ---
+# FreeCAD スクリプト
 
-# FreeCAD Scripts
+FreeCAD CAD アプリケーション用の製品品質の Python スクリプトを生成するための専門スキル。 3D モデリング タスクの短縮表現、準コード、および自然言語の説明を解釈し、それらを正しい FreeCAD Python API 呼び出しに変換します。
 
-Expert skill for generating production-quality Python scripts for the FreeCAD CAD application. Interprets shorthand, quasi-code, and natural language descriptions of 3D modeling tasks and translates them into correct FreeCAD Python API calls.
+## このスキルを使用する場合
 
-## When to Use This Skill
+- FreeCAD の組み込みコンソールまたはマクロ システム用の Python スクリプトの作成
+- 3D ジオメトリの作成または操作 (パーツ、メッシュ、スケッチャー、パス、FEM)
+- カスタム プロパティを使用してパラメトリックな FeaturePython オブジェクトを構築する
+- FreeCAD 内で PySide/Qt を使用した GUI ツールの開発
+- Pivy 経由で Coin3D シーングラフを操作する
+- カスタムワークベンチまたはGuiコマンドの作成
+- 繰り返しのCAD操作をマクロで自動化
+- メッシュ表現とソリッド表現の間の変換
+- FEM 解析、レイトレーシング、または図面のエクスポートのスクリプト作成
 
-- Writing Python scripts for FreeCAD's built-in console or macro system
-- Creating or manipulating 3D geometry (Part, Mesh, Sketcher, Path, FEM)
-- Building parametric FeaturePython objects with custom properties
-- Developing GUI tools using PySide/Qt within FreeCAD
-- Manipulating the Coin3D scenegraph via Pivy
-- Creating custom workbenches or Gui Commands
-- Automating repetitive CAD operations with macros
-- Converting between mesh and solid representations
-- Scripting FEM analyses, raytracing, or drawing exports
+## 前提条件
 
-## Prerequisites
+- FreeCAD がインストールされている (0.19 以降を推奨、最新 API の場合は 0.21 以降/1.0 以降)
+- Python 3.x (FreeCAD にバンドルされている)
+- GUI 作業の場合: PySide2 (FreeCAD にバンドルされている)
+- シーングラフの場合: Pivy (FreeCAD にバンドルされている)
 
-- FreeCAD installed (0.19+ recommended; 0.21+/1.0+ for latest API)
-- Python 3.x (bundled with FreeCAD)
-- For GUI work: PySide2 (bundled with FreeCAD)
-- For scenegraph: Pivy (bundled with FreeCAD)
+## FreeCAD Python 環境
 
-## FreeCAD Python Environment
-
-FreeCAD embeds a Python interpreter. Scripts run in an environment where these key modules are available:
-
-```python
+FreeCAD には Python インタープリターが組み込まれています。スクリプトは、次の主要モジュールが利用可能な環境で実行されます。```python
 import FreeCAD          # Core module (also aliased as 'App')
 import FreeCADGui       # GUI module (also aliased as 'Gui') — only in GUI mode
 import Part             # Part workbench — BRep/OpenCASCADE shapes
@@ -43,11 +40,7 @@ import FEM              # FEM workbench
 import TechDraw         # TechDraw workbench (replaces Drawing)
 import BOPTools         # Boolean operations
 import CompoundTools    # Compound shape utilities
-```
-
-### The FreeCAD Document Model
-
-```python
+```### FreeCAD ドキュメント モデル```python
 # Create or access a document
 doc = FreeCAD.newDocument("MyDoc")
 doc = FreeCAD.ActiveDocument
@@ -67,13 +60,9 @@ obj = doc.MyBox  # Attribute access also works
 
 # Remove objects
 doc.removeObject("MyBox")
-```
+```## コアコンセプト
 
-## Core Concepts
-
-### Vectors and Placements
-
-```python
+### ベクトルと配置```python
 import FreeCAD
 
 # Vectors
@@ -103,13 +92,9 @@ import math
 mat = FreeCAD.Matrix()
 mat.move(FreeCAD.Vector(10, 0, 0))
 mat.rotateZ(math.radians(45))
-```
+```### ジオメトリの作成と操作 (パーツ モジュール)
 
-### Creating and Manipulating Geometry (Part Module)
-
-The Part module wraps OpenCASCADE and provides BRep solid modeling:
-
-```python
+Part モジュールは OpenCASCADE をラップし、BRep ソリッド モデリングを提供します。```python
 import FreeCAD
 import Part
 
@@ -168,11 +153,7 @@ doc = FreeCAD.ActiveDocument or FreeCAD.newDocument()
 obj = doc.addObject("Part::Feature", "MyShape")
 obj.Shape = box
 doc.recompute()
-```
-
-### Topological Exploration
-
-```python
+```### トポロジカル探索```python
 shape = obj.Shape
 
 # Access sub-elements
@@ -197,11 +178,7 @@ edge.Curve         # Underlying geometric curve
 
 # Shape type
 shape.ShapeType    # "Solid", "Shell", "Face", "Wire", "Edge", "Vertex", "Compound"
-```
-
-### Mesh Module
-
-```python
+```### メッシュモジュール```python
 import Mesh
 
 # Create mesh from vertices and facets
@@ -227,126 +204,121 @@ mesh = MeshPart.meshFromShape(Shape=shape, LinearDeflection=0.1,
 shape = Part.Shape()
 shape.makeShapeFromMesh(mesh.Topology, 0.05)  # tolerance
 solid = Part.makeSolid(shape)
-```
+```### スケッチャーモジュール
 
-### Sketcher Module
-
-# Create a sketch on XY plane
-sketch = doc.addObject("Sketcher::SketchObject", "MySketch")
-sketch.Placement = FreeCAD.Placement(
+# XY平面上にスケッチを作成
+スケッチ = doc.addObject("スケッチャー::スケッチオブジェクト", "MySketch")
+スケッチ.配置 = FreeCAD.配置(
     FreeCAD.Vector(0, 0, 0),
     FreeCAD.Rotation(0, 0, 0, 1)
-)
+）
 
-# Add geometry (returns geometry index)
-idx_line = sketch.addGeometry(Part.LineSegment(
+# ジオメトリを追加 (ジオメトリ インデックスを返します)
+idx_line =sketch.addGeometry(Part.LineSegment(
     FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(10, 0, 0)))
-idx_circle = sketch.addGeometry(Part.Circle(
-    FreeCAD.Vector(5, 5, 0), FreeCAD.Vector(0, 0, 1), 3))
+idx_circle =sketch.addGeometry(Part.Circle(
+    FreeCAD.Vector(5, 5, 0)、FreeCAD.Vector(0, 0, 1), 3))
 
-# Add constraints
-sketch.addConstraint(Sketcher.Constraint("Coincident", 0, 2, 1, 1))
-sketch.addConstraint(Sketcher.Constraint("Horizontal", 0))
-sketch.addConstraint(Sketcher.Constraint("DistanceX", 0, 1, 0, 2, 10.0))
-sketch.addConstraint(Sketcher.Constraint("Radius", 1, 3.0))
-sketch.addConstraint(Sketcher.Constraint("Fixed", 0, 1))
-# Constraint types: Coincident, Horizontal, Vertical, Parallel, Perpendicular,
-#   Tangent, Equal, Symmetric, Distance, DistanceX, DistanceY, Radius, Angle,
-#   Fixed (Block), InternalAlignment
+# 制約を追加する
+sketch.addConstraint(Sketcher.Constraint("一致", 0, 2, 1, 1))
+スケッチ.addConstraint(Sketcher.Constraint("水平", 0))
+スケッチ.addConstraint(Sketcher.Constraint("距離X", 0, 1, 0, 2, 10.0))
+sketch.addConstraint(Sketcher.Constraint("半径", 1, 3.0))
+sketch.addConstraint(Sketcher.Constraint("固定", 0, 1))
+# 拘束タイプ: 一致、水平、垂直、平行、垂直、
+# 接線、等価、対称、距離、距離X、距離Y、半径、角度、
+# 固定 (ブロック)、InternalAlignment
 
-doc.recompute()
-```
+doc.recompute()```
 
 ### Draft Module
 
-```python
-import Draft
-import FreeCAD
+```パイソン
+ドラフトをインポート
+FreeCAD をインポートする
 
-# 2D shapes
+# 2D 形状
 line = Draft.makeLine(FreeCAD.Vector(0,0,0), FreeCAD.Vector(10,0,0))
-circle = Draft.makeCircle(5)
+サークル = Draft.makeCircle(5)
 rect = Draft.makeRectangle(10, 5)
-poly = Draft.makePolygon(6, radius=5)   # hexagon
+ポリ = Draft.makePolygon(6, radius=5) # 六角形
 
-# Operations
-moved = Draft.move(obj, FreeCAD.Vector(10, 0, 0), copy=True)
-rotated = Draft.rotate(obj, 45, FreeCAD.Vector(0,0,0),
-                        axis=FreeCAD.Vector(0,0,1), copy=True)
-scaled = Draft.scale(obj, FreeCAD.Vector(2,2,2), center=FreeCAD.Vector(0,0,0),
-                      copy=True)
+# 操作
+移動 = Draft.move(obj, FreeCAD.Vector(10, 0, 0), copy=True)
+回転 = Draft.rotate(obj, 45, FreeCAD.Vector(0,0,0),
+                        軸=FreeCAD.Vector(0,0,1)、コピー=True)
+スケール = Draft.scale(obj, FreeCAD.Vector(2,2,2), center=FreeCAD.Vector(0,0,0),
+                      コピー=真)
 offset = Draft.offset(obj, FreeCAD.Vector(1,0,0))
-array = Draft.makeArray(obj, FreeCAD.Vector(15,0,0),
-                         FreeCAD.Vector(0,15,0), 3, 3)
-```
+配列 = Draft.makeArray(obj, FreeCAD.Vector(15,0,0),
+                         FreeCAD.Vector(0,15,0), 3, 3)```
 
 ## Creating Parametric Objects (FeaturePython)
 
 FeaturePython objects are custom parametric objects with properties that trigger recomputation:
 
-```python
-import FreeCAD
-import Part
+```パイソン
+FreeCAD をインポートする
+パーツのインポート
 
-class MyBox:
-    """A custom parametric box."""
+クラスMyBox:
+    """カスタムパラメトリックボックス。"""
 
     def __init__(self, obj):
-        obj.Proxy = self
-        obj.addProperty("App::PropertyLength", "Length", "Dimensions",
-                         "Box length").Length = 10.0
-        obj.addProperty("App::PropertyLength", "Width", "Dimensions",
-                         "Box width").Width = 10.0
-        obj.addProperty("App::PropertyLength", "Height", "Dimensions",
-                         "Box height").Height = 10.0
+        obj.Proxy = 自己
+        obj.addProperty("App::PropertyLength", "長さ", "寸法",
+                         "ボックスの長さ").長さ = 10.0
+        obj.addProperty("App::PropertyLength", "幅", "寸法",
+                         "ボックスの幅").Width = 10.0
+        obj.addProperty("App::PropertyLength", "高さ", "寸法",
+                         "ボックスの高さ").高さ = 10.0
 
-    def execute(self, obj):
-        """Called on document recompute."""
+    def 実行(self, obj):
+        """ドキュメントの再計算時に呼び出されます。"""
         obj.Shape = Part.makeBox(obj.Length, obj.Width, obj.Height)
 
     def onChanged(self, obj, prop):
-        """Called when a property changes."""
-        pass
+        """プロパティが変更されると呼び出されます。"""
+        パスする
 
     def __getstate__(self):
-        return None
+        なしを返す
 
     def __setstate__(self, state):
-        return None
+        なしを返す
 
 
-class ViewProviderMyBox:
-    """View provider for custom icon and display settings."""
+クラス ViewProviderMyBox:
+    """カスタム アイコンと表示設定のプロバイダーを表示します。"""
 
     def __init__(self, vobj):
-        vobj.Proxy = self
+        vobj.Proxy = 自己
 
     def getIcon(self):
-        return ":/icons/Part_Box.svg"
+        ":/icons/Part_Box.svg" を返します
 
-    def attach(self, vobj):
-        self.Object = vobj.Object
+    defattach(self, vobj):
+        self.オブジェクト = vobj.オブジェクト
 
     def updateData(self, obj, prop):
-        pass
+        パスする
 
     def onChanged(self, vobj, prop):
-        pass
+        パスする
 
     def __getstate__(self):
-        return None
+        なしを返す
 
     def __setstate__(self, state):
-        return None
+        なしを返す
 
 
-# --- Usage ---
-doc = FreeCAD.ActiveDocument or FreeCAD.newDocument("Test")
+# --- 使用法 ---
+doc = FreeCAD.ActiveDocument または FreeCAD.newDocument("Test")
 obj = doc.addObject("Part::FeaturePython", "CustomBox")
-MyBox(obj)
+MyBox(オブジェクト)
 ViewProviderMyBox(obj.ViewObject)
-doc.recompute()
-```
+doc.recompute()```
 
 ### Common Property Types
 
@@ -371,319 +343,309 @@ doc.recompute()
 
 ### Gui Commands
 
-```python
-import FreeCAD
-import FreeCADGui
+```パイソン
+FreeCAD をインポートする
+FreeCADGui をインポートする
 
-class MyCommand:
-    """A custom toolbar/menu command."""
+クラスMyCommand:
+    """カスタム ツールバー/メニュー コマンド。"""
 
     def GetResources(self):
-        return {
-            "Pixmap": ":/icons/Part_Box.svg",
-            "MenuText": "My Custom Command",
-            "ToolTip": "Creates a custom box",
-            "Accel": "Ctrl+Shift+B"
+        戻り値 {
+            "ピックスマップ": ":/icons/Part_Box.svg",
+            "MenuText": "私のカスタム コマンド",
+            "ツールチップ": "カスタム ボックスを作成します",
+            「アクセル」：「Ctrl+Shift+B」
         }
 
     def IsActive(self):
-        return FreeCAD.ActiveDocument is not None
+        FreeCAD.ActiveDocument が None ではないことを返します
 
-    def Activated(self):
-        # Command logic here
-        FreeCAD.Console.PrintMessage("Command activated\n")
+    def Activated(自身):
+        # コマンドロジックはここにあります
+        FreeCAD.Console.PrintMessage("コマンドがアクティブになりました\n")
 
-FreeCADGui.addCommand("My_CustomCommand", MyCommand())
-```
+FreeCADGui.addCommand("My_CustomCommand", MyCommand())```
 
 ### PySide Dialogs
 
-```python
-from PySide2 import QtWidgets, QtCore, QtGui
+```パイソン
+PySide2 から QtWidgets、QtCore、QtGui をインポート
 
-class MyDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent or FreeCADGui.getMainWindow())
-        self.setWindowTitle("My Tool")
+クラスMyDialog(QtWidgets.QDialog):
+    def __init__(self,parent=None):
+        super().__init__(親またはFreeCADGui.getMainWindow())
+        self.setWindowTitle("マイツール")
         self.setMinimumWidth(300)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        レイアウト = QtWidgets.QVBoxLayout(self)
 
-        # Input fields
-        self.label = QtWidgets.QLabel("Length:")
+        # 入力フィールド
+        self.label = QtWidgets.QLabel("長さ:")
         self.spinbox = QtWidgets.QDoubleSpinBox()
         self.spinbox.setRange(0.1, 1000.0)
         self.spinbox.setValue(10.0)
         self.spinbox.setSuffix(" mm")
 
-        form = QtWidgets.QFormLayout()
+        フォーム = QtWidgets.QFormLayout()
         form.addRow(self.label, self.spinbox)
-        layout.addLayout(form)
+        レイアウト.addLayout(フォーム)
 
-        # Buttons
+        # ボタン
         btn_layout = QtWidgets.QHBoxLayout()
         self.btn_ok = QtWidgets.QPushButton("OK")
-        self.btn_cancel = QtWidgets.QPushButton("Cancel")
+        self.btn_cancel = QtWidgets.QPushButton("キャンセル")
         btn_layout.addWidget(self.btn_ok)
         btn_layout.addWidget(self.btn_cancel)
-        layout.addLayout(btn_layout)
+        レイアウト.addLayout(btn_layout)
 
         self.btn_ok.clicked.connect(self.accept)
         self.btn_cancel.clicked.connect(self.reject)
 
-# Usage
-dialog = MyDialog()
-if dialog.exec_() == QtWidgets.QDialog.Accepted:
-    length = dialog.spinbox.value()
-    FreeCAD.Console.PrintMessage(f"Length: {length}\n")
-```
+# 使用法
+ダイアログ = MyDialog()
+if Dialog.exec_() == QtWidgets.QDialog.Accepted:
+    長さ = ダイアログ.スピンボックス.値()
+    FreeCAD.Console.PrintMessage(f"長さ: {長さ}\n")```
 
 ### Task Panel (Recommended for FreeCAD integration)
 
-```python
-class MyTaskPanel:
-    """Task panel shown in the left sidebar."""
+```パイソン
+クラスMyTaskPanel:
+    """タスクパネルは左側のサイドバーに表示されます。"""
 
-    def __init__(self):
+    def __init__(自分自身):
         self.form = QtWidgets.QWidget()
-        layout = QtWidgets.QVBoxLayout(self.form)
+        レイアウト = QtWidgets.QVBoxLayout(self.form)
         self.spinbox = QtWidgets.QDoubleSpinBox()
         self.spinbox.setValue(10.0)
-        layout.addWidget(QtWidgets.QLabel("Length:"))
+        layout.addWidget(QtWidgets.QLabel("長さ:"))
         layout.addWidget(self.spinbox)
 
     def accept(self):
-        # Called when user clicks OK
-        length = self.spinbox.value()
-        FreeCAD.Console.PrintMessage(f"Accepted: {length}\n")
+        # ユーザーが「OK」をクリックすると呼び出されます
+        長さ = self.spinbox.value()
+        FreeCAD.Console.PrintMessage(f"受け入れられました: {length}\n")
         FreeCADGui.Control.closeDialog()
-        return True
+        Trueを返す
 
-    def reject(self):
+    デフォルト拒否(自分自身):
         FreeCADGui.Control.closeDialog()
-        return True
+        Trueを返す
 
     def getStandardButtons(self):
         return int(QtWidgets.QDialogButtonBox.Ok |
                    QtWidgets.QDialogButtonBox.Cancel)
 
-# Show the panel
-panel = MyTaskPanel()
-FreeCADGui.Control.showDialog(panel)
-```
+# パネルを表示する
+パネル = MyTaskPanel()
+FreeCADGui.Control.showDialog(パネル)```
 
 ## Coin3D Scenegraph (Pivy)
 
-```python
-from pivy import coin
-import FreeCADGui
+```パイソン
+Pivy輸入コインから
+FreeCADGui をインポートする
 
-# Access the scenegraph root
+# シーングラフのルートにアクセスする
 sg = FreeCADGui.ActiveDocument.ActiveView.getSceneGraph()
 
-# Add a custom separator with a sphere
-sep = coin.SoSeparator()
-mat = coin.SoMaterial()
-mat.diffuseColor.setValue(1.0, 0.0, 0.0)  # Red
-trans = coin.SoTranslation()
+# 球を使用したカスタムセパレーターを追加します
+sep = コイン.SoSeparator()
+マット = コイン.SoMaterial()
+mat.diffuseColor.setValue(1.0, 0.0, 0.0) # 赤
+trans = コイン.SoTranslation()
 trans.translation.setValue(10, 10, 10)
-sphere = coin.SoSphere()
+球 = コイン.SoSphere()
 sphere.radius.setValue(2.0)
-sep.addChild(mat)
+sep.addChild(マット)
 sep.addChild(trans)
-sep.addChild(sphere)
+sep.addChild(球体)
 sg.addChild(sep)
 
-# Remove later
-sg.removeChild(sep)
-```
+# 後で削除する
+sg.removeChild(sep)```
 
 ## Custom Workbench Creation
 
-```python
-import FreeCADGui
+```パイソン
+FreeCADGui をインポートする
 
-class MyWorkbench(FreeCADGui.Workbench):
-    MenuText = "My Workbench"
-    ToolTip = "A custom workbench"
-    Icon = ":/icons/freecad.svg"
+クラス MyWorkbench(FreeCADGui.Workbench):
+    MenuText = "私のワークベンチ"
+    ツールヒント = "カスタム ワークベンチ"
+    アイコン = ":/icons/freecad.svg"
 
-    def Initialize(self):
-        """Called at workbench activation."""
-        import MyCommands  # Import your command module
-        self.appendToolbar("My Tools", ["My_CustomCommand"])
-        self.appendMenu("My Menu", ["My_CustomCommand"])
+    def 初期化(自分自身):
+        """ワークベンチのアクティブ化時に呼び出されます。"""
+        import MyCommands # コマンド モジュールをインポートします
+        self.appendToolbar("マイ ツール", ["My_CustomCommand"])
+        self.appendMenu("マイメニュー", ["My_CustomCommand"])
 
-    def Activated(self):
-        pass
+    def Activated(自身):
+        パスする
 
-    def Deactivated(self):
-        pass
+    def 非アクティブ化(自分自身):
+        パスする
 
     def GetClassName(self):
-        return "Gui::PythonWorkbench"
+        "Gui::PythonWorkbench" を返す
 
-FreeCADGui.addWorkbench(MyWorkbench)
-```
+FreeCADGui.addWorkbench(MyWorkbench)```
 
 ## Macro Best Practices
 
-```python
-# Standard macro header
-# -*- coding: utf-8 -*-
-# FreeCAD Macro: MyMacro
-# Description: Brief description of what the macro does
-# Author: YourName
-# Version: 1.0
-# Date: 2026-04-07
+```パイソン
+# 標準マクロヘッダー
+# -*- コーディング: utf-8 -*-
+# FreeCAD マクロ: MyMacro
+# 説明: マクロの動作の簡単な説明
+# 著者: あなたの名前
+# バージョン: 1.0
+# 日付: 2026-04-07
 
-import FreeCAD
-import Part
-from FreeCAD import Base
+FreeCAD をインポートする
+パーツのインポート
+FreeCADインポートベースより
 
-# Guard for GUI availability
-if FreeCAD.GuiUp:
-    import FreeCADGui
-    from PySide2 import QtWidgets, QtCore
+# GUI の可用性を保護する
+FreeCAD.GuiUp の場合:
+    FreeCADGui をインポートする
+    PySide2 から QtWidgets、QtCore をインポート
 
 def main():
     doc = FreeCAD.ActiveDocument
-    if doc is None:
-        FreeCAD.Console.PrintError("No active document\n")
-        return
+    doc が None の場合:
+        FreeCAD.Console.PrintError("アクティブなドキュメントがありません\n")
+        戻る
 
-    if FreeCAD.GuiUp:
+    FreeCAD.GuiUp の場合:
         sel = FreeCADGui.Selection.getSelection()
-        if not sel:
-            FreeCAD.Console.PrintWarning("No objects selected\n")
+        そうでない場合:
+            FreeCAD.Console.PrintWarning("オブジェクトが選択されていません\n")
 
-    # ... macro logic ...
+    # ...マクロロジック ...
 
     doc.recompute()
-    FreeCAD.Console.PrintMessage("Macro completed\n")
+    FreeCAD.Console.PrintMessage("マクロが完了しました\n")
 
-if __name__ == "__main__":
-    main()
-```
+__name__ == "__main__"の場合:
+    メイン()```
 
 ### Selection Handling
 
-```python
-# Get selected objects
-sel = FreeCADGui.Selection.getSelection()           # List of objects
-sel_ex = FreeCADGui.Selection.getSelectionEx()       # Extended (sub-elements)
+```パイソン
+# 選択したオブジェクトを取得する
+sel = FreeCADGui.Selection.getSelection() # オブジェクトのリスト
+sel_ex = FreeCADGui.Selection.getSelectionEx() # 拡張 (サブ要素)
 
-for selobj in sel_ex:
-    obj = selobj.Object
-    for sub in selobj.SubElementNames:
+sel_ex の selobj の場合:
+    obj = selobj.オブジェクト
+    selobj.SubElementNames のサブの場合:
         print(f"{obj.Name}.{sub}")
-        shape = obj.getSubObject(sub)  # Get sub-shape
+        Shape = obj.getSubObject(sub) # サブシェイプを取得します
 
-# Select programmatically
+# プログラムで選択する
 FreeCADGui.Selection.addSelection(doc.MyBox)
 FreeCADGui.Selection.addSelection(doc.MyBox, "Face1")
-FreeCADGui.Selection.clearSelection()
-```
+FreeCADGui.Selection.clearSelection()```
 
 ### Console Output
 
-```python
-FreeCAD.Console.PrintMessage("Info message\n")
-FreeCAD.Console.PrintWarning("Warning message\n")
-FreeCAD.Console.PrintError("Error message\n")
-FreeCAD.Console.PrintLog("Debug/log message\n")
-```
+```パイソン
+FreeCAD.Console.PrintMessage("情報メッセージ\n")
+FreeCAD.Console.PrintWarning("警告メッセージ\n")
+FreeCAD.Console.PrintError("エラー メッセージ\n")
+FreeCAD.Console.PrintLog("デバッグ/ログ メッセージ\n")```
 
 ## Common Patterns
 
 ### Parametric Pad from Sketch
 
-```python
+```パイソン
 doc = FreeCAD.ActiveDocument
 
-# Create sketch
-sketch = doc.addObject("Sketcher::SketchObject", "Sketch")
-sketch.addGeometry(Part.LineSegment(FreeCAD.Vector(0,0,0), FreeCAD.Vector(10,0,0)))
-sketch.addGeometry(Part.LineSegment(FreeCAD.Vector(10,0,0), FreeCAD.Vector(10,10,0)))
-sketch.addGeometry(Part.LineSegment(FreeCAD.Vector(10,10,0), FreeCAD.Vector(0,10,0)))
-sketch.addGeometry(Part.LineSegment(FreeCAD.Vector(0,10,0), FreeCAD.Vector(0,0,0)))
-# Close with coincident constraints
-for i in range(3):
-    sketch.addConstraint(Sketcher.Constraint("Coincident", i, 2, i+1, 1))
-sketch.addConstraint(Sketcher.Constraint("Coincident", 3, 2, 0, 1))
+# スケッチを作成する
+スケッチ = doc.addObject("スケッチャー::スケッチオブジェクト", "スケッチ")
+スケッチ.addGeometry(Part.LineSegment(FreeCAD.Vector(0,0,0), FreeCAD.Vector(10,0,0)))
+スケッチ.addGeometry(Part.LineSegment(FreeCAD.Vector(10,0,0), FreeCAD.Vector(10,10,0)))
+スケッチ.addGeometry(Part.LineSegment(FreeCAD.Vector(10,10,0), FreeCAD.Vector(0,10,0)))
+スケッチ.addGeometry(Part.LineSegment(FreeCAD.Vector(0,10,0), FreeCAD.Vector(0,0,0)))
+# 一致制約で閉じる
+range(3) の i の場合:
+    sketch.addConstraint(Sketcher.Constraint("一致", i, 2, i+1, 1))
+スケッチ.addConstraint(Sketcher.Constraint("一致", 3, 2, 0, 1))
 
-# Pad (PartDesign)
-pad = doc.addObject("PartDesign::Pad", "Pad")
-pad.Profile = sketch
-pad.Length = 5.0
-sketch.Visibility = False
-doc.recompute()
-```
+# パッド (パーツデザイン)
+Pad = doc.addObject("PartDesign::Pad", "Pad")
+パッド.プロファイル = スケッチ
+パッドの長さ = 5.0
+スケッチ.可視性 = False
+doc.recompute()```
 
 ### Export Shapes
 
-```python
-# STEP export
+```パイソン
+# STEPエクスポート
 Part.export([doc.MyBox], "/path/to/output.step")
 
-# STL export (mesh)
-import Mesh
+# STL エクスポート (メッシュ)
+メッシュのインポート
 Mesh.export([doc.MyBox], "/path/to/output.stl")
 
-# IGES export
+# IGES エクスポート
 Part.export([doc.MyBox], "/path/to/output.iges")
 
-# Multiple formats via importlib
-import importlib
-importlib.import_module("importOBJ").export([doc.MyBox], "/path/to/output.obj")
-```
+# importlib による複数のフォーマット
+インポートインポート
+importlib.import_module("importOBJ").export([doc.MyBox], "/path/to/output.obj")```
 
 ### Units and Quantities
 
-```python
-# FreeCAD uses mm internally
+```パイソン
+# FreeCAD は内部で mm を使用します
 q = FreeCAD.Units.Quantity("10 mm")
-q_inch = FreeCAD.Units.Quantity("1 in")
-print(q_inch.getValueAs("mm"))  # 25.4
+q_inch = FreeCAD.Units.Quantity("1 インチ")
+print(q_inch.getValueAs("mm")) # 25.4
 
-# Parse user input with units
-q = FreeCAD.Units.parseQuantity("2.5 in")
-value_mm = float(q)  # Value in mm (internal unit)
-```
+# ユーザー入力を単位で解析する
+q = FreeCAD.Units.parseQuantity("2.5 インチ")
+value_mm = float(q) # mm 単位の値 (内部単位)
+「」
 
-## Compensation Rules (Quasi-Coder Integration)
+## 報酬ルール (準コーダー統合)
 
-When interpreting shorthand or quasi-code for FreeCAD scripts:
+FreeCAD スクリプトの短縮表現または疑似コードを解釈する場合:
 
-1. **Terminology mapping**: "box" → `Part.makeBox()`, "cylinder" → `Part.makeCylinder()`, "sphere" → `Part.makeSphere()`, "merge/combine/join" → `.fuse()`, "subtract/cut/remove" → `.cut()`, "intersect" → `.common()`, "round edges/fillet" → `.makeFillet()`, "bevel/chamfer" → `.makeChamfer()`
-2. **Implicit document**: If no document handling is mentioned, wrap in standard `doc = FreeCAD.ActiveDocument or FreeCAD.newDocument()`
-3. **Units assumption**: Default to millimeters unless stated otherwise
-4. **Recompute**: Always call `doc.recompute()` after modifications
-5. **GUI guard**: Wrap GUI-dependent code in `if FreeCAD.GuiUp:` when the script may run headless
-6. **Part.show()**: Use `Part.show(shape, "Name")` for quick display, or `doc.addObject("Part::Feature", "Name")` for named persistent objects
+1. **用語のマッピング**: 「ボックス」→ `Part.makeBox()`、「円柱」→ `Part.makeCylinder()`、「球」→ `Part.makeSphere()`、「マージ/結合/結合」→ `.fuse()`、「減算/カット/削除」→ `.cut()`、「交差」→ `.common()`、「ラウンド エッジ/フィレット」→ `.makeFillet()`、 「面取り・面取り」 → `.makeChamfer()`
+2. **暗黙的なドキュメント**: ドキュメントの処理が記載されていない場合は、標準の `doc = FreeCAD.ActiveDocument or FreeCAD.newDocument()` で囲みます。
+3. **単位の仮定**: 特に明記されていない限り、デフォルトはミリメートルです。
+4. **再計算**: 変更後は常に `doc.recompute()` を呼び出します
+5. **GUI ガード**: スクリプトがヘッドレスで実行される可能性がある場合、GUI に依存するコードを `if FreeCAD.GuiUp:` でラップします。
+6. **Part.show()**: クイック表示には `Part.show(shape, "Name")` を使用し、名前付き永続オブジェクトには `doc.addObject("Part::Feature", "Name")` を使用します
 
-## References
+## 参考文献
 
-### Primary Links
+### プライマリリンク
 
-- [Writing Python code](https://wiki.freecad.org/Manual:A_gentle_introduction#Writing_Python_code)
-- [Manipulating FreeCAD objects](https://wiki.freecad.org/Manual:A_gentle_introduction#Manipulating_FreeCAD_objects)
-- [Vectors and Placements](https://wiki.freecad.org/Manual:A_gentle_introduction#Vectors_and_Placements)
-- [Creating and manipulating geometry](https://wiki.freecad.org/Manual:Creating_and_manipulating_geometry)
-- [Creating parametric objects](https://wiki.freecad.org/Manual:Creating_parametric_objects)
-- [Creating interface tools](https://wiki.freecad.org/Manual:Creating_interface_tools)
-- [Python](https://en.wikipedia.org/wiki/Python_%28programming_language%29)
-- [Introduction to Python](https://wiki.freecad.org/Introduction_to_Python)
-- [Python scripting tutorial](https://wiki.freecad.org/Python_scripting_tutorial)
-- [FreeCAD scripting basics](https://wiki.freecad.org/FreeCAD_Scripting_Basics)
-- [Gui Command](https://wiki.freecad.org/Gui_Command)
+- [Python コードの書き方](https://wiki.freecad.org/Manual:A_gentle_introduction#Writing_Python_code)
+- [FreeCAD オブジェクトの操作](https://wiki.freecad.org/Manual:A_gentle_introduction#Manipulated_FreeCAD_objects)
+- [ベクターと配置](https://wiki.freecad.org/Manual:A_gentle_introduction#Vectors_and_Placements)
+- [ジオメトリの作成と操作](https://wiki.freecad.org/Manual:Creating_and_manipulator_geometry)
+- [パラメトリック オブジェクトの作成](https://wiki.freecad.org/Manual:Creating_parametric_objects)
+- [インターフェイス ツールの作成](https://wiki.freecad.org/Manual:Creating_interface_tools)
+- [Python](https://en.wikipedia.org/wiki/Python_%28プログラミング_言語%29)
+- [Python 入門](https://wiki.freecad.org/ Introduction_to_Python)
+- [Python スクリプト チュートリアル](https://wiki.freecad.org/Python_scripting_tutorial)
+- [FreeCAD スクリプトの基礎](https://wiki.freecad.org/FreeCAD_Scripting_Basics)
+- [Gui コマンド](https://wiki.freecad.org/Gui_Command)
 
-### Bundled Reference Documents
+### 同梱の参考資料
 
-See the [references/](references/) directory for topic-organized guides:
+トピック別にまとめられたガイドについては、[references/](references/) ディレクトリを参照してください。
 
-1. [scripting-fundamentals.md](references/scripting-fundamentals.md) — Core scripting, document model, console
-2. [geometry-and-shapes.md](references/geometry-and-shapes.md) — Part, Mesh, Sketcher, topology
-3. [parametric-objects.md](references/parametric-objects.md) — FeaturePython, properties, scripted objects
-4. [gui-and-interface.md](references/gui-and-interface.md) — PySide, dialogs, task panels, Coin3D
-5. [workbenches-and-advanced.md](references/workbenches-and-advanced.md) — Workbenches, macros, FEM, Path, recipes
+1. [scripting-fundamentals.md](references/scripting-fundamentals.md) — コア スクリプト、ドキュメント モデル、コンソール
+2. [geometry-and-shapes.md](references/geometry-and-shapes.md) — パーツ、メッシュ、スケッチャー、トポロジ
+3. [parametric-objects.md](references/parametric-objects.md) — 機能Python、プロパティ、スクリプト化されたオブジェクト
+4. [gui-and-interface.md](references/gui-and-interface.md) — PySide、ダイアログ、タスクパネル、Coin3D
+5. [workbenches-and-advanced.md](references/workbenches-and-advanced.md) — ワークベンチ、マクロ、FEM、パス、レシピ

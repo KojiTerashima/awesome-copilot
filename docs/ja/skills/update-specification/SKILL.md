@@ -2,30 +2,27 @@
 name: update-specification
 description: 'Update an existing specification file for the solution, optimized for Generative AI consumption based on new requirements or updates to any existing code.'
 ---
+# 仕様の更新
 
-# Update Specification
+目標は、新しい要件に基づいて既存の仕様ファイル `${file}` を更新するか、既存のコードを更新することです。
 
-Your goal is to update the existing specification file `${file}` based on new requirements or updates to any existing code.
+仕様ファイルは、ソリューション コンポーネントの要件、制約、インターフェイスを、明確で曖昧さのない方法で定義し、生成 AI が効果的に使用できるように構造化する必要があります。確立された文書標準に従い、コンテンツが機械可読で自己完結型であることを確認してください。
 
-The specification file must define the requirements, constraints, and interfaces for the solution components in a manner that is clear, unambiguous, and structured for effective use by Generative AIs. Follow established documentation standards and ensure the content is machine-readable and self-contained.
+## AI 対応仕様のベスト プラクティス
 
-## Best Practices for AI-Ready Specifications
+- 正確で明確かつ明確な言葉を使用します。
+- 要件、制約、推奨事項を明確に区別します。
+- 解析を容易にするために、構造化された書式設定 (見出し、リスト、表) を使用します。
+- 慣用句、比喩、または文脈に依存した参照は避けてください。
+- すべての頭字語とドメイン固有の用語を定義します。
+- 該当する場合は、例と特殊なケースを含めます。
+- ドキュメントが自己完結型であり、外部コンテキストに依存しないことを確認します。
 
-- Use precise, explicit, and unambiguous language.
-- Clearly distinguish between requirements, constraints, and recommendations.
-- Use structured formatting (headings, lists, tables) for easy parsing.
-- Avoid idioms, metaphors, or context-dependent references.
-- Define all acronyms and domain-specific terms.
-- Include examples and edge cases where applicable.
-- Ensure the document is self-contained and does not rely on external context.
+仕様は [/spec/](/spec/) ディレクトリに保存し、`[a-z0-9-]+.md` の規則に従って名前を付ける必要があります。名前は仕様の内容を説明するものであり、[スキーマ、ツール、データ、インフラストラクチャ、プロセス、アーキテクチャ、または設計] の 1 つである高レベルの目的から始まる必要があります。
 
-The specification should be saved in the [/spec/](/spec/) directory and named according to the following convention: `[a-z0-9-]+.md`, where the name should be descriptive of the specification's content and starting with the highlevel purpose, which is one of [schema, tool, data, infrastructure, process, architecture, or design].
+仕様ファイルは、整形式のマークダウンでフォーマットされている必要があります。
 
-The specification file must be formatted in well formed Markdown.
-
-Specification files must follow the template below, ensuring that all sections are filled out appropriately. The front matter for the markdown should be structured correctly as per the example following:
-
-```md
+仕様ファイルは以下のテンプレートに従い、すべてのセクションが適切に入力されていることを確認する必要があります。マークダウンの前付けは、次の例のように正しく構成されている必要があります。```md
 ---
 title: [Concise Title Describing the Specification's Focus]
 version: [Optional: e.g., 1.0, Date]
@@ -111,9 +108,8 @@ tags: [Optional: List of relevant tags or categories, e.g., `infrastructure`, `p
 
 ## 9. Examples & Edge Cases
 
-```code
-// Code snippet or data example demonstrating the correct application of the guidelines, including edge cases
-```
+```コード
+// エッジケースを含む、ガイドラインの正しい適用を示すコード スニペットまたはデータ例```
 
 ## 10. Validation Criteria
 

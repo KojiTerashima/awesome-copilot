@@ -2,135 +2,122 @@
 name: salesforce-component-standards
 description: 'Quality standards for Salesforce Lightning Web Components (LWC), Aura components, and Visualforce pages. Covers SLDS 2 compliance, accessibility (WCAG 2.1 AA), data access pattern selection, component communication rules, XSS prevention, CSRF enforcement, FLS/CRUD in AuraEnabled methods, view state management, and Jest test requirements. Use this skill when building or reviewing any Salesforce UI component to enforce platform-specific security and quality standards.'
 ---
+# Salesforce コンポーネントの品質基準
 
-# Salesforce Component Quality Standards
+これらのチェックを、作成またはレビューするすべての LWC、Aura コンポーネント、および Visualforce ページに適用します。
 
-Apply these checks to every LWC, Aura component, and Visualforce page you write or review.
+## セクション 1 — LWC 品質基準
 
-## Section 1 — LWC Quality Standards
+### 1.1 データアクセスパターンの選択
 
-### 1.1 Data Access Pattern Selection
+JavaScript コントローラー コードを記述する前に、適切なデータ アクセス パターンを選択してください。
 
-Choose the right data access pattern before writing JavaScript controller code:
-
-| Use case | Pattern | Why |
+|使用例 |パターン |なぜ |
 |---|---|---|
-| Read a single record reactively (follows navigation) | `@wire(getRecord, { recordId, fields })` | Lightning Data Service — cached, reactive |
-| Standard CRUD form for a single object | `<lightning-record-form>` or `<lightning-record-edit-form>` | Built-in FLS, CRUD, and accessibility |
-| Complex server query or filtered list | `@wire(apexMethodName, { param })` on a `cacheable=true` method | Allows caching; wire re-fires on param change |
-| User-triggered action, DML, or non-cacheable server call | Imperative `apexMethodName(params).then(...).catch(...)` | Required for DML — wired methods cannot be `@AuraEnabled` without `cacheable=true` |
-| Cross-component communication (no shared parent) | Lightning Message Service (LMS) | Decoupled, works across DOM boundaries |
-| Multi-object graph relationships | GraphQL `@wire(gql, { query, variables })` | Single round-trip for complex related data |
+|単一レコードを反応的に読み取ります (ナビゲーションに従います) | `@wire(getRecord, { recordId, fields })` | Lightning データ サービス — キャッシュ、リアクティブ |
+|単一オブジェクトの標準 CRUD フォーム | `<lightning-record-form>` または `<lightning-record-edit-form>` |組み込みの FLS、CRUD、およびアクセシビリティ |
+|複雑なサーバー クエリまたはフィルタリングされたリスト | `cacheable=true` メソッドの `@wire(apexMethodName, { param })` |キャッシュを許可します。パラメータ変更時にワイヤが再起動する |
+|ユーザーがトリガーしたアクション、DML、またはキャッシュ不可能なサーバー呼び出し |命令型 `apexMethodName(params).then(...).catch(...)` | DML には必須 — 有線メソッドは `cacheable=true` なしで `@AuraEnabled` にすることはできません。
+|コンポーネント間通信 (共有親なし) |ライトニング メッセージ サービス (LMS) |分離され、DOM の境界を越えて機能します |
+|複数オブジェクトのグラフの関係 |グラフQL `@wire(gql, { query, variables })` |複雑な関連データの単一ラウンドトリップ |
 
-### 1.2 Security Rules
+### 1.2 セキュリティルール
 
-| Rule | Enforcement |
+|ルール |執行 |
 |---|---|
-| No raw user data in `innerHTML` | Use `{expression}` binding in the template — the framework auto-escapes. Never use `this.template.querySelector('.el').innerHTML = userValue` |
-| Apex `@AuraEnabled` methods enforce CRUD/FLS | Use `WITH USER_MODE` in SOQL or explicit `Schema.sObjectType` checks |
-| No hardcoded org-specific IDs in component JavaScript | Query or pass as a prop — never embed record IDs in source |
-| `@api` properties from parent: validate before use | A parent can pass anything — validate type and range before using as a query parameter |
+| `innerHTML` に生のユーザー データがありません |テンプレートで `{expression}` バインディングを使用します。フレームワークは自動エスケープします。 `this.template.querySelector('.el').innerHTML = userValue` は決して使用しないでください。
+| Apex `@AuraEnabled` メソッドは CRUD/FLS を強制します | SOQL で `WITH USER_MODE` を使用するか、明示的な `Schema.sObjectType` チェックを使用します。
+|コンポーネント JavaScript に組織固有の ID をハードコードしない |クエリを実行するか、プロパティとして渡します。レコード ID をソースに埋め込まないでください。
+|親からの `@api` プロパティ: 使用前に検証 |親は何でも渡すことができます。クエリ パラメーターとして使用する前に型と範囲を検証します。
 
-### 1.3 SLDS 2 and Styling Standards
+### 1.3 SLDS 2 とスタイル標準
 
-- **Never** hardcode colours: `color: #FF3366` → use `color: var(--slds-c-button-brand-color-background)` or a semantic SLDS token.
-- **Never** override SLDS classes with `!important` — compose with custom CSS properties.
-- Use `<lightning-*>` base components wherever they exist: `lightning-button`, `lightning-input`, `lightning-datatable`, `lightning-card`, etc.
-- Base components include built-in SLDS 2, dark mode, and accessibility — avoid reimplementing their behaviour.
-- If using custom CSS, test in both **light mode** and **dark mode** before declaring done.
+- **決して**ハードコード色: `color: #FF3366` → `color: var(--slds-c-button-brand-color-background)` またはセマンティック SLDS トークンを使用します。
+- **決して** SLDS クラスを `!important` でオーバーライドしないでください。カスタム CSS プロパティを使用して作成します。
+- `<lightning-*>` ベース コンポーネントが存在する場合は常に使用します: `lightning-button`、`lightning-input`、`lightning-datatable`、`lightning-card` など。
+- 基本コンポーネントには、組み込みの SLDS 2、ダーク モード、およびアクセシビリティが含まれます。これらの動作の再実装は避けてください。
+- カスタム CSS を使用している場合は、完了を宣言する前に **ライト モード** と **ダーク モード** の両方でテストしてください。
 
-### 1.4 Accessibility Requirements (WCAG 2.1 AA)
+### 1.4 アクセシビリティ要件 (WCAG 2.1 AA)すべての LWC コンポーネントは、完了したとみなされる前に、次のすべてに合格する必要があります。
 
-Every LWC component must pass all of these before it is considered done:
+- [ ] すべてのフォーム入力には `<label>` または `aria-label` が含まれます。プレースホルダーを唯一のラベルとして使用しないでください。
+- [ ] すべてのアイコンのみのボタンには、アクションを説明する `alternative-text` または `aria-label` が含まれています
+- [ ] すべてのインタラクティブ要素はキーボード (Tab、Enter、Space、Escape) でアクセスおよび操作できます。
+- [ ] ステータスを伝える唯一の手段ではありません - テキスト、アイコン、または `aria-*` 属性と組み合わせる
+- [ ] エラー メッセージは、`aria-describedby` を介して入力に関連付けられます。
+- [ ] モーダルでのフォーカス管理は正しい — フォーカスは開くとモーダルに移動し、閉じるとモーダルに戻ります。
 
-- [ ] All form inputs have `<label>` or `aria-label` — never use placeholder as the only label
-- [ ] All icon-only buttons have `alternative-text` or `aria-label` describing the action
-- [ ] All interactive elements are reachable and operable by keyboard (Tab, Enter, Space, Escape)
-- [ ] Colour is not the only means of conveying status — pair with text, icon, or `aria-*` attributes
-- [ ] Error messages are associated with their input via `aria-describedby`
-- [ ] Focus management is correct in modals — focus moves into the modal on open and back on close
+### 1.5 コンポーネントの通信ルール
 
-### 1.5 Component Communication Rules
-
-| Direction | Mechanism |
+|方向 |メカニズム |
 |---|---|
-| Parent → Child | `@api` property or calling a `@api` method |
-| Child → Parent | `CustomEvent` — `this.dispatchEvent(new CustomEvent('eventname', { detail: data }))` |
-| Sibling / unrelated components | Lightning Message Service (LMS) |
-| Never use | `document.querySelector`, `window.*`, or Pub/Sub libraries |
+|親 → 子 | `@api` プロパティまたは `@api` メソッドの呼び出し |
+|子→親 | `CustomEvent` — `this.dispatchEvent(new CustomEvent('eventname', { detail: data }))` |
+|兄弟/無関係のコンポーネント |ライトニング メッセージ サービス (LMS) |
+|決して使用しないでください | `document.querySelector`、`window.*`、または Pub/Sub ライブラリ |
 
-For Flow screen components:
-- Events that need to reach the Flow runtime must set `bubbles: true` and `composed: true`.
-- Expose `@api value` for two-way binding with the Flow variable.
+フロー画面コンポーネントの場合:
+- フロー ランタイムに到達する必要があるイベントは、`bubbles: true` および `composed: true` を設定する必要があります。
+- Flow 変数との双方向バインディングのために `@api value` を公開します。
 
-### 1.6 JavaScript Performance Rules
+### 1.6 JavaScript パフォーマンス ルール
 
-- **No side effects in `connectedCallback`**: it runs on every DOM attach — avoid DML, heavy computation, or rendering state mutations here.
-- **Guard `renderedCallback`**: always use a boolean guard to prevent infinite render loops.
-- **Avoid reactive property traps**: setting a reactive property inside `renderedCallback` causes a re-render — use it only when necessary and guarded.
-- **Do not store large datasets in component state** — paginate or stream large results instead.
+- **`connectedCallback`** には副作用はありません。DOM がアタッチされるたびに実行されます。ここでは DML、大量の計算、レンダリング状態の変更を避けてください。
+- **ガード `renderedCallback`**: 無限のレンダリング ループを防ぐために、常にブール ガードを使用します。
+- **リアクティブ プロパティ トラップを避ける**: `renderedCallback` 内にリアクティブ プロパティを設定すると、再レンダリングが発生します。必要で保護されている場合にのみ使用してください。
+- **大きなデータセットをコンポーネント状態に保存しないでください** - 代わりに、大きな結果をページ分割するかストリーミングします。
 
-### 1.7 Jest Test Requirements
+### 1.7 Jest テストの要件
 
-Every component that handles user interaction or retrieves Apex data must have a Jest test:
-
-```javascript
+ユーザインタラクションを処理したり、Apex データを取得したりするすべてのコンポーネントには、Jest テストが必要です。```javascript
 // Minimum test coverage expectations
 it('renders the component with correct title', async () => { ... });
 it('calls apex method and displays results', async () => { ... });  // Wire mock
 it('dispatches event when button is clicked', async () => { ... });
 it('shows error state when apex call fails', async () => { ... }); // Error path
-```
-
-Use `@salesforce/sfdx-lwc-jest` mocking utilities:
-- `wire` adapter mocking: `setImmediate` + `emit({ data, error })`
-- Apex method mocking: `jest.mock('@salesforce/apex/MyClass.myMethod', ...)`
+````@salesforce/sfdx-lwc-jest` モック ユーティリティを使用します。
+- `wire` アダプターのモック: `setImmediate` + `emit({ data, error })`
+- Apex メソッドのモック: `jest.mock('@salesforce/apex/MyClass.myMethod', ...)`
 
 ---
 
-## Section 2 — Aura Component Standards
+## セクション 2 — Aura コンポーネントの標準
 
-### 2.1 When to Use Aura vs LWC
+### 2.1 Aura と LWC を使用する場合
 
-- **New components: always LWC** unless the target context is Aura-only (e.g. extending `force:appPage`, using Aura-specific events in a legacy managed package).
-- **Migrating Aura to LWC**: prefer LWC, migrate component-by-component; LWC can be embedded inside Aura components.
+- **新しいコンポーネント: ターゲットコンテキストが Aura のみでない限り、常に LWC** (例: `force:appPage` の拡張、従来の管理パッケージでの Aura 固有のイベントの使用)。
+- **Aura を LWC に移行**: LWC を優先し、コンポーネントごとに移行します。 LWC は Aura コンポーネント内に埋め込むことができます。
 
-### 2.2 Aura Security Rules
+### 2.2 Aura セキュリティルール
 
-- `@AuraEnabled` controller methods must declare `with sharing` and enforce CRUD/FLS — Aura does **not** enforce them automatically.
-- Never use `{!v.something}` with unescaped user data in `<div>` unbound helpers — use `<ui:outputText value="{!v.text}" />` or `<c:something>` to escape.
-- Validate all inputs from component attributes before using them in SOQL / Apex logic.
+- `@AuraEnabled` コントローラーメソッドは `with sharing` を宣言し、CRUD/FLS を強制する必要があります。Aura はこれらを自動的に強制しません**。
+- `<div>` アンバインド ヘルパー内のエスケープされていないユーザー データでは `{!v.something}` を使用しないでください。エスケープするには `<ui:outputText value="{!v.text}" />` または `<c:something>` を使用してください。
+- SOQL / Apex ロジックで使用する前に、コンポーネント属性からのすべての入力を検証します。
 
-### 2.3 Aura Event Design
+### 2.3 Aura イベントの設計
 
-- **Component events** for parent-child communication — lowest scope.
-- **Application events** only when component events cannot reach the target — they broadcast to the entire app and can be a performance and maintenance problem.
-- For hybrid LWC + Aura stacks: use Lightning Message Service to decouple communication — do not rely on Aura application events reaching LWC components.
+- 親子通信の **コンポーネント イベント** - 最も低い範囲。
+- **アプリケーション イベント**は、コンポーネント イベントがターゲットに到達できない場合にのみ発生します。イベントはアプリ全体にブロードキャストされ、パフォーマンスとメンテナンスの問題になる可能性があります。
+- ハイブリッド LWC + Aura スタックの場合: Lightning メッセージ サービスを使用して通信を分離します。LWC コンポーネントに到達する Aura アプリケーション イベントに依存しません。
 
 ---
 
-## Section 3 — Visualforce Security Standards
+## セクション 3 — Visualforce セキュリティ標準
 
-### 3.1 XSS Prevention
-
-```xml
+### 3.1 XSS の防止```xml
 <!-- ❌ NEVER — renders raw user input as HTML -->
 <apex:outputText value="{!userInput}" escape="false" />
 
 <!-- ✅ ALWAYS — auto-escaping on -->
 <apex:outputText value="{!userInput}" />
 <!-- Default escape="true" — platform HTML-encodes the output -->
-```
+```ルール: `escape="false"` は、ユーザー制御のデータには決して受け入れられません。リッチ テキストをレンダリングする必要がある場合は、出力前にホワイトリストを使用してサーバー側をサニタイズします。
 
-Rule: `escape="false"` is never acceptable for user-controlled data. If rich text must be rendered, sanitise server-side with a whitelist before output.
+### 3.2 CSRF 保護
 
-### 3.2 CSRF Protection
+すべてのポストバック アクションには `<apex:form>` を使用します。プラットフォームは CSRF トークンをフォームに自動的に挿入します。 CSRF 保護をバイパスする生の `<form method="POST">` HTML 要素は**使用しないでください**。
 
-Use `<apex:form>` for all postback actions — the platform injects a CSRF token automatically into the form. Do **not** use raw `<form method="POST">` HTML elements, which bypass CSRF protection.
-
-### 3.3 SOQL Injection Prevention in Controllers
-
-```apex
+### 3.3 コントローラでの SOQL インジェクションの防止```apex
 // ❌ NEVER
 String soql = 'SELECT Id FROM Account WHERE Name = \'' + ApexPages.currentPage().getParameters().get('name') + '\'';
 List<Account> results = Database.query(soql);
@@ -138,18 +125,14 @@ List<Account> results = Database.query(soql);
 // ✅ ALWAYS — bind variable
 String nameParam = ApexPages.currentPage().getParameters().get('name');
 List<Account> results = [SELECT Id FROM Account WHERE Name = :nameParam];
-```
+```### 3.4 状態管理チェックリストの表示
 
-### 3.4 View State Management Checklist
+- [ ] ビューステートが 135 KB 未満である (ブラウザ開発者ツールまたは Salesforce の [ビューステート] タブで確認してください)
+- [ ] サーバー側の計算のみに使用されるフィールドは `transient` として宣言されます
+- [ ] 大規模なコレクションがポストバック間で不必要に保持されない
+- [ ] `readonly="true"` は、ビューステートのシリアル化をスキップするために読み取り専用ページの `<apex:page>` に設定されます
 
-- [ ] View state is under 135 KB (check in browser developer tools or the Salesforce View State tab)
-- [ ] Fields used only for server-side calculations are declared `transient`
-- [ ] Large collections are not persisted across postbacks unnecessarily
-- [ ] `readonly="true"` is set on `<apex:page>` for read-only pages to skip view-state serialisation
-
-### 3.5 FLS / CRUD in Visualforce Controllers
-
-```apex
+### 3.5 Visualforce コントローラの FLS / CRUD```apex
 // Before reading a field
 if (!Schema.sObjectType.Account.fields.Revenue__c.isAccessible()) {
     ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'You do not have access to this field.'));
@@ -160,23 +143,21 @@ if (!Schema.sObjectType.Account.fields.Revenue__c.isAccessible()) {
 if (!Schema.sObjectType.Account.isDeletable()) {
     throw new System.NoAccessException();
 }
-```
-
-Standard controllers enforce FLS for bound fields automatically. **Custom controllers do not** — FLS must be enforced manually.
+```標準コントローラーは、バインドされたフィールドに対して FLS を自動的に適用します。 **カスタム コントローラーには適用されません** — FLS は手動で適用する必要があります。
 
 ---
 
-## Quick Reference — Component Anti-Patterns Summary
+## クイック リファレンス — コンポーネントのアンチパターンの概要
 
-| Anti-pattern | Technology | Risk | Fix |
+|アンチパターン |テクノロジー |リスク |修正 |
 |---|---|---|---|
-| `innerHTML` with user data | LWC | XSS | Use template bindings `{expression}` |
-| Hardcoded hex colours | LWC/Aura | Dark-mode / SLDS 2 break | Use SLDS CSS custom properties |
-| Missing `aria-label` on icon buttons | LWC/Aura/VF | Accessibility failure | Add `alternative-text` or `aria-label` |
-| No guard in `renderedCallback` | LWC | Infinite rerender loop | Add `hasRendered` boolean guard |
-| Application event for parent-child | Aura | Unnecessary broadcast scope | Use component event instead |
-| `escape="false"` on user data | Visualforce | XSS | Remove — use default escaping |
-| Raw `<form>` postback | Visualforce | CSRF vulnerability | Use `<apex:form>` |
-| No `with sharing` on custom controller | VF / Apex | Data exposure | Add `with sharing` declaration |
-| FLS not checked in custom controller | VF / Apex | Privilege escalation | Add `Schema.sObjectType` checks |
-| SOQL concatenated with URL param | VF / Apex | SOQL injection | Use bind variables |
+| `innerHTML` とユーザー データ | ＬＷＣ | XSS |テンプレート バインディングを使用する `{expression}` |
+|ハードコードされた 16 進数の色 | LWC/オーラ |ダークモード / SLDS 2 ブレーク | SLDS CSS カスタム プロパティを使用する |
+|アイコン ボタンに `aria-label` がありません。 LWC/オーラ/VF |アクセシビリティの失敗 | `alternative-text` または `aria-label` を追加 |
+| `renderedCallback` にはガードがありません | ＬＷＣ |無限の再レンダリング ループ | `hasRendered` ブール値ガードを追加 |
+|親子で応募イベント |オーラ |不要なブロードキャスト スコープ |代わりにコンポーネント イベントを使用してください。
+| `escape="false"` ユーザーデータ |ビジュアルフォース | XSS |削除 — デフォルトのエスケープを使用 |
+|生の `<form>` ポストバック |ビジュアルフォース | CSRF の脆弱性 | `<apex:form>` を使用してください。
+|カスタム コントローラに `with sharing` がありません | VF/アペックス |データ漏洩 | `with sharing` 宣言を追加 |
+|カスタム コントローラーで FLS がチェックされていません | VF/アペックス |権限昇格 | `Schema.sObjectType` チェックを追加 |
+| URL パラメータと連結された SOQL | VF/アペックス | SOQL インジェクション |バインド変数を使用する |

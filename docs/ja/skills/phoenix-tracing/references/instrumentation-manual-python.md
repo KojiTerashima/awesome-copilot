@@ -1,182 +1,150 @@
-# Manual Instrumentation (Python)
+# 手動インストルメンテーション (Python)
 
-Add custom spans using decorators or context managers for fine-grained tracing control.
+デコレータまたはコンテキスト マネージャを使用してカスタム スパンを追加し、きめ細かいトレース制御を実現します。
 
-## Setup
+＃＃ 設定「」バッシュ
+pip インストール arise-phoenix-otel
+「」
 
-```bash
-pip install arize-phoenix-otel
-```
+「」パイソン
+phoenix.otelインポートレジスタから
+Tracer_provider = register(project_name="my-app")
+トレーサー = トレーサー_プロバイダー.get_tracer(__name__)
+「」## クイックリファレンス
 
-```python
-from phoenix.otel import register
-tracer_provider = register(project_name="my-app")
-tracer = tracer_provider.get_tracer(__name__)
-```
+|スパンの種類 |デコレーター |使用例 |
+|----------|-----------|----------|
+|チェーン | `@tracer.chain` |オーケストレーション、ワークフロー、パイプライン |
+|レトリバー | `@tracer.retriever` |ベクトル検索、文書検索 |
+|ツール | `@tracer.tool` |外部 API 呼び出し、関数実行 |
+|エージェント | `@tracer.agent` |多段階の推論、計画 |
+| LLM | `@tracer.llm` | LLM API 呼び出し (手動のみ) |
+|埋め込み | `@tracer.embedding` |埋め込み生成 |
+|リランカー | `@tracer.reranker` |ドキュメントの再ランキング |
+|ガードレール | `@tracer.guardrail` |安全性チェック、コンテンツ管理 |
+|評価者 | `@tracer.evaluator` | LLM評価、品質チェック |
 
-## Quick Reference
+## デコレータアプローチ (推奨)
 
-| Span Kind | Decorator | Use Case |
-|-----------|-----------|----------|
-| CHAIN | `@tracer.chain` | Orchestration, workflows, pipelines |
-| RETRIEVER | `@tracer.retriever` | Vector search, document retrieval |
-| TOOL | `@tracer.tool` | External API calls, function execution |
-| AGENT | `@tracer.agent` | Multi-step reasoning, planning |
-| LLM | `@tracer.llm` | LLM API calls (manual only) |
-| EMBEDDING | `@tracer.embedding` | Embedding generation |
-| RERANKER | `@tracer.reranker` | Document re-ranking |
-| GUARDRAIL | `@tracer.guardrail` | Safety checks, content moderation |
-| EVALUATOR | `@tracer.evaluator` | LLM evaluation, quality checks |
-
-## Decorator Approach (Recommended)
-
-**Use for:** Full function instrumentation, automatic I/O capture
-
-```python
+**用途:** 全機能計測、自動 I/O キャプチャ「」パイソン
 @tracer.chain
-def rag_pipeline(query: str) -> str:
-    docs = retrieve_documents(query)
-    ranked = rerank(docs, query)
-    return generate_response(ranked, query)
+def rag_pipeline(クエリ: str) -> str:
+    docs =retrieve_documents(クエリ)
+    ランク = 再ランク(ドキュメント、クエリ)
+    returngenerate_response(ランク付けされた、クエリ)
 
 @tracer.retriever
-def retrieve_documents(query: str) -> list[dict]:
-    results = vector_db.search(query, top_k=5)
-    return [{"content": doc.text, "score": doc.score} for doc in results]
+defretrieve_documents(クエリ: str) -> リスト[dict]:
+    結果 = Vector_db.search(クエリ、top_k=5)
+    return [{"content": doc.text, "score": doc.score} (結果のドキュメントの場合)]
 
 @tracer.tool
-def get_weather(city: str) -> str:
-    response = requests.get(f"https://api.weather.com/{city}")
-    return response.json()["weather"]
-```
+def get_weather(都市: str) -> str:
+    応答 = request.get(f"https://api.weather.com/{city}")
+    return response.json()["天気"]
+「」**カスタム スパン名:**「」パイソン
+@tracer.chain(name="ラグパイプライン-v2")
+def my_workflow(クエリ: str) -> str:
+    返却処理(クエリ)
+「」## コンテキストマネージャーのアプローチ
 
-**Custom span names:**
+**用途:** 部分的な関数インストルメンテーション、カスタム属性、動的制御「」パイソン
+opentelemetry.trace import Status、StatusCode から
+jsonをインポートする
 
-```python
-@tracer.chain(name="rag-pipeline-v2")
-def my_workflow(query: str) -> str:
-    return process(query)
-```
+defretrieve_with_metadata(クエリ: str):
+    Tracer.start_as_current_span( を使用)
+        "ベクトル検索",
+        openinference_span_kind="レトリバー"
+    ) スパンとして:
+        span.set_attribute("input.value", クエリ)
 
-## Context Manager Approach
+        結果 = Vector_db.search(クエリ、top_k=5)
 
-**Use for:** Partial function instrumentation, custom attributes, dynamic control
-
-```python
-from opentelemetry.trace import Status, StatusCode
-import json
-
-def retrieve_with_metadata(query: str):
-    with tracer.start_as_current_span(
-        "vector_search",
-        openinference_span_kind="retriever"
-    ) as span:
-        span.set_attribute("input.value", query)
-
-        results = vector_db.search(query, top_k=5)
-
-        documents = [
+        書類 = [
             {
-                "document.id": doc.id,
-                "document.content": doc.text,
-                "document.score": doc.score
+                "ドキュメント.id": ドキュメント.id、
+                "ドキュメント.コンテンツ": ドキュメント.テキスト、
+                "ドキュメント.スコア": ドキュメント.スコア
             }
-            for doc in results
-        ]
+            結果のドキュメントの場合
+        】
         span.set_attribute("retrieval.documents", json.dumps(documents))
-        span.set_status(Status(StatusCode.OK))
+        span.set_status(ステータス(ステータスコード.OK))
 
-        return documents
-```
+        書類を返送する
+「」## 入力/出力のキャプチャ
 
-## Capturing Input/Output
+**評価可能なスパンの I/O を常にキャプチャします。**
 
-**Always capture I/O for evaluation-ready spans.**
+### 自動 I/O キャプチャ (デコレータ)
 
-### Automatic I/O Capture (Decorators)
-
-Decorators automatically capture input arguments and return values:
-
-```python  theme={null}
+デコレータは入力引数を自動的に取得し、値を返します。```Python テーマ={null}
 @tracer.chain
 def handle_query(user_input: str) -> str:
-    result = agent.generate(user_input)
-    return result.text
+    結果 = エージェント.生成(ユーザー入力)
+    結果を返す.テキスト
 
-# Automatically captures:
+# 自動的にキャプチャします:
 # - input.value: user_input
-# - output.value: result.text
-# - input.mime_type / output.mime_type: auto-detected
-```
+# - 出力値: 結果テキスト
+# - input.mime_type / Output.mime_type: 自動検出
+「」### 手動 I/O キャプチャ (コンテキスト マネージャー)
 
-### Manual I/O Capture (Context Manager)
-
-Use `set_input()` and `set_output()` for simple I/O capture:
-
-```python  theme={null}
-from opentelemetry.trace import Status, StatusCode
+単純な I/O キャプチャには `set_input()` と `set_output()` を使用します。```Python テーマ={null}
+opentelemetry.trace import Status、StatusCode から
 
 def handle_query(user_input: str) -> str:
-    with tracer.start_as_current_span(
-        "query.handler",
-        openinference_span_kind="chain"
-    ) as span:
-        span.set_input(user_input)
+    Tracer.start_as_current_span( を使用)
+        "クエリ.ハンドラー",
+        openinference_span_kind="チェーン"
+    ) スパンとして:
+        スパン.set_input(ユーザー入力)
 
-        result = agent.generate(user_input)
+        結果 = エージェント.生成(ユーザー入力)
 
-        span.set_output(result.text)
-        span.set_status(Status(StatusCode.OK))
+        スパン.set_output(結果.テキスト)
+        span.set_status(ステータス(ステータスコード.OK))
 
-        return result.text
-```
-
-**What gets captured:**
-
-```json
+        結果を返す.テキスト
+「」**何がキャプチャされるか:**```json
 {
-  "input.value": "What is 2+2?",
-  "input.mime_type": "text/plain",
-  "output.value": "2+2 equals 4.",
-  "output.mime_type": "text/plain"
+  "input.value": "2+2 とは何ですか?",
+  "input.mime_type": "テキスト/プレーン",
+  "output.value": "2+2 は 4 に等しい。",
+  "output.mime_type": "テキスト/プレーン"
 }
-```
+「」**これが重要な理由:**
+- Phoenix 評価者には `input.value` と `output.value` が必要です
+- Phoenix UI はデバッグ用に I/O を目立つように表示します
+- データセットを微調整するためのデータのエクスポートを可能にします
 
-**Why this matters:**
-- Phoenix evaluators require `input.value` and `output.value`
-- Phoenix UI displays I/O prominently for debugging
-- Enables exporting data for fine-tuning datasets
+### 追加のメタデータを使用したカスタム I/O
 
-### Custom I/O with Additional Metadata
+I/O と一緒にカスタム属性には `set_attribute()` を使用します。```Python テーマ={null}
+def process_query(クエリ: str):
+    Tracer.start_as_current_span( を使用)
+        "クエリ.プロセス",
+        openinference_span_kind="チェーン"
+    ) スパンとして:
+        # 標準 I/O
+        スパン.set_input(クエリ)
 
-Use `set_attribute()` for custom attributes alongside I/O:
+        # カスタムメタデータ
+        span.set_attribute("input.length", len(クエリ))
 
-```python  theme={null}
-def process_query(query: str):
-    with tracer.start_as_current_span(
-        "query.process",
-        openinference_span_kind="chain"
-    ) as span:
-        # Standard I/O
-        span.set_input(query)
+        結果 = llm.generate(クエリ)
 
-        # Custom metadata
-        span.set_attribute("input.length", len(query))
+        # 標準出力
+        スパン.set_output(結果.テキスト)
 
-        result = llm.generate(query)
-
-        # Standard output
-        span.set_output(result.text)
-
-        # Custom metadata
+        # カスタムメタデータ
         span.set_attribute("output.tokens", result.usage.total_tokens)
-        span.set_status(Status(StatusCode.OK))
+        span.set_status(ステータス(ステータスコード.OK))
 
-        return result
-```
+        結果を返す
+「」## 関連項目
 
-## See Also
-
-- **Span attributes:** `span-chain.md`, `span-retriever.md`, `span-tool.md`, `span-llm.md`, `span-agent.md`, `span-embedding.md`, `span-reranker.md`, `span-guardrail.md`, `span-evaluator.md`
-- **Auto-instrumentation:** `instrumentation-auto-python.md` for framework integrations
-- **API docs:** https://docs.arize.com/phoenix/tracing/manual-instrumentation
+- **スパン属性:** `span-chain.md`、`span-retriever.md`、`span-tool.md`、`span-llm.md`、`span-agent.md`、`span-embedding.md`、`span-reranker.md`、`span-guardrail.md`、`span-evaluator.md`
+- **自動インスツルメンテーション:** `instrumentation-auto-python.md` (フレームワーク統合用)
+- **API ドキュメント:** https://docs.arize.com/phoenix/tracing/manual-instrumentation

@@ -2,66 +2,57 @@
 name: reviewing-oracle-to-postgres-migration
 description: 'Identifies Oracle-to-PostgreSQL migration risks by cross-referencing code against known behavioral differences (empty strings, refcursors, type coercion, sorting, timestamps, concurrent transactions, etc.). Use when planning a database migration, reviewing migration artifacts, or validating that integration tests cover Oracle/PostgreSQL differences.'
 ---
+# Oracle から PostgreSQL データベースへの移行
 
-# Oracle-to-PostgreSQL Database Migration
+移行のリスクを明らかにし、`references/` フォルダーに文書化されている既知の Oracle/PostgreSQL の動作の違いに対して移行作業を検証します。
 
-Surfaces migration risks and validates migration work against known Oracle/PostgreSQL behavioral differences documented in the `references/` folder.
+## いつ使用するか
 
-## When to use
+1. **計画** — プロシージャ、トリガー、クエリ、または Refcursor クライアントでの移行作業を開始する前に。どの参照情報が適用されるかを特定して、リスクに事前に対処します。
+2. **検証中** — 移行作業が完了したら、該当するすべての洞察が対処され、統合テストで新しい PostgreSQL セマンティクスがカバーされていることを確認します。
 
-1. **Planning** — Before starting migration work on a procedure, trigger, query, or refcursor client. Identify which reference insights apply so risks are addressed up front.
-2. **Validating** — After migration work is done, confirm every applicable insight was addressed and integration tests cover the new PostgreSQL semantics.
+## ワークフロー
 
-## Workflow
+タスクのタイプを決定します。
 
-Determine the task type:
+**移行を計画していますか?** リスク評価ワークフローに従います。
+**完了した作業を検証していますか?** 検証ワークフローに従います。
 
-**Planning a migration?** Follow the risk assessment workflow.
-**Validating completed work?** Follow the validation workflow.
-
-### Risk assessment workflow (planning)
-
-```
+### リスク評価ワークフロー (計画)```
 Risk Assessment:
 - [ ] Step 1: Identify the migration scope
 - [ ] Step 2: Screen each insight for applicability
 - [ ] Step 3: Document risks and recommended actions
-```
+```**ステップ 1: 移行範囲を特定する**
 
-**Step 1: Identify the migration scope**
+影響を受けるデータベース オブジェクト (プロシージャ、トリガー、クエリ、ビュー) とそれらを呼び出すアプリケーション コードをリストします。
 
-List the affected database objects (procedures, triggers, queries, views) and the application code that calls them.
+**ステップ 2: それぞれの洞察が適用可能かどうかを選別する**
 
-**Step 2: Screen each insight for applicability**
+[references/REFERENCE.md](references/REFERENCE.md) の参照インデックスを確認してください。エントリごとに、その洞察によって影響を受けるパターンが移行スコープに含まれているかどうかを判断します。洞察が関連する可能性がある場合にのみ、参照ファイル全体を読んでください。
 
-Review the reference index in [references/REFERENCE.md](references/REFERENCE.md). For each entry, determine whether the migration scope contains patterns affected by that insight. Read the full reference file only when the insight is potentially relevant.
+**ステップ 3: リスクと推奨されるアクションを文書化する**
 
-**Step 3: Document risks and recommended actions**
+該当する洞察ごとに、参照ファイルから特定のリスクと推奨される修正パターンをメモします。設計上の決定が必要な洞察にフラグを立てます (Oracle の空の文字列を NULL として保持するセマンティクスを維持するか、PostgreSQL の動作を採用するかなど)。
 
-For each applicable insight, note the specific risk and the recommended fix pattern from the reference file. Flag any insight that requires a design decision (e.g., whether to preserve Oracle empty-string-as-NULL semantics or adopt PostgreSQL behavior).
-
-### Validation workflow (post-migration)
-
-```
+### 検証ワークフロー (移行後)```
 Validation:
 - [ ] Step 1: Map the migration artifact
 - [ ] Step 2: Cross-check applicable insights
 - [ ] Step 3: Verify integration test coverage
 - [ ] Step 4: Gate the result
-```
-
-**Step 1: Map the migration artifact**
+```**ステップ 1: 移行アーティファクトをマッピングする**
 
 Identify the migrated object and summarize the change set.
 
-**Step 2: Cross-check applicable insights**
+**ステップ 2: 該当する洞察をクロスチェックします**
 
-For each reference in [references/REFERENCE.md](references/REFERENCE.md), confirm the behavior or test requirement is acknowledged and addressed in the migration work.
+[references/REFERENCE.md](references/REFERENCE.md) 内の各参照について、動作またはテスト要件が認識され、移行作業で対処されていることを確認します。
 
-**Step 3: Verify integration test coverage**
+**ステップ 3: 統合テストのカバレッジを確認する**
 
-Confirm tests exercise both the happy path and the failure scenarios highlighted in applicable insights (exceptions, sorting, refcursor consumption, concurrent transactions, timestamps, etc.).
+テストが、適切な洞察 (例外、並べ替え、リカーサーの消費、同時トランザクション、タイムスタンプなど) で強調表示されている正常なパスと失敗シナリオの両方を実行していることを確認します。
 
-**Step 4: Gate the result**
+**ステップ 4: 結果をゲートする**
 
 Return a checklist asserting each applicable insight was addressed, migration scripts run, and integration tests pass.

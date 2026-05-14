@@ -1,26 +1,23 @@
 ---
 title: React 19 use() Hook Pattern Reference
 ---
+# React 19 use() フックパターンリファレンス
 
-# React 19 use() Hook Pattern Reference
+`use()` フックは、React コンポーネント内の Promise とコンテキストをアンラップするための React 19 の答えです。これにより、コンポーネント本体で直接、よりクリーンな非同期パターンが可能になり、以前は個別の遅延コンポーネントや複雑な状態管理を必要としたアーキテクチャの複雑さが回避されます。
 
-The `use()` hook is React 19's answer for unwrapping promises and context within React components. It enables cleaner async patterns directly in your component body, avoiding the architectural complexity that previously required separate lazy components or complex state management.
+## use() とは何ですか?
 
-## What is use()?
+`use()` は次のようなフックです。
 
-`use()` is a hook that:
+- **Promise または context オブジェクトを受け入れます**
+- **解決された値またはコンテキスト値を返します**
+- **処理** プロミスに対する自動的な一時停止
+- **条件付きで呼び出すことができます** コンポーネント内で (Promise のトップレベルではありません)
+- **エラーをスローします**。サスペンス + エラー境界でキャッチできる
 
-- **Accepts** a promise or context object
-- **Returns** the resolved value or context value
-- **Handles** Suspense automatically for promises
-- **Can be called conditionally** inside components (not at top level for promises)
-- **Throws errors**, which Suspense + error boundary can catch
+## Promise で use()
 
-## use() with Promises
-
-### React 18 Pattern
-
-```jsx
+### React 18 パターン```jsx
 // React 18 approach 1  lazy load a component module:
 const UserComponent = React.lazy(() => import('./User'));
 
@@ -43,11 +40,7 @@ function App({ userId }) {
   if (!user) return <Spinner />;
   return <User user={user} />;
 }
-```
-
-### React 19 use() Pattern
-
-```jsx
+```### React 19 use() パターン```jsx
 // React 19  use() directly in component:
 function App({ userId }) {
   const user = use(fetchUser(userId)); // Suspends automatically
@@ -62,18 +55,14 @@ function Root() {
     </Suspense>
   );
 }
-```
+```**主な違い:**
 
-**Key differences:**
+- `use()` は、Promise をコンポーネント本体で直接アンラップします
+- サスペンス境界は引き続き必要ですが、アプリのルートに配置できます (コンポーネントごとではありません)。
+- 単純な非同期データには状態や useEffect は必要ありません
+- コンポーネント内での条件付きラッピングが可能
 
-- `use()` unwraps the promise directly in the component body
-- Suspense boundary is still needed, but can be placed at app root (not per-component)
-- No state or useEffect needed for simple async data
-- Conditional wrapping allowed inside components
-
-## use() with Promises -- Conditional Fetching
-
-```jsx
+## Promise を使用した use() -- 条件付きフェッチ```jsx
 // React 18  conditional with state
 function SearchResults() {
   const [results, setResults] = useState(null);
@@ -100,13 +89,9 @@ function SearchResults() {
   const results = use(search(query)); // Only fetches if query is truthy
   return <Results items={results} />;
 }
-```
+```## コンテキストで use()
 
-## use() with Context
-
-`use()` can unwrap context without being at component root. Less common than promise usage, but useful for conditional context reading:
-
-```jsx
+`use()` は、コンポーネントのルートになくてもコンテキストをアンラップできます。 Promise の使用ほど一般的ではありませんが、条件付きコンテキストの読み取りに役立ちます。```jsx
 // React 18  always in component body, only works at top level
 const theme = useContext(ThemeContext);
 
@@ -115,42 +100,30 @@ function Button({ useSystemTheme }) {
   const theme = useSystemTheme ? use(ThemeContext) : defaultTheme;
   return <button style={theme}>Click</button>;
 }
-```
+```---
 
----
+## 移行戦略
 
-## Migration Strategy
+### フェーズ 1 変更は必要ありません
 
-### Phase 1  No changes required
-
-React 19 `use()` is opt-in. All existing Suspense + component splitting patterns continue to work:
-
-```jsx
+React 19 `use()` はオプトインです。既存のサスペンス + コンポーネントの分割パターンはすべて引き続き機能します。```jsx
 // Keep this as-is if it's working:
 const Lazy = React.lazy(() => import('./Component'));
 <Suspense fallback={<Spinner />}><Lazy /></Suspense>
-```
+```### フェーズ 2 移行後のクリーンアップ (オプション)
 
-### Phase 2  Post-migration cleanup (optional)
+React 19 の移行が安定したら、`useEffect + state` 非同期パターンのコードベースをプロファイリングします。以下は `use()` リファクタリングの適切な候補です。
 
-After React 19 migration stabilizes, profile codebases for `useEffect + state` async patterns. These are good candidates for `use()` refactoring:
-
-Identify patterns:
-
-```bash
+パターンを特定する:```bash
 grep -rn "useEffect.*\(.*fetch\|async\|promise" src/ --include="*.js" --include="*.jsx"
-```
+```対象:
 
-Target:
+- シンプルなフェッチオンマウントパターン
+- 複雑な依存関係配列は不要
+- コンポーネントごとに単一のプロミス
+- サスペンスはアプリ内の他の場所ですでに使用されています
 
-- Simple fetch-on-mount patterns
-- No complex dependency arrays
-- Single promise per component
-- Suspense already in use elsewhere in the app
-
-Example refactor:
-
-```jsx
+リファクタリングの例:```jsx
 // Before:
 function Post({ postId }) {
   const [post, setPost] = useState(null);
@@ -173,15 +146,11 @@ function Post({ postId }) {
 <Suspense fallback={<AppSpinner />}>
   <Post postId={123} />
 </Suspense>
-```
+```---
 
----
+## エラー処理
 
-## Error Handling
-
-`use()` throws errors, which Suspense error boundaries catch:
-
-```jsx
+`use()` はエラーをスローし、サスペンス エラー境界がキャッチします。```jsx
 function Root() {
   return (
     <ErrorBoundary fallback={<ErrorScreen />}>
@@ -196,13 +165,11 @@ function DataComponent() {
   const data = use(fetchData()); // If fetch rejects, error boundary catches it
   return <Data data={data} />;
 }
-```
+```---
 
----
+## use() を使用しない場合
 
-## When NOT to use use()
-
-- **Avoid during migration**  stabilize React 19 first
-- **Complex dependencies**  if multiple promises or complex ordering logic, stick with `useEffect`
-- **Retry logic**  `use()` doesn't handle retry; `useEffect` with state is clearer
-- **Debounced updates**  `use()` refetches on every prop change; `useEffect` with cleanup is better
+- **移行中は避けてください** まず React 19 を安定化してください
+- **複雑な依存関係** 複数の Promise または複雑な順序付けロジックがある場合は、`useEffect` を使用してください。
+- **再試行ロジック** `use()` は再試行を処理しません。 `useEffect` の状態がより明確になります
+- **デバウンスされた更新** `use()` はプロパティが変更されるたびに再フェッチします。 `useEffect` をクリーンアップした方が良い

@@ -1,74 +1,62 @@
-# Validation
+# 検証
 
-Validate LLM judges against human labels before deploying. Target >80% agreement.
+導入する前に、人間のラベルに対して LLM ジャッジを検証します。目標 > 80% の合意。
 
-## Requirements
+## 要件
 
-| Requirement | Target |
+|要件 |ターゲット |
 | ----------- | ------ |
-| Test set size | 100+ examples |
-| Balance | ~50/50 pass/fail |
-| Accuracy | >80% |
-| TPR/TNR | Both >70% |
+|テストセットのサイズ | 100 を超える例 |
+|バランス | ~50/50 合格/不合格 |
+|精度 | >80% |
+| TPR/TNR |両方 >70% |
 
-## Metrics
+## メトリクス
 
-| Metric | Formula | Use When |
+|メトリック |式 |いつ使用する |
 | ------ | ------- | -------- |
-| **Accuracy** | (TP+TN) / Total | General |
-| **TPR (Recall)** | TP / (TP+FN) | Quality assurance |
-| **TNR (Specificity)** | TN / (TN+FP) | Safety-critical |
-| **Cohen's Kappa** | Agreement beyond chance | Comparing evaluators |
+| **精度** | (TP+TN) / 合計 |一般 |
+| **TPR (リコール)** | TP / (TP+FN) |品質保証 |
+| **TNR (特異性)** | TN / (TN+FP) |安全性が重要 |
+| **コーエンのカッパ** |偶然を超えた合意 |評価者の比較 |
 
-## Quick Validation
-
-```python
-from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
+## クイック検証「」パイソン
+sklearn.metrics からのインポート、classification_report、confusion_matrix、cohen_kappa_score
 
 print(classification_report(human_labels, evaluator_predictions))
 print(f"Kappa: {cohen_kappa_score(human_labels, evaluator_predictions):.3f}")
 
-# Get TPR/TNR
-cm = confusion_matrix(human_labels, evaluator_predictions)
-tn, fp, fn, tp = cm.ravel()
+# TPR/TNR を取得する
+cm = 混乱行列(人間ラベル、評価者予測)
+tn、fp、fn、tp = cm.ravel()
 tpr = tp / (tp + fn)
 tnr = tn / (tn + fp)
-```
-
-## Golden Dataset Structure
-
-```python
-golden_example = {
-    "input": "What is the capital of France?",
-    "output": "Paris is the capital.",
-    "ground_truth_label": "correct",
+「」## ゴールデン データセット構造「」パイソン
+ゴールデン_例 = {
+    "input": "フランスの首都はどこですか?",
+    "output": "パリは首都です。",
+    "ground_truth_label": "正しい",
 }
-```
+「」## ゴールデン データセットの構築
 
-## Building Golden Datasets
+1. サンプル生産トレース (エラー、負のフィードバック、エッジケース)
+2. バランス ~50/50 合格/不合格
+3. 専門家が各例にラベルを付ける
+4. データセットのバージョンを変更する (既存のデータセットは決して変更しないでください)「」パイソン
+# GOOD - 新しいバージョンを作成します
+ゴールデン_v2 = ゴールデン_v1 + [新しい例]
 
-1. Sample production traces (errors, negative feedback, edge cases)
-2. Balance ~50/50 pass/fail
-3. Expert labels each example
-4. Version datasets (never modify existing)
+# 悪い - 既存のものを決して変更しないでください
+Golden_v1.append(new_example)
+「」## 警告サイン
 
-```python
-# GOOD - create new version
-golden_v2 = golden_v1 + [new_examples]
+- 全員合格または全員不合格 → 甘すぎる/厳しすぎる
+- ランダムな結果 → 基準が不明瞭
+- TPR/TNR < 70% → 改善が必要
 
-# BAD - never modify existing
-golden_v1.append(new_example)
-```
+## いつ再検証するか
 
-## Warning Signs
-
-- All pass or all fail → too lenient/strict
-- Random results → criteria unclear
-- TPR/TNR < 70% → needs improvement
-
-## Re-Validate When
-
-- Prompt template changes
-- Judge model changes
-- Criteria changes
-- Monthly
+- テンプレートの変更を促す
+- ジャッジモデルの変更
+- 基準の変更
+- 毎月

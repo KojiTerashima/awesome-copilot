@@ -2,52 +2,49 @@
 name: qdrant-search-quality-diagnosis
 description: "Diagnoses Qdrant search quality issues. Use when someone reports 'results are bad', 'wrong results', 'not relevant results', 'missing matches', 'recall is low', 'approximate search worse than exact', 'which embedding model', or 'quality dropped after quantization'. Also use when search quality degrades without obvious changes."
 ---
+# 悪い検索品質を診断する方法
 
-# How to Diagnose Bad Search Quality
+チューニングの前に、ベースラインを確立します。正確な KNN をグラウンド トゥルースとして使用し、近似的な HNSW と比較します。生産では、95% 以上のリコール @K を目標にします。
 
-Before tuning, establish baselines. Use exact KNN as ground truth, compare against approximate HNSW. Target >95% recall@K for production.
+## 何が問題なのかまだわかりません
 
-## Don't Know What's Wrong Yet
+次の場合に使用します。結果が無関係であるか、期待された一致が見つからず、原因を切り分ける必要がある場合に使用します。
 
-Use when: results are irrelevant or missing expected matches and you need to isolate the cause.
+- `exact=true` を使用して HNSW 近似をバイパスするテスト [検索 API](https://search.qdrant.tech/md/documentation/tutorials-search-engineering/retrieval-quality/?s=standard-mode-vs-exact-search)
+- 正確な検索が不適切 = モデルまたは検索パイプラインの問題。正確に良い、おおよそ悪い = HNSW を調整します。
+- 量子化により品質が低下するかどうかを確認します (量子化の有無を比較)
+- フィルターの制限が厳しすぎるかどうかを確認します (その場合は、ACORN を使用する必要がある場合があります)。
+- チャンク化されたドキュメントから結果が重複する場合は、グループ化 API を使用して重複を排除します [グループ化](https://search.qdrant.tech/md/documentation/search/search/?s=grouping-api)
 
-- Test with `exact=true` to bypass HNSW approximation [Search API](https://search.qdrant.tech/md/documentation/tutorials-search-engineering/retrieval-quality/?s=standard-mode-vs-exact-search)
-- Exact search bad = model or search pipeline problem. Exact good, approximate bad = tune HNSW.
-- Check if quantization degrades quality (compare with and without)
-- Check if filters are too restrictive (then you might need to use ACORN)
-- If duplicate results from chunked documents, use Grouping API to deduplicate [Grouping](https://search.qdrant.tech/md/documentation/search/search/?s=grouping-api)
+ペイロード フィルタリングとスパース ベクトル検索は別のものです。メタデータ (日付、カテゴリ、タグ) は、フィルタリングのためにペイロードに組み込まれます。テキスト コンテンツは検索用にスパース ベクトルに入ります。
 
-Payload filtering and sparse vector search are different things. Metadata (dates, categories, tags) goes in payload for filtering. Text content goes in sparse vectors for search.
+## 正確な検索よりも悪い近似検索
 
-## Approximate Search Worse Than Exact
+次の場合に使用します。完全検索では良好な結果が返されるが、HNSW 近似では結果が得られません。
 
-Use when: exact search returns good results but HNSW approximation misses them.
+- クエリ時に `hnsw_ef` を増やす [検索パラメータ](https://search.qdrant.tech/md/documentation/operations/optimize/?s=fine-tuning-search-parameters)
+- `ef_construct` を増やします (高品質の場合は 200 以上) [HNSW config](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=vector-index)
+- `m` を増やします (デフォルトは 16、再現率が高い場合は 32) [HNSW config](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=vector-index)
+- オーバーサンプリング + 量子化による再スコアを有効にする [量子化による検索](https://search.qdrant.tech/md/documentation/manage-data/quantization/?s=searching-with-quantization)
+- フィルタリングされたクエリ用の ACORN (v1.16+) [ACORN](https://search.qdrant.tech/md/documentation/search/search/?s=acorn-search-algorithm)
 
-- Increase `hnsw_ef` at query time [Search params](https://search.qdrant.tech/md/documentation/operations/optimize/?s=fine-tuning-search-parameters)
-- Increase `ef_construct` (200+ for high quality) [HNSW config](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=vector-index)
-- Increase `m` (16 default, 32 for high recall) [HNSW config](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=vector-index)
-- Enable oversampling + rescore with quantization [Search with quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/?s=searching-with-quantization)
-- ACORN for filtered queries (v1.16+) [ACORN](https://search.qdrant.tech/md/documentation/search/search/?s=acorn-search-algorithm)
+バイナリ量子化には再スコアが必要です。これがなければ、品質の低下は深刻です。リコールを回復するには、オーバーサンプリング (バイナリの場合は最小 3 ～ 5 倍) を使用します。実稼働前に、データに対する量子化の影響を必ずテストしてください。 [量子化](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
 
-Binary quantization requires rescore. Without it, quality loss is severe. Use oversampling (3-5x minimum for binary) to recover recall. Always test quantization impact on your data before production. [Quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+## 間違った埋め込みモデル
 
-## Wrong Embedding Model
+次の場合に使用します。完全一致検索でも悪い結果が返されます。
 
-Use when: exact search also returns bad results.
+100 ～ 1000 のサンプル クエリで上位 3 つの MTEB モデルをテストし、リコール @ 10 を測定します。ドメイン固有のモデルは、多くの場合、一般的なモデルよりも優れたパフォーマンスを発揮します。 [ホスト型推論](https://search.qdrant.tech/md/documentation/inference/)
 
-Test top 3 MTEB models on 100-1000 sample queries, measure recall@10. Domain-specific models often outperform general models. [Hosted inference](https://search.qdrant.tech/md/documentation/inference/)
+## 最適化されていない検索パイプライン
 
-## Unoptimized Search Pipeline
+使用する場合: 完全一致検索でも悪い結果が返され、モデルの選択がユーザーによって確認される場合。
 
-Use when: exact search also returns bad results and model choice is confirmed by user.
+高度な検索戦略スキルに従って検索を最適化します。
 
-Optimize search according to advanced search-strategies skill.
-
-## What NOT to Do
-
-- Tune Qdrant before verifying the model is right for the task (most quality issues are model issues)
-- Use binary quantization without rescore (severe quality loss)
-- Set `hnsw_ef` lower than results requested (guaranteed bad recall)
-- Skip payload indexes on filtered fields then blame quality (HNSW can't traverse filtered-out nodes, and filterable HNSW is built only if payload indexes were set up prior)
-- Deploy without baseline recall or other search relevance metrics (no way to measure regressions)
-- Confuse payload filtering with sparse vector search (different things, different config)
+## してはいけないこと- モデルがタスクに適していることを確認する前に Qdrant を調整します (品質の問題のほとんどはモデルの問題です)
+- スコアを再設定せずにバイナリ量子化を使用します (重大な品質の低下)
+- `hnsw_ef` を要求された結果よりも低く設定します (不正な再現が保証されます)
+- フィルタリングされたフィールドのペイロード インデックスをスキップし、品質を非難します (HNSW はフィルタリングされたノードを走査できず、フィルタリング可能な HNSW はペイロード インデックスが事前に設定されている場合にのみ構築されます)
+- ベースライン再現率やその他の検索関連性指標を使用せずに展開します (回帰を測定する方法がありません)。
+- ペイロード フィルタリングとスパース ベクトル検索を混同する (異なるもの、異なる構成)

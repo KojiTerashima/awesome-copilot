@@ -1,411 +1,349 @@
-# Community Docs, PR Checklist, Anti-patterns, and Release Checklist
+# コミュニティ ドキュメント、PR チェックリスト、アンチパターン、リリース チェックリスト
 
-## Table of Contents
-1. [README.md required sections](#1-readmemd-required-sections)
-2. [Docstrings — Google style](#2-docstrings--google-style)
-3. [CONTRIBUTING.md template](#3-contributingmd)
-4. [SECURITY.md template](#4-securitymd)
-5. [GitHub Issue Templates](#5-github-issue-templates)
-6. [PR Checklist](#6-pr-checklist)
-7. [Anti-patterns to avoid](#7-anti-patterns-to-avoid)
-8. [Master Release Checklist](#8-master-release-checklist)
+## 目次
+1. [README.md 必須セクション](#1-readmemd-required-sections)
+2. [ドキュメント文字列 — Google スタイル](#2-docstrings--google-style)
+3. [CONTRIBUTING.md テンプレート](#3-contributingmd)
+4. [SECURITY.mdテンプレート](#4-securitymd)
+5. [GitHub 問題テンプレート](#5-github-issue-templates)
+6. [PR チェックリスト](#6-pr-チェックリスト)
+7. [避けるべきアンチパターン](#7-避けるべきアンチパターン)
+8. [マスターリリースチェックリスト](#8-マスターリリースチェックリスト)
 
 ---
 
-## 1. `README.md` Required Sections
+## 1. `README.md` 必須セクション
 
-A good README is the single most important file for adoption. Users decide in 30 seconds whether
-to use your library based on the README.
+優れた README は、採用にとって最も重要なファイルです。ユーザーは 30 秒以内に次のことを決定します。
+README に基づいてライブラリを使用します。```マークダウン
+# あなたのパッケージ
 
-```markdown
-# your-package
+> 1 行の説明 — それが何をするのか、そしてなぜそれが役立つのか。
 
-> One-line description — what it does and why it's useful.
-
-[![PyPI version](https://badge.fury.io/py/your-package.svg)](https://pypi.org/project/your-package/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/your-package)](https://pypi.org/project/your-package/)
+[![PyPI バージョン](https://badge.fury.io/py/your-package.svg)](https://pypi.org/project/your-package/)
+[![Python バージョン](https://img.shields.io/pypi/pyversions/your-package)](https://pypi.org/project/your-package/)
 [![CI](https://github.com/you/your-package/actions/workflows/ci.yml/badge.svg)](https://github.com/you/your-package/actions/workflows/ci.yml)
-[![Coverage](https://codecov.io/gh/you/your-package/branch/master/graph/badge.svg)](https://codecov.io/gh/you/your-package)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![カバレッジ](https://codecov.io/gh/you/your-package/branch/master/graph/badge.svg)](https://codecov.io/gh/you/your-package)
+[![ライセンス: MIT](https://img.shields.io/badge/License-MIT- yellow.svg)](ライセンス)
 
-## Installation
+## インストール
 
-pip install your-package
+pip パッケージをインストールします
 
-# With Redis backend:
+# Redis バックエンドの場合:
 pip install "your-package[redis]"
 
-## Quick Start
+## クイックスタート
 
-(A copy-paste working example — no setup required to run it)
+(コピー＆ペーストの動作例 - 実行するためのセットアップは必要ありません)
 
-from your_package import YourClient
+your_package から YourClient をインポート
 
 client = YourClient(api_key="sk-...")
-result = client.process({"input": "value"})
-print(result)
+result = client.process({"入力": "値"})
+印刷(結果)
 
-## Features
+## 特徴
 
-- Feature 1
-- Feature 2
+- 特徴1
+- 特徴2
 
-## Configuration
+## 構成
 
-| Parameter | Type | Default | Description |
-|---|---|---|—--|
-| api_key | str | required | Authentication credential |
-| timeout | int | 30 | Request timeout in seconds |
-| retries | int | 3 | Number of retry attempts |
+|パラメータ |タイプ |デフォルト |説明 |
+|---|---|---|---|
+| APIキー | str |必須 |認証資格情報 |
+|タイムアウト |整数 | 30 |リクエストのタイムアウト (秒) |
+|再試行 |整数 | 3 |再試行回数 |
 
-## Backends
+## バックエンド
 
-Brief comparison — in-memory vs Redis — and when to use each.
+簡単な比較 (インメモリと Redis)、およびそれぞれをいつ使用するか。
 
-## Contributing
+## 貢献する
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+[CONTRIBUTING.md](./CONTRIBUTING.md) を参照してください。
 
-## Changelog
+## 変更履歴
 
-See [CHANGELOG.md](./CHANGELOG.md)
+[CHANGELOG.md](./CHANGELOG.md) を参照してください。
 
-## License
+## ライセンス
 
-MIT — see [LICENSE](./LICENSE)
-```
+MIT — [ライセンス](./LICENSE) を参照
+「」---
 
----
+## 2. ドキュメント文字列 — Google スタイル
 
-## 2. Docstrings — Google Style
+すべてのパブリック クラス、メソッド、関数に Google スタイルの docstring を使用します。 IDE はこれらを表示します
+mkdocs/sphinx はツールチップとしてドキュメントを自動生成でき、意図を伝えます。
+明らかに貢献者に。「」パイソン
+クラス YourClient:
+    「」
+    <目的> のメインクライアント。
 
-Use Google-style docstrings for every public class, method, and function. IDEs display these
-as tooltips, mkdocs/sphinx can auto-generate documentation from them, and they convey intent
-clearly to contributors.
+    引数:
+        api_key: 認証資格情報。
+        timeout: リクエストのタイムアウト (秒単位)。デフォルトは 30 です。
+        retries: 再試行の回数。デフォルトは 3 です。
 
-```python
-class YourClient:
-    """
-    Main client for <purpose>.
+    発生するもの:
+        ValueError: api_key が空であるか、タイムアウトが正でない場合。
 
-    Args:
-        api_key: Authentication credential.
-        timeout: Request timeout in seconds. Defaults to 30.
-        retries: Number of retry attempts. Defaults to 3.
-
-    Raises:
-        ValueError: If api_key is empty or timeout is non-positive.
-
-    Example:
-        >>> from your_package import YourClient
+    例:
+        >>> your_package から YourClient をインポート
         >>> client = YourClient(api_key="sk-...")
-        >>> result = client.process({"input": "value"})
-    """
-```
+        >>> 結果 = client.process({"入力": "値"})
+    「」
+「」---
 
----
+## 3. `CONTRIBUTING.md````マークダウン
+# パッケージに貢献する
 
-## 3. `CONTRIBUTING.md`
-
-```markdown
-# Contributing to your-package
-
-## Development Setup
+## 開発セットアップ
 
 git clone https://github.com/you/your-package
-cd your-package
+あなたのパッケージをCD化する
 pip install -e ".[dev]"
-pre-commit install
+プリコミットインストール
 
-## Running Tests
+## テストの実行
 
 pytest
 
-## Running Linting
+## リンティングの実行
 
-ruff check .
-black . --check
+ラフチェック。
+黒 。 --チェック
 mypy your_package/
 
-## Submitting a PR
+## PR を送信する
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feat/your-feature`
-3. Make changes with tests
-4. Ensure CI passes: `pre-commit run --all-files && pytest`
-5. Update `CHANGELOG.md` under `[Unreleased]`
-6. Open a PR — use the PR template
+1. リポジトリをフォークする
+2. 機能ブランチを作成します: `git checkout -b feat/your-feature`
+3. テストで変更を加える
+4. CI が合格することを確認します: `pre-commit run --all-files && pytest`
+5. `[Unreleased]` の下の `CHANGELOG.md` を更新します
+6. PR を開きます — PR テンプレートを使用します
 
-## Commit Message Format (Conventional Commits)
+## コミットメッセージの形式 (従来のコミット)
 
-- `feat: add Redis backend`
+- @@コード4@@
 - `fix: correct retry behavior on timeout`
 - `docs: update README quick start`
-- `chore: bump ruff to 0.5`
+- @@コード7@@
 - `test: add edge cases for memory backend`
 
-## Reporting Bugs
+## バグの報告
 
-Use the GitHub issue template. Include Python version, package version,
-and a minimal reproducible example.
-```
+GitHub の問題テンプレートを使用します。 Python のバージョン、パッケージのバージョン、
+そして最小限の再現可能な例。
+「」---
 
----
+## 4. `SECURITY.md````マークダウン
+# セキュリティポリシー
 
-## 4. `SECURITY.md`
+## サポートされているバージョン
 
-```markdown
-# Security Policy
-
-## Supported Versions
-
-| Version | Supported |
+|バージョン |サポートされている |
 |---|---|
-| 1.x.x   | Yes       |
-| < 1.0   | No        |
+| 1.x.x |はい |
+| < 1.0 |いいえ |
 
-## Reporting a Vulnerability
+## 脆弱性の報告
 
-Do NOT open a public GitHub issue for security vulnerabilities.
+セキュリティの脆弱性について GitHub でパブリックな問題を開かないでください。
 
-Report via: GitHub private security reporting (preferred)
-or email: security@yourdomain.com
+レポート経由: GitHub プライベート セキュリティ レポート (推奨)
+または電子メール: security@yourdomain.com
 
-Include:
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fix (if any)
+含める:
+- 脆弱性の説明
+- 再現手順
+- 潜在的な影響
+- 提案された修正 (ある場合)
 
-We aim to acknowledge within 48 hours and resolve within 14 days.
-```
+48 時間以内に確認し、14 日以内に解決することを目指しています。
+「」---
 
+## 5. GitHub の問題テンプレート
+
+### `.github/ISSUE_TEMPLATE/bug_report.md````マークダウン
+---
+名前: バグレポート
+about: 再現可能なバグを報告する
+ラベル: バグ
 ---
 
-## 5. GitHub Issue Templates
+**Python バージョン:**
+**パッケージバージョン:**
 
-### `.github/ISSUE_TEMPLATE/bug_report.md`
+**バグの説明:**
 
-```markdown
+**再現可能な最小限の例:**
+「」パイソン
+# ここにコードを貼り付けます「」
+
+**期待される動作:**
+
+**実際の動作:**
+「」### `.github/ISSUE_TEMPLATE/feature_request.md````マークダウン
 ---
-name: Bug Report
-about: Report a reproducible bug
-labels: bug
----
-
-**Python version:**
-**Package version:**
-
-**Describe the bug:**
-
-**Minimal reproducible example:**
-```python
-# paste code here
-```
-
-**Expected behavior:**
-
-**Actual behavior:**
-```
-
-### `.github/ISSUE_TEMPLATE/feature_request.md`
-
-```markdown
----
-name: Feature Request
-about: Suggest a new feature or enhancement
-labels: enhancement
+名前: 機能リクエスト
+about: 新しい機能または拡張機能を提案する
+ラベル:拡張機能
 ---
 
-**Problem this would solve:**
+**これで解決できる問題:**
 
-**Proposed solution:**
+**提案された解決策:**
 
-**Alternatives considered:**
-```
+**考慮される代替案:**
+「」---
 
----
+## 6. PR チェックリスト
 
-## 6. PR Checklist
+レビューをリクエストする前に、すべての項目を確認する必要があります。 CI は完全に緑色でなければなりません。
 
-All items must be checked before requesting review. CI must be fully green.
-
-### Code Quality Gates
-```
-[ ] ruff check . — zero errors
-[ ] black . --check — zero formatting issues
-[ ] isort . --check-only — imports sorted correctly
-[ ] mypy your_package/ — zero type errors
-[ ] pytest — all tests pass
-[ ] Coverage >= 80% (enforced by fail_under in pyproject.toml)
-[ ] All GitHub Actions workflows green
-```
-
-### Structure
-```
-[ ] pyproject.toml: name, dynamic/version, description, requires-python, license, authors,
-    keywords (10+), classifiers, dependencies, all [project.urls] filled in
-[ ] dynamic = ["version"] if using setuptools_scm
+### コード品質ゲート「」
+【】ラフチェック。 — エラーゼロ
+[ ] 黒。 --check — フォーマットの問題はゼロ
+[ ] 等。 --check-only — インポートは正しくソートされます
+[ ] mypy your_package/ — ゼロタイプエラー
+[ ] pytest — すべてのテストに合格します
+[ ] カバレッジ >= 80% (pyproject.toml のfail_under によって強制)
+[ ] すべての GitHub Actions ワークフローが緑色
+「」＃＃＃ 構造「」
+[ ] pyproject.toml: 名前、動的/バージョン、説明、Python が必要、ライセンス、作成者、
+    キーワード (10 個以上)、分類子、依存関係、すべての [project.url] が入力されました
+setuptools_scm を使用する場合 [ ] Dynamic = ["version"]
 [ ] [tool.setuptools_scm] with local_scheme = "no-local-version"
-[ ] setup.py shim present (if using setuptools_scm)
-[ ] py.typed marker file exists in the package directory (empty file)
-[ ] py.typed listed in [tool.setuptools.package-data]
-[ ] "Typing :: Typed" classifier in pyproject.toml
-[ ] __init__.py has __all__ listing all public symbols
-[ ] __version__ via importlib.metadata (not hardcoded string)
-```
-
-### Testing
-```
-[ ] conftest.py has shared fixtures for client and backend
-[ ] Core happy path tested
-[ ] Error conditions and edge cases tested
-[ ] Each backend tested independently in isolation
-[ ] Redis backend tested in separate CI job with redis service (if applicable)
-[ ] asyncio_mode = "auto" in pyproject.toml (for async tests)
-[ ] fetch-depth: 0 in all CI checkout steps
-```
-
-### Optional Backend (if applicable)
-```
-[ ] BaseBackend abstract class defines the interface
-[ ] MemoryBackend works with zero extra deps
-[ ] RedisBackend raises ImportError with clear pip install hint if redis not installed
-[ ] Both backends unit-tested independently
-[ ] redis extra declared in [project.optional-dependencies]
-[ ] README shows both install paths (base and [redis])
-```
-
-### Changelog & Docs
-```
-[ ] CHANGELOG.md updated under [Unreleased]
-[ ] README has: description, install, quick start, config table, badges, license
-[ ] All public symbols have Google-style docstrings
-[ ] CONTRIBUTING.md: dev setup, test/lint commands, PR instructions
-[ ] SECURITY.md: supported versions, reporting process
+[ ] setup.py シムが存在します (setuptools_scm を使用している場合)
+[ ] py.typed マーカー ファイルがパッケージ ディレクトリに存在します (空のファイル)
+[ ] py.typed は [tool.setuptools.package-data] にリストされています
+[ ] pyproject.toml の「Typing :: Typed」分類子
+[ ] __init__.py にはすべてのパブリック シンボルをリストする __all__ があります
+[ ] importlib.metadata 経由の __version__ (ハードコードされた文字列ではない)
+「」### テスト「」
+[ ] conftest.py にはクライアントとバックエンドの共有フィクスチャがあります
+[ ] テスト済みのコア ハッピー パス
+[ ] テスト済みのエラー条件とエッジケース
+[ ] 各バックエンドは個別に個別にテストされました
+[ ] Redis バックエンドは Redis サービスを使用した別の CI ジョブでテストされました (該当する場合)
+[ ] asyncio_mode = pyproject.toml の "auto" (非同期テスト用)
+[ ] fetch- Depth: すべての CI チェックアウト ステップで 0
+「」### オプションのバックエンド (該当する場合)「」
+[ ] BaseBackend 抽象クラスはインターフェイスを定義します
+[ ] MemoryBackend は追加の DEPS なしで動作します
+[ ] RedisBackend は、Redis がインストールされていない場合、明確な pip インストール ヒントとともに ImportError を発生させます
+[ ] 両方のバックエンドが個別に単体テスト済み
+[ ] [project.optional-dependency] で宣言された redis extra
+[ ] README には両方のインストール パス (base と [redis]) が示されています
+「」### 変更履歴とドキュメント「」
+[ ] CHANGELOG.md が [未公開] で更新されました
+[ ] README には、説明、インストール、クイック スタート、構成テーブル、バッジ、ライセンスが含まれています
+[ ] すべての公開シンボルには Google スタイルの docstring が含まれます
+[ ] CONTRIBUTING.md: 開発セットアップ、テスト/lint コマンド、PR 命令
+[ ] SECURITY.md: サポートされているバージョン、報告プロセス
 [ ] .github/ISSUE_TEMPLATE/bug_report.md
 [ ] .github/ISSUE_TEMPLATE/feature_request.md
-```
+「」###CI/CD「」
+[ ] ci.yml: lint + mypy + テスト行列 (サポートされているすべての Python バージョン)
+[ ] ci.yml: Redis サービスを使用した Redis バックエンドの別のジョブ
+[ ] public.yml: v*.*.* タグでトリガーされ、信頼された公開 (OIDC) を使用します。
+[ ] フェッチ深度: すべてのワークフロー チェックアウト ステップで 0
+[ ] GitHub リポジトリの [設定] → [環境] で作成された pypi 環境
+[ ] リポジトリ シークレットに API トークンがありません
+「」---
 
-### CI/CD
-```
-[ ] ci.yml: lint + mypy + test matrix (all supported Python versions)
-[ ] ci.yml: separate job for Redis backend with redis service
-[ ] publish.yml: triggered on v*.*.* tags, uses Trusted Publishing (OIDC)
-[ ] fetch-depth: 0 in all workflow checkout steps
-[ ] pypi environment created in GitHub repo Settings → Environments
-[ ] No API tokens in repository secrets
-```
+## 7. 避けるべきアンチパターン
 
----
-
-## 7. Anti-patterns to Avoid
-
-| Anti-pattern | Why it's bad | Correct approach |
+|アンチパターン |なぜダメなのか |正しいアプローチ |
 |---|---|---|
-| `__version__ = "1.0.0"` hardcoded with setuptools_scm | Goes stale after first git tag | Use `importlib.metadata.version()` |
-| Missing `fetch-depth: 0` in CI checkout | setuptools_scm can't find tags → version = `0.0.0+dev` | Add `fetch-depth: 0` to **every** checkout step |
-| `local_scheme` not set | `+g<hash>` suffix breaks PyPI uploads (local versions rejected) | `local_scheme = "no-local-version"` |
-| Missing `py.typed` file | IDEs and mypy don't see package as typed | Create empty `py.typed` in package root |
-| `py.typed` not in `package-data` | File missing from installed wheel — useless | Add to `[tool.setuptools.package-data]` |
-| Importing optional dep at module top | `ImportError` on `import your_package` for all users | Lazy import inside the function/class that needs it |
-| Duplicating metadata in `setup.py` | Conflicts with `pyproject.toml`; drifts | Keep `setup.py` as 3-line shim only |
-| No `fail_under` in coverage config | Coverage regressions go unnoticed | Set `fail_under = 80` |
-| No mypy in CI | Type errors silently accumulate | Add mypy step to `ci.yml` |
-| API tokens in GitHub Secrets for PyPI | Security risk, rotation burden | Use Trusted Publishing (OIDC) |
-| Committing directly to `main`/`master` | Bypasses CI checks | Enforce via `no-commit-to-branch` pre-commit hook |
-| Missing `[Unreleased]` section in CHANGELOG | Changes pile up and get forgotten at release time | Keep `[Unreleased]` updated every PR |
-| Pinning exact dep versions in a library | Breaks dependency resolution for users | Use `>=` lower bounds only; avoid `==` |
-| No `__all__` in `__init__.py` | Users can accidentally import internal helpers | Declare `__all__` with every public symbol |
-| `from your_package import *` in tests | Tests pass even when imports are broken | Always use explicit imports |
-| No `SECURITY.md` | No path for responsible vulnerability disclosure | Add file with response timeline |
-| `Any` everywhere in type hints | Defeats mypy entirely | Use `object` for truly arbitrary values |
-| `Union` return types | Forces every caller to write `isinstance()` checks | Return concrete types; use overloads |
-| `setup.cfg` + `pyproject.toml` both active | Conflicts and confusing for contributors | Migrate everything to `pyproject.toml` |
-| Releasing on untagged commits | Version number is meaningless | Always tag before release |
-| Not testing on all supported Python versions | Breakage discovered by users, not you | Matrix test in CI |
-| `license = {text = "MIT"}` (old form) | Deprecated; PEP 639 uses SPDX strings | `license = "MIT"` |
-| No issue templates | Bug reports are inconsistent | Add `bug_report.md` + `feature_request.md` |
+| `__version__ = "1.0.0"` setuptools_scm でハードコーディング |最初の git タグの後は古くなります | `importlib.metadata.version()` を使用します。
+| CI チェックアウトに `fetch-depth: 0` がありません | setuptools_scm でタグが見つかりません → version = `0.0.0+dev` | `fetch-depth: 0` を **すべて** チェックアウト ステップに追加します。
+| `local_scheme` が設定されていません | `+g<hash>` サフィックスにより PyPI アップロードが中断される (ローカル バージョンは拒否される) | `local_scheme = "no-local-version"` |
+| `py.typed` ファイルがありません | IDE と mypy はパッケージを入力どおりに認識しません。パッケージ root | に空の `py.typed` を作成します。
+| `py.typed` は `package-data` にありません |インストールされたホイールにファイルがありません - 役に立たない | `[tool.setuptools.package-data]` に追加 |
+|モジュール先頭でオプションの dep をインポート | `ImportError` 上の `import your_package` すべてのユーザー向け |それを必要とする関数/クラス内の遅延インポート |
+| `setup.py` でメタデータを複製しています | `pyproject.toml` と競合します。ドリフト | `setup.py` を 3 行のシムのみとして保持します。
+|カバレッジ設定に `fail_under` がありません |カバレッジの後退は気づかれない | `fail_under = 80` を設定 |
+| CI に mypy はありません |タイプエラーは静かに蓄積されます。 mypy ステップを `ci.yml` に追加 |
+| GitHub Secrets for PyPI の API トークン |セキュリティリスク、ローテーションの負担 |信頼できる発行 (OIDC) を使用する |
+| `main`/`master` に直接コミットする | CI チェックをバイパスします。 `no-commit-to-branch` コミット前フックを介して強制する |
+| CHANGELOG に `[Unreleased]` セクションがありません |変更が積み重なり、リリース時には忘れ去られる | `[Unreleased]` を PR ごとに更新する |
+|正確な dep バージョンをライブラリに固定する |ユーザーの依存関係の解決を中断します。 `>=` 下限のみを使用してください。 `==` は避けてください。
+| `__init__.py` に `__all__` はありません |ユーザーが誤って内部ヘルパーをインポートする可能性があります。すべてのパブリック シンボルで `__all__` を宣言します。
+| `from your_package import *` テスト中 |インポートが壊れていてもテストは合格します。常に明示的なインポートを使用してください。
+|いいえ `SECURITY.md` |責任ある脆弱性開示の道はない |応答タイムラインを含むファイルを追加 |
+| `Any` 型ヒント内のあらゆる場所 | mypy を完全に破る |真に任意の値には `object` を使用します。
+| `Union` 戻り値の型 |すべての呼び出し元に `isinstance()` チェックの書き込みを強制します。具体的な型を返します。オーバーロードを使用する |
+| `setup.cfg` + `pyproject.toml` 両方ともアクティブ |コントリビューターにとっての矛盾と混乱 |すべてを `pyproject.toml` に移行する |
+|タグなしのコミットでのリリース |バージョン番号は意味がありません |リリース前に必ずタグ付けする |
+|サポートされているすべての Python バージョンでテストしていない |破損はあなたではなくユーザーによって発見されました | CI でのマトリックス テスト |
+| `license = {text = "MIT"}` (旧形式) |廃止されました。 PEP 639 は SPDX 文字列を使用します。 `license = "MIT"` |
+|問題のテンプレートはありません |バグレポートに一貫性がない | `bug_report.md` + `feature_request.md` を追加 |
 
 ---
 
-## 8. Master Release Checklist
+## 8. マスターリリースチェックリスト
 
-Run through every item before pushing a release tag. CI must be fully green.
+リリースタグを押す前に、すべての項目を確認してください。 CI は完全に緑色でなければなりません。
 
-### Code Quality
-```
-[ ] ruff check . — zero errors
-[ ] ruff format . --check — zero formatting issues
-[ ] mypy src/your_package/ — zero type errors
-[ ] pytest — all tests pass
-[ ] Coverage >= 80% (fail_under enforced in pyproject.toml)
-[ ] All GitHub Actions CI jobs green (lint + test matrix)
-```
-
-### Project Structure
-```
-[ ] pyproject.toml — name, description, requires-python, license (SPDX string), authors,
-    keywords (10+), classifiers (Python versions + Typing :: Typed), urls (all 5 fields)
-[ ] dynamic = ["version"] set (if using setuptools_scm or hatch-vcs)
+### コードの品質「」
+【】ラフチェック。 — エラーゼロ
+[ ] ラフ形式。 --check — フォーマットの問題はゼロ
+[ ] mypy src/your_package/ — ゼロタイプのエラー
+[ ] pytest — すべてのテストに合格します
+[ ] カバレッジ >= 80% (pyproject.toml で強制的に fail_under)
+[ ] すべての GitHub Actions CI ジョブは緑色 (lint + テスト マトリックス)
+「」### プロジェクトの構造「」
+[ ] pyproject.toml — 名前、説明、Requires-Python、ライセンス (SPDX 文字列)、作成者、
+    キーワード (10 以上)、分類子 (Python バージョン + Typing :: Typed)、URL (5 つのフィールドすべて)
+[ ] 動的 = ["バージョン"] セット (setuptools_scm または hatch-vcs を使用する場合)
 [ ] [tool.setuptools_scm] with local_scheme = "no-local-version"
-[ ] setup.py shim present (if using setuptools_scm)
-[ ] py.typed marker file exists (empty file in package root)
-[ ] py.typed listed in [tool.setuptools.package-data]
-[ ] "Typing :: Typed" classifier in pyproject.toml
-[ ] __init__.py has __all__ listing all public symbols
-[ ] __version__ reads from importlib.metadata (not hardcoded)
-```
+[ ] setup.py シムが存在します (setuptools_scm を使用している場合)
+[ ] py.typed マーカー ファイルが存在します (パッケージ ルートに空のファイル)
+[ ] py.typed は [tool.setuptools.package-data] にリストされています
+[ ] pyproject.toml の「Typing :: Typed」分類子
+[ ] __init__.py にはすべてのパブリック シンボルをリストする __all__ があります
+[ ] __version__ は importlib.metadata から読み取ります (ハードコードされていません)
+「」### テスト「」
+[ ] conftest.py にはクライアントとバックエンドの共有フィクスチャがあります
+[ ] テスト済みのコア ハッピー パス
+[ ] テスト済みのエラー条件とエッジケース
+[ ] 各バックエンドは個別に個別にテストされました
+[ ] asyncio_mode = pyproject.toml の "auto" (非同期テスト用)
+[ ] fetch- Depth: すべての CI チェックアウト ステップで 0
+「」### 変更履歴とドキュメント「」
+[ ] CHANGELOG.md: [未リリース] エントリが [x.y.z] に移動されました - YYYY-MM-DD
+[ ] README には、説明、インストール コマンド、クイック スタート、構成テーブル、バッジが含まれています
+[ ] すべての公開シンボルには Google スタイルの docstring が含まれます
+[ ] CONTRIBUTING.md: 開発セットアップ、テスト/lint コマンド、PR 命令
+[ ] SECURITY.md: サポートされているバージョン、タイムラインを含むレポート プロセス
+「」### バージョン管理「」
+[ ] すべての CI チェックは、タグ付けする予定のコミットに渡されます
+[ ] CHANGELOG.md が更新され、コミットされました
+[ ] Git タグは形式 v1.2.3 に従います (semver、v プレフィックス)
+[ ] ビルドされたホイール名に古い local_scheme サフィックスは表示されません
+「」###CI/CD「」
+[ ] ci.yml: lint + mypy + テスト行列 (サポートされているすべての Python バージョン)
+[ ] public.yml: v*.*.* タグでトリガーされ、信頼された公開 (OIDC) を使用します。
+[ ] GitHub リポジトリの [設定] → [環境] で作成された pypi 環境
+[ ] リポジトリ シークレットに API トークンが保存されていません
+「」### リリースコマンドシーケンス「」バッシュ
+# 1. 完全なローカル検証を実行する
+ラフチェック。 ;ラフフォーマット。 - チェック ; mypy src/your_package/ ; pytest
 
-### Testing
-```
-[ ] conftest.py has shared fixtures for client and backend
-[ ] Core happy path tested
-[ ] Error conditions and edge cases tested
-[ ] Each backend tested independently in isolation
-[ ] asyncio_mode = "auto" in pyproject.toml (for async tests)
-[ ] fetch-depth: 0 in all CI checkout steps
-```
-
-### CHANGELOG and Docs
-```
-[ ] CHANGELOG.md: [Unreleased] entries moved to [x.y.z] - YYYY-MM-DD
-[ ] README has: description, install commands, quick start, config table, badges
-[ ] All public symbols have Google-style docstrings
-[ ] CONTRIBUTING.md: dev setup, test/lint commands, PR instructions
-[ ] SECURITY.md: supported versions, reporting process with timeline
-```
-
-### Versioning
-```
-[ ] All CI checks pass on the commit you plan to tag
-[ ] CHANGELOG.md updated and committed
-[ ] Git tag follows format v1.2.3 (semver, v prefix)
-[ ] No stale local_scheme suffixes will appear in the built wheel name
-```
-
-### CI/CD
-```
-[ ] ci.yml: lint + mypy + test matrix (all supported Python versions)
-[ ] publish.yml: triggered on v*.*.* tags, uses Trusted Publishing (OIDC)
-[ ] pypi environment created in GitHub repo Settings → Environments
-[ ] No API tokens stored in repository secrets
-```
-
-### The Release Command Sequence
-```bash
-# 1. Run full local validation
-ruff check . ; ruff format . --check ; mypy src/your_package/ ; pytest
-
-# 2. Update CHANGELOG.md — move [Unreleased] to [x.y.z]
-# 3. Commit the changelog
+# 2. CHANGELOG.md を更新します — [未リリース] を [x.y.z] に移動します
+# 3. 変更ログをコミットする
 git add CHANGELOG.md
-git commit -m "chore: prepare release vX.Y.Z"
+git commit -m "雑務: リリース vX.Y.Z の準備"
 
-# 4. Tag and push — this triggers publish.yml automatically
-git tag vX.Y.Z
-git push origin main --tags
+# 4. タグ付けしてプッシュ - これにより、publish.yml が自動的にトリガーされます
+git タグ vX.Y.Z
+git Push Origin main --tags
 
-# 5. Monitor: https://github.com/<you>/<pkg>/actions
-# 6. Verify: https://pypi.org/project/your-package/
-```
+# 5. モニター: https://github.com/<you>/<pkg>/actions
+# 6. 確認: https://pypi.org/project/your-package/
+「」

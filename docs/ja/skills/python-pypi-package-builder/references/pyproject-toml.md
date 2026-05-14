@@ -1,470 +1,400 @@
-# pyproject.toml, Backends, Versioning, and Typed Package
+# pyproject.toml、バックエンド、バージョン管理、および型付きパッケージ
 
-## Table of Contents
-1. [Complete pyproject.toml — setuptools + setuptools_scm](#1-complete-pyprojecttoml)
-2. [hatchling (modern, zero-config)](#2-hatchling-modern-zero-config)
-3. [flit (minimal, version from `__version__`)](#3-flit-minimal-version-from-__version__)
-4. [poetry (integrated dep manager)](#4-poetry-integrated-dep-manager)
-5. [Versioning Strategy — PEP 440, semver, dep specifiers](#5-versioning-strategy)
-6. [setuptools_scm — dynamic version from git tags](#6-dynamic-versioning-with-setuptools_scm)
-7. [setup.py shim for legacy editable installs](#7-setuppy-shim)
-8. [PEP 561 typed package (py.typed)](#8-typed-package-pep-561)
+## 目次
+1. [完全な pyproject.toml — setuptools + setuptools_scm](#1-complete-pyprojecttoml)
+2. [孵化したばかりの子 (モダン、ゼロ構成)](#2-hatchling-modern-zero-config)
+3. [flit (最小、`__version__` のバージョン)](#3-flit-minimal-version-from-__version__)
+4. [poetry (統合された dep マネージャー)](#4-poetry-integrated-dep-manager)
+5. [バージョン管理戦略 — PEP 440、semver、dep 指定子](#5-versioning-strategy)
+6. [setuptools_scm — git タグからの動的バージョン](#6-dynamic-versioning-with-setuptools_scm)
+7. [従来の編集可能なインストール用の setup.py shim](#7-setuppy-shim)
+8. [PEP 561 型付きパッケージ (py.typed)](#8-typed-package-pep-561)
 
 ---
 
-## 1. Complete pyproject.toml
+## 1. pyproject.toml を完成させます
 
-### setuptools + setuptools_scm (recommended for git-tag versioning)
-
-```toml
-[build-system]
-requires = ["setuptools>=68", "wheel", "setuptools_scm"]
+### setuptools + setuptools_scm (git タグのバージョン管理に推奨)```トムル
+[ビルドシステム]
+Required = ["setuptools>=68", "wheel", "setuptools_scm"]
 build-backend = "setuptools.build_meta"
 
-[project]
-name = "your-package"
-dynamic = ["version"]           # Version comes from git tags via setuptools_scm
-description = "<your description> — <key feature 1>, <key feature 2>"
+[プロジェクト]
+名前 = "あなたのパッケージ"
+Dynamic = ["version"] # バージョンは setuptools_scm 経由で git タグから取得されます
+description = "<説明> — <主な機能 1>、<主な機能 2>"
 readme = "README.md"
-requires-python = ">=3.10"
-license = "MIT"                # PEP 639 SPDX expression (string, not {text = "MIT"})
-license-files = ["LICENSE"]
-authors = [
-    {name = "Your Name", email = "you@example.com"},
-]
-maintainers = [
-    {name = "Your Name", email = "you@example.com"},
-]
-keywords = [
-    "python",
-    # Add 10-15 specific keywords that describe your library — they affect PyPI discoverability
-]
-classifiers = [
-    "Development Status :: 3 - Alpha",          # Change to 5 at stable release
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Typing :: Typed",          # Add this when shipping py.typed
-]
-dependencies = [
-    # List your runtime dependencies here. Keep them minimal.
-    # Example: "httpx>=0.24", "pydantic>=2.0"
-    # Leave empty if your library has no required runtime deps.
-]
+必要な-Python = ">=3.10"
+ライセンス = "MIT" # PEP 639 SPDX 式 (文字列、{text = "MIT"} ではありません)
+ライセンスファイル = ["ライセンス"]
+著者 = [
+    {名前 = "あなたの名前"、メール = "you@example.com"}、
+】
+メンテナー = [
+    {名前 = "あなたの名前"、メール = "you@example.com"}、
+】
+キーワード = [
+    「パイソン」、
+    # ライブラリを説明する 10 ～ 15 個の特定のキーワードを追加します - これらは PyPI の発見可能性に影響します
+】
+分類子 = [
+    "開発ステータス :: 3 - アルファ"、# 安定版リリースでは 5 に変更されます
+    "対象読者:: 開発者",
+    "ライセンス :: OSI 承認済み :: MIT ライセンス",
+    "オペレーティング システム :: OS に依存しない",
+    "プログラミング言語 :: Python :: 3",
+    "プログラミング言語 :: Python :: 3.10",
+    "プログラミング言語 :: Python :: 3.11",
+    "プログラミング言語 :: Python :: 3.12",
+    "プログラミング言語 :: Python :: 3.13",
+    "トピック :: ソフトウェア開発 :: ライブラリ :: Python モジュール",
+    "Typing :: Typed", # py.typed を出荷するときにこれを追加します
+】
+依存関係 = [
+    # ここにランタイムの依存関係をリストします。それらは最小限にしてください。
+    # 例: "httpx>=0.24"、"pydantic>=2.0"
+    # ライブラリに必要なランタイム DEPS がない場合は、空のままにしておきます。
+】
 
-[project.optional-dependencies]
-redis = [
-    "redis>=4.2",               # Optional heavy backend
-]
-dev = [
+[プロジェクト.オプションの依存関係]
+レディス = [
+    "redis>=4.2", # オプションの重いバックエンド
+】
+開発 = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
     "httpx>=0.24",
     "pytest-cov>=4.0",
-    "ruff>=0.4",
-    "black>=24.0",
+    "ラフ>=0.4"、
+    "ブラック>=24.0"、
     "isort>=5.13",
     "mypy>=1.0",
-    "pre-commit>=3.0",
-    "build",
-    "twine",
-]
+    "事前コミット>=3.0",
+    「構築する」、
+    「麻ひも」、
+】
 
-[project.urls]
-Homepage      = "https://github.com/yourusername/your-package"
-Documentation = "https://github.com/yourusername/your-package#readme"
-Repository    = "https://github.com/yourusername/your-package"
-"Bug Tracker" = "https://github.com/yourusername/your-package/issues"
-Changelog     = "https://github.com/yourusername/your-package/blob/master/CHANGELOG.md"
+[プロジェクト.url]
+ホームページ = "https://github.com/あなたのユーザー名/あなたのパッケージ"
+ドキュメント = "https://github.com/yourusername/your-package#readme"
+リポジトリ = "https://github.com/yourusername/your-package"
+「バグトラッカー」=「https://github.com/yourusername/your-package/issues」
+変更ログ = "https://github.com/yourusername/your-package/blob/master/CHANGELOG.md"
 
-# --- Setuptools configuration ---
+# --- Setuptools 構成 ---
 [tool.setuptools.packages.find]
-include = ["your_package*"]   # flat layout
-# For src/ layout, use:
-# where = ["src"]
+include = ["your_package*"] # フラットレイアウト
+# src/layout の場合は、次を使用します。
+# ここで = ["ソース"]
 
-[tool.setuptools.package-data]
-your_package = ["py.typed"]  # Ship the py.typed marker in the wheel
+[tool.setuptools.パッケージデータ]
+your_package = ["py.typed"] # py.typed マーカーをホイールに含めて送信します
 
-# --- setuptools_scm: version from git tags ---
+# --- setuptools_scm: git タグからのバージョン ---
 [tool.setuptools_scm]
-version_scheme = "post-release"
-local_scheme   = "no-local-version"  # Prevents +local suffix breaking PyPI uploads
+version_scheme = "リリース後"
+local_scheme = "no-local-version" # +local サフィックスによる PyPI アップロードの破壊を防止します
 
-# --- Ruff (linting) ---
-[tool.ruff]
-target-version = "py310"
-line-length    = 100
+# --- ラフ（糸くず） ---
+[ツール.ラフ]
+ターゲットバージョン = "py310"
+行の長さ = 100
 
-[tool.ruff.lint]
-select = ["E", "F", "W", "I", "N", "UP", "B", "SIM", "C4", "PTH", "RUF"]
-ignore = ["E501"]   # Line length enforced by formatter
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*"   = ["S101", "ANN"]    # Allow assert and missing annotations in tests
-"scripts/*" = ["T201"]           # Allow print in scripts
+[ツール.ruff.lint]
+select = ["E"、"F"、"W"、"I"、"N"、"UP"、"B"、"SIM"、"C4"、"PTH"、"RUF"]
+ignore = ["E501"] # フォーマッタによって強制される行の長さ[tool.ruff.lint.ファイルごとの無視]
+"tests/*" = ["S101", "ANN"] # テストでのアサーションと欠落したアノテーションを許可します
+"scripts/*" = ["T201"] # スクリプトでの印刷を許可します
 
 [tool.ruff.format]
-quote-style = "double"
+引用スタイル = "ダブル"
 
-# --- Black (formatting) ---
-[tool.black]
-line-length    = 100
-target-version = ["py310", "py311", "py312", "py313"]
+# --- 黒 (書式設定) ---
+[ツール.ブラック]
+行の長さ = 100
+ターゲットバージョン = ["py310", "py311", "py312", "py313"]
 
-# --- isort (import sorting) ---
-[tool.isort]
-profile     = "black"
-line_length = 100
+# --- isort (インポートソート) ---
+[ツール.isort]
+プロフィール = "黒"
+行の長さ = 100
 
-# --- mypy (static type checking) ---
-[tool.mypy]
-python_version         = "3.10"
-warn_return_any        = true
-warn_unused_configs    = true
-warn_unused_ignores    = true
-disallow_untyped_defs  = true
-disallow_any_generics  = true
+# --- mypy (静的型チェック) ---
+[ツール.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_any_generics = true
 ignore_missing_imports = true
-strict                 = false     # Set true for maximum strictness
+strict = false # 最大限の厳密性を得るには true を設定します
 
 [[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false     # Relaxed in tests
+module = "テスト.*"
+disallow_untyped_defs = false # テストで緩和
 
 # --- pytest ---
 [tool.pytest.ini_options]
-asyncio_mode  = "auto"
-testpaths     = ["tests"]
-pythonpath    = ["."]          # For flat layout; remove for src/
-python_files  = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
-addopts       = "-v --tb=short --cov=your_package --cov-report=term-missing"
+asyncio_mode = "自動"
+テストパス = ["テスト"]
+pythonpath = ["."] # フラット レイアウトの場合。 src/ の削除
+python_files = "test_*.py"
+python_classes = "テスト*"
+python_functions = "テスト_*"
+addopts = "-v --tb=short --cov=your_package --cov-report=term-missing"
 
-# --- Coverage ---
-[tool.coverage.run]
-source = ["your_package"]
-omit   = ["tests/*"]
+# --- 対象範囲 ---
+[ツール.カバレッジ.実行]
+ソース = ["あなたのパッケージ"]
+省略 = ["tests/*"]
 
-[tool.coverage.report]
-fail_under   = 80
+[ツール.カバレッジ.レポート]
+失敗アンダー = 80
 show_missing = true
 exclude_lines = [
-    "pragma: no cover",
+    "プラグマ: カバーなし",
     "def __repr__",
-    "raise NotImplementedError",
-    "if TYPE_CHECKING:",
-    "@abstractmethod",
-]
-```
+    "NotImplementedError を発生させる",
+    "TYPE_CHECKING の場合:",
+    "@abstractメソッド",
+】
+「」---
 
----
+## 2. 孵化したばかりの子 (最新、ゼロ構成)
 
-## 2. hatchling (Modern, Zero-Config)
-
-Best for new pure-Python projects that don't need C extensions. No `setup.py` needed. Use
-`hatch-vcs` for git-tag versioning, or omit it for manual version bumps.
-
-```toml
-[build-system]
-requires = ["hatchling", "hatch-vcs"]     # hatch-vcs for git-tag versioning
+C 拡張機能を必要としない新しい純粋な Python プロジェクトに最適です。 `setup.py` は必要ありません。使用する
+git タグのバージョン管理の場合は `hatch-vcs`、手動でバージョンをバンプする場合は省略します。```トムル
+[ビルドシステム]
+Required = ["hatchling", "hatch-vcs"] # git タグのバージョン管理用の hatch-vcs
 build-backend = "hatchling.build"
 
-[project]
-name = "your-package"
-dynamic = ["version"]            # Remove and add version = "1.0.0" for manual versioning
-description = "One-line description"
+[プロジェクト]
+名前 = "あなたのパッケージ"
+Dynamic = ["version"] # 手動バージョン管理用に version = "1.0.0" を削除して追加します
+description = "1 行の説明"
 readme = "README.md"
-requires-python = ">=3.10"
-license = "MIT"
-license-files = ["LICENSE"]
-authors = [{name = "Your Name", email = "you@example.com"}]
-keywords = ["python"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Typing :: Typed",
-]
-dependencies = []
+必要な-Python = ">=3.10"
+ライセンス = "MIT"
+ライセンスファイル = ["ライセンス"]
+著者 = [{名前 = "あなたの名前", 電子メール = "you@example.com"}]
+キーワード = ["Python"]
+分類子 = [
+    "開発状況 :: 3 - アルファ",
+    "対象読者:: 開発者",
+    "ライセンス :: OSI 承認済み :: MIT ライセンス",
+    "オペレーティング システム :: OS に依存しない",
+    "プログラミング言語 :: Python :: 3",
+    "入力 :: 入力済み",
+】
+依存関係 = []
 
-[project.optional-dependencies]
+[プロジェクト.オプションの依存関係]
 dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.6", "mypy>=1.10"]
 
-[project.urls]
-Homepage  = "https://github.com/yourusername/your-package"
-Changelog = "https://github.com/yourusername/your-package/blob/master/CHANGELOG.md"
+[プロジェクト.url]
+ホームページ = "https://github.com/あなたのユーザー名/あなたのパッケージ"
+変更ログ = "https://github.com/yourusername/your-package/blob/master/CHANGELOG.md"
 
-# --- Hatchling build config ---
+# --- ヒナのビルド構成 ---
 [tool.hatch.build.targets.wheel]
-packages = ["src/your_package"]    # src/ layout
-# packages = ["your_package"]      # ← flat layout
+パッケージ = ["src/your_package"] # src/ レイアウト
+# パッケージ = ["your_package"] # ← フラット レイアウト
 
-[tool.hatch.version]
-source = "vcs"                     # git-tag versioning via hatch-vcs
+[ツール.ハッチング.バージョン]
+source = "vcs" # hatch-vcs による git タグのバージョン管理
 
 [tool.hatch.version.raw-options]
-local_scheme = "no-local-version"
+local_scheme = "ローカルバージョンなし"
 
-# ruff, mypy, pytest, coverage sections — same as setuptools template above
-```
+# ruff、mypy、pytest、カバレッジ セクション — 上記の setuptools テンプレートと同じ
+「」---
 
----
+## 3. flit (最小、`__version__` のバージョン)
 
-## 3. flit (Minimal, Version from `__version__`)
+非常に単純な単一モジュールのパッケージに最適です。設定ゼロ。バージョンは直接読み込まれます
+@@コード1@@。 `__version__` には常に **静的文字列** が必要です。```トムル
+[ビルドシステム]
+必要 = ["flit_core>=3.9"]
+ビルドバックエンド = "flit_core.buildapi"
 
-Best for very simple, single-module packages. Zero config. Version is read directly from
-`your_package/__init__.py`. Always requires a **static string** for `__version__`.
-
-```toml
-[build-system]
-requires = ["flit_core>=3.9"]
-build-backend = "flit_core.buildapi"
-
-[project]
-name = "your-package"
-dynamic = ["version", "description"]  # Read from __init__.py __version__ and docstring
+[プロジェクト]
+名前 = "あなたのパッケージ"
+Dynamic = ["version", "description"] # __init__.py __version__ と docstring から読み取る
 readme = "README.md"
-requires-python = ">=3.10"
-license = "MIT"
-authors = [{name = "Your Name", email = "you@example.com"}]
-classifiers = [
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Typing :: Typed",
-]
-dependencies = []
+必要な-Python = ">=3.10"
+ライセンス = "MIT"
+著者 = [{名前 = "あなたの名前", 電子メール = "you@example.com"}]
+分類子 = [
+    "ライセンス :: OSI 承認済み :: MIT ライセンス",
+    "プログラミング言語 :: Python :: 3",
+    "入力 :: 入力済み",
+】
+依存関係 = []
 
-[project.urls]
-Homepage = "https://github.com/yourusername/your-package"
+[プロジェクト.url]
+ホームページ = "https://github.com/あなたのユーザー名/あなたのパッケージ"
 
-# flit reads __version__ from your_package/__init__.py automatically.
-# Ensure __init__.py has: __version__ = "1.0.0"  (static string — flit does NOT support
-# importlib.metadata for dynamic version discovery)
-```
+# flit は your_package/__init__.py から __version__ を自動的に読み取ります。
+# __init__.py に次の内容が含まれていることを確認します: __version__ = "1.0.0" (静的文字列 - flit はサポートしていません)
+# 動的バージョン検出用の importlib.metadata)
+「」---
 
----
+## 4. 詩 (統合された依存関係 + ビルド マネージャー)
 
-## 4. poetry (Integrated Dependency + Build Manager)
-
-Best for teams that want a single tool to manage deps, build, and publish. Poetry v2+
-supports the standard `[project]` table.
-
-```toml
-[build-system]
-requires = ["poetry-core>=2.0"]
+デプスの管理、構築、公開を 1 つのツールで行いたいチームに最適です。詩 v2+
+標準の `[project]` テーブルをサポートします。```トムル
+[ビルドシステム]
+必要 = ["詩コア>=2.0"]
 build-backend = "poetry.core.masonry.api"
 
-[project]
-name = "your-package"
-version = "1.0.0"
-description = "One-line description"
+[プロジェクト]
+名前 = "あなたのパッケージ"
+バージョン = "1.0.0"
+description = "1 行の説明"
 readme = "README.md"
-requires-python = ">=3.10"
-license = "MIT"
-authors = [{name = "Your Name", email = "you@example.com"}]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Typing :: Typed",
-]
-dependencies = []   # poetry v2+ uses standard [project] table
+必要な-Python = ">=3.10"
+ライセンス = "MIT"
+著者 = [{名前 = "あなたの名前", 電子メール = "you@example.com"}]
+分類子 = [
+    "プログラミング言語 :: Python :: 3",
+    "入力 :: 入力済み",
+】
+dependency = [] # 詩 v2+ は標準の [プロジェクト] テーブルを使用します
 
-[project.optional-dependencies]
+[プロジェクト.オプションの依存関係]
 dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.10"]
 
-# Optional: use [tool.poetry] only for poetry-specific features
-[tool.poetry.group.dev.dependencies]
-# Poetry-specific group syntax (alternative to [project.optional-dependencies])
+# オプション: [tool.poetry] は詩固有の機能にのみ使用します
+[tool.poetry.group.dev.dependency]
+# 詩固有のグループ構文 ([project.optional-dependency] の代替)
 pytest = ">=8.0"
-```
+「」---
 
----
+## 5. バージョン管理戦略
 
-## 5. Versioning Strategy
+### PEP 440 — スタンダード「」
+正規形式: N[.N]+[{a|b|rc}N][.postN][.devN]
 
-### PEP 440 — The Standard
+例:
+  1.0.0 安定版リリース
+  1.0.0a1 アルファ (プレリリース)
+  1.0.0b2 ベータ版
+  1.0.0rc1 リリース候補
+  1.0.0.post1 リリース後 (例: パッケージ修正のみ - コード変更なし)
+  1.0.0.dev1 開発スナップショット (PyPI 用ではありません)
+「」### セマンティック バージョニング (SemVer) — すべてのライブラリにこれを使用します「」
+メジャーパッチ、マイナーパッチ
 
-```
-Canonical form:  N[.N]+[{a|b|rc}N][.postN][.devN]
-
-Examples:
-  1.0.0          Stable release
-  1.0.0a1        Alpha (pre-release)
-  1.0.0b2        Beta
-  1.0.0rc1       Release candidate
-  1.0.0.post1    Post-release (e.g., packaging fix only — no code change)
-  1.0.0.dev1     Development snapshot (NOT for PyPI)
-```
-
-### Semantic Versioning (SemVer) — use this for every library
-
-```
-MAJOR.MINOR.PATCH
-
-MAJOR: Breaking API change (remove/rename public function/class/arg)
-MINOR: New feature, fully backward-compatible
-PATCH: Bug fix, no API change
-```
-
-| Change | What bumps | Example |
+メジャー: API の重大な変更 (パブリック関数/クラス/引数の削除/名前変更)
+マイナー: 新機能、完全な下位互換性
+パッチ: バグ修正、API 変更なし
+「」|変更 |何がぶつかる |例 |
 |---|---|---|
-| Remove / rename a public function | MAJOR | `1.2.3 → 2.0.0` |
-| Add new public function | MINOR | `1.2.3 → 1.3.0` |
-| Bug fix, no API change | PATCH | `1.2.3 → 1.2.4` |
-| New pre-release | suffix | `2.0.0a1`, `2.0.0rc1` |
+|パブリック関数を削除/名前変更する |メジャー | `1.2.3 → 2.0.0` |
+|新しいパブリック関数を追加 |マイナー | `1.2.3 → 1.3.0` |
+|バグ修正、API 変更なし |パッチ | `1.2.3 → 1.2.4` |
+|新しいプレリリース |接尾辞 | `2.0.0a1`、`2.0.0rc1` |
 
-### Version in code — read from package metadata
-
-```python
+### コード内のバージョン — パッケージのメタデータから読み取る「」パイソン
 # your_package/__init__.py
-from importlib.metadata import version, PackageNotFoundError
+importlib.metadata インポート バージョンから、PackageNotFoundError
 
-try:
-    __version__ = version("your-package")
-except PackageNotFoundError:
-    __version__ = "0.0.0-dev"    # Fallback for uninstalled dev checkouts
-```
+試してみてください:
+    __version__ = version("あなたのパッケージ")
+PackageNotFoundError を除く:
+    __version__ = "0.0.0-dev" # アンインストールされた開発チェックアウトのフォールバック
+「」setuptools_scm を使用する場合は、`__version__ = "1.0.0"` をハードコードしないでください。setuptools_scm を使用すると、無効になります。
+最初の git タグ。常に `importlib.metadata` を使用してください。
 
-Never hardcode `__version__ = "1.0.0"` when using setuptools_scm — it goes stale after the
-first git tag. Use `importlib.metadata` always.
+### 依存関係に関するバージョン指定子のベスト プラクティス```トムル
+# [プロジェクト] の依存関係内 — ライブラリの場合:
+"httpx>=0.24" # 最小バージョン - ライブラリに推奨
+"httpx>=0.24,<1.0" # 既知の重大な変更が存在する場合のみ上限
 
-### Version specifier best practices for dependencies
+# アプリケーションのみ (ライブラリには決して使用しないでください):
+"httpx==0.27.0" # 正確にピン留めします - ライブラリの dep 解像度を壊します
 
-```toml
-# In [project] dependencies — for a LIBRARY:
-"httpx>=0.24"            # Minimum version — PREFERRED for libraries
-"httpx>=0.24,<1.0"       # Upper bound only when a known breaking change exists
+# ライブラリではこれを決して行わないでください:
+# "httpx~=0.24.0" # 互換性のあるリリース演算子 — 厳しすぎます
+# "httpx==0.27.*" # ワイルドカード ピン — 壊れやすい
+「」---
 
-# ONLY for applications (never for libraries):
-"httpx==0.27.0"          # Pin exactly — breaks dep resolution in libraries
+## 6. `setuptools_scm` を使用した動的バージョニング
 
-# NEVER do this in a library:
-# "httpx~=0.24.0"        # Compatible release operator — too tight
-# "httpx==0.27.*"        # Wildcard pin — fragile
-```
+`setuptools_scm` は git タグを読み取り、パッケージのバージョンを自動的に設定します。手動で行う必要はありません
+各リリースの前にバージョン文字列を編集します。
 
----
+### 仕組み「」
+git タグ v1.0.0 → パッケージ バージョン = 1.0.0
+git タグ v1.1.0 → パッケージ バージョン = 1.1.0
+(タグの後にコミット) → version = 1.1.0.post1+g<hash> (PyPI 用に削除)
+「」`local_scheme = "no-local-version"` は `+g<hash>` サフィックスを取り除き、PyPI アップロードが失敗しないようにします。
+「ローカル バージョン ラベルは許可されていません」エラー。
 
-## 6. Dynamic Versioning with `setuptools_scm`
-
-`setuptools_scm` reads your git tags and sets the package version automatically — no more manually
-editing version strings before each release.
-
-### How it works
-
-```
-git tag v1.0.0        →  package version = 1.0.0
-git tag v1.1.0        →  package version = 1.1.0
-(commits after tag)   →  version = 1.1.0.post1+g<hash>  (stripped for PyPI)
-```
-
-`local_scheme = "no-local-version"` strips the `+g<hash>` suffix so PyPI uploads never fail with
-a "local version label not allowed" error.
-
-### Access version at runtime
-
-```python
+### 実行時のバージョンへのアクセス「」パイソン
 # your_package/__init__.py
-from importlib.metadata import version, PackageNotFoundError
+importlib.metadata インポート バージョンから、PackageNotFoundError
 
-try:
-    __version__ = version("your-package")
-except PackageNotFoundError:
-    __version__ = "0.0.0-dev"  # Fallback for uninstalled dev checkouts
-```
+試してみてください:
+    __version__ = version("あなたのパッケージ")
+PackageNotFoundError を除く:
+    __version__ = "0.0.0-dev" # アンインストールされた開発チェックアウトのフォールバック
+「」setuptools_scm を使用する場合は、`__version__ = "1.0.0"` をハードコードしないでください。setuptools_scm を使用すると、無効になります。
+最初のタグ。
 
-Never hardcode `__version__ = "1.0.0"` when using setuptools_scm — it will go stale after the
-first tag.
+### 完全なリリース フロー (これだけです。他には何も必要ありません)「」バッシュ
+git タグ v1.2.0
+git Push Origin master --tags
+# GitHub アクションのpublish.yml が自動的にトリガーされる
+「」---
 
-### Full release flow (this is it — nothing else needed)
+## 7. `setup.py` シム
 
-```bash
-git tag v1.2.0
-git push origin master --tags
-# GitHub Actions publish.yml triggers automatically
-```
+一部の古いツールや IDE では、依然として `setup.py` が必要です。 3 行のシムとして保持します - すべて本物です
+設定は `pyproject.toml` に残ります。「」パイソン
+# setup.py — 薄いシムのみ。すべての設定は pyproject.toml にあります。
+setuptoolsからセットアップをインポート
 
----
-
-## 7. `setup.py` Shim
-
-Some older tools and IDEs still expect a `setup.py`. Keep it as a three-line shim — all real
-configuration stays in `pyproject.toml`.
-
-```python
-# setup.py — thin shim only. All config lives in pyproject.toml.
-from setuptools import setup
-
-setup()
-```
-
-Never duplicate `name`, `version`, `dependencies`, or any other metadata from `pyproject.toml`
-into `setup.py`. If you copy anything there it will eventually drift and cause confusing conflicts.
+セットアップ()
+「」`name`、`version`、`dependencies`、またはその他のメタデータを `pyproject.toml` から複製しないでください。
+`setup.py` に変換します。そこに何かをコピーすると、最終的にはずれてしまい、混乱を招く競合が発生します。
 
 ---
 
-## 8. Typed Package (PEP 561)
+## 8. 型付きパッケージ (PEP 561)
 
-A properly declared typed package means mypy, pyright, and IDEs automatically pick up your type
-hints without any extra configuration from your users.
+適切に宣言された型付きパッケージとは、mypy、pyright、および IDE が自動的に型を取得することを意味します。
+ユーザーが追加の構成を行うことなく、ヒントを得ることができます。
 
-### Step 1: Create the marker file
+### ステップ 1: マーカー ファイルを作成する「」バッシュ
+# ファイルは存在する必要があります。その内容は重要ではありません。その存在が信号です。
+your_package/py.typed にタッチします
+「」### ステップ 2: ホイールに含める
 
-```bash
-# The file must exist; its content doesn't matter — its presence is the signal.
-touch your_package/py.typed
-```
-
-### Step 2: Include it in the wheel
-
-Already in the template above:
-
-```toml
-[tool.setuptools.package-data]
+上記のテンプレートにはすでに含まれています:```トムル
+[tool.setuptools.パッケージデータ]
 your_package = ["py.typed"]
-```
-
-### Step 3: Add the PyPI classifier
-
-```toml
-classifiers = [
+「」### ステップ 3: PyPI 分類子を追加する```トムル
+分類子 = [
     ...
-    "Typing :: Typed",
-]
-```
-
-### Step 4: Type-annotate all public functions
-
-```python
+    "入力 :: 入力済み",
+】
+「」### ステップ 4: すべてのパブリック関数に型アノテーションを付ける「」パイソン
 # Good — fully typed
 def process(
-    self,
+    自分自身、
     data: dict[str, object],
-    *,
-    timeout: int = 30,
+    *、
+    タイムアウト: int = 30、
 ) -> dict[str, object]:
     ...
 
-# Bad — mypy will flag this, and IDEs give no completions to users
-def process(self, data, timeout=30):
+# 悪い — mypy はこれにフラグを立てますが、IDE はユーザーに補完を提供しません
+def プロセス (自己、データ、タイムアウト = 30):
     ...
-```
-
-### Step 5: Verify py.typed ships in the wheel
-
-```bash
-python -m build
-unzip -l dist/your_package-*.whl | grep py.typed
-# Must show: your_package/py.typed
-```
-
-If it's missing, check your `[tool.setuptools.package-data]` config.
+「」### ステップ 5: py.typed がホイールに組み込まれていることを確認する「」バッシュ
+Python -m ビルド
+unzip -l dist/your_package-*.whl | unzip -l dist/your_package-*.whl | unzip -l dist/your_package-*.whl grep py.typed
+# 表示する必要があります: your_package/py.typed
+「」見つからない場合は、`[tool.setuptools.package-data]` 構成を確認してください。

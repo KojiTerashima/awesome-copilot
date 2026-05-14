@@ -4,38 +4,35 @@ description: 'Process media files (video, audio, images, documents) using Transl
 license: MIT
 compatibility: Requires a free Transloadit account (https://transloadit.com/signup). Uses the @transloadit/mcp-server MCP server or the @transloadit/node CLI.
 ---
+# Transloadit メディア処理
 
-# Transloadit Media Processing
+Transloadit のクラウド インフラストラクチャを使用して、メディア ファイルを処理、変換、エンコードします。
+86 個以上の特殊な処理ロボットでビデオ、オーディオ、画像、ドキュメントをサポートします。
 
-Process, transform, and encode media files using Transloadit's cloud infrastructure.
-Supports video, audio, images, and documents with 86+ specialized processing robots.
+## このスキルを使用する場合
 
-## When to Use This Skill
+このスキルは、次の場合に使用します。
 
-Use this skill when you need to:
+- ビデオを HLS、MP4、WebM、またはその他の形式にエンコードします
+- ビデオからサムネイルまたはアニメーション GIF を生成
+- 画像のサイズ変更、トリミング、透かし、または最適化
+- 画像形式間の変換 (JPEG、PNG、WebP、AVIF、HEIF)
+- オーディオの抽出またはトランスコード (MP3、AAC、FLAC、WAV)
+- ビデオまたはオーディオクリップを連結します
+- ビデオに字幕またはオーバーレイテキストを追加します
+- OCR文書（PDF、スキャンした画像）
+- 音声合成またはテキスト読み上げを実行します。
+- AI ベースのコンテンツ管理またはオブジェクト検出を適用する
+- 操作を連鎖させる複数ステップのメディア パイプラインを構築する
 
-- Encode video to HLS, MP4, WebM, or other formats
-- Generate thumbnails or animated GIFs from video
-- Resize, crop, watermark, or optimize images
-- Convert between image formats (JPEG, PNG, WebP, AVIF, HEIF)
-- Extract or transcode audio (MP3, AAC, FLAC, WAV)
-- Concatenate video or audio clips
-- Add subtitles or overlay text on video
-- OCR documents (PDF, scanned images)
-- Run speech-to-text or text-to-speech
-- Apply AI-based content moderation or object detection
-- Build multi-step media pipelines that chain operations together
+## セットアップ
 
-## Setup
+### オプション A: MCP サーバー (Copilot に推奨)
 
-### Option A: MCP Server (recommended for Copilot)
+Transloadit MCP サーバーを IDE 構成に追加します。これにより、エージェントに直接アクセスできるようになります。
+Transloadit ツール (`create_template`、`create_assembly`、`list_assembly_notifications` など) に送信します。
 
-Add the Transloadit MCP server to your IDE config. This gives the agent direct access
-to Transloadit tools (`create_template`, `create_assembly`, `list_assembly_notifications`, etc.).
-
-**VS Code / GitHub Copilot** (`.vscode/mcp.json` or user settings):
-
-```json
+**VS Code / GitHub Copilot** (`.vscode/mcp.json` またはユーザー設定):```json
 {
   "servers": {
     "transloadit": {
@@ -48,26 +45,18 @@ to Transloadit tools (`create_template`, `create_assembly`, `list_assembly_notif
     }
   }
 }
-```
+```https://transloadit.com/c/-/api-credentials で API 認証情報を取得します。
 
-Get your API credentials at https://transloadit.com/c/-/api-credentials
+### オプション B: CLI
 
-### Option B: CLI
-
-If you prefer running commands directly:
-
-```bash
+コマンドを直接実行したい場合は、次のようにします。```bash
 npx -y @transloadit/node assemblies create \
   --steps '{"encoded": {"robot": "/video/encode", "use": ":original", "preset": "hls-1080p"}}' \
   --wait \
   --input ./my-video.mp4
-```
+```## コア ワークフロー
 
-## Core Workflows
-
-### Encode Video to HLS (Adaptive Streaming)
-
-```json
+### ビデオを HLS (アダプティブ ストリーミング) にエンコードする```json
 {
   "steps": {
     "encoded": {
@@ -77,11 +66,7 @@ npx -y @transloadit/node assemblies create \
     }
   }
 }
-```
-
-### Generate Thumbnails from Video
-
-```json
+```### ビデオからサムネイルを生成する```json
 {
   "steps": {
     "thumbnails": {
@@ -93,11 +78,7 @@ npx -y @transloadit/node assemblies create \
     }
   }
 }
-```
-
-### Resize and Watermark Images
-
-```json
+```### 画像のサイズ変更と透かし入れ```json
 {
   "steps": {
     "resized": {
@@ -116,11 +97,7 @@ npx -y @transloadit/node assemblies create \
     }
   }
 }
-```
-
-### OCR a Document
-
-```json
+```### ドキュメントの OCR```json
 {
   "steps": {
     "recognized": {
@@ -131,11 +108,7 @@ npx -y @transloadit/node assemblies create \
     }
   }
 }
-```
-
-### Concatenate Audio Clips
-
-```json
+```### オーディオ クリップを連結する```json
 {
   "steps": {
     "imported": {
@@ -149,13 +122,9 @@ npx -y @transloadit/node assemblies create \
     }
   }
 }
-```
+```## マルチステップのパイプライン
 
-## Multi-Step Pipelines
-
-Steps can be chained using the `"use"` field. Each step references a previous step's output:
-
-```json
+`"use"` フィールドを使用してステップを連鎖させることができます。各ステップは、前のステップの出力を参照します。```json
 {
   "steps": {
     "resized": {
@@ -175,20 +144,18 @@ Steps can be chained using the `"use"` field. Each step references a previous st
     }
   }
 }
-```
+```## 主要な概念
 
-## Key Concepts
+- **アセンブリ**: 単一の処理ジョブ。 `create_assembly` (MCP) または `assemblies create` (CLI) を介して作成されます。
+- **テンプレート**: Transloadit に保存されている再利用可能なステップのセット。 `create_template` (MCP) または `templates create` (CLI) を介して作成されます。
+- **ロボット**: 処理ユニット (例: `/video/encode`、`/image/resize`)。完全なリストは https://transloadit.com/docs/transcoding/ でご覧ください。
+- **ステップ**: パイプラインを定義する JSON オブジェクト。各キーはステップ名で、各値はロボットを構成します。
+- **`:original`**: アップロードされた入力ファイルを参照します。
 
-- **Assembly**: A single processing job. Created via `create_assembly` (MCP) or `assemblies create` (CLI).
-- **Template**: A reusable set of steps stored on Transloadit. Created via `create_template` (MCP) or `templates create` (CLI).
-- **Robot**: A processing unit (e.g., `/video/encode`, `/image/resize`). See full list at https://transloadit.com/docs/transcoding/
-- **Steps**: JSON object defining the pipeline. Each key is a step name, each value configures a robot.
-- **`:original`**: Refers to the uploaded input file.
+## ヒント
 
-## Tips
-
-- Use `--wait` with the CLI to block until processing completes.
-- Use `preset` values (e.g., `"hls-1080p"`, `"mp3"`, `"webp"`) for common format targets instead of specifying every parameter.
-- Chain `"use": "step_name"` to build multi-step pipelines without intermediate downloads.
-- For batch processing, use `/http/import` to pull files from URLs, S3, GCS, Azure, FTP, or Dropbox.
-- Templates can include `${variables}` for dynamic values passed at assembly creation time.
+- 処理が完了するまでブロックするには、CLI で `--wait` を使用します。
+- すべてのパラメータを指定するのではなく、共通の形式ターゲットに `preset` 値 (例: `"hls-1080p"`、`"mp3"`、`"webp"`) を使用します。
+- `"use": "step_name"` をチェーンして、中間ダウンロードなしで複数ステップのパイプラインを構築します。
+- バッチ処理の場合は、`/http/import` を使用して URL、S3、GCS、Azure、FTP、または Dropbox からファイルをプルします。
+- テンプレートには、アセンブリ作成時に渡される動的な値の `${variables}` を含めることができます。

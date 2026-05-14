@@ -1,33 +1,27 @@
-# FreeCAD Geometry and Shapes
+# FreeCAD のジオメトリと形状
 
-Reference guide for creating and manipulating geometry in FreeCAD using the Part, Mesh, and Sketcher modules.
+Part、Mesh、Sketcher モジュールを使用して FreeCAD でジオメトリを作成および操作するためのリファレンス ガイド。
 
-## Official Wiki References
+## 公式 Wiki リファレンス
 
-- [Creating and manipulating geometry](https://wiki.freecad.org/Manual:Creating_and_manipulating_geometry)
-- [Part scripting](https://wiki.freecad.org/Part_scripting)
-- [Topological data scripting](https://wiki.freecad.org/Topological_data_scripting)
-- [Mesh scripting](https://wiki.freecad.org/Mesh_Scripting)
-- [Mesh to Part conversion](https://wiki.freecad.org/Mesh_to_Part)
-- [Sketcher scripting](https://wiki.freecad.org/Sketcher_scripting)
-- [Drawing API example](https://wiki.freecad.org/Drawing_API_example)
-- [Part: Create a ball bearing I](https://wiki.freecad.org/Scripted_Parts:_Ball_Bearing_-_Part_1)
-- [Part: Create a ball bearing II](https://wiki.freecad.org/Scripted_Parts:_Ball_Bearing_-_Part_2)
-- [Line drawing function](https://wiki.freecad.org/Line_drawing_function)
+- [ジオメトリの作成と操作](https://wiki.freecad.org/Manual:Creating_and_manipulator_geometry)
+- [パート スクリプト](https://wiki.freecad.org/Part_scripting)
+- [トポロジカル データ スクリプト](https://wiki.freecad.org/Topological_data_scripting)
+- [メッシュ スクリプト](https://wiki.freecad.org/Mesh_Scripting)
+- [メッシュからパーツへの変換](https://wiki.freecad.org/Mesh_to_Part)
+- [スケッチャー スクリプト](https://wiki.freecad.org/Sketcher_scripting)
+- [描画 API の例](https://wiki.freecad.org/Drawing_API_example)
+- [パート: ボール ベアリングを作成する I](https://wiki.freecad.org/Scripted_Parts:_Ball_Bearing_-_Part_1)
+- [パート: ボール ベアリングを作成する II](https://wiki.freecad.org/Scripted_Parts:_Ball_Bearing_-_Part_2)
+・【線画機能】(https://wiki.freecad.org/Line_drawing_function)
 
-## Part Module — Shape Hierarchy
+## 部品モジュール — 形状階層
 
-OpenCASCADE topology levels (bottom to top):
-
-```
+OpenCASCADE トポロジ レベル (下から上):```
 Vertex → Edge → Wire → Face → Shell → Solid → CompSolid → Compound
-```
+```各レベルにはその下のレベルが含まれます。
 
-Each level contains the levels below it.
-
-## Primitive Shapes
-
-```python
+## プリミティブ形状```python
 import Part
 import FreeCAD as App
 
@@ -59,11 +53,7 @@ helix = Part.makeHelix(pitch, height, radius)
 # Wedge
 wedge = Part.makeWedge(xmin, ymin, zmin, z2min, x2min,
                         xmax, ymax, zmax, z2max, x2max)
-```
-
-## Curves and Edges
-
-```python
+```## カーブとエッジ```python
 # Line segment
 line = Part.makeLine((0,0,0), (10,0,0))
 line = Part.LineSegment(App.Vector(0,0,0), App.Vector(10,0,0)).toShape()
@@ -97,11 +87,7 @@ bezier = Part.BezierCurve()
 bezier.setPoles([App.Vector(0,0,0), App.Vector(3,5,0),
                   App.Vector(7,5,0), App.Vector(10,0,0)])
 edge3 = bezier.toShape()
-```
-
-## Wires, Faces, and Solids
-
-```python
+```## ワイヤー、面、ソリッド```python
 # Wire from edges
 wire = Part.Wire([edge1, edge2, edge3])   # edges must connect end-to-end
 
@@ -122,11 +108,7 @@ solid = Part.Solid(shell)
 
 # Compound (group shapes without merging)
 compound = Part.Compound([shape1, shape2, shape3])
-```
-
-## Shape Operations
-
-```python
+```## 形状操作```python
 # Boolean operations
 union = shape1.fuse(shape2)
 diff = shape1.cut(shape2)
@@ -152,11 +134,7 @@ thick = solid.makeThickness([face_to_remove], thickness, tolerance)
 
 # Section (intersection curve of solid with plane)
 section = solid.section(Part.makePlane(100, 100, App.Vector(0,0,5)))
-```
-
-## Extrude, Revolve, Loft, Sweep
-
-```python
+```## 押し出し、回転、ロフト、スイープ```python
 # Extrude face or wire
 extruded = face.extrude(App.Vector(0, 0, 10))    # direction vector
 
@@ -179,11 +157,7 @@ sweep = Part.Wire([path_edge]).makePipeShell(
     True,    # make solid
     False    # use Frenet frame
 )
-```
-
-## Topological Exploration
-
-```python
+```## トポロジー探索```python
 shape = obj.Shape
 
 # Sub-element access
@@ -231,33 +205,29 @@ shape.CenterOfMass
 shape.ShapeType         # "Solid", "Compound", "Face", etc.
 shape.isValid()
 shape.isClosed()
-```
+```## スケッチャー制約リファレンス
 
-## Sketcher Constraints Reference
-
-| Constraint | Syntax | Description |
+|制約 |構文 |説明 |
 |---|---|---|
-| Coincident | `("Coincident", geo1, pt1, geo2, pt2)` | Points coincide |
-| Horizontal | `("Horizontal", geo)` | Line is horizontal |
-| Vertical | `("Vertical", geo)` | Line is vertical |
-| Parallel | `("Parallel", geo1, geo2)` | Lines are parallel |
-| Perpendicular | `("Perpendicular", geo1, geo2)` | Lines are perpendicular |
-| Tangent | `("Tangent", geo1, geo2)` | Curves are tangent |
-| Equal | `("Equal", geo1, geo2)` | Equal length/radius |
-| Symmetric | `("Symmetric", geo1, pt1, geo2, pt2, geoLine)` | Symmetric about line |
-| Distance | `("Distance", geo1, pt1, geo2, pt2, value)` | Distance between points |
-| DistanceX | `("DistanceX", geo, pt1, pt2, value)` | Horizontal distance |
-| DistanceY | `("DistanceY", geo, pt1, pt2, value)` | Vertical distance |
-| Radius | `("Radius", geo, value)` | Circle/arc radius |
-| Angle | `("Angle", geo1, geo2, value)` | Angle between lines |
-| Fixed | `("Fixed", geo)` | Lock geometry |
+|偶然 | `("Coincident", geo1, pt1, geo2, pt2)` |点が一致します |
+|水平 | `("Horizontal", geo)` |線は水平です |
+|垂直 | `("Vertical", geo)` |線は垂直です |
+|パラレル | `("Parallel", geo1, geo2)` |線は平行です |
+|垂直 | `("Perpendicular", geo1, geo2)` |線は垂直です |
+|接線 | `("Tangent", geo1, geo2)` |曲線は接しています |
+|等しい | `("Equal", geo1, geo2)` |等しい長さ/半径 |
+|対称 | `("Symmetric", geo1, pt1, geo2, pt2, geoLine)` |線対称 |
+|距離 | `("Distance", geo1, pt1, geo2, pt2, value)` |点間の距離 |
+|距離X | `("DistanceX", geo, pt1, pt2, value)` |水平距離 |
+|距離Y | `("DistanceY", geo, pt1, pt2, value)` |垂直距離 |
+|半径 | `("Radius", geo, value)` |円/円弧の半径 |
+|角度 | `("Angle", geo1, geo2, value)` |線間の角度 |
+|修正済み | `("Fixed", geo)` |ロック ジオメトリ |
 
-Point indices: `1` = start, `2` = end, `3` = center (circles/arcs).
-External geometry index: `-1` = X axis, `-2` = Y axis.
+ポイント インデックス: `1` = 開始、`2` = 終了、`3` = 中心 (円/円弧)。
+外部ジオメトリ インデックス: `-1` = X 軸、`-2` = Y 軸。
 
-## Mesh Operations
-
-```python
+## メッシュ操作```python
 import Mesh
 
 # Create from file

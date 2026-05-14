@@ -1,85 +1,67 @@
-# Phoenix Tracing: Auto-Instrumentation (Python)
+# Phoenix トレーシング: 自動インストルメンテーション (Python)
 
-**Automatically create spans for LLM calls without code changes.**
+**コードを変更せずに、LLM 呼び出しのスパンを自動的に作成します。**
 
-## Overview
+## 概要
 
-Auto-instrumentation patches supported libraries at runtime to create spans automatically. Use for supported frameworks (LangChain, LlamaIndex, OpenAI SDK, etc.). For custom logic, manual-instrumentation-python.md.
+自動インスツルメンテーション パッチは、実行時にスパンを自動的に作成するライブラリをサポートしました。サポートされているフレームワーク (LangChain、LlamaIndex、OpenAI SDK など) に使用します。カスタム ロジックの場合は、manual-instrumentation-python.md。
 
-## Supported Frameworks
+## サポートされているフレームワーク
 
-**Python:**
+**パイソン:**
 
-- LLM SDKs: OpenAI, Anthropic, Bedrock, Mistral, Vertex AI, Groq, Ollama
-- Frameworks: LangChain, LlamaIndex, DSPy, CrewAI, Instructor, Haystack
-- Install: `pip install openinference-instrumentation-{name}`
+- LLM SDK: OpenAI、Anthropic、Bedrock、Mistral、Vertex AI、Groq、Ollama
+- フレームワーク: LangChain、LlamaIndex、DSPy、CrewAI、Instructor、Haystack
+- インストール: `pip install openinference-instrumentation-{name}`
 
-## Setup
+## セットアップ
 
-**Install and enable:**
+**インストールして有効にします:**「」バッシュ
+pip インストール arise-phoenix-otel
+pip install openinference-instrumentation-openai # 必要に応じて他を追加
+「」
 
-```bash
-pip install arize-phoenix-otel
-pip install openinference-instrumentation-openai  # Add others as needed
-```
+「」パイソン
+phoenix.otelインポートレジスタから
 
-```python
-from phoenix.otel import register
-
-register(project_name="my-app", auto_instrument=True)  # Discovers all installed instrumentors
-```
-
-**Example:**
-
-```python
-from phoenix.otel import register
-from openai import OpenAI
+register(project_name="my-app", auto_instrument=True) # インストールされているすべてのインストルメンタを検出します
+「」**例：**「」パイソン
+phoenix.otelインポートレジスタから
+openaiインポートからOpenAI
 
 register(project_name="my-app", auto_instrument=True)
 
-client = OpenAI()
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-```
+クライアント = OpenAI()
+応答 = client.chat.completions.create(
+    モデル = "gpt-4"、
+    メッセージ=[{"役割": "ユーザー", "コンテンツ": "こんにちは!"}]
+）
+「」トレースは、自動的にキャプチャされたモデル、入力/出力、トークン、タイミングとともに Phoenix UI に表示されます。完全な属性スキーマについては、スパン種類ファイルを参照してください。
 
-Traces appear in Phoenix UI with model, input/output, tokens, timing automatically captured. See span kind files for full attribute schemas.
+**選択的インスツルメンテーション** (明示的制御):「」パイソン
+phoenix.otelインポートレジスタから
+openinference.instrumentation.openai からインポート OpenAIInstrumentor
 
-**Selective instrumentation** (explicit control):
-
-```python
-from phoenix.otel import register
-from openinference.instrumentation.openai import OpenAIInstrumentor
-
-tracer_provider = register(project_name="my-app")  # No auto_instrument
+tracer_provider = register(project_name="my-app") # auto_instrument はありません
 OpenAIInstrumentor().instrument(tracer_provider=tracer_provider)
-```
+「」## 制限事項
 
-## Limitations
+自動インスツルメンテーションは次のものをキャプチャしません。
 
-Auto-instrumentation does NOT capture:
+- カスタム ビジネス ロジック
+- 内部関数呼び出し
 
-- Custom business logic
-- Internal function calls
-
-**Example:**
-
-```python
-def my_custom_workflow(query: str) -> str:
-    preprocessed = preprocess(query)  # Not traced
-    response = client.chat.completions.create(...)  # Traced (auto)
-    postprocessed = postprocess(response)  # Not traced
-    return postprocessed
-```
-
-**Solution:** Add manual instrumentation:
-
-```python
+**例:**「」パイソン
+def my_custom_workflow(クエリ: str) -> str:
+    preprocessed = preprocess(query) # トレースされません
+    response = client.chat.completions.create(...) # トレース済み (自動)
+    postprocessed = postprocess(response) # トレースされません
+    後処理して返す
+「」**解決策:** 手動インストルメンテーションを追加します。「」パイソン
 @tracer.chain
-def my_custom_workflow(query: str) -> str:
-    preprocessed = preprocess(query)
-    response = client.chat.completions.create(...)
-    postprocessed = postprocess(response)
-    return postprocessed
-```
+def my_custom_workflow(クエリ: str) -> str:
+    前処理 = 前処理(クエリ)
+    応答 = client.chat.completions.create(...)
+    後処理 = 後処理(応答)
+    後処理して返す
+「」

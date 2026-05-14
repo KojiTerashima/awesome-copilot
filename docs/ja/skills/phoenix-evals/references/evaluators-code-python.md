@@ -1,91 +1,77 @@
-# Evaluators: Code Evaluators in Python
+# エバリュエーター: Python のコード エバリュエーター
 
-Deterministic evaluators without LLM. Fast, cheap, reproducible.
+LLM を使用しない決定論的評価器。速く、安く、再現可能。
 
-## Basic Pattern
+## 基本パターン「」パイソン
+輸入再
+jsonをインポートする
+phoenix.evals からインポート create_evaluator
 
-```python
-import re
-import json
-from phoenix.evals import create_evaluator
-
-@create_evaluator(name="has_citation", kind="code")
-def has_citation(output: str) -> bool:
-    return bool(re.search(r'\[\d+\]', output))
+@create_evaluator(name="引用あり", kind="コード")
+def has_quote(出力: str) -> ブール:
+    return bool(re.search(r'\[\d+\]', 出力))
 
 @create_evaluator(name="json_valid", kind="code")
-def json_valid(output: str) -> bool:
-    try:
-        json.loads(output)
-        return True
-    except json.JSONDecodeError:
-        return False
-```
+def json_valid(出力: str) -> ブール:
+    試してみてください:
+        json.loads(出力)
+        Trueを返す
+    json.JSONDecodeError を除く:
+        Falseを返す
+「」## パラメータのバインド
 
-## Parameter Binding
-
-| Parameter | Description |
+|パラメータ |説明 |
 | --------- | ----------- |
-| `output` | Task output |
-| `input` | Example input |
-| `expected` | Expected output |
-| `metadata` | Example metadata |
-
-```python
+| `output` |タスクの出力 |
+| `input` |入力例 |
+| `expected` |期待される出力 |
+| `metadata` |メタデータの例 |「」パイソン
 @create_evaluator(name="matches_expected", kind="code")
-def matches_expected(output: str, expected: dict) -> bool:
-    return output.strip() == expected.get("answer", "").strip()
-```
+defmatches_expected(出力: str、期待値: dict) -> bool:
+    return Output.strip() == Expected.get("answer", "").strip()
+「」## 一般的なパターン
 
-## Common Patterns
+- **正規表現**: `re.search(pattern, output)`
+- **JSON スキーマ**: `jsonschema.validate()`
+- **キーワード**: `keyword in output.lower()`
+- **長さ**: `len(output.split())`
+- **類似性**: `editdistance.eval()` または Jaccard
 
-- **Regex**: `re.search(pattern, output)`
-- **JSON schema**: `jsonschema.validate()`
-- **Keywords**: `keyword in output.lower()`
-- **Length**: `len(output.split())`
-- **Similarity**: `editdistance.eval()` or Jaccard
+## 戻り値の型
 
-## Return Types
-
-| Return type | Result |
+|戻り値の型 |結果 |
 | ----------- | ------ |
-| `bool` | `True` → score=1.0, label="True"; `False` → score=0.0, label="False" |
-| `float`/`int` | Used as the `score` value directly |
-| `str` (short, ≤3 words) | Used as the `label` value |
-| `str` (long, ≥4 words) | Used as the `explanation` value |
-| `dict` with `score`/`label`/`explanation` | Mapped to Score fields directly |
-| `Score` object | Used as-is |
+| `bool` | `True` → スコア=1.0、ラベル="True"; `False` → スコア=0.0、ラベル="False" |
+| `float`/`int` | `score` 値として直接使用されます。
+| `str` (短い、≤3 ワード) | `label` 値として使用される |
+| `str` (長い、4 ワード以上) | `explanation` 値として使用されます。
+| `dict` と `score`/`label`/`explanation` |スコアフィールドに直接マッピング |
+| `Score` オブジェクト |そのまま使用 |
 
-## Important: Code vs LLM Evaluators
+## 重要: コードと LLM の評価
 
-The `@create_evaluator` decorator wraps a plain Python function.
+`@create_evaluator` デコレーターは、プレーンな Python 関数をラップします。
 
-- `kind="code"` (default): For deterministic evaluators that don't call an LLM.
-- `kind="llm"`: Marks the evaluator as LLM-based, but **you** must implement the LLM
-  call inside the function. The decorator does not call an LLM for you.
+- `kind="code"` (デフォルト): LLM を呼び出さない決定的評価の場合。
+- `kind="llm"`: エバリュエーターを LLM ベースとしてマークしますが、**あなた** は LLM を実装する必要があります
+  関数内で呼び出します。デコレーターは、ユーザーに代わって LLM を呼び出しません。
 
-For most LLM-based evaluation, prefer `ClassificationEvaluator` which handles
-the LLM call, structured output parsing, and explanations automatically:
+ほとんどの LLM ベースの評価では、処理を行う `ClassificationEvaluator` を優先します。
+LLM 呼び出し、構造化された出力解析、および説明が自動的に行われます。「」パイソン
+phoenix.evals より、ClassificationEvaluator、LLM をインポート
 
-```python
-from phoenix.evals import ClassificationEvaluator, LLM
+関連性 = 分類評価者(
+    名前 = "関連性",
+    prompt_template="これは関係ありますか?\n{{input}}\n{{output}}\n答え:",
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
+    選択肢={"関連性": 1.0, "無関係": 0.0},
+）
+「」## 事前構築済み「」パイソン
+phoenix.experiments.evaluators からインポート ContainsAnyKeyword、JSONParseable、MatchesRegex
 
-relevance = ClassificationEvaluator(
-    name="relevance",
-    prompt_template="Is this relevant?\n{{input}}\n{{output}}\nAnswer:",
-    llm=LLM(provider="openai", model="gpt-4o"),
-    choices={"relevant": 1.0, "irrelevant": 0.0},
-)
-```
-
-## Pre-Built
-
-```python
-from phoenix.experiments.evaluators import ContainsAnyKeyword, JSONParseable, MatchesRegex
-
-evaluators = [
-    ContainsAnyKeyword(keywords=["disclaimer"]),
-    JSONParseable(),
+評価者 = [
+    ContainsAnyKeyword(keywords=["免責事項"])、
+    JSONParseable()、
     MatchesRegex(pattern=r"\d{4}-\d{2}-\d{2}"),
-]
-```
+】
+「」

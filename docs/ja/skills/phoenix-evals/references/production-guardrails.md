@@ -1,53 +1,49 @@
-# Production: Guardrails vs Evaluators
+# プロダクション: ガードレール vs 評価者
 
-Guardrails block in real-time. Evaluators measure asynchronously.
+ガードレールはリアルタイムでブロックします。評価者は非同期的に測定します。
 
-## Key Distinction
-
-```
-Request → [INPUT GUARDRAIL] → LLM → [OUTPUT GUARDRAIL] → Response
+## キーの区別「」
+リクエスト → [INPUT GUARDRAIL] → LLM → [OUTPUT GUARDRAIL] → レスポンス
                                             │
-                                            └──→ ASYNC EVALUATOR (background)
-```
+                                            └──→ ASYNC EVALUATOR (バックグラウンド)
+「」## ガードレール
 
-## Guardrails
-
-| Aspect | Requirement |
+|側面 |要件 |
 | ------ | ----------- |
-| Timing | Synchronous, blocking |
-| Latency | < 100ms |
-| Purpose | Prevent harm |
-| Type | Code-based (deterministic) |
+|タイミング |同期、ブロッキング |
+|レイテンシ | < 100ms |
+|目的 |危害を防ぐ |
+|タイプ |コードベース (決定論的) |
 
-**Use for:** PII detection, prompt injection, profanity, length limits, format validation.
+**用途:** PII 検出、プロンプト挿入、冒涜、長さ制限、形式検証。
 
-## Evaluators
+## 評価者
 
-| Aspect | Characteristic |
+|側面 |特徴 |
 | ------ | -------------- |
-| Timing | Async, background |
-| Latency | Can be seconds |
-| Purpose | Measure quality |
-| Type | Can use LLMs |
+|タイミング |非同期、バックグラウンド |
+|レイテンシ |秒でも構いません |
+|目的 |品質を測定する |
+|タイプ | LLM を使用できる |
 
-**Use for:** Helpfulness, faithfulness, tone, completeness, citation accuracy.
+**用途:** 有用性、忠実さ、トーン、完全性、引用の正確さ。
 
-## Decision
+## 決定
 
-| Question | Answer |
+|質問 |答え |
 | -------- | ------ |
-| Must block harmful content? | Guardrail |
-| Measuring quality? | Evaluator |
-| Need LLM judgment? | Evaluator |
-| < 100ms required? | Guardrail |
-| False positives = angry users? | Evaluator |
+|有害なコンテンツをブロックする必要がありますか? |ガードレール |
+|品質を測定しますか？ |評価者 |
+| LLM 判定が必要ですか? |評価者 |
+| 100ms 未満が必要ですか? |ガードレール |
+|誤検知 = 怒っているユーザー? |評価者 |
 
-## LLM Guardrails: Rarely
+## LLM ガードレール: まれに
 
-Only use LLM guardrails if:
-- Latency budget > 1s
-- Error cost >> LLM cost
-- Low volume
-- Fallback exists
+LLM ガードレールは、次の場合にのみ使用します。
+- レイテンシー バジェット > 1 秒
+- エラーコスト >> LLM コスト
+- 音量が小さい
+- フォールバックが存在します
 
-**Key Principle:** Guardrails prevent harm (block). Evaluators measure quality (log).
+**重要な原則:** ガードレールは危害 (ブロック) を防ぎます。評価者は品質 (対数) を測定します。

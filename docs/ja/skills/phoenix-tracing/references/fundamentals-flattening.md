@@ -1,58 +1,44 @@
-# Flattening Convention
+# フラット化規則
 
-OpenInference flattens nested data structures into dot-notation attributes for database compatibility, OpenTelemetry compatibility, and simple querying.
+OpenInference は、データベース互換性、OpenTelemetry 互換性、および単純なクエリのために、ネストされたデータ構造をドット表記属性に平坦化します。
 
-## Flattening Rules
+## フラット化ルール
 
-**Objects → Dot Notation**
-
-```javascript
-{ llm: { model_name: "gpt-4", token_count: { prompt: 10, completion: 20 } } }
-// becomes
+**オブジェクト → ドット表記**```JavaScript
+{ llm: { モデル名: "gpt-4"、トークン数: { プロンプト: 10、完了: 20 } } }
+// になります
 { "llm.model_name": "gpt-4", "llm.token_count.prompt": 10, "llm.token_count.completion": 20 }
-```
-
-**Arrays → Zero-Indexed Notation**
-
-```javascript
-{ llm: { input_messages: [{ role: "user", content: "Hi" }] } }
-// becomes
-{ "llm.input_messages.0.message.role": "user", "llm.input_messages.0.message.content": "Hi" }
-```
-
-**Message Convention: `.message.` segment required**
-
-```
+「」**配列 → ゼロインデックス表記**```JavaScript
+{ llm: { input_messages: [{ 役割: "ユーザー"、コンテンツ: "こんにちは" }] } }
+// になります
+{ "llm.input_messages.0.message.role": "ユーザー"、"llm.input_messages.0.message.content": "こんにちは" }
+「」**メッセージ規則: `.message.` セグメントが必要です**「」
 llm.input_messages.{index}.message.{field}
 llm.input_messages.0.message.tool_calls.0.tool_call.function.name
-```
-
-## Complete Example
-
-```javascript
-// Original
+「」## 完全な例```JavaScript
+// オリジナル
 {
-  openinference: { span: { kind: "LLM" } },
+  openinference: { スパン: { 種類: "LLM" } }、
   llm: {
-    model_name: "claude-3-5-sonnet-20241022",
-    invocation_parameters: { temperature: 0.7, max_tokens: 1000 },
-    input_messages: [{ role: "user", content: "Tell me a joke" }],
-    output_messages: [{ role: "assistant", content: "Why did the chicken cross the road?" }],
-    token_count: { prompt: 5, completion: 10, total: 15 }
+    モデル名: "クロード-3-5-ソネット-20241022",
+    invocation_parameters: { 温度: 0.7、最大トークン: 1000 }、
+    input_messages: [{ 役割: "ユーザー"、コンテンツ: "冗談を言ってください" }],
+    Output_messages: [{ 役割: "アシスタント"、内容: "なぜニワトリは道路を渡ったのですか?" }]、
+    token_count: { プロンプト: 5、完了: 10、合計: 15 }
   }
 }
 
-// Flattened (stored in Phoenix spans.attributes JSONB)
+// フラット化 (Phoenixspans.attributes JSONB に保存)
 {
   "openinference.span.kind": "LLM",
   "llm.model_name": "claude-3-5-sonnet-20241022",
-  "llm.invocation_parameters": "{\"temperature\": 0.7, \"max_tokens\": 1000}",
-  "llm.input_messages.0.message.role": "user",
-  "llm.input_messages.0.message.content": "Tell me a joke",
-  "llm.output_messages.0.message.role": "assistant",
-  "llm.output_messages.0.message.content": "Why did the chicken cross the road?",
-  "llm.token_count.prompt": 5,
-  "llm.token_count.completion": 10,
+  "llm.invocation_parameters": "{\"温度\": 0.7、\"max_tokens\": 1000}",
+  "llm.input_messages.0.message.role": "ユーザー",
+  "llm.input_messages.0.message.content": "冗談を言ってください",
+  "llm.output_messages.0.message.role": "アシスタント",
+  "llm.output_messages.0.message.content": "なぜ鶏は道路を渡ったのですか?",
+  "llm.token_count.prompt": 5、
+  "llm.token_count.completion": 10、
   "llm.token_count.total": 15
 }
-```
+「」

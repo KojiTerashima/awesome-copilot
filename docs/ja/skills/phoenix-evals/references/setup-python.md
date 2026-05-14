@@ -1,64 +1,44 @@
-# Setup: Python
+# セットアップ: Python
 
-Packages required for Phoenix evals and experiments.
+Phoenix の評価と実験に必要なパッケージ。
 
-## Installation
+## インストール「」バッシュ
+# コア Phoenix パッケージ (client、evals、otel を含む)
+pip インストール arise-phoenix
 
-```bash
-# Core Phoenix package (includes client, evals, otel)
-pip install arize-phoenix
+# または個別のパッケージをインストールする
+pip install arize-phoenix-client # Phoenix クライアントのみ
+pip install arize-phoenix-evals # 評価ユーティリティ
+pip install arize-phoenix-otel # OpenTelemetry 統合
+「」## LLM プロバイダー
 
-# Or install individual packages
-pip install arize-phoenix-client   # Phoenix client only
-pip install arize-phoenix-evals    # Evaluation utilities
-pip install arize-phoenix-otel     # OpenTelemetry integration
-```
+LLM-as-judge 評価者の場合は、プロバイダーの SDK をインストールします。「」バッシュ
+pip インストール openai # OpenAI
+pip install anthropic # Anthropic
+pip install google-generativeai # Google
+「」## 検証 (オプション)「」バッシュ
+pip install scikit-learn # TPR/TNR メトリクスの場合
+「」## クイック検証「」パイソン
+phoenix.clientインポートクライアントから
+phoenix.evals から LLM、ClassificationEvaluator をインポート
+phoenix.otelインポートレジスタから
 
-## LLM Providers
+# すべてのインポートが機能するはずです
+print("Phoenix Python のセットアップが完了しました")
+「」## キーのインポート (Evals 2.0)「」パイソン
+phoenix.clientインポートクライアントから
+phoenix.evals インポートから (
+    ClassificationEvaluator、# LLM 分類エバリュエーター (推奨)
+    LLM、# プロバイダーに依存しない LLM ラッパー
+    async_evaluate_dataframe, # DataFrame をバッチ評価します (推奨、非同期)
+    Evaluate_dataframe, # DataFrame をバッチ評価する (同期)
+    create_evaluator, # コードベースのエバリュエーター用のデコレーター
+    create_classifier, # LLM 分類評価器のファクトリー
+    bind_evaluator, # 列名を評価パラメータにマップする
+    スコア、# スコア データクラス
+）
+from phoenix.evals.utils import to_annotation_dataframe # Phoenix アノテーションの結果をフォーマットする
+「」**優先**: `create_classifier` よりも `ClassificationEvaluator` (より多くのパラメーター/カスタマイズ)。
+**推奨**: `evaluate_dataframe` よりも `async_evaluate_dataframe` (LLM 評価のスループットが向上します)。
 
-For LLM-as-judge evaluators, install your provider's SDK:
-
-```bash
-pip install openai      # OpenAI
-pip install anthropic   # Anthropic
-pip install google-generativeai  # Google
-```
-
-## Validation (Optional)
-
-```bash
-pip install scikit-learn  # For TPR/TNR metrics
-```
-
-## Quick Verify
-
-```python
-from phoenix.client import Client
-from phoenix.evals import LLM, ClassificationEvaluator
-from phoenix.otel import register
-
-# All imports should work
-print("Phoenix Python setup complete")
-```
-
-## Key Imports (Evals 2.0)
-
-```python
-from phoenix.client import Client
-from phoenix.evals import (
-    ClassificationEvaluator,      # LLM classification evaluator (preferred)
-    LLM,                          # Provider-agnostic LLM wrapper
-    async_evaluate_dataframe,     # Batch evaluate a DataFrame (preferred, async)
-    evaluate_dataframe,           # Batch evaluate a DataFrame (sync)
-    create_evaluator,             # Decorator for code-based evaluators
-    create_classifier,            # Factory for LLM classification evaluators
-    bind_evaluator,               # Map column names to evaluator params
-    Score,                        # Score dataclass
-)
-from phoenix.evals.utils import to_annotation_dataframe  # Format results for Phoenix annotations
-```
-
-**Prefer**: `ClassificationEvaluator` over `create_classifier` (more parameters/customization).
-**Prefer**: `async_evaluate_dataframe` over `evaluate_dataframe` (better throughput for LLM evals).
-
-**Do NOT use** legacy 1.0 imports: `OpenAIModel`, `AnthropicModel`, `run_evals`, `llm_classify`.
+**レガシー 1.0 インポートは使用しないでください**: `OpenAIModel`、`AnthropicModel`、`run_evals`、`llm_classify`。

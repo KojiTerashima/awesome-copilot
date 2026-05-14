@@ -19,100 +19,93 @@ metadata:
     primaryEnv: FLOWSTUDIO_MCP_TOKEN
     homepage: https://mcp.flowstudio.app
 ---
+# FlowStudio MCP を使用してガバナンスを自動化する
 
-# Power Automate Governance with FlowStudio MCP
+FlowStudio を通じて Power Automate フローを大規模に分類、タグ付け、管理します
+MCP **キャッシュ ストア** — Dataverse なし、CoE スターター キットなし、および
+Power Automate ポータルなし。
 
-Classify, tag, and govern Power Automate flows at scale through the FlowStudio
-MCP **cached store** — without Dataverse, without the CoE Starter Kit, and
-without the Power Automate portal.
+このスキルは `update_store_flow` を使用してガバナンス メタデータを書き込み、
+監視ツール (`list_store_flows`、`get_store_flow`、`list_store_makers`、
+など) テナントの状態を読み取ります。監視およびヘルスチェックのワークフローについては、次を参照してください。
+`flowstudio-power-automate-monitoring` スキル。
 
-This skill uses `update_store_flow` to write governance metadata and the
-monitoring tools (`list_store_flows`, `get_store_flow`, `list_store_makers`,
-etc.) to read tenant state. For monitoring and health-check workflows, see
-the `flowstudio-power-automate-monitoring` skill.
-
-> **Start every session with `tools/list`** to confirm tool names and parameters.
-> This skill covers workflows and patterns — things `tools/list` cannot tell you.
-> If this document disagrees with `tools/list` or a real API response, the API wins.
+> **各セッションを `tools/list`** で開始して、ツール名とパラメータを確認します。
+> このスキルは、`tools/list` では教えてもらえないワークフローとパターンをカバーします。
+> このドキュメントが `tools/list` または実際の API 応答と一致しない場合、API が優先されます。
 
 ---
 
-## Critical: How to Extract Flow IDs
+## 重要: フロー ID を抽出する方法
 
-`list_store_flows` returns `id` in format `<environmentId>.<flowId>`. **You must split
-on the first `.`** to get `environmentName` and `flowName` for all other tools:
-
-```
+`list_store_flows` は `id` を `<environmentId>.<flowId>` の形式で返します。 **分割する必要があります
+最初の `.`** で、他のすべてのツールの `environmentName` と `flowName` を取得します。```
 id = "Default-<envGuid>.<flowGuid>"
 environmentName = "Default-<envGuid>"    (everything before first ".")
 flowName = "<flowGuid>"                  (everything after first ".")
-```
-
-Also: skip entries that have no `displayName` or have `state=Deleted` —
-these are sparse records or flows that no longer exist in Power Automate.
-If a deleted flow has `monitor=true`, suggest disabling monitoring
-(`update_store_flow` with `monitor=false`) to free up a monitoring slot
-(standard plan includes 20).
+```また、`displayName` が含まれないエントリ、または `state=Deleted` が含まれるエントリをスキップします。
+これらは、Power Automate にはもう存在しない、まばらなレコードまたはフローです。
+削除されたフローに `monitor=true` がある場合は、モニタリングを無効にすることを提案します
+(`update_store_flow` と `monitor=false`) 監視スロットを解放します
+(標準プランには 20 が含まれます)。
 
 ---
 
-## The Write Tool: `update_store_flow`
+## 書き込みツール: `update_store_flow`
 
-`update_store_flow` writes governance metadata to the **Flow Studio cache
-only** — it does NOT modify the flow in Power Automate. These fields are
-not visible via `get_live_flow` or the PA portal. They exist only in the
-Flow Studio store and are used by Flow Studio's scanning pipeline and
-notification rules.
+`update_store_flow` はガバナンス メタデータを **Flow Studio キャッシュに書き込みます
+のみ** — Power Automate のフローは変更されません。これらのフィールドは、
+`get_live_flow` または PA ポータルからは表示されません。それらは、
+Flow Studio ストアと Flow Studio のスキャン パイプラインによって使用され、
+通知ルール。
 
-This means:
-- `ownerTeam` / `supportEmail` — sets who Flow Studio considers the
-  governance contact. Does NOT change the actual PA flow owner.
-- `rule_notify_email` — sets who receives Flow Studio failure/missing-run
-  notifications. Does NOT change Microsoft's built-in flow failure alerts.
-- `monitor` / `critical` / `businessImpact` — Flow Studio classification
-  only. Power Automate has no equivalent fields.
+これは次のことを意味します。
+- `ownerTeam` / `supportEmail` — Flow Studio が誰を考慮するかを設定します
+  ガバナンス連絡先。実際の PA フローの所有者は変更されません。
+- `rule_notify_email` — Flow Studio の失敗/実行不足を受け取る人を設定します
+  通知。 Microsoft の組み込みフロー障害アラートは変更されません。
+- `monitor` / `critical` / `businessImpact` — フロー スタジオの分類
+  のみ。 Power Automate には同等のフィールドはありません。
 
-Merge semantics — only fields you provide are updated. Returns the full
-updated record (same shape as `get_store_flow`).
+マージ セマンティクス — 指定したフィールドのみが更新されます。全額を返します
+更新されたレコード (`get_store_flow` と同じ形式)。
 
-Required parameters: `environmentName`, `flowName`. All other fields optional.
+必須パラメータ: `environmentName`、`flowName`。他のフィールドはすべてオプションです。
 
-### Settable Fields
+### 設定可能なフィールド
 
-| Field | Type | Purpose |
+|フィールド |タイプ |目的 |
 |---|---|---|
-| `monitor` | bool | Enable run-level scanning (standard plan: 20 flows included) |
-| `rule_notify_onfail` | bool | Send email notification on any failed run |
-| `rule_notify_onmissingdays` | number | Send notification when flow hasn't run in N days (0 = disabled) |
-| `rule_notify_email` | string | Comma-separated notification recipients |
-| `description` | string | What the flow does |
-| `tags` | string | Classification tags (also auto-extracted from description `#hashtags`) |
-| `businessImpact` | string | Low / Medium / High / Critical |
-| `businessJustification` | string | Why the flow exists, what process it automates |
-| `businessValue` | string | Business value statement |
-| `ownerTeam` | string | Accountable team |
-| `ownerBusinessUnit` | string | Business unit |
-| `supportGroup` | string | Support escalation group |
-| `supportEmail` | string | Support contact email |
-| `critical` | bool | Designate as business-critical |
-| `tier` | string | Standard or Premium |
-| `security` | string | Security classification or notes |
+| `monitor` |ブール |実行レベルのスキャンを有効にする (標準プラン: 20 フローが含まれる) |
+| `rule_notify_onfail` |ブール |失敗した実行時に電子メール通知を送信する |
+| `rule_notify_onmissingdays` |番号 |フローが N 日間実行されなかった場合に通知を送信します (0 = 無効) |
+| `rule_notify_email` |文字列 |カンマ区切りの通知受信者 |
+| `description` |文字列 |フローの動作 |
+| `tags` |文字列 |分類タグ (説明 `#hashtags` からも自動抽出)
+| `businessImpact` |文字列 |低 / 中 / 高 / クリティカル |
+| `businessJustification` |文字列 |フローが存在する理由、フローによって自動化されるプロセス |
+| `businessValue` |文字列 |ビジネス価値ステートメント |
+| `ownerTeam` |文字列 |責任あるチーム |
+| `ownerBusinessUnit` |文字列 |ビジネスユニット |
+| `supportGroup` |文字列 |サポート エスカレーション グループ |
+| `supportEmail` |文字列 |サポート連絡先メールアドレス |
+| `critical` |ブール |ビジネスクリティカルとして指定 |
+| `tier` |文字列 |スタンダードまたはプレミアム |
+| `security` |文字列 |セキュリティの分類または注意事項 |
 
-> **Caution with `security`:** The `security` field on `get_store_flow`
-> contains structured JSON (e.g. `{"triggerRequestAuthenticationType":"All"}`).
-> Writing a plain string like `"reviewed"` will overwrite this. To mark a
-> flow as security-reviewed, use `tags` instead.
+> **`security` に関する注意:** `get_store_flow` の `security` フィールド
+> 構造化された JSON (例: `{"triggerRequestAuthenticationType":"All"}`) が含まれています。
+> `"reviewed"` のようなプレーンな文字列を書くとこれが上書きされます。マークを付けるには
+> セキュリティレビュー済みのフローなので、代わりに `tags` を使用してください。
 
 ---
 
-## Governance Workflows
+## ガバナンス ワークフロー
 
-### 1. Compliance Detail Review
+### 1. コンプライアンスの詳細レビュー
 
-Identify flows missing required governance metadata — the equivalent of
-the CoE Starter Kit's Developer Compliance Center.
-
-```
+必要なガバナンス メタデータが欠落しているフローを特定します。これに相当します。
+CoE スターター キットの開発者コンプライアンス センター。```
 1. Ask the user which compliance fields they require
    (or use their organization's existing governance policy)
 2. list_store_flows
@@ -124,35 +117,31 @@ the CoE Starter Kit's Developer Compliance Center.
 5. For each non-compliant flow:
    - Ask the user for values
    - update_store_flow(environmentName, flowName, ...provided fields)
-```
+```**コンプライアンスチェックに利用可能なフィールド:**
 
-**Fields available for compliance checks:**
-
-| Field | Example policy |
+|フィールド |ポリシーの例 |
 |---|---|
-| `description` | Every flow should be documented |
-| `businessImpact` | Classify as Low / Medium / High / Critical |
-| `businessJustification` | Required for High/Critical impact flows |
-| `ownerTeam` | Every flow should have an accountable team |
-| `supportEmail` | Required for production flows |
-| `monitor` | Required for critical flows (note: standard plan includes 20 monitored flows) |
-| `rule_notify_onfail` | Recommended for monitored flows |
-| `critical` | Designate business-critical flows |
+| `description` |すべてのフローを文書化する必要があります |
+| `businessImpact` |低 / 中 / 高 / クリティカルに分類 |
+| `businessJustification` |高/重大な影響のフローに必要 |
+| `ownerTeam` |すべてのフローには責任あるチームが必要です。
+| `supportEmail` |実稼働フローに必要 |
+| `monitor` |重要なフローに必要 (注: 標準プランには 20 個の監視対象フローが含まれます) |
+| `rule_notify_onfail` |監視対象フローに推奨 |
+| `critical` |ビジネスクリティカルなフローを指定する |
 
-> Each organization defines their own compliance rules. The fields above are
-> suggestions based on common Power Platform governance patterns (CoE Starter
-> Kit). Ask the user what their requirements are before flagging flows as
-> non-compliant.
+> 各組織は独自のコンプライアンス ルールを定義します。上記のフィールドは、
+> 一般的な Power Platform ガバナンス パターンに基づく提案 (CoE スターター)
+>キット）。フローにフラグを付ける前に、ユーザーに要件を尋ねます。
+> 非準拠です。
 >
-> **Tip:** Flows created or updated via MCP already have `description`
-> (auto-appended by `update_live_flow`). Flows created manually in the
-> Power Automate portal are the ones most likely missing governance metadata.
+> **ヒント:** MCP 経由で作成または更新されたフローには、すでに `description` が設定されています
+> (`update_live_flow` によって自動追加されます)。で手動で作成されたフロー
+> Power Automate ポータルは、ガバナンス メタデータが欠落している可能性が最も高いものです。
 
-### 2. Orphaned Resource Detection
+### 2. 孤立したリソースの検出
 
-Find flows owned by deleted or disabled Azure AD accounts.
-
-```
+削除または無効化された Azure AD アカウントが所有するフローを検索します。```
 1. list_store_makers
 2. Filter where deleted=true AND ownerFlowCount > 0
    Note: deleted makers have NO displayName/mail — record their id (AAD OID)
@@ -168,26 +157,22 @@ Find flows owned by deleted or disabled Azure AD accounts.
        ownerTeam="NewTeam", supportEmail="new-owner@contoso.com")
    - Or decommission: set_store_flow_state(environmentName, flowName,
        state="Stopped")
-```
-
-> `update_store_flow` updates governance metadata in the cache only. To
-> transfer actual PA ownership, an admin must use the Power Platform admin
-> center or PowerShell.
+```> `update_store_flow` はキャッシュ内のガバナンス メタデータのみを更新します。に
+> 実際の PA 所有権を譲渡するには、管理者は Power Platform 管理者を使用する必要があります
+> センターまたは PowerShell。
 >
-> **Note:** Many orphaned flows are system-generated (created by
-> `DataverseSystemUser` accounts for SLA monitoring, knowledge articles,
-> etc.). These were never built by a person — consider tagging them
-> rather than reassigning.
+> **注意:** 孤立したフローの多くはシステムによって生成されます (
+> `DataverseSystemUser` は、SLA モニタリング、ナレッジ記事、
+>など）。これらは人によって構築されたものではありません - タグ付けを検討してください
+> 再割り当てではなく。
 >
-> **Coverage:** This workflow searches the cached store only, not the
-> live PA API. Flows created after the last scan won't appear.
+> **対象範囲:** このワークフローは、キャッシュされたストアのみを検索し、ストアは検索しません。
+> ライブ PA API。最後のスキャン後に作成されたフローは表示されません。
 
-### 3. Archive Score Calculation
+### 3. アーカイブスコアの計算
 
-Compute an inactivity score (0-7) per flow to identify safe cleanup
-candidates. Aligns with the CoE Starter Kit's archive scoring.
-
-```
+安全なクリーンアップを識別するために、フローごとの非アクティブ スコア (0 ～ 7) を計算します。
+候補者たち。 CoE スターター キットのアーカイブ スコアと一致します。```
 1. list_store_flows
 2. For each flow (skip entries without displayName or state=Deleted):
    - Split id → environmentName, flowName
@@ -211,20 +196,16 @@ candidates. Aligns with the CoE Starter Kit's archive scoring.
    set_store_flow_state(environmentName, flowName, state="Stopped")
    Read existing tags, append #archived
    update_store_flow(environmentName, flowName, tags="<existing> #archived")
-```
+```> **「アーカイブ」の意味:** Power Automate にはネイティブのアーカイブ機能がありません。
+> MCP 経由でアーカイブすることは、(1) フローを実行できないように停止することを意味します。
+> (2) `#archived` タグを付けて、将来のクリーンアップで検出できるようにします。
+> 実際の削除には Power Automate ポータルまたは管理者 PowerShell が必要です
+> — MCP ツールでは実行できません。
 
-> **What "archive" means:** Power Automate has no native archive feature.
-> Archiving via MCP means: (1) stop the flow so it can't run, and
-> (2) tag it `#archived` so it's discoverable for future cleanup.
-> Actual deletion requires the Power Automate portal or admin PowerShell
-> — it cannot be done via MCP tools.
+### 4. コネクタの監査
 
-### 4. Connector Audit
-
-Audit which connectors are in use across monitored flows. Useful for DLP
-impact analysis and premium license planning.
-
-```
+監視対象のフロー全体でどのコネクタが使用されているかを監査します。 DLP に便利
+影響分析とプレミアム ライセンスの計画。```
 1. list_store_flows(monitor=true)
    (scope to monitored flows — auditing all 1000+ flows is expensive)
 2. For each flow (skip entries without displayName or state=Deleted):
@@ -241,26 +222,22 @@ impact analysis and premium license planning.
 4. Report inventory to user
    - For DLP analysis: user provides their DLP policy connector groups,
      agent cross-references against the inventory
-```
-
-> **Scope to monitored flows.** Each flow requires a `get_store_flow` call
-> to read the `connections` JSON. Standard plans have ~20 monitored flows —
-> manageable. Auditing all flows in a large tenant (1000+) would be very
-> expensive in API calls.
+```> **監視対象のフローが対象範囲です。** 各フローには `get_store_flow` 呼び出しが必要です
+> `connections` JSON を読み取ります。標準プランには最大 20 の監視対象フローがあります —
+> 管理可能です。大規模なテナント (1000 以上) 内のすべてのフローを監査するのは非常に困難です
+> API呼び出しにコストがかかる。
 >
-> **`list_store_connections`** returns connection instances (who created
-> which connection) but NOT connector types per flow. Use it for connection
-> counts per environment, not for the connector audit.
+> **`list_store_connections`** は接続インスタンス (作成者) を返します
+> どの接続) ですが、フローごとのコネクタ タイプではありません。接続に使用します
+> コネクタ監査ではなく、環境ごとの数です。
 >
-> DLP policy definitions are not available via MCP. The agent builds the
-> connector inventory; the user provides the DLP classification to
-> cross-reference against.
+> DLP ポリシー定義は MCP 経由では利用できません。エージェントが構築するのは、
+> コネクタの在庫。ユーザーは DLP 分類を提供します
+> に対する相互参照。
 
-### 5. Notification Rule Management
+### 5. 通知ルールの管理
 
-Configure monitoring and alerting for flows at scale.
-
-```
+大規模なフローの監視とアラートを構成します。```
 Enable failure alerts on all critical flows:
 1. list_store_flows(monitor=true)
 2. For each flow (skip entries without displayName or state=Deleted):
@@ -283,22 +260,18 @@ Enable missing-run detection for scheduled flows:
    - If rule_notify_onmissingdays is 0 or not set:
      update_store_flow(environmentName, flowName,
        rule_notify_onmissingdays=2)
-```
-
-> `critical`, `rule_notify_onfail`, and `rule_notify_onmissingdays` are only
-> available from `get_store_flow`, not from `list_store_flows`. The list call
-> pre-filters to monitored flows; the detail call checks the notification fields.
+```> `critical`、`rule_notify_onfail`、`rule_notify_onmissingdays` は
+> `list_store_flows` ではなく、`get_store_flow` から利用可能です。リストコール
+> 監視対象のフローを事前にフィルタリングします。詳細呼び出しでは、通知フィールドがチェックされます。
 >
-> **Monitoring limit:** The standard plan (FlowStudio for Teams / MCP Pro+)
-> includes 20 monitored flows. Before bulk-enabling `monitor=true`, check
-> how many flows are already monitored:
+> **監視制限:** 標準プラン (FlowStudio for Teams / MCP Pro+)
+> には 20 の監視対象フローが含まれます。 `monitor=true` を一括有効にする前に確認してください
+> すでに監視されているフローの数:
 > `len(list_store_flows(monitor=true))`
 
-### 6. Classification and Tagging
+### 6. 分類とタグ付け
 
-Bulk-classify flows by connector type, business function, or risk level.
-
-```
+コネクタのタイプ、ビジネス機能、またはリスク レベルごとにフローを一括分類します。```
 Auto-tag by connector:
 1. list_store_flows
 2. For each flow (skip entries without displayName or state=Deleted):
@@ -314,29 +287,25 @@ Auto-tag by connector:
    - Read existing tags from get_store_flow response, append new tags
    - update_store_flow(environmentName, flowName,
        tags="<existing tags> #sharepoint #teams")
-```
-
-> **Two tag systems:** Tags shown in `list_store_flows` are auto-extracted
-> from the flow's `description` field (e.g. a maker writes `#operations` in
-> the PA portal description). Tags set via `update_store_flow(tags=...)`
-> write to a separate field in the Azure Table cache. They are independent —
-> writing store tags does not touch the description, and editing the
-> description in the portal does not affect store tags.
+```> **2 つのタグ システム:** `list_store_flows` で示されるタグは自動抽出されます
+> フローの `description` フィールドから (例: メーカーが `#operations` をフィールドに書き込む)
+> PA ポータルの説明)。 `update_store_flow(tags=...)` 経由で設定されたタグ
+> Azure テーブル キャッシュの別のフィールドに書き込みます。彼らは独立しています —
+> ストアタグの記述は説明には影響せず、
+> ポータル内の説明はストア タグに影響しません。
 >
-> **Tag merge:** `update_store_flow(tags=...)` overwrites the store tags
-> field. To avoid losing tags from other workflows, read the current store
-> tags from `get_store_flow` first, append new ones, then write back.
+> **タグの結合:** `update_store_flow(tags=...)` はストア タグを上書きします
+>フィールド。他のワークフローからタグが失われないようにするには、現在のストアを読み取ります。
+> `get_store_flow` のタグを最初に追加し、新しいタグを追加してから書き戻します。
 >
-> `get_store_flow` already has a `tier` field (Standard/Premium) computed
-> by the scanning pipeline. Only use `update_store_flow(tier=...)` if you
-> need to override it.
+> `get_store_flow` にはすでに `tier` フィールド (標準/プレミアム) が計算されています
+> スキャンパイプラインによって。次の場合にのみ `update_store_flow(tier=...)` を使用してください。
+> オーバーライドする必要があります。
 
-### 7. Maker Offboarding
+### 7. メーカーのオフボーディング
 
-When an employee leaves, identify their flows and apps, and reassign
-Flow Studio governance contacts and notification recipients.
-
-```
+従業員が退職した場合、そのフローとアプリを特定し、再割り当てする
+Flow Studio のガバナンス連絡先と通知受信者。```
 1. get_store_maker(makerKey="<departing-user-aad-oid>")
    → check ownerFlowCount, ownerAppCount, deleted status
 2. list_store_flows → collect all flows
@@ -356,23 +325,19 @@ Flow Studio governance contacts and notification recipients.
      Read existing tags, append #decommissioned
      update_store_flow(environmentName, flowName, tags="<existing> #decommissioned")
 6. Report: flows reassigned, flows stopped, apps needing manual reassignment
-```
-
-> **What "reassign" means here:** `update_store_flow` changes who Flow
-> Studio considers the governance contact and who receives Flow Studio
-> notifications. It does NOT transfer the actual Power Automate flow
-> ownership — that requires the Power Platform admin center or PowerShell.
-> Also update `rule_notify_email` so failure notifications go to the new
-> team instead of the departing employee's email.
+```> **ここでの「再割り当て」の意味:** `update_store_flow` はフローを変更する人
+> Studio はガバナンス担当者と Flow Studio を受け取る人を検討します
+> 通知。実際の Power Automate フローは転送されません。
+> 所有権 — Power Platform 管理センターまたは PowerShell が必要です。
+> また、`rule_notify_email` も更新して、失敗通知が新しいアドレスに送信されるようにします。
+> 退職する従業員の電子メールの代わりにチームに連絡します。
 >
-> Power Apps ownership cannot be changed via MCP tools. Report them for
-> manual reassignment in the Power Apps admin center.
+> Power Apps の所有権は MCP ツールを介して変更できません。報告してください
+> Power Apps 管理センターでの手動再割り当て。
 
-### 8. Security Review
+### 8. セキュリティのレビュー
 
-Review flows for potential security concerns using cached store data.
-
-```
+キャッシュされたストア データを使用して、潜在的なセキュリティ上の問題がないかフローを確認します。```
 1. list_store_flows(monitor=true)
 2. For each flow (skip entries without displayName or state=Deleted):
    - Split id → environmentName, flowName
@@ -385,28 +350,24 @@ Review flows for potential security concerns using cached store data.
    Read existing tags, append #security-reviewed
    update_store_flow(environmentName, flowName, tags="<existing> #security-reviewed")
    Do NOT overwrite the security field — it contains structured auth data
-```
+```**セキュリティレビューに利用可能なフィールド:**
 
-**Fields available for security review:**
-
-| Field | Where | What it tells you |
+|フィールド |どこ |それがあなたに伝えること |
 |---|---|---|
-| `security.triggerRequestAuthenticationType` | security JSON | `"All"` = HTTP trigger accepts unauthenticated requests |
-| `sharingType` | top-level | `"Coauthor"` = shared with co-authors for editing |
-| `connections` | connections JSON | Which connectors the flow uses (check for HTTP, custom) |
-| `referencedResources` | JSON string | SharePoint sites, Teams channels, external URLs the flow accesses |
-| `tier` | top-level | `"Premium"` = uses premium connectors |
+| `security.triggerRequestAuthenticationType` |セキュリティ JSON | `"All"` = HTTP トリガーは認証されていないリクエストを受け入れます |
+| `sharingType` |トップレベル | `"Coauthor"` = 編集のために共著者と共有 |
+| `connections` |接続 JSON |フローが使用するコネクタ (HTTP、カスタムを確認) |
+| `referencedResources` | JSON文字列 | SharePoint サイト、Teams チャネル、フローがアクセスする外部 URL |
+| `tier` |トップレベル | `"Premium"` = プレミアム コネクタを使用 |
 
-> Each organization decides what constitutes a security concern. For example,
-> an unauthenticated HTTP trigger is expected for webhook receivers (Stripe,
-> GitHub) but may be a risk for internal flows. Review findings in context
-> before flagging.
+> 何がセキュリティ上の懸念事項となるかは、各組織が決定します。たとえば、
+> Webhook レシーバーには認証されていない HTTP トリガーが予期されます (ストライプ、
+> GitHub) ですが、内部フローにとってはリスクとなる可能性があります。コンテキストに沿って調査結果をレビューする
+> フラグを立てる前に。
 
-### 9. Environment Governance
+### 9. 環境ガバナンス
 
-Audit environments for compliance and sprawl.
-
-```
+環境のコンプライアンスとスプロールを監査します。```
 1. list_store_environments
    Skip entries without displayName (tenant-level metadata rows)
 2. Flag:
@@ -420,13 +381,9 @@ Audit environments for compliance and sprawl.
      no need for per-flow get_store_flow calls
 4. list_store_connections → group by environmentName
    - Connection count per environment
-```
+```### 10. ガバナンスダッシュボード
 
-### 10. Governance Dashboard
-
-Generate a tenant-wide governance summary.
-
-```
+テナント全体のガバナンスの概要を生成します。```
 Efficient metrics (list calls only):
 1. total_flows = len(list_store_flows())
 2. monitored = len(list_store_flows(monitor=true))
@@ -455,50 +412,48 @@ For detailed metrics, iterate all flows in a single pass:
     Split id → environmentName, flowName
     get_store_flow(environmentName, flowName)
     → accumulate businessImpact, description, tier
-```
+```---
 
----
+## フィールド参照: `get_store_flow` ガバナンスで使用されるフィールド
 
-## Field Reference: `get_store_flow` Fields Used in Governance
+以下のフィールドはすべて `get_store_flow` 応答に存在することが確認されています。
+`*` でマークされたフィールドは、`list_store_flows` でも利用できます (安価)。
 
-All fields below are confirmed present on the `get_store_flow` response.
-Fields marked with `*` are also available on `list_store_flows` (cheaper).
-
-| Field | Type | Governance use |
+|フィールド |タイプ |ガバナンス利用 |
 |---|---|---|
-| `displayName` * | string | Archive score (test/demo name detection) |
-| `state` * | string | Archive score, lifecycle management |
-| `tier` | string | License audit (Standard vs Premium) |
-| `monitor` * | bool | Is this flow being actively monitored? |
-| `critical` | bool | Business-critical designation (settable via update_store_flow) |
-| `businessImpact` | string | Compliance classification |
-| `businessJustification` | string | Compliance attestation |
-| `ownerTeam` | string | Ownership accountability |
-| `supportEmail` | string | Escalation contact |
-| `rule_notify_onfail` | bool | Failure alerting configured? |
-| `rule_notify_onmissingdays` | number | SLA monitoring configured? |
-| `rule_notify_email` | string | Alert recipients |
-| `description` | string | Documentation completeness |
-| `tags` | string | Classification — `list_store_flows` shows description-extracted hashtags only; store tags written by `update_store_flow` require `get_store_flow` to read back |
-| `runPeriodTotal` * | number | Activity level |
-| `runPeriodFailRate` * | number | Health status |
-| `runLast` | ISO string | Last run timestamp |
-| `scanned` | ISO string | Data freshness |
-| `deleted` | bool | Lifecycle tracking |
-| `createdTime` * | ISO string | Archive score (age) |
-| `lastModifiedTime` * | ISO string | Archive score (staleness) |
-| `owners` | JSON string | Orphan detection, ownership audit — parse with json.loads() |
-| `connections` | JSON string | Connector audit, tier — parse with json.loads() |
-| `complexity` | JSON string | Archive score (simplicity) — parse with json.loads() |
-| `security` | JSON string | Auth type audit — parse with json.loads(), contains `triggerRequestAuthenticationType` |
-| `sharingType` | string | Oversharing detection (top-level, NOT inside security) |
-| `referencedResources` | JSON string | URL audit — parse with json.loads() |
+| `displayName` * |文字列 |アーカイブスコア (テスト/デモ名検出) |
+| `state` * |文字列 |アーカイブ スコア、ライフサイクル管理 |
+| `tier` |文字列 |ライセンス監査 (Standard と Premium) |
+| `monitor` * |ブール |このフローはアクティブに監視されていますか? |
+| `critical` |ブール |ビジネスクリティカルな指定 (update_store_flow 経由で設定可能) |
+| `businessImpact` |文字列 |コンプライアンスの分類 |
+| `businessJustification` |文字列 |コンプライアンス証明書 |
+| `ownerTeam` |文字列 |所有者の責任 |
+| `supportEmail` |文字列 |エスカレーション連絡先 |
+| `rule_notify_onfail` |ブール |障害アラートが設定されていますか? |
+| `rule_notify_onmissingdays` |番号 | SLA監視は設定されていますか? |
+| `rule_notify_email` |文字列 |アラート受信者 |
+| `description` |文字列 |ドキュメントの完全性 |
+| `tags` |文字列 |分類 — `list_store_flows` は説明から抽出されたハッシュタグのみを表示します。 `update_store_flow` によって書き込まれたストア タグを読み戻すには `get_store_flow` が必要です。
+| `runPeriodTotal` * |番号 |活動レベル |
+| `runPeriodFailRate` * |番号 |健康状態 |
+| `runLast` | ISO文字列 |最終実行タイムスタンプ |
+| `scanned` | ISO文字列 |データの鮮度 |
+| `deleted` |ブール |ライフサイクル追跡 |
+| `createdTime` * | ISO文字列 |アーカイブスコア (年齢) |
+| `lastModifiedTime` * | ISO文字列 |アーカイブスコア (古さ) |
+| `owners` | JSON文字列 |孤立検出、所有権監査 — json.loads() で解析 |
+| `connections` | JSON文字列 |コネクタ監査、層 — json.loads() で解析 |
+| `complexity` | JSON文字列 |アーカイブスコア (シンプルさ) — json.loads() で解析 |
+| `security` | JSON文字列 |認証タイプの監査 — json.loads() で解析し、`triggerRequestAuthenticationType` を含みます。
+| `sharingType` |文字列 |過剰共有の検出 (トップレベル、セキュリティ内ではない) |
+| `referencedResources` | JSON文字列 | URL 監査 - json.loads() で解析 |
 
 ---
 
-## Related Skills
+## 関連スキル
 
-- `flowstudio-power-automate-monitoring` — Health checks, failure rates, inventory (read-only)
-- `flowstudio-power-automate-mcp` — Core connection setup, live tool reference
-- `flowstudio-power-automate-debug` — Deep diagnosis with action-level inputs/outputs
-- `flowstudio-power-automate-build` — Build and deploy flow definitions
+- `flowstudio-power-automate-monitoring` — ヘルスチェック、故障率、インベントリ（読み取り専用）
+- `flowstudio-power-automate-mcp` — コア接続セットアップ、ライブツールリファレンス
+- `flowstudio-power-automate-debug` — アクションレベルの入出力による詳細な診断
+- `flowstudio-power-automate-build` — フロー定義の構築とデプロイ

@@ -1,170 +1,130 @@
-# TypeScript Setup
+# TypeScript のセットアップ
 
-Setup Phoenix tracing in TypeScript/JavaScript with `@arizeai/phoenix-otel`.
+`@arizeai/phoenix-otel` を使用して、TypeScript/JavaScript で Phoenix トレースをセットアップします。
 
-## Metadata
+## メタデータ
 
-| Attribute | Value |
-|-----------|-------|
-| Priority | Critical - required for all tracing |
-| Setup Time | <5 min |
+|属性 |値 |
+|----------|----------|
+|優先順位 |クリティカル - すべてのトレースに必要 |
+|セットアップ時間 | 5 分未満 |
 
-## Quick Start
+## クイックスタート「」バッシュ
+npm インストール @arizeai/phoenix-otel
+「」
 
-```bash
-npm install @arizeai/phoenix-otel
-```
-
-```typescript
+```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
-register({ projectName: "my-app" });
-```
+register({ プロジェクト名: "my-app" });
+「」デフォルトでは `http://localhost:6006` に接続します。
 
-Connects to `http://localhost:6006` by default.
-
-## Configuration
-
-```typescript
+＃＃ 構成```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
 
-register({
-  projectName: "my-app",
-  url: "http://localhost:6006",
-  apiKey: process.env.PHOENIX_API_KEY,
-  batch: true
+登録({
+  プロジェクト名: "私のアプリ",
+  URL: "http://localhost:6006",
+  apiKey: process.env.PHOENIX_API_KEY、
+  バッチ: true
 });
-```
+「」**環境変数:**「」バッシュ
+エクスポート PHOENIX_API_KEY="あなたの API キー"
+エクスポート PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
+エクスポート PHOENIX_PROJECT_NAME="my-app"
+「」## ESM と CommonJS の比較
 
-**Environment variables:**
-
-```bash
-export PHOENIX_API_KEY="your-api-key"
-export PHOENIX_COLLECTOR_ENDPOINT="http://localhost:6006"
-export PHOENIX_PROJECT_NAME="my-app"
-```
-
-## ESM vs CommonJS
-
-**CommonJS (automatic):**
-
-```javascript
+**CommonJS (自動):**```JavaScript
 const { register } = require("@arizeai/phoenix-otel");
-register({ projectName: "my-app" });
+register({ プロジェクト名: "my-app" });
 
 const OpenAI = require("openai");
-```
-
-**ESM (manual instrumentation required):**
-
-```typescript
+「」**ESM (手動計測が必要):**```タイプスクリプト
 import { register, registerInstrumentations } from "@arizeai/phoenix-otel";
 import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
-import OpenAI from "openai";
+「openai」から OpenAI をインポートします。
 
-register({ projectName: "my-app" });
+register({ プロジェクト名: "my-app" });
 
-const instrumentation = new OpenAIInstrumentation();
-instrumentation.manuallyInstrument(OpenAI);
-registerInstrumentations({ instrumentations: [instrumentation] });
-```
+const インストルメンテーション = new OpenAIInstrumentation();
+インストルメンテーション.manuallyInstrument(OpenAI);
+registerInstrumentations({ インストルメンテーション: [インストルメンテーション] });
+「」**理由:** ESM インポートはホイストされるため、`manuallyInstrument()` が必要です。
 
-**Why:** ESM imports are hoisted, so `manuallyInstrument()` is needed.
+## フレームワークの統合
 
-## Framework Integration
-
-**Next.js (App Router):**
-
-```typescript
-// instrumentation.ts
-export async function register() {
+**Next.js (アプリルーター):**```タイプスクリプト
+// インストルメンテーション.ts
+非同期関数のエクスポート register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { register } = await import("@arizeai/phoenix-otel");
-    register({ projectName: "my-nextjs-app" });
+    register({ プロジェクト名: "my-nextjs-app" });
   }
 }
-```
-
-**Express.js:**
-
-```typescript
+「」**Express.js:**```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
 
-register({ projectName: "my-express-app" });
+register({ プロジェクト名: "my-express-app" });
 
-const app = express();
-```
+const app = Express();
+「」## 終了前のフラッシュ スパン
 
-## Flushing Spans Before Exit
+**重要:** プロセスの終了時にプロセッサー内でキューに残っている場合、スパンはエクスポートされない可能性があります。 `provider.shutdown()` を呼び出して、終了する前に明示的にフラッシュします。
 
-**CRITICAL:** Spans may not be exported if still queued in the processor when your process exits. Call `provider.shutdown()` to explicitly flush before exit.
-
-**Standard pattern:**
-
-```typescript
-const provider = register({
-  projectName: "my-app",
-  batch: true,
+**標準パターン:**```タイプスクリプト
+const プロバイダー = register({
+  プロジェクト名: "私のアプリ",
+  バッチ: true、
 });
 
-async function main() {
-  await doWork();
-  await provider.shutdown();  // Flush spans before exit
+非同期関数 main() {
+  doWork() を待ちます;
+  プロバイダーを待ちます.shutdown();  // 終了前にスパンをフラッシュします
 }
 
-main().catch(async (error) => {
-  console.error(error);
-  await provider.shutdown();  // Flush on error too
-  process.exit(1);
+main().catch(async (エラー) => {
+  コンソール.エラー(エラー);
+  プロバイダーを待ちます.shutdown();  // エラー時もフラッシュ
+  プロセス終了(1);
 });
-```
-
-**Alternative:**
-
-```typescript
-// Use batch: false for immediate export (no shutdown needed)
-register({
-  projectName: "my-app",
-  batch: false,
+「」**代替：**```タイプスクリプト
+// 即時エクスポートにはバッチ: false を使用します (シャットダウンは必要ありません)
+登録({
+  プロジェクト名: "私のアプリ",
+  バッチ: false、
 });
-```
+「」正常な終了を含む運用パターンについては、`production-typescript.md` を参照してください。
 
-For production patterns including graceful termination, see `production-typescript.md`.
+## 検証
 
-## Verification
+1. Phoenix UI を開きます: `http://localhost:6006`
+2. アプリケーションを実行します
+3. プロジェクト内のトレースを確認します。
 
-1. Open Phoenix UI: `http://localhost:6006`
-2. Run your application
-3. Check for traces in your project
-
-**Enable diagnostic logging:**
-
-```typescript
+**診断ログを有効にする:**```タイプスクリプト
 import { DiagLogLevel, register } from "@arizeai/phoenix-otel";
 
-register({
-  projectName: "my-app",
-  diagLogLevel: DiagLogLevel.DEBUG,
+登録({
+  プロジェクト名: "私のアプリ",
+  diagLogLevel: DiagLogLevel.DEBUG、
 });
-```
+「」## トラブルシューティング
 
-## Troubleshooting
+**痕跡なし:**
+- `PHOENIX_COLLECTOR_ENDPOINT` が正しいことを確認してください
+- Phoenix Cloud に `PHOENIX_API_KEY` を設定します
+- ESM の場合: `manuallyInstrument()` が呼び出されることを確認します。
+- **`batch: true` の場合:** 終了前に `provider.shutdown()` を呼び出して、キューに入れられたスパンをフラッシュします (「スパンのフラッシュ」セクションを参照)
 
-**No traces:**
-- Verify `PHOENIX_COLLECTOR_ENDPOINT` is correct
-- Set `PHOENIX_API_KEY` for Phoenix Cloud
-- For ESM: Ensure `manuallyInstrument()` is called
-- **With `batch: true`:** Call `provider.shutdown()` before exit to flush queued spans (see Flushing Spans section)
+**痕跡がありません:**
+- `batch: true` の場合: プロセスが終了する前に `await provider.shutdown()` を呼び出し、キューに入れられたスパンをフラッシュします
+- 代替案: `batch: false` を即時エクスポートに設定します (シャットダウンは必要ありません)。
 
-**Traces missing:**
-- With `batch: true`: Call `await provider.shutdown()` before process exit to flush queued spans
-- Alternative: Set `batch: false` for immediate export (no shutdown needed)
+**属性がありません:**
+- インストルメンテーションが登録されていることを確認します (ESM は手動セットアップが必要です)
+- `instrumentation-auto-typescript.md`を参照
 
-**Missing attributes:**
-- Check instrumentation is registered (ESM requires manual setup)
-- See `instrumentation-auto-typescript.md`
+## 関連項目
 
-## See Also
-
-- **Auto-instrumentation:** `instrumentation-auto-typescript.md`
-- **Manual instrumentation:** `instrumentation-manual-typescript.md`
-- **API docs:** https://arize-ai.github.io/phoenix/
+- **自動インストルメンテーション:** `instrumentation-auto-typescript.md`
+- **手動計測:** `instrumentation-manual-typescript.md`
+- **API ドキュメント:** https://arize-ai.github.io/phoenix/

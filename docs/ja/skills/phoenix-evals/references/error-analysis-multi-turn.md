@@ -1,52 +1,40 @@
-# Error Analysis: Multi-Turn Conversations
+# エラー分析: マルチターン会話
 
-Debugging complex multi-turn conversation traces.
+複雑なマルチターン会話トレースのデバッグ。
 
-## The Approach
+## アプローチ
 
-1. **End-to-end first** - Did the conversation achieve the goal?
-2. **Find first failure** - Trace backwards to root cause
-3. **Simplify** - Try single-turn before multi-turn debug
-4. **N-1 testing** - Isolate turn-specific vs capability issues
+1. **最初からエンドツーエンド** - 会話は目標を達成しましたか?
+2. **最初の障害を見つける** - 根本原因まで遡って追跡します
+3. **単純化** - マルチターンのデバッグの前にシングルターンを試してください
+4. **N-1 テスト** - ターン固有の問題と能力の問題を分離する
 
-## Find First Upstream Failure
+## 最初の上流障害を見つける「」
+ターン 1: ユーザーがフライトについて質問する ✓
+ターン 2: アシスタントが日付を尋ねます ✓
+ターン 3: ユーザーが日付を指定 ✓
+ターン 4: アシスタントが間違った日付を検索 ← 最初の失敗
+ターン 5: 間違ったフライトが表示される (結果)
+ターン 6: ユーザーの不満 (結果)
+「」ターン6ではなくターン4に集中してください。
 
-```
-Turn 1: User asks about flights ✓
-Turn 2: Assistant asks for dates ✓
-Turn 3: User provides dates ✓
-Turn 4: Assistant searches WRONG dates ← FIRST FAILURE
-Turn 5: Shows wrong flights (consequence)
-Turn 6: User frustrated (consequence)
-```
+## まず単純化する
 
-Focus on Turn 4, not Turn 6.
+マルチターンをデバッグする前に、シングルターンをテストします。「」パイソン
+# シングルターンも失敗する場合 → 問題は検索/知識です
+# シングルターンが経過した場合 → 問題は会話のコンテキストです
+response = chat("電子機器の返品ポリシーは何ですか?")
+「」## N-1 テスト
 
-## Simplify First
+コンテキストとしてターン 1 から N-1 を指定し、ターン N をテストします。「」パイソン
+コンテキスト = 会話[:n-1]
+応答 = chat_with_context(コンテキスト, user_message_n)
+# 実際のターンNと比較
+「」これにより、エラーがコンテキストに起因するのか、それとも基礎となる機能に起因するのかが分離されます。
 
-Before debugging multi-turn, test single-turn:
+## チェックリスト
 
-```python
-# If single-turn also fails → problem is retrieval/knowledge
-# If single-turn passes → problem is conversation context
-response = chat("What's the return policy for electronics?")
-```
-
-## N-1 Testing
-
-Give turns 1 to N-1 as context, test turn N:
-
-```python
-context = conversation[:n-1]
-response = chat_with_context(context, user_message_n)
-# Compare to actual turn N
-```
-
-This isolates whether error is from context or underlying capability.
-
-## Checklist
-
-1. Did conversation achieve goal? (E2E)
-2. Which turn first went wrong?
-3. Can you reproduce with single-turn?
-4. Is error from context or capability? (N-1 test)
+1. 会話は目標を達成しましたか? (E2E)
+2. 最初に間違ったのはどのターンですか?
+3. ワンターンで再現できますか？
+4. エラーはコンテキストまたは機能によるものですか? (N-1テスト)

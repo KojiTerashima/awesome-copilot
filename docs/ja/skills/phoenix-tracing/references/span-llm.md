@@ -1,79 +1,71 @@
-# LLM Spans
+# LLM スパン
 
-Represent calls to language models (OpenAI, Anthropic, local models, etc.).
+言語モデル (OpenAI、Anthropic、ローカル モデルなど) への呼び出しを表します。
 
-## Required Attributes
+## 必須の属性
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `openinference.span.kind` | String | Must be "LLM" |
-| `llm.model_name` | String | Model identifier (e.g., "gpt-4", "claude-3-5-sonnet-20241022") |
+|属性 |タイプ |説明 |
+|----------|------|---------------|
+| `openinference.span.kind` |文字列 | 「LLM」である必要があります |
+| `llm.model_name` |文字列 |モデル識別子 (例: "gpt-4"、"claude-3-5-sonnet-20241022") |
 
-## Key Attributes
+## 主要な属性
 
-| Category | Attributes | Example |
-|----------|------------|---------|
-| **Model** | `llm.model_name`, `llm.provider` | "gpt-4-turbo", "openai" |
-| **Tokens** | `llm.token_count.prompt`, `llm.token_count.completion`, `llm.token_count.total` | 25, 8, 33 |
-| **Cost** | `llm.cost.prompt`, `llm.cost.completion`, `llm.cost.total` | 0.0021, 0.0045, 0.0066 |
-| **Parameters** | `llm.invocation_parameters` (JSON) | `{"temperature": 0.7, "max_tokens": 1024}` |
-| **Messages** | `llm.input_messages.{i}.*`, `llm.output_messages.{i}.*` | See examples below |
-| **Tools** | `llm.tools.{i}.tool.json_schema` | Function definitions |
+|カテゴリー |属性 |例 |
+|----------|-----------|----------|
+| **モデル** | `llm.model_name`、`llm.provider` | "gpt-4-turbo"、"openai" |
+| **トークン** | `llm.token_count.prompt`、`llm.token_count.completion`、`llm.token_count.total` | 25、8、33 |
+| **コスト** | `llm.cost.prompt`、`llm.cost.completion`、`llm.cost.total` | 0.0021、0.0045、0.0066 |
+| **パラメータ** | `llm.invocation_parameters` (JSON) | `{"temperature": 0.7, "max_tokens": 1024}` |
+| **メッセージ** | `llm.input_messages.{i}.*`、`llm.output_messages.{i}.*` |以下の例を参照してください |
+| **ツール** | `llm.tools.{i}.tool.json_schema` |関数の定義 |
 
-## Cost Tracking
+## コストの追跡
 
-**Core attributes:**
-- `llm.cost.prompt` - Total input cost (USD)
-- `llm.cost.completion` - Total output cost (USD)
-- `llm.cost.total` - Total cost (USD)
+**コア属性:**
+- `llm.cost.prompt` - 総投入コスト (USD)
+- `llm.cost.completion` - 総出力コスト (USD)
+- `llm.cost.total` - 総コスト (USD)
 
-**Detailed cost breakdown:**
-- `llm.cost.prompt_details.{input,cache_read,cache_write,audio}` - Input cost components
-- `llm.cost.completion_details.{output,reasoning,audio}` - Output cost components
+**詳細な費用の内訳:**
+- `llm.cost.prompt_details.{input,cache_read,cache_write,audio}` - 入力コストコンポーネント
+- `llm.cost.completion_details.{output,reasoning,audio}` - コストコンポーネントを出力します
 
-## Messages
+## メッセージ
 
-**Input messages:**
-- `llm.input_messages.{i}.message.role` - "user", "assistant", "system", "tool"
-- `llm.input_messages.{i}.message.content` - Text content
-- `llm.input_messages.{i}.message.contents.{j}` - Multimodal (text + images)
-- `llm.input_messages.{i}.message.tool_calls` - Tool invocations
+**入力メッセージ:**
+- `llm.input_messages.{i}.message.role` - 「ユーザー」、「アシスタント」、「システム」、「ツール」
+- `llm.input_messages.{i}.message.content` - テキストの内容
+- `llm.input_messages.{i}.message.contents.{j}` - マルチモーダル (テキスト + 画像)
+- `llm.input_messages.{i}.message.tool_calls` - ツールの呼び出し
 
-**Output messages:** Same structure as input messages.
+**出力メッセージ:** 入力メッセージと同じ構造。
 
-## Example: Basic LLM Call
-
-```json
+## 例: 基本的な LLM 呼び出し```json
 {
   "openinference.span.kind": "LLM",
   "llm.model_name": "claude-3-5-sonnet-20241022",
-  "llm.invocation_parameters": "{\"temperature\": 0.7, \"max_tokens\": 1024}",
-  "llm.input_messages.0.message.role": "system",
-  "llm.input_messages.0.message.content": "You are a helpful assistant.",
-  "llm.input_messages.1.message.role": "user",
-  "llm.input_messages.1.message.content": "What is the capital of France?",
-  "llm.output_messages.0.message.role": "assistant",
-  "llm.output_messages.0.message.content": "The capital of France is Paris.",
-  "llm.token_count.prompt": 25,
-  "llm.token_count.completion": 8,
+  "llm.invocation_parameters": "{\"温度\": 0.7、\"max_tokens\": 1024}",
+  "llm.input_messages.0.message.role": "システム",
+  "llm.input_messages.0.message.content": "あなたは役に立つアシスタントです。",
+  "llm.input_messages.1.message.role": "ユーザー",
+  "llm.input_messages.1.message.content": "フランスの首都はどこですか?",
+  "llm.output_messages.0.message.role": "アシスタント",
+  "llm.output_messages.0.message.content": "フランスの首都はパリです。",
+  "llm.token_count.prompt": 25、
+  "llm.token_count.completion": 8、
   "llm.token_count.total": 33
 }
-```
-
-## Example: LLM with Tool Calls
-
-```json
+「」## 例: ツール呼び出しを使用した LLM```json
 {
   "openinference.span.kind": "LLM",
   "llm.model_name": "gpt-4-turbo",
-  "llm.input_messages.0.message.content": "What's the weather in SF?",
+  "llm.input_messages.0.message.content": "サンフランシスコの天気は?",
   "llm.output_messages.0.message.tool_calls.0.tool_call.function.name": "get_weather",
   "llm.output_messages.0.message.tool_calls.0.tool_call.function.arguments": "{\"location\": \"San Francisco\"}",
   "llm.tools.0.tool.json_schema": "{\"type\": \"function\", \"function\": {\"name\": \"get_weather\"}}"
 }
-```
+「」## 関連項目
 
-## See Also
-
-- **Instrumentation:** `instrumentation-auto-python.md`, `instrumentation-manual-python.md`
-- **Full spec:** https://github.com/Arize-ai/openinference/blob/main/spec/semantic_conventions.md
+- **計測:** `instrumentation-auto-python.md`、`instrumentation-manual-python.md`
+- **完全な仕様:** https://github.com/Arize-ai/openinference/blob/main/spec/semantic_conventions.md

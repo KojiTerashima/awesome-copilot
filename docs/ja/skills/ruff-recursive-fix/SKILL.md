@@ -2,90 +2,67 @@
 name: ruff-recursive-fix
 description: Run Ruff checks with optional scope and rule overrides, apply safe and unsafe autofixes iteratively, review each change, and resolve remaining findings with targeted edits or user decisions.
 ---
+# Ruff 再帰的修正
 
-# Ruff Recursive Fix
+## 概要
 
-## Overview
+このスキルを使用して、制御された反復ワークフローで Ruff によるコード品質を強化します。
+以下をサポートします。
 
-Use this skill to enforce code quality with Ruff in a controlled, iterative workflow.
-It supports:
+- オプションの範囲を特定のフォルダーに制限します。
+- `pyproject.toml` からのデフォルトのプロジェクト設定。
+- 柔軟な Ruff 呼び出し (`uv`、直接 `ruff`、`python -m ruff`、または同等のもの)。
+- オプションの実行ごとのルールの上書き (`--select`、`--ignore`、`--extend-select`、`--extend-ignore`)。
+- 安全な自動修正と安全でない自動修正。
+- 各修正パス後の差分レビュー。
+- 結果が解決されるか決定が必要になるまで、再帰的に繰り返します。
+- 抑制が正当な場合にのみ、インライン `# noqa` を賢明に使用します。
 
-- Optional scope limitation to a specific folder.
-- Default project settings from `pyproject.toml`.
-- Flexible Ruff invocation (`uv`, direct `ruff`, `python -m ruff`, or equivalent).
-- Optional per-run rule overrides (`--select`, `--ignore`, `--extend-select`, `--extend-ignore`).
-- Automatic safe then unsafe autofixes.
-- Diff review after each fix pass.
-- Recursive repetition until findings are resolved or require a decision.
-- Judicious use of inline `# noqa` only when suppression is justified.
+## 入力
 
-## Inputs
+実行する前に次の入力を収集します。
 
-Collect these inputs before running:
+- `target_path` (オプション): チェックするフォルダーまたはファイル。空とはリポジトリ全体を意味します。
+- `ruff_runner` (オプション): 明示的な Ruff コマンド プレフィックス (例: `uv run`、`ruff`、`python -m ruff`、`pipx run ruff`)。
+- `rules_select` (オプション): 適用するコンマ区切りのルール コード。
+- `rules_ignore` (オプション): 無視するコンマ区切りのルール コード。
+- `extend_select` (オプション): 設定されたデフォルトを置き換えずに追加する追加のルール。
+- `extend_ignore` (オプション): 設定されたデフォルトを置き換えずに無視される追加のルール。
+- `allow_unsafe_fixes` (デフォルト: true): Ruff の安全でない修正を実行するかどうか。
+- `ask_on_ambiguity` (デフォルト: true): 複数の有効な選択肢が存在する場合は、常にユーザーに質問します。
 
-- `target_path` (optional): folder or file to check. Empty means whole repository.
-- `ruff_runner` (optional): explicit Ruff command prefix (for example `uv run`, `ruff`, `python -m ruff`, `pipx run ruff`).
-- `rules_select` (optional): comma-separated rule codes to enforce.
-- `rules_ignore` (optional): comma-separated rule codes to ignore.
-- `extend_select` (optional): extra rules to add without replacing configured defaults.
-- `extend_ignore` (optional): extra ignored rules without replacing configured defaults.
-- `allow_unsafe_fixes` (default: true): whether to run Ruff unsafe fixes.
-- `ask_on_ambiguity` (default: true): always ask the user when multiple valid choices exist.
+## コマンドの構築
 
-## Command Construction
+入力から Ruff コマンドを構築します。
 
-Build Ruff commands from inputs.
+### 0.ラフランナーを解決する
 
-### 0. Resolve Ruff Runner
+コマンドを構築する前に、再利用可能な `ruff_cmd` プレフィックスを決定してください。
 
-Determine a reusable `ruff_cmd` prefix before building commands.
+解決順序:
 
-Resolution order:
+1. `ruff_runner` が提供されている場合は、そのまま使用します。
+2. `uv` が利用可能で、Ruff が `uv` を通じて管理されている場合は、`uv run ruff` を使用します。
+3. それ以外の場合、`ruff` が `PATH` で利用可能な場合は、`ruff` を使用します。
+4. Python が利用可能で、その環境に Ruff がインストールされている場合は、`python -m ruff` を使用します。
+5. それ以外の場合は、インストールされた Ruff を呼び出すプロジェクト固有の同等の機能 (`pipx run ruff` など) を使用するか、停止してユーザーに尋ねます。
 
-1. If `ruff_runner` is provided, use it as-is.
-2. Else if `uv` is available and Ruff is managed through `uv`, use `uv run ruff`.
-3. Else if `ruff` is available on `PATH`, use `ruff`.
-4. Else if Python is available and Ruff is installed in that environment, use `python -m ruff`.
-5. Else use any project-specific equivalent that invokes installed Ruff (for example `pipx run ruff`), or stop and ask the user.
+ワークフロー内のすべての `check` および `format` コマンドには、同じ解決された `ruff_cmd` を使用します。
 
-Use the same resolved `ruff_cmd` for all `check` and `format` commands in the workflow.
-
-Base command:
-
-```bash
+基本コマンド:```bash
 <ruff_cmd> check
-```
-
-Formatter command:
-
-```bash
+```フォーマッタコマンド:```bash
 <ruff_cmd> format
-```
-
-With optional target:
-
-```bash
+```オプションのターゲットを使用する場合:```bash
 <ruff_cmd> format <target_path>
-```
-
-Add optional target:
-
-```bash
+```オプションのターゲットを追加します。```bash
 <ruff_cmd> check <target_path>
-```
-
-Add optional overrides as needed:
-
-```bash
+```必要に応じて、オプションのオーバーライドを追加します。```bash
 --select <codes>
 --ignore <codes>
 --extend-select <codes>
 --extend-ignore <codes>
-```
-
-Examples:
-
-```bash
+```例:```bash
 # Full project with defaults from pyproject.toml
 ruff check
 
@@ -97,104 +74,100 @@ uv run ruff check src --extend-ignore D,TD
 
 # Check only selected rules in a folder
 ruff check src/data --select F,E9,I
-```
+```## ワークフロー
 
-## Workflow
+### 1. ベースライン分析
 
-### 1. Baseline Analysis
+1. 選択したスコープとオプションを使用して `<ruff_cmd> check` を実行します。
+2. 検出結果をタイプ別に分類します。
+	- 自動修復可能な金庫。
+	- 自動修正可能で安全ではありません。
+	- 自動修正はできません。
+3. 所見が残らない場合は中止します。
 
-1. Run `<ruff_cmd> check` with the selected scope and options.
-2. Classify findings by type:
-	- Autofixable safe.
-	- Autofixable unsafe.
-	- Not autofixable.
-3. If no findings remain, stop.
+### 2. 安全な Autofix パス
 
-### 2. Safe Autofix Pass
+1. 同じスコープ/オプションを使用して `--fix` で Ruff を実行します。
+2. 結果の diff を注意深く確認して、セマンティックな正確さとスタイルの一貫性を確認します。
+3. 同じスコープで `<ruff_cmd> format` を実行します。
+4. `<ruff_cmd> check` を再実行して、残りの結果を更新します。
 
-1. Run Ruff with `--fix` using the same scope/options.
-2. Review resulting diff carefully for semantic correctness and style consistency.
-3. Run `<ruff_cmd> format` on the same scope.
-4. Re-run `<ruff_cmd> check` to refresh remaining findings.
+### 3. 安全でない Autofix パス
 
-### 3. Unsafe Autofix Pass
+検出結果が残っており、`allow_unsafe_fixes=true` の場合にのみ実行します。
 
-Run only if findings remain and `allow_unsafe_fixes=true`.
+1. 同じスコープ/オプションを使用して `--fix --unsafe-fixes` で Ruff を実行します。
+2. 結果の差分を注意深く確認し、動作に応じた編集を優先します。
+3. 同じスコープで `<ruff_cmd> format` を実行します。
+4. `<ruff_cmd> check` を再実行します。
 
-1. Run Ruff with `--fix --unsafe-fixes` using the same scope/options.
-2. Review resulting diff carefully, prioritizing behavior-sensitive edits.
-3. Run `<ruff_cmd> format` on the same scope.
-4. Re-run `<ruff_cmd> check`.
+### 4. 手動修復パス
 
-### 4. Manual Remediation Pass
+残りの調査結果については、次のとおりです。
 
-For remaining findings:
+1. 明確で安全な修正がある場合は、コード内で直接修正します。
+2. 編集は最小限かつローカルに保ちます。
+3. 同じスコープで `<ruff_cmd> format` を実行します。
+4. `<ruff_cmd> check` を再実行します。
 
-1. Fix directly in code when there is a clear, safe correction.
-2. Keep edits minimal and local.
-3. Run `<ruff_cmd> format` on the same scope.
-4. Re-run `<ruff_cmd> check`.
+### 5. 曖昧さに関するポリシー
 
-### 5. Ambiguity Policy
+いずれかのステップで有効な解決策が複数ある場合は、続行する前に必ずユーザーに質問してください。
+同等のオプションの間で黙って選択しないでください。
 
-If there are multiple valid solutions at any step, always ask the user before proceeding.
-Do not choose silently between equivalent options.
+### 6. 抑制の決定 (`# noqa`)
 
-### 6. Suppression Decision (`# noqa`)
+すべての条件が true の場合にのみ抑制を使用します。
 
-Use suppression only when all conditions are true:
+- ルールが、必要な動作、パブリック API、フレームワーク規約、または可読性の目標と矛盾しています。
+- リファクタリングはルールの値に不釣り合いになります。
+- 抑制は範囲が狭く、特定的です (単一行、可能な場合は明示的なコード)。
 
-- The rule conflicts with required behavior, public API, framework conventions, or readability goals.
-- Refactoring would be disproportionate to the value of the rule.
-- The suppression is narrow and specific (single line, explicit code when possible).
+ガイドライン:
 
-Guidelines:
+- 広範囲の `# noqa` よりも `# noqa: <RULE>` を優先します。
+- 明らかではない抑制についての簡単な理由のコメントを追加します。
+- 有効な結果が 2 つ以上存在する場合は、どのオプションを優先するかを常にユーザーに尋ねます。
 
-- Prefer `# noqa: <RULE>` over broad `# noqa`.
-- Add a brief reason comment for non-obvious suppressions.
-- If two or more valid outcomes exist, always ask the user which option to prefer.
+### 7. 再帰ループと停止基準
 
-### 7. Recursive Loop and Stop Criteria
+次のいずれかの結果が得られるまで、手順 2 ～ 6 を繰り返します。
 
-Repeat steps 2 to 6 until one of these outcomes:
+- `<ruff_cmd> check` はクリーンな状態を返します。
+- 残りの調査結果には、アーキテクチャ/製品の決定が必要です。
+- 残りの発見は、文書化された理論的根拠によって意図的に隠蔽されます。
+- ループを繰り返しても進みません。
 
-- `<ruff_cmd> check` returns clean.
-- Remaining findings require architectural/product decisions.
-- Remaining findings are intentionally suppressed with documented rationale.
-- Repeated loop makes no progress.
+各ループ反復には、次の `<ruff_cmd> check` の前に `<ruff_cmd> format` を含める必要があります。
 
-Each loop iteration must include `<ruff_cmd> format` before the next `<ruff_cmd> check`.
+進行状況が検出されない場合:
 
-When no progress is detected:
+1. ブロックされたルールと影響を受けるファイルを要約します。
+2. 有効なオプションとトレードオフを提示します。
+3. ユーザーに選択を求めます。
 
-1. Summarize blocked rules and affected files.
-2. Present valid options and trade-offs.
-3. Ask the user to choose.
+## 品質ゲート完了を宣言する前に:
 
-## Quality Gates
+- Ruff は、選択したスコープ/オプションに関して予期しない結果を返しません。
+- すべての自動修正の差分が正確であるかどうかがレビューされます。
+- 明示的な正当な理由がない限り、抑制は追加されません。
+- 動作に影響を与える可能性のある安全でない修正は、ユーザーに対して強調表示されます。
+- Ruff フォーマットは反復ごとに実行されます。
 
-Before declaring completion:
+## 出力コントラクト
 
-- Ruff returns no unexpected findings for the chosen scope/options.
-- All autofix diffs are reviewed for correctness.
-- No suppression is added without explicit justification.
-- Any unsafe fix with possible behavioral impact is highlighted to the user.
-- Ruff formatting is executed in every iteration.
+実行の最後に、次のことを報告します。
 
-## Output Contract
+- スコープとラフのオプションが使用されます。
+- 実行された反復の数。
+- 修正された調査結果の概要。
+- 手動修正のリスト。
+- 根拠のある抑制のリスト。
+- 残りの調査結果 (存在する場合)、およびユーザーの決定が必要。
 
-At the end of execution, report:
+## 推奨されるプロンプト スターター
 
-- Scope and Ruff options used.
-- Number of iterations performed.
-- Summary of fixed findings.
-- List of manual fixes.
-- List of suppressions with rationale.
-- Remaining findings, if any, and required user decisions.
-
-## Suggested Prompt Starters
-
-- "Run ruff-recursive-fix on the whole repo with default config."
-- "Run ruff-recursive-fix only on src/models, ignore DOC rules."
-- "Run ruff-recursive-fix on tests with select F,E9,I and no unsafe fixes."
-- "Run ruff-recursive-fix on src/data and ask me before adding any noqa."
+- 「デフォルト設定を使用してリポジトリ全体で ruff-recursive-fix を実行します。」
+- 「src/models に対してのみ ruff-recursive-fix を実行し、DOC ルールを無視します。」
+- 「F、E9、I を選択し、安全でない修正を含まないテストで ruff-recursive-fix を実行します。」
+- 「src/data で ruff-recursive-fix を実行し、noqa を追加する前に私に尋ねてください。」

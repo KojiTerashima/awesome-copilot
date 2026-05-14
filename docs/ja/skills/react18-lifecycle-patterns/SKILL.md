@@ -2,62 +2,58 @@
 name: react18-lifecycle-patterns
 description: 'Provides exact before/after migration patterns for the three unsafe class component lifecycle methods - componentWillMount, componentWillReceiveProps, and componentWillUpdate - targeting React 18.3.1. Use this skill whenever a class component needs its lifecycle methods migrated, when deciding between getDerivedStateFromProps vs componentDidUpdate, when adding getSnapshotBeforeUpdate, or when fixing React 18 UNSAFE_ lifecycle warnings. Always use this skill before writing any lifecycle migration code - do not guess the pattern from memory, the decision trees here prevent the most common migration mistakes.'
 ---
+# React 18 ライフサイクル パターン
 
-# React 18 Lifecycle Patterns
+3 つの安全でないクラス コンポーネントのライフサイクル メソッドを React 18.3.1 準拠のパターンに移行するためのリファレンス。
 
-Reference for migrating the three unsafe class component lifecycle methods to React 18.3.1 compliant patterns.
+## クイック意思決定ガイド
 
-## Quick Decision Guide
+ライフサイクル メソッドを移行する前に、メソッドの動作の **セマンティック カテゴリ**を特定します。間違ったカテゴリ = 間違った移行。以下の表は、正しい参照ファイルへのルートを示しています。
 
-Before migrating any lifecycle method, identify the **semantic category** of what the method does. Wrong category = wrong migration. The table below routes you to the correct reference file.
+###componentWillMount - 何をするものですか?
 
-### componentWillMount - what does it do?
-
-| What it does | Correct migration | Reference |
+|何をするのか |正しい移行 |参考資料 |
 |---|---|---|
-| Sets initial state (`this.setState(...)`) | Move to `constructor` | [→ componentWillMount.md](references/componentWillMount.md#case-a) |
-| Runs a side effect (fetch, subscription, DOM) | Move to `componentDidMount` | [→ componentWillMount.md](references/componentWillMount.md#case-b) |
-| Derives initial state from props | Move to `constructor` with props | [→ componentWillMount.md](references/componentWillMount.md#case-c) |
+|初期状態を設定します (`this.setState(...)`) | `constructor` に移動 | [→componentWillMount.md](references/componentWillMount.md#case-a) |
+|副作用 (フェッチ、サブスクリプション、DOM) を実行します。 `componentDidMount` に移動 | [→componentWillMount.md](references/componentWillMount.md#case-b) |
+| props | から初期状態を取得します。小道具を使用して `constructor` に移動 | [→componentWillMount.md](references/componentWillMount.md#case-c) |
 
-### componentWillReceiveProps - what does it do?
+###componentWillReceiveProps - 何をするものですか?
 
-| What it does | Correct migration | Reference |
+|何をするのか |正しい移行 |参考資料 |
 |---|---|---|
-| Async side effect triggered by prop change (fetch, cancel) | `componentDidUpdate` | [→ componentWillReceiveProps.md](references/componentWillReceiveProps.md#case-a) |
-| Pure state derivation from new props (no side effects) | `getDerivedStateFromProps` | [→ componentWillReceiveProps.md](references/componentWillReceiveProps.md#case-b) |
+|プロパティの変更 (フェッチ、キャンセル) によって引き起こされる非同期の副作用 | `componentDidUpdate` | [→componentWillReceiveProps.md](references/componentWillReceiveProps.md#case-a) |
+|新しいプロパティからの純粋な状態の派生 (副作用なし) | `getDerivedStateFromProps` | [→componentWillReceiveProps.md](references/componentWillReceiveProps.md#case-b) |
 
-### componentWillUpdate - what does it do?
+###componentWillUpdate - 何をするのですか?
 
-| What it does | Correct migration | Reference |
+|何をするのか |正しい移行 |参考資料 |
 |---|---|---|
-| Reads the DOM before update (scroll, size, position) | `getSnapshotBeforeUpdate` | [→ componentWillUpdate.md](references/componentWillUpdate.md#case-a) |
-| Cancels requests / runs effects before update | `componentDidUpdate` with prev comparison | [→ componentWillUpdate.md](references/componentWillUpdate.md#case-b) |
+|更新前に DOM を読み取ります (スクロール、サイズ、位置) | `getSnapshotBeforeUpdate` | [→componentWillUpdate.md](references/componentWillUpdate.md#case-a) |
+|更新前にリクエストをキャンセル/実行効果を実行します。 `componentDidUpdate` と前の比較 | [→componentWillUpdate.md](references/componentWillUpdate.md#case-b) |
 
 ---
 
-## The UNSAFE_ Prefix Rule
+## UNSAFE_ プレフィックス ルール
 
-**Never use `UNSAFE_componentWillMount`, `UNSAFE_componentWillReceiveProps`, or `UNSAFE_componentWillUpdate` as a permanent fix.**
+**`UNSAFE_componentWillMount`、`UNSAFE_componentWillReceiveProps`、または `UNSAFE_componentWillUpdate` を永続的な修正として使用しないでください。**
 
-Prefixing suppresses the React 18.3.1 warning but does NOT:
-- Fix concurrent mode safety issues
-- Prepare the codebase for React 19 (where these are removed, with or without the prefix)
-- Fix the underlying semantic problem the migration is meant to address
+プレフィックスを付けると React 18.3.1 の警告が抑制されますが、次のことは抑制されません。
+- 同時モードの安全性の問題を修正
+- React 19 用のコードベースを準備します (これらはプレフィックスの有無にかかわらず削除されます)
+- 移行によって解決される根本的なセマンティック上の問題を修正する
 
-The UNSAFE_ prefix is only appropriate as a temporary hold while scheduling the real migration sprint. Mark any UNSAFE_ prefix additions with:
-```jsx
-// TODO: React 19 will remove this. Migrate before React 19 upgrade.
-// UNSAFE_ prefix added temporarily - replace with componentDidMount / getDerivedStateFromProps / etc.
-```
+UNSAFE_ プレフィックスは、実際の移行スプリントをスケジュールする際の一時的な保留としてのみ適切です。 UNSAFE_ プレフィックスの追加には次のマークを付けます。```jsx
+// TODO: React 19 ではこれが削除されます。 React 19 にアップグレードする前に移行してください。
+// UNSAFE_ プレフィックスが一時的に追加されました。componentDidMount / getDerivedStateFromProps / などに置き換えます。
+「」---
 
----
+## 参照ファイル
 
-## Reference Files
+移行するライフサイクル メソッドの完全な参照ファイルをお読みください。
 
-Read the full reference file for the lifecycle method you are migrating:
+- **`references/componentWillMount.md`** - 完全な前後コードを含む 3 つのケース
+- **`references/componentWillReceiveProps.md`** - getDerivedStateFromProps トラップ警告、完全な例
+- **`references/componentWillUpdate.md`** - getSnapshotBeforeUpdate +componentDidUpdate のペア
 
-- **`references/componentWillMount.md`** - 3 cases with full before/after code
-- **`references/componentWillReceiveProps.md`** - getDerivedStateFromProps trap warnings, full examples
-- **`references/componentWillUpdate.md`** - getSnapshotBeforeUpdate + componentDidUpdate pairing
-
-Read the relevant file before writing any migration code.
+移行コードを記述する前に、関連するファイルを読んでください。

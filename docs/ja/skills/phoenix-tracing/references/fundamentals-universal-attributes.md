@@ -1,72 +1,62 @@
-# Universal Attributes
+# ユニバーサル属性
 
-This document covers attributes that can be used on any span kind in OpenInference.
+このドキュメントでは、OpenInference のあらゆる種類のスパンで使用できる属性について説明します。
 
-## Overview
+## 概要
 
-These attributes can be used on **any span kind** to provide additional context, tracking, and metadata.
+これらの属性は、**任意の種類のスパン**で使用して、追加のコンテキスト、追跡、メタデータを提供できます。
 
-## Input/Output
+## 入力/出力
 
-| Attribute          | Type   | Description                                          |
+|属性 |タイプ |説明 |
 | ------------------ | ------ | ---------------------------------------------------- |
-| `input.value`      | String | Input to the operation (prompt, query, document)     |
-| `input.mime_type`  | String | MIME type (e.g., "text/plain", "application/json")   |
-| `output.value`     | String | Output from the operation (response, vector, result) |
-| `output.mime_type` | String | MIME type of output                                  |
+| `input.value` |文字列 |操作への入力 (プロンプト、クエリ、ドキュメント) |
+| `input.mime_type` |文字列 | MIME タイプ (例: "text/plain"、"application/json") |
+| `output.value` |文字列 |操作からの出力 (応答、ベクトル、結果) |
+| `output.mime_type` |文字列 |出力の MIME タイプ |
 
-### Why Capture I/O?
+### I/O をキャプチャする理由
 
-**Always capture input/output for evaluation-ready spans:**
-- Phoenix evaluators (faithfulness, relevance, Q&A correctness) require `input.value` and `output.value`
-- Phoenix UI displays I/O prominently in trace views for debugging
-- Enables exporting I/O for creating fine-tuning datasets
-- Provides complete context for analyzing agent behavior
+**評価可能なスパンの入力/出力を常にキャプチャします:**
+- Phoenix の評価者 (忠実性、関連性、Q&A の正しさ) には `input.value` および `output.value` が必要です
+- Phoenix UI は、デバッグ用にトレース ビューで I/O を目立つように表示します
+- 微調整データセットを作成するための I/O のエクスポートを有効にします
+- エージェントの動作を分析するための完全なコンテキストを提供します
 
-**Example attributes:**
-
-```json
+**属性の例:**```json
 {
-  "openinference.span.kind": "CHAIN",
-  "input.value": "What is the weather?",
-  "input.mime_type": "text/plain",
-  "output.value": "I don't have access to weather data.",
-  "output.mime_type": "text/plain"
+  "openinference.span.kind": "チェーン",
+  "input.value": "天気は何ですか?",
+  "input.mime_type": "テキスト/プレーン",
+  "output.value": "気象データにアクセスできません。",
+  "output.mime_type": "テキスト/プレーン"
 }
-```
-
-**See language-specific implementation:**
+「」**言語固有の実装を参照してください:**
 - TypeScript: `instrumentation-manual-typescript.md`
 - Python: `instrumentation-manual-python.md`
 
-## Session and User Tracking
+## セッションとユーザーの追跡
 
-| Attribute    | Type   | Description                                    |
-| ------------ | ------ | ---------------------------------------------- |
-| `session.id` | String | Session identifier for grouping related traces |
-| `user.id`    | String | User identifier for per-user analysis          |
+|属性 |タイプ |説明 |
+| ------------ | ------ | ------------------------------------------------ |
+| `session.id` |文字列 |関連するトレースをグループ化するためのセッション識別子 |
+| `user.id` |文字列 |ユーザーごとの分析のためのユーザー識別子 |
 
-**Example:**
-
-```json
+**例：**```json
 {
   "openinference.span.kind": "LLM",
-  "session.id": "session_abc123",
+  "セッションID": "セッション_abc123",
   "user.id": "user_xyz789"
 }
-```
+「」## メタデータ
 
-## Metadata
-
-| Attribute  | Type   | Description                                |
+|属性 |タイプ |説明 |
 | ---------- | ------ | ------------------------------------------ |
-| `metadata` | string | JSON-serialized object of key-value pairs  |
+| `metadata` |文字列 |キーと値のペアの JSON シリアル化オブジェクト |
 
-**Example:**
-
-```json
+**例：**```json
 {
   "openinference.span.kind": "LLM",
-  "metadata": "{\"environment\": \"production\", \"model_version\": \"v2.1\", \"cost_center\": \"engineering\"}"
+  "メタデータ": "{\"環境\": \"本番\"、\"モデルバージョン\": \"v2.1\"、\"コストセンター\": \"エンジニアリング\"}"
 }
-```
+「」

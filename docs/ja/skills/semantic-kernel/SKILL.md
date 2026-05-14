@@ -2,55 +2,52 @@
 name: semantic-kernel
 description: 'Create, update, refactor, explain, or review Semantic Kernel solutions using shared guidance plus language-specific references for .NET and Python.'
 ---
+# セマンティックカーネル
 
-# Semantic Kernel
+このスキルは、セマンティック カーネル上に構築されたアプリケーション、プラグイン、関数呼び出しフロー、または AI 統合を操作するときに使用します。
 
-Use this skill when working with applications, plugins, function-calling flows, or AI integrations built on Semantic Kernel.
+実装に関するアドバイスは、メモリだけではなく、最新のセマンティック カーネルのドキュメントとサンプルに基づいてください。
 
-Always ground implementation advice in the latest Semantic Kernel documentation and samples rather than memory alone.
+## 最初にターゲット言語を決定します
 
-## Determine the target language first
+推奨事項やコード変更を行う前に、言語ワークフローを選択してください。
 
-Choose the language workflow before making recommendations or code changes:
+1. リポジトリに `.cs`、`.csproj`、`.sln`、またはその他の .NET プロジェクト ファイルが含まれる場合、またはユーザーが C# または .NET のガイダンスを明示的に要求する場合は、**.NET** ワークフローを使用します。 [references/dotnet.md](references/dotnet.md) に従ってください。
+2. リポジトリに `.py`、`pyproject.toml`、`requirements.txt` が含まれる場合、またはユーザーが明示的に Python のガイダンスを要求する場合は、**Python** ワークフローを使用します。 [references/python.md](references/python.md)に従ってください。
+3. リポジトリに両方のエコシステムが含まれている場合は、編集中のファイルで使用されている言語、またはユーザーが指定したターゲットと一致させます。
+4. 言語があいまいな場合は、まず現在のワークスペースを調べてから、最も近い言語固有のリファレンスを選択します。
 
-1. Use the **.NET** workflow when the repository contains `.cs`, `.csproj`, `.sln`, or other .NET project files, or when the user explicitly asks for C# or .NET guidance. Follow [references/dotnet.md](references/dotnet.md).
-2. Use the **Python** workflow when the repository contains `.py`, `pyproject.toml`, `requirements.txt`, or the user explicitly asks for Python guidance. Follow [references/python.md](references/python.md).
-3. If the repository contains both ecosystems, match the language used by the files being edited or the user's stated target.
-4. If the language is ambiguous, inspect the current workspace first and then choose the closest language-specific reference.
+## 常にライブドキュメントを参照してください
 
-## Always consult live documentation
+- 最初にセマンティック カーネルの概要をお読みください: <https://learn.microsoft.com/semantic-kernel/overview/>
+- 現在の API サーフェスの公式ドキュメントとサンプルを優先します。
+- Microsoft Docs MCP ツールが利用可能な場合は、それを使用して、最新のフレームワーク ガイダンスと例を取得します。
 
-- Read the Semantic Kernel overview first: <https://learn.microsoft.com/semantic-kernel/overview/>
-- Prefer official docs and samples for the current API surface.
-- Use the Microsoft Docs MCP tooling when available to fetch up-to-date framework guidance and examples.
+## 共有ガイダンス
 
-## Shared guidance
+任意の言語でセマンティック カーネルを使用する場合:
 
-When working with Semantic Kernel in any language:
+- カーネル操作には非同期パターンを使用します。
+- 公式プラグインと関数呼び出しパターンに従います。
+- 明示的なエラー処理とログを実装します。
+- 強力な型指定、明確な抽象化、保守可能な構成パターンを好みます。
+- Azure AI Foundry、Azure OpenAI、OpenAI、その他の AI サービスには組み込みコネクタを使用しますが、タスクに適合する場合は新しいプロジェクトには Azure AI Foundry サービスを優先します。
+- ソリューションを簡素化する場合は、カーネルのメモリおよびコンテキスト管理機能を使用します。
+- Azure 認証が適切な場合は、`DefaultAzureCredential` を使用します。
 
-- Use async patterns for kernel operations.
-- Follow official plugin and function-calling patterns.
-- Implement explicit error handling and logging.
-- Prefer strong typing, clear abstractions, and maintainable composition patterns.
-- Use built-in connectors for Azure AI Foundry, Azure OpenAI, OpenAI, and other AI services, while preferring Azure AI Foundry services for new projects when that fits the task.
-- Use the kernel's memory and context-management capabilities when they simplify the solution.
-- Use `DefaultAzureCredential` when Azure authentication is appropriate.
+## ワークフロー1. ターゲット言語を決定し、一致する参照ファイルを読み取ります。
+2. 実装を選択する前に、最新の公式ドキュメントとサンプルを取得します。
+3. このスキルから共有セマンティック カーネル ガイダンスを適用します。
+4. 選択したリファレンスからの言語固有のパッケージ、リポジトリ、サンプル パス、コーディング プラクティスを使用します。
+5. リポジトリ内の例が現在のドキュメントと異なる場合は、その違いを説明し、現在サポートされているパターンに従ってください。
 
-## Workflow
+## 参考文献
 
-1. Determine the target language and read the matching reference file.
-2. Fetch the latest official docs and samples before making implementation choices.
-3. Apply the shared Semantic Kernel guidance from this skill.
-4. Use the language-specific package, repository, sample paths, and coding practices from the chosen reference.
-5. When examples in the repo differ from current docs, explain the difference and follow the current supported pattern.
+- [.NET リファレンス](references/dotnet.md)
+- [Pythonリファレンス](references/python.md)
 
-## References
+## 完了基準
 
-- [.NET reference](references/dotnet.md)
-- [Python reference](references/python.md)
-
-## Completion criteria
-
-- Recommendations match the target language.
-- Package names, repository paths, and sample locations match the selected ecosystem.
-- Guidance reflects current Semantic Kernel documentation rather than stale assumptions.
+- 推奨事項はターゲット言語と一致します。
+- パッケージ名、リポジトリ パス、およびサンプルの場所が、選択したエコシステムと一致します。
+- ガイダンスは、古い仮定ではなく、現在のセマンティック カーネルのドキュメントを反映しています。

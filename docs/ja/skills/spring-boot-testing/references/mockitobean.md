@@ -1,14 +1,12 @@
 # @MockitoBean
 
-Mocking dependencies in Spring Boot tests (replaces deprecated @MockBean in Spring Boot 4+).
+Spring Boot テストでの依存関係のモック (Spring Boot 4 以降では非推奨の @MockBean を置き換えます)。
 
-## Overview
+## 概要
 
-`@MockitoBean` replaces the deprecated `@MockBean` annotation in Spring Boot 4.0+. It creates a Mockito mock and registers it in the Spring context, replacing any existing bean of the same type.
+`@MockitoBean` は、Spring Boot 4.0 以降で非推奨となった `@MockBean` アノテーションを置き換えます。 Mockito モックを作成して Spring コンテキストに登録し、同じタイプの既存の Bean を置き換えます。
 
-## Basic Usage
-
-```java
+## 基本的な使い方```java
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
   
@@ -18,19 +16,15 @@ class OrderControllerTest {
   @MockitoBean
   private UserService userService;
 }
-```
+```## サポートされているテスト スライス
 
-## Supported Test Slices
+- `@WebMvcTest` - サービス/リポジトリの依存関係をモックする
+- `@WebFluxTest` - リアクティブ サービスの依存関係を模擬する
+- `@SpringBootTest` - 本物の Bean をモックに置き換えます
 
-- `@WebMvcTest` - Mock service/repository dependencies
-- `@WebFluxTest` - Mock reactive service dependencies
-- `@SpringBootTest` - Replace real beans with mocks
+## スタブ化メソッド
 
-## Stubbing Methods
-
-### Basic Stub
-
-```java
+### 基本スタブ```java
 @Test
 void shouldReturnOrder() {
   Order order = new Order(1L, "PENDING");
@@ -38,75 +32,39 @@ void shouldReturnOrder() {
   
   // Test code
 }
-```
-
-### Multiple Returns
-
-```java
+```### 複数の返品```java
 given(orderService.findById(anyLong()))
   .willReturn(new Order(1L, "PENDING"))
   .willReturn(new Order(2L, "COMPLETED"));
-```
-
-### Throwing Exceptions
-
-```java
+```### 例外のスロー```java
 given(orderService.findById(999L))
   .willThrow(new OrderNotFoundException(999L));
-```
-
-### Argument Matching
-
-```java
+```### 引数のマッチング```java
 given(orderService.create(argThat(req -> req.getQuantity() > 0)))
   .willReturn(1L);
 
 given(orderService.findByStatus(eq("PENDING")))
   .willReturn(List.of(new Order()));
-```
+```## インタラクションの検証
 
-## Verifying Interactions
-
-### Verify Method Called
-
-```java
+### 呼び出されたメソッドの検証```java
 verify(orderService).findById(1L);
-```
-
-### Verify Never Called
-
-```java
+```### 電話がかかっていないことを確認する```java
 verify(orderService, never()).delete(any());
-```
-
-### Verify Count
-
-```java
+```### カウントの検証```java
 verify(orderService, times(2)).findById(anyLong());
 verify(orderService, atLeastOnce()).findByStatus(anyString());
-```
-
-### Verify Order
-
-```java
+```### 注文の確認```java
 InOrder inOrder = inOrder(orderService, userService);
 inOrder.verify(orderService).findById(1L);
 inOrder.verify(userService).getUser(any());
-```
+```## モックのリセット
 
-## Resetting Mocks
-
-Mocks are reset between tests automatically. To reset mid-test:
-
-```java
+モックはテスト間で自動的にリセットされます。テスト中にリセットするには:```java
 Mockito.reset(orderService);
-```
+```## 部分モッキング用の @MockitoSpyBean
 
-## @MockitoSpyBean for Partial Mocking
-
-Use `@MockitoSpyBean` to wrap a real bean with Mockito.
-
-```java
+`@MockitoSpyBean` を使用して、実際の Bean を Mockito でラップします。```java
 @SpringBootTest
 class OrderServiceIntegrationTest {
   
@@ -120,13 +78,9 @@ class OrderServiceIntegrationTest {
     // Test with real service but mocked payment client
   }
 }
-```
+```## カスタム テスト Bean の @TestBean
 
-## @TestBean for Custom Test Beans
-
-Register a custom bean instance in the test context:
-
-```java
+カスタム Bean インスタンスをテスト コンテキストに登録します。```java
 @SpringBootTest
 class OrderServiceTest {
   
@@ -135,13 +89,9 @@ class OrderServiceTest {
     return new FakePaymentClient();
   }
 }
-```
+```## スコーピング: シングルトンとプロトタイプ
 
-## Scoping: Singleton vs Prototype
-
-Spring Framework 7+ (Spring Boot 4+) supports mocking non-singleton beans:
-
-```java
+Spring Framework 7+ (Spring Boot 4+) は、非シングルトン Bean のモックをサポートしています。```java
 @Component
 @Scope("prototype")
 public class OrderProcessor {
@@ -159,13 +109,9 @@ class OrderServiceTest {
     // Test code
   }
 }
-```
+```## 一般的なパターン
 
-## Common Patterns
-
-### Mocking Repository in Service Test
-
-```java
+### サービステストでのリポジトリのモック化```java
 @SpringBootTest
 class OrderServiceTest {
   @MockitoBean
@@ -184,49 +130,35 @@ class OrderServiceTest {
     verify(orderRepository).save(any(Order.class));
   }
 }
-```
+```### 同じタイプの複数のモック
 
-### Multiple Mocks of Same Type
-
-Use bean names:
-
-```java
+Bean 名を使用します。```java
 @MockitoBean(name = "primaryDataSource")
 private DataSource primaryDataSource;
 
 @MockitoBean(name = "secondaryDataSource")
 private DataSource secondaryDataSource;
-```
+```## @MockBean からの移行
 
-## Migration from @MockBean
-
-### Before (Deprecated)
-
-```java
+### 以前 (非推奨)```java
 @MockBean
 private OrderService orderService;
-```
-
-### After (Spring Boot 4+)
-
-```java
+```### 後 (Spring Boot 4+)```java
 @MockitoBean
 private OrderService orderService;
-```
+```## Mockito @Mock との主な違い
 
-## Key Differences from Mockito @Mock
-
-| Feature | @MockitoBean | @Mock |
+|特集 | @MockitoBean @モック |
 | ------- | ------------ | ----- |
-| Context integration | Yes | No |
-| Spring lifecycle | Participates | None |
-| Works with @Autowired | Yes | No |
-| Test slice support | Yes | Limited |
+|コンテキストの統合 |はい |いいえ |
+|春のライフサイクル |参加 |なし |
+| @Autowired と連携します |はい |いいえ |
+|テストスライスのサポート |はい |限定 |
 
-## Best Practices
+## ベストプラクティス
 
-1. Use `@MockitoBean` only when Spring context is involved
-2. For pure unit tests, use Mockito's `@Mock` or `Mockito.mock()`
-3. Always verify interactions that have side effects
-4. Don't verify simple queries (stubbing is enough)
-5. Reset mocks if test modifies shared mock state
+1. Spring コンテキストが関係する場合にのみ `@MockitoBean` を使用します
+2. 純粋な単体テストの場合は、Mockito の `@Mock` または `Mockito.mock()` を使用します。
+3. 副作用のある相互作用を常に検証する
+4. 単純なクエリを検証しない (スタブ化で十分です)
+5. テストによって共有モック状態が変更された場合はモックをリセットする

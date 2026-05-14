@@ -1,114 +1,110 @@
-# Verification Checklist (Phase 3)
+# 検証チェックリスト (フェーズ 3)
 
-Before declaring the quality playbook complete, check every benchmark below. If any fails, go back and fix it.
+品質ハンドブックの完成を宣言する前に、以下のすべてのベンチマークを確認してください。失敗した場合は、戻って修正してください。
 
-## Self-Check Benchmarks
+## セルフチェックベンチマーク
 
-### 1. Test Count
+### 1. テスト数
 
-Calculate the heuristic target: (testable spec sections) + (QUALITY.md scenarios) + (defensive patterns from Step 5).
+ヒューリスティック ターゲットを計算します: (テスト可能な仕様セクション) + (QUALITY.md シナリオ) + (ステップ 5 の防御パターン)。
 
-- **Well below target** → You likely missed spec requirements or skimmed defensive patterns. Go back and check.
-- **Near target** → Review whether you tested negative cases and boundaries.
-- **Above target** → Fine, as long as every test is meaningful. Don't pad to hit a number.
+- **目標を大きく下回っています** → スペック要件を見逃しているか、防御パターンを軽視している可能性があります。戻って確認してください。
+- **目標に近い** → 陰性のケースと境界をテストしたかどうかを確認します。
+- **目標を上回りました** → すべてのテストが意味がある限り、問題ありません。数字を入力するためにパディングしないでください。
 
-### 2. Scenario Coverage
+### 2. シナリオの範囲
 
-Count the scenarios in QUALITY.md. Count the scenario test functions in your functional test file. The numbers must match exactly.
+QUALITY.md 内のシナリオをカウントします。機能テスト ファイル内のシナリオ テスト関数をカウントします。数値は正確に一致する必要があります。
 
-### 3. Cross-Variant Coverage
+### 3. クロスバリアントの適用範囲
 
-If the project handles N input variants, what percentage of tests exercise all N?
+プロジェクトが N 個の入力バリアントを処理する場合、N 個すべてを実行するテストの割合は何ですか?
 
-Count: tests that loop or parametrize over all variants / total tests.
+カウント: すべてのバリアント/合計テストをループまたはパラメーター化するテスト。
 
-**Heuristic: ~30%.** If well below, look for single-variant tests that should be parametrized. Common candidates: structural completeness, identity verification, required field presence, data relationships, semantic correctness. The exact percentage matters less than ensuring cross-cutting properties are tested across all variants.
+**ヒューリスティック: ~30%。** かなり下回る場合は、パラメータ化する必要がある単一バリアント テストを探します。一般的な候補: 構造の完全性、本人確認、必須フィールドの存在、データの関係、意味の正確さ。正確なパーセンテージは、すべてのバリアントにわたって横断的な特性がテストされていることを確認することよりも重要です。
 
-### 4. Boundary and Negative Test Count
+### 4. 境界および陰性検査数
 
-Count the defensive patterns from Step 5. Count your boundary/negative tests. The ratio should be close to 1:1. If significantly lower, write more tests targeting untested defensive patterns.
+ステップ 5 の防御パターンを数えます。境界/ネガティブ テストを数えます。比率は 1:1 に近いはずです。大幅に低い場合は、テストされていない防御パターンを対象としたテストをさらに作成します。
 
-### 5. Assertion Depth
+### 5. アサーションの深さ
 
-Scan your assertions. How many are presence checks vs. value checks? If more than half are presence-only (`assert x is not None`, `assert x in output`), strengthen them to check actual values.
+自分の主張をざっと調べてみましょう。存在チェックと値チェックの数はどれくらいですか?半数以上がプレゼンスのみ (`assert x is not None`、`assert x in output`) の場合は、実際の値を確認するために強化します。
 
-### 6. Layer Correctness
+### 6. レイヤーの正確性
 
-For each test, ask: "Am I testing the *requirement* or the *mechanism*?" If any test only asserts that a specific error type is raised without also verifying pipeline output, it's testing the mechanism. Rewrite to test the outcome.
+テストごとに、「*要件* をテストしているのか、それとも *メカニズム* をテストしているのか?」と尋ねます。パイプライン出力も検証せずに、特定の種類のエラーが発生することのみをアサートするテストは、メカニズムをテストしていることになります。結果をテストするために書き直します。
 
-### 7. Mutation Validity
+### 7. 突然変異の有効性
 
-For every test that mutates a fixture, verify the mutation value is in the "Accepts" column of your Step 5b schema map. If any mutation uses a type the schema rejects, the test fails with a validation error instead of testing defensive code. Fix it.
+フィクスチャを変更するすべてのテストについて、変更値がステップ 5b スキーマ マップの「Accepts」列にあることを確認します。スキーマが拒否する型を突然変異が使用している場合、テストは防御的なコードをテストするのではなく、検証エラーで失敗します。修正してください。
 
-### 8. All Tests Pass — Zero Failures AND Zero Errors
+### 8. すべてのテストに合格 - 失敗もエラーもゼロ
 
-Run the test suite using the project's test runner:
+プロジェクトのテスト ランナーを使用してテスト スイートを実行します。
 
 - **Python:** `pytest quality/test_functional.py -v`
 - **Scala:** `sbt "testOnly *FunctionalSpec"`
-- **Java:** `mvn test -Dtest=FunctionalTest` or `gradle test --tests FunctionalTest`
+- **Java:** `mvn test -Dtest=FunctionalTest` または `gradle test --tests FunctionalTest`
 - **TypeScript:** `npx jest functional.test.ts --verbose`
-- **Go:** `go test -v` targeting the generated test file's package — use the project's existing module and package layout
-- **Rust:** `cargo test` targeting the generated test — either the integration test target in `tests/` or inline `#[cfg(test)]` tests, matching the project's conventions
+- **Go:** `go test -v` 生成されたテスト ファイルのパッケージをターゲットにします — プロジェクトの既存のモジュールとパッケージ レイアウトを使用します
+- **Rust:** `cargo test` 生成されたテストをターゲットにします — `tests/` の統合テスト ターゲットまたはインライン `#[cfg(test)]` テストのいずれかで、プロジェクトの規則に一致します**失敗とエラーの両方を確認してください。** ほとんどのテスト フレームワークは、テストの失敗 (アサーション エラー) とテスト エラー (セットアップの失敗、フィクスチャの欠落、インポート/解決エラー、初期化中の例外) を区別します。どちらも壊れたテストです。よくある間違い: 存在しない共有フィクスチャまたはヘルパーを参照するテストを生成することです。これらはアサーションの失敗ではなくセットアップ エラーとして表示されますが、同様に壊れています。
 
-**Check for both failures AND errors.** Most test frameworks distinguish between test failures (assertion errors) and test errors (setup failures, missing fixtures, import/resolution errors, exceptions during initialization). Both are broken tests. A common mistake: generating tests that reference shared fixtures or helpers that don't exist. These show up as setup errors, not assertion failures — but they are just as broken.
+実行後、以下を確認してください。
+- すべてのテストに合格しました - カウントは合計テスト数と一致する必要があります
+- 失敗ゼロ
+- エラー/セットアップ失敗なし
 
-After running, check:
-- All tests passed — count must equal total test count
-- Zero failures
-- Zero errors/setup failures
+セットアップ エラーがある場合は、フィクスチャ/セットアップ ファイルの作成を忘れているか、存在しないヘルパーを参照しています。戻って、テストを作成するか、自己完結型になるようにテストを書き直します。
 
-If there are setup errors, you forgot to create the fixture/setup file or you referenced helpers that don't exist. Go back and either create them or rewrite the tests to be self-contained.
+### 9. 既存のテストは継続される
 
-### 9. Existing Tests Unbroken
+(新しいテストだけでなく) プロジェクトの完全なテスト スイートを実行します。新しいファイルは何も壊れてはいけません。
 
-Run the project's full test suite (not just your new tests). Your new files should not break anything.
+## ドキュメントの検証
 
-## Documentation Verification
+### 10. QUALITY.md シナリオの参照実際のコードとラベルのソース
 
-### 10. QUALITY.md Scenarios Reference Real Code and Label Sources
+すべてのシナリオでは、コードベースに存在する実際の関数名、ファイル名、またはパターンについて言及する必要があります。各参照を grep して、存在することを確認します。
 
-Every scenario should mention actual function names, file names, or patterns that exist in the codebase. Grep for each reference to confirm it exists.
+非正式な要件に基づいて作業する場合は、各シナリオとテストに正規の形式 (`[Req: formal — README §3]`、`[Req: inferred — from validate_input() behavior]`、`[Req: user-confirmed — "must handle empty input"]`) を使用した要件タグが含まれていることを確認します。推定された要件には、フェーズ 4 でのユーザーレビューのためにフラグを付ける必要があります。
 
-If working from non-formal requirements, verify that each scenario and test includes a requirement tag using the canonical format: `[Req: formal — README §3]`, `[Req: inferred — from validate_input() behavior]`, `[Req: user-confirmed — "must handle empty input"]`. Inferred requirements should be flagged for user review in Phase 4.
+### 11. RUN_CODE_REVIEW.md は自己完結型です
 
-### 11. RUN_CODE_REVIEW.md Is Self-Contained
+事前のコンテキストを持たない AI は、それを読み取って有用なレビューを実行できるはずです。チェックしてください: ブートストラップ ファイルがリストされていますか?特定の重点分野はありますか?ガードレールはありますか?
 
-An AI with no prior context should be able to read it and perform a useful review. Check: does it list bootstrap files? Does it have specific focus areas? Are the guardrails present?
+### 12. RUN_INTEGRATION_TESTS.md は実行可能であり、現場で正確です
 
-### 12. RUN_INTEGRATION_TESTS.md Is Executable and Field-Accurate
+すべてのコマンドが機能するはずです。すべてのチェックには具体的な合否基準が必要です。「正しく見えるかどうかを確認する」のではなく、特定の期待される結果が必要です。
 
-Every command should work. Every check should have a concrete pass/fail criterion — not "verify it looks right" but a specific expected result.
+**品質ゲートがメモリではなくフィールド参照テーブルから書き込まれたことを確認します。** 以下を確認してください。
 
-**Verify quality gates were written from a Field Reference Table, not from memory.** Check that:
+1. RUN_INTEGRATION_TESTS.md には、すべてのスキーマのすべてのフィールドの行を含むフィールド参照テーブルが存在します。
+2. **フィールド数のチェック:** スキーマごとに、実際のスキーマ ファイル内のフィールドを数え、テーブル内の行を数えます。数値が一致しない場合は、フィールドが不足しているか、フィールドが作成されています。最も一般的な失敗: スキーマには 8 つのフィールドがありますが、テーブルには「重要な」フィールドが 2 ～ 3 つしかありません。
+3. **文字ごとのチェック:** 各スキーマ ファイルを再度読み取り、テーブル内のすべてのフィールド名をファイルの内容と比較します。 `document_id` ≠ `doc_id`。 `sentiment_score` ≠ `sentiment`。 `classification` ≠ `category`。
+4. すべての型と制約がスキーマと一致します (`float 0-1` は `int 0-100` ではなく、`string enum` は `integer` ではありません)
 
-1. A Field Reference Table exists in RUN_INTEGRATION_TESTS.md with a row for every field in every schema
-2. **Field count check:** For each schema, count the fields in the actual schema file and count the rows in your table. If the numbers don't match, you missed fields or invented fields. The most common failure: a schema has 8 fields but the table only has 2-3 "important" ones.
-3. **Character-for-character check:** Re-read each schema file now and compare every field name in your table against the file contents. `document_id` ≠ `doc_id`. `sentiment_score` ≠ `sentiment`. `classification` ≠ `category`.
-4. Every type and constraint matches the schema (`float 0-1` is not `int 0-100`, `string enum` is not `integer`)
+フィールド名、数、またはタイプが間違っている場合は、続行する前に修正してください。テーブルは基礎です。テーブルが間違っている場合、そこから構築されるすべての高品質なゲートも間違っています。
 
-If any field name, count, or type is wrong, fix it before proceeding. The table is the foundation — if the table is wrong, every quality gate built from it is wrong.
+### 13. RUN_SPEC_AUDIT.md プロンプトはコピー＆ペースト可能です
 
-### 13. RUN_SPEC_AUDIT.md Prompt Is Copy-Pasteable
+最終的な監査プロンプトは、変更せずにクロード コード、カーソル、およびコパイロットに貼り付けると機能するはずです (ファイル参照構文を除く)。
 
-The definitive audit prompt should work when pasted into Claude Code, Cursor, and Copilot without modification (except file reference syntax).
+## クイックチェックリストの形式これを最終的な承認として使用します。
 
-## Quick Checklist Format
-
-Use this as a final sign-off:
-
-- [ ] Test count near heuristic target (spec sections + scenarios + defensive patterns)
-- [ ] Scenario test count matches QUALITY.md scenario count
-- [ ] Cross-variant tests ~30% of total (every cross-cutting property covered)
-- [ ] Boundary tests ≈ defensive pattern count
-- [ ] Majority of assertions check values, not just presence
-- [ ] All tests assert outcomes, not mechanisms
-- [ ] All mutations use schema-valid values
-- [ ] All new tests pass (zero failures AND zero errors — check for fixture errors)
-- [ ] All existing tests still pass
-- [ ] QUALITY.md scenarios reference real code and include `[Req: tier — source]` tags
-- [ ] If using inferred requirements: all `[Req: inferred — ...]` items are flagged for user review
-- [ ] Code review protocol is self-contained
-- [ ] Integration test quality gates were written from a Field Reference Table (not memory)
-- [ ] Integration tests have specific pass criteria
-- [ ] Spec audit prompt is copy-pasteable and uses `[Req: tier — source]` tag format
+- [ ] ヒューリスティックターゲットに近いテスト数 (仕様セクション + シナリオ + 防御パターン)
+- [ ] シナリオのテスト数が QUALITY.md のシナリオ数と一致します
+- [ ] クロスバリアント テスト 全体の ~30% (すべての横断的なプロパティをカバー)
+- [ ] 境界テスト ≈ 守備パターン数
+- [ ] アサーションの大部分は存在だけでなく値をチェックします
+- [ ] すべてのテストはメカニズムではなく結果を表明します
+- [ ] すべてのミューテーションはスキーマ有効な値を使用します
+- [ ] すべての新しいテストに合格します (失敗もエラーもありません - フィクスチャ エラーをチェックします)
+- [ ] 既存のテストはすべて合格します
+- [ ] QUALITY.md シナリオは実際のコードを参照し、`[Req: tier — source]` タグを含みます
+- [ ] 推定要件を使用する場合: すべての `[Req: inferred — ...]` 項目にユーザー レビュー用のフラグが設定されます
+- [ ] コードレビュープロトコルは自己完結型です
+- [ ] 統合テストの品質ゲートはフィールド参照テーブル (メモリではなく) から書き込まれました
+- [ ] 統合テストには特定の合格基準があります
+- [ ] 仕様監査プロンプトはコピー＆ペースト可能で、`[Req: tier — source]` タグ形式を使用します

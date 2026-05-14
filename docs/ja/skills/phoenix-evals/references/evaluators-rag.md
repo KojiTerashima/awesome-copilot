@@ -1,108 +1,88 @@
-# Evaluators: RAG Systems
+# 評価者: RAG Systems
 
-RAG has two distinct components requiring different evaluation approaches.
+RAG には、異なる評価アプローチを必要とする 2 つの異なるコンポーネントがあります。
 
-## Two-Phase Evaluation
+## 2 段階の評価「」
+検索世代
+──────────
+クエリ → 取得 → ドキュメント ドキュメント + クエリ → LLM → 回答
+         │ │
+    IR メトリクス LLM ジャッジ / コード チェック
+「」**最初に IR メトリクスを使用して取得をデバッグします**。次に生成品質に取り組みます。
 
-```
-RETRIEVAL                    GENERATION
-─────────                    ──────────
-Query → Retriever → Docs     Docs + Query → LLM → Answer
-         │                              │
-    IR Metrics              LLM Judges / Code Checks
-```
+## 取得評価 (IR メトリクス)
 
-**Debug retrieval first** using IR metrics, then tackle generation quality.
+従来の情報取得メトリクスを使用します。
 
-## Retrieval Evaluation (IR Metrics)
-
-Use traditional information retrieval metrics:
-
-| Metric | What It Measures |
+|メトリック |何を測定するのか |
 | ------ | ---------------- |
-| Recall@k | Of all relevant docs, how many in top k? |
-| Precision@k | Of k retrieved docs, how many relevant? |
-| MRR | How high is first relevant doc? |
-| NDCG | Quality weighted by position |
+|リコール@k |関連するすべてのドキュメントのうち、上位 k にいくつ入るでしょうか? |
+|精度@k |取得した k 個のドキュメントのうち、関連するドキュメントはいくつありますか? |
+| MRR |最初の関連ドキュメントの高さはどれくらいですか? |
+| NDCG |ポジションごとに重み付けされた品質 |「」パイソン
+# クエリとドキュメントの関連ラベルが必要です
+def remember_at_k(retrieved_ids、relevant_ids、k=5):
+    取得_セット = セット(取得_ids[:k])
+    関連セット = セット(関連ID)
+    関連性のないセットの場合:
+        0.0を返す
+    return len(取得したセット & 関連するセット) / len(関連するセット)
+「」## 取得テストデータの作成
 
-```python
-# Requires query-document relevance labels
-def recall_at_k(retrieved_ids, relevant_ids, k=5):
-    retrieved_set = set(retrieved_ids[:k])
-    relevant_set = set(relevant_ids)
-    if not relevant_set:
-        return 0.0
-    return len(retrieved_set & relevant_set) / len(relevant_set)
-```
+クエリとドキュメントのペアを合成的に生成します。「」パイソン
+# 逆のプロセス: ドキュメント → ドキュメントが回答する質問
+defgenerate_retrieval_test(ドキュメント):
+    テストペア = []
+    ドキュメント内のドキュメントの場合:
+        # 事実を抽出し、質問を生成する
+        質問 = llm(f"このドキュメントの回答となる 3 つの質問を生成します:\n{doc}")
+        質問の q について:
+            test_pairs.append({"クエリ": q, "relevant_doc_id": doc.id})
+    テストペアを返す
+「」## 世代評価
 
-## Creating Retrieval Test Data
+コードでは測定できない品質には LLM ジャッジを使用します。
 
-Generate query-document pairs synthetically:
-
-```python
-# Reverse process: document → questions that document answers
-def generate_retrieval_test(documents):
-    test_pairs = []
-    for doc in documents:
-        # Extract facts, generate questions
-        questions = llm(f"Generate 3 questions this document answers:\n{doc}")
-        for q in questions:
-            test_pairs.append({"query": q, "relevant_doc_id": doc.id})
-    return test_pairs
-```
-
-## Generation Evaluation
-
-Use LLM judges for qualities code can't measure:
-
-| Eval | Question |
+|評価 |質問 |
 | ---- | -------- |
-| **Faithfulness** | Are all claims supported by retrieved context? |
-| **Relevance** | Does answer address the question? |
-| **Completeness** | Does answer cover key points from context? |
+| **忠実さ** |すべての主張は取得されたコンテキストによってサポートされていますか? |
+| **関連性** |答えは質問に答えていますか? |
+| **完全性** |回答は文脈から重要なポイントをカバーしていますか? |「」パイソン
+phoenix.evals より、ClassificationEvaluator、LLM をインポート
 
-```python
-from phoenix.evals import ClassificationEvaluator, LLM
-
-FAITHFULNESS_TEMPLATE = """Given the context and answer, is every claim in the answer supported by the context?
+FAITHFULNESS_TEMPLATE = """コンテキストと回答を考慮すると、回答内のすべての主張はコンテキストによってサポートされていますか?
 
 <context>{{context}}</context>
-<answer>{{output}}</answer>
+<回答>{{出力}}</回答>
 
-"faithful" = ALL claims supported by context
-"unfaithful" = ANY claim NOT in context
+「忠実」 = 文脈によってサポートされるすべての主張
+「不誠実」 = 文脈に当てはまらないあらゆる主張
 
-Answer (faithful/unfaithful):"""
+答え（忠実/不忠実）：「」
 
-faithfulness = ClassificationEvaluator(
-    name="faithfulness",
-    prompt_template=FAITHFULNESS_TEMPLATE,
-    llm=LLM(provider="openai", model="gpt-4o"),
-    choices={"unfaithful": 0, "faithful": 1}
-)
-```
+忠実度 = 分類評価者(
+    名前=「誠実さ」、
+    プロンプト_テンプレート=FAITHFULNESS_TEMPLATE、
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
+    選択肢={「不誠実」: 0, 「誠実」: 1}
+）
+「」## RAG 障害分類法
 
-## RAG Failure Taxonomy
+評価すべき一般的な故障モード:```ヤムル
+取得失敗数:
+  - no_relevant_docs: クエリは無関係なコンテンツを返します
+  -partial_retrieval: 一部の関連ドキュメントが欠落しています
+  - 間違ったチャンク: 正しいドキュメント、間違ったセクション
 
-Common failure modes to evaluate:
+生成失敗:
+  - 幻覚: 取得されたコンテキストにない主張
+  -ignored_context: 回答は取得したドキュメントを使用しません
+  - 不完全: コンテキストから重要な情報が欠落しています
+  - 間違った合成: ソースの解釈を間違えたり、組み合わせを間違えたりします。
+「」## 評価順序
 
-```yaml
-retrieval_failures:
-  - no_relevant_docs: Query returns unrelated content
-  - partial_retrieval: Some relevant docs missed
-  - wrong_chunk: Right doc, wrong section
+1. **最初に取得** - ドキュメントが間違っている場合、生成は失敗します
+2. **忠実さ** - 回答は文脈に基づいていますか?
+3. **回答の質** - 回答は質問に答えていますか?
 
-generation_failures:
-  - hallucination: Claims not in retrieved context
-  - ignored_context: Answer doesn't use retrieved docs
-  - incomplete: Missing key information from context
-  - wrong_synthesis: Misinterprets or miscombines sources
-```
-
-## Evaluation Order
-
-1. **Retrieval first** - If wrong docs, generation will fail
-2. **Faithfulness** - Is answer grounded in context?
-3. **Answer quality** - Does answer address the question?
-
-Fix retrieval problems before debugging generation.
+生成をデバッグする前に取得の問題を修正します。

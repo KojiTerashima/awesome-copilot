@@ -1,79 +1,77 @@
-# FlowStudio MCP — Action Types Reference
+# FlowStudio MCP — アクション タイプのリファレンス
 
-Compact lookup for recognising action types returned by `get_live_flow`.
-Use this to **read and understand** existing flow definitions.
+`get_live_flow` によって返されたアクション タイプを認識するためのコンパクトなルックアップ。
+これを使用して、既存のフロー定義を**読んで理解**します。
 
-> For full copy-paste construction patterns, see the `flowstudio-power-automate-build` skill.
-
----
-
-## How to Read a Flow Definition
-
-Every action has `"type"`, `"runAfter"`, and `"inputs"`. The `runAfter` object
-declares dependencies: `{"Previous": ["Succeeded"]}`. Valid statuses:
-`Succeeded`, `Failed`, `Skipped`, `TimedOut`.
+> 完全なコピー＆ペースト構築パターンについては、`flowstudio-power-automate-build` スキルを参照してください。
 
 ---
 
-## Action Type Quick Reference
+## フロー定義の読み取り方法
 
-| Type | Purpose | Key fields to inspect | Output reference |
+すべてのアクションには `"type"`、`"runAfter"`、および `"inputs"` があります。 `runAfter` オブジェクト
+依存関係を宣言します: `{"Previous": ["Succeeded"]}`。有効なステータス:
+`Succeeded`、`Failed`、`Skipped`、`TimedOut`。
+
+---
+
+## アクション タイプのクイック リファレンス
+
+|タイプ |目的 |検査する主要なフィールド |出力リファレンス |
 |---|---|---|---|
-| `Compose` | Store/transform a value | `inputs` (any expression) | `outputs('Name')` |
-| `InitializeVariable` | Declare a variable | `inputs.variables[].{name, type, value}` | `variables('name')` |
-| `SetVariable` | Update a variable | `inputs.{name, value}` | `variables('name')` |
-| `IncrementVariable` | Increment a numeric variable | `inputs.{name, value}` | `variables('name')` |
-| `AppendToArrayVariable` | Push to an array variable | `inputs.{name, value}` | `variables('name')` |
-| `If` | Conditional branch | `expression.and/or`, `actions`, `else.actions` | — |
-| `Switch` | Multi-way branch | `expression`, `cases.{case, actions}`, `default` | — |
-| `Foreach` | Loop over array | `foreach`, `actions`, `operationOptions` | `item()` / `items('Name')` |
-| `Until` | Loop until condition | `expression`, `limit.{count, timeout}`, `actions` | — |
-| `Wait` | Delay | `inputs.interval.{count, unit}` | — |
-| `Scope` | Group / try-catch | `actions` (nested action map) | `result('Name')` |
-| `Terminate` | End run | `inputs.{runStatus, runError}` | — |
-| `OpenApiConnection` | Connector call (SP, Outlook, Teams…) | `inputs.host.{apiId, connectionName, operationId}`, `inputs.parameters` | `outputs('Name')?['body/...']` |
-| `OpenApiConnectionWebhook` | Webhook wait (approvals, adaptive cards) | same as above | `body('Name')?['...']` |
-| `Http` | External HTTP call | `inputs.{method, uri, headers, body}` | `outputs('Name')?['body']` |
-| `Response` | Return to HTTP caller | `inputs.{statusCode, headers, body}` | — |
-| `Query` | Filter array | `inputs.{from, where}` | `body('Name')` (filtered array) |
-| `Select` | Reshape/project array | `inputs.{from, select}` | `body('Name')` (projected array) |
-| `Table` | Array → CSV/HTML string | `inputs.{from, format, columns}` | `body('Name')` (string) |
-| `ParseJson` | Parse JSON with schema | `inputs.{content, schema}` | `body('Name')?['field']` |
-| `Expression` | Built-in function (e.g. ConvertTimeZone) | `kind`, `inputs` | `body('Name')` |
+| `Compose` |値の保存/変換 | `inputs` (任意の式) | `outputs('Name')` |
+| `InitializeVariable` |変数を宣言する | `inputs.variables[].{name, type, value}` | `variables('name')` |
+| `SetVariable` |変数を更新する | `inputs.{name, value}` | `variables('name')` |
+| `IncrementVariable` |数値変数をインクリメントする | `inputs.{name, value}` | `variables('name')` |
+| `AppendToArrayVariable` |配列変数にプッシュする | `inputs.{name, value}` | `variables('name')` |
+| `If` |条件分岐 | `expression.and/or`、`actions`、`else.actions` | — |
+| `Switch` |多方向分岐 | `expression`、`cases.{case, actions}`、`default` | — |
+| `Foreach` |配列をループする | `foreach`、`actions`、`operationOptions` | `item()` / `items('Name')` |
+| `Until` |条件 | までループします。 `expression`、`limit.{count, timeout}`、`actions` | — |
+| `Wait` |遅延 | `inputs.interval.{count, unit}` | — |
+| `Scope` |グループ / トライキャッチ | `actions` (ネストされたアクション マップ) | `result('Name')` |
+| `Terminate` |エンドラン | `inputs.{runStatus, runError}` | — |
+| `OpenApiConnection` |コネクタ通話 (SP、Outlook、Teams…) | `inputs.host.{apiId, connectionName, operationId}`、`inputs.parameters` | `outputs('Name')?['body/...']` |
+| `OpenApiConnectionWebhook` | Webhook 待機 (承認、アダプティブ カード) |同上 | `body('Name')?['...']` |
+| `Http` |外部 HTTP 呼び出し | `inputs.{method, uri, headers, body}` | `outputs('Name')?['body']` |
+| `Response` | HTTP 呼び出し元に戻る | `inputs.{statusCode, headers, body}` | — |
+| `Query` |フィルター配列 | `inputs.{from, where}` | `body('Name')` (フィルターされた配列) |
+| `Select` |配列の再形成/投影 | `inputs.{from, select}` | `body('Name')` (投影された配列) |
+| `Table` |配列 → CSV/HTML 文字列 | `inputs.{from, format, columns}` | `body('Name')` (文字列) |
+| `ParseJson` |スキーマを使用して JSON を解析する | `inputs.{content, schema}` | `body('Name')?['field']` |
+| `Expression` |組み込み関数 (ConvertTimeZone など) | `kind`、`inputs` | `body('Name')` |
 
 ---
 
-## Connector Identification
+## コネクタの識別
 
-When you see `type: OpenApiConnection`, identify the connector from `host.apiId`:
+`type: OpenApiConnection` が表示されたら、`host.apiId` からのコネクタを特定します。
 
-| apiId suffix | Connector |
+| APIId サフィックス |コネクタ |
 |---|---|
-| `shared_sharepointonline` | SharePoint |
+| `shared_sharepointonline` |シェアポイント |
 | `shared_office365` | Outlook / Office 365 |
-| `shared_teams` | Microsoft Teams |
-| `shared_approvals` | Approvals |
-| `shared_office365users` | Office 365 Users |
-| `shared_flowmanagement` | Flow Management |
+| `shared_teams` |マイクロソフトチーム |
+| `shared_approvals` |承認 |
+| `shared_office365users` | Office 365 ユーザー |
+| `shared_flowmanagement` |フロー管理 |
 
-The `operationId` tells you the specific operation (e.g. `GetItems`, `SendEmailV2`,
-`PostMessageToConversation`). The `connectionName` maps to a GUID in
-`properties.connectionReferences`.
+`operationId` は、特定の操作を示します (例: `GetItems`、`SendEmailV2`、
+`PostMessageToConversation`)。 `connectionName` は、次の GUID にマップされます。
+`properties.connectionReferences`。
 
 ---
 
-## Common Expressions (Reading Cheat Sheet)
-
-| Expression | Meaning |
+## 一般的な表現 (チートシートの読み方)|式 |意味 |
 |---|---|
-| `@outputs('X')?['body/value']` | Array result from connector action X |
-| `@body('X')` | Direct body of action X (Query, Select, ParseJson) |
-| `@item()?['Field']` | Current loop item's field |
-| `@triggerBody()?['Field']` | Trigger payload field |
-| `@variables('name')` | Variable value |
-| `@coalesce(a, b)` | First non-null of a, b |
-| `@first(array)` | First element (null if empty) |
-| `@length(array)` | Array count |
-| `@empty(value)` | True if null/empty string/empty array |
-| `@union(a, b)` | Merge arrays — **first wins** on duplicates |
-| `@result('Scope')` | Array of action outcomes inside a Scope |
+| `@outputs('X')?['body/value']` |コネクタアクション X | の結果の配列
+| `@body('X')` |アクション X の直接本体 (Query、Select、ParseJson) |
+| `@item()?['Field']` |現在のループ項目のフィールド |
+| `@triggerBody()?['Field']` |トリガーペイロードフィールド |
+| `@variables('name')` |変数値 |
+| `@coalesce(a, b)` | a、b の最初の非 null |
+| `@first(array)` |最初の要素 (空の場合は null) |
+| `@length(array)` |配列数 |
+| `@empty(value)` | null/空の文字列/空の配列の場合は True |
+| `@union(a, b)` |配列を結合する — 重複した場合は **最初の勝利** |
+| `@result('Scope')` |スコープ内のアクション結果の配列 |

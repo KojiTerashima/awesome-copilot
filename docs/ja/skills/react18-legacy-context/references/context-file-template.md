@@ -1,116 +1,94 @@
-# Context File Template
+# コンテキスト ファイル テンプレート
 
-Standard template for a new context module. Copy and fill in the name.
+新しいコンテキスト モジュールの標準テンプレート。コピーして名前を入力します。
 
-## Template
+＃＃ テンプレート```jsx
+// src/contexts/[名前]Context.js
+「react」から React をインポートします。
 
-```jsx
-// src/contexts/[Name]Context.js
-import React from 'react';
-
-// ─── 1. Default Value ───────────────────────────────────────────────────────
-// Shape must match what the provider will pass as `value`
-// Used when a consumer renders outside any provider (edge case protection)
-const defaultValue = {
-  // fill in the shape
+// ──── 1. デフォルト値 ──────────────────
+// 形状はプロバイダーが `value` として渡すものと一致する必要があります
+// コンシューマーがプロバイダーの外部でレンダリングするときに使用されます (エッジ ケース保護)
+const デフォルト値 = {
+  // 形状を塗りつぶします
 };
 
-// ─── 2. Create Context ──────────────────────────────────────────────────────
-export const [Name]Context = React.createContext(defaultValue);
+// ──── 2. コンテキストの作成 ─────────────────
+import const [名前]Context = React.createContext(defaultValue);
 
-// ─── 3. Display Name (for React DevTools) ───────────────────────────────────
-[Name]Context.displayName = '[Name]Context';
+// ──── 3. 表示名 (React DevTools の場合) ──────────
+[名前]Context.displayName = '[名前]コンテキスト';
 
-// ─── 4. Optional: Custom Hook (strongly recommended) ────────────────────────
-// Provides a clean import path and a helpful error if used outside provider
-export function use[Name]() {
-  const context = React.useContext([Name]Context);
-  if (context === defaultValue) {
-    // Only throw if defaultValue is a sentinel - skip if a real default makes sense
-    // throw new Error('use[Name] must be used inside a [Name]Provider');
+// ─── 4. オプション: カスタム フック (強く推奨) ------------------------------------------
+// クリーンなインポート パスと、プロバイダー外で使用された場合に役立つエラーを提供します
+エクスポート関数 use[名前]() {
+  const context = React.useContext([名前]コンテキスト);
+  if (context === デフォルト値) {
+    //defaultValue がセンチネルの場合のみスローします - 実際のデフォルトが意味をなす場合はスキップします
+    // throw new Error('use[Name] は [Name]Provider 内で使用する必要があります');
   }
-  return context;
+  コンテキストを返します。
 }
-```
-
-## Filled Example - AuthContext
-
-```jsx
+「」## 入力例 - AuthContext```jsx
 // src/contexts/AuthContext.js
-import React from 'react';
+「react」から React をインポートします。
 
-const defaultValue = {
-  user: null,
-  isAuthenticated: false,
-  login: () => Promise.resolve(),
-  logout: () => {},
+const デフォルト値 = {
+  ユーザー: null、
+  isAuthenticated: false、
+  ログイン: () => Promise.resolve(),
+  ログアウト: () => {},
 };
 
-export const AuthContext = React.createContext(defaultValue);
+エクスポート const AuthContext = React.createContext(defaultValue);
 AuthContext.displayName = 'AuthContext';
 
-export function useAuth() {
-  return React.useContext(AuthContext);
+エクスポート関数 useAuth() {
+  React.useContext(AuthContext) を返します。
 }
-```
-
-## Filled Example - ThemeContext
-
-```jsx
+「」## 入力例 - ThemeContext```jsx
 // src/contexts/ThemeContext.js
-import React from 'react';
+「react」から React をインポートします。
 
-const defaultValue = {
-  theme: 'light',
-  toggleTheme: () => {},
+const デフォルト値 = {
+  テーマ：「光」、
+  トグルテーマ: () => {},
 };
 
-export const ThemeContext = React.createContext(defaultValue);
-ThemeContext.displayName = 'ThemeContext';
+エクスポート const ThemeContext = React.createContext(defaultValue);
+ThemeContext.displayName = 'テーマコンテキスト';
 
-export function useTheme() {
-  return React.useContext(ThemeContext);
+エクスポート関数 useTheme() {
+  React.useContext(ThemeContext) を返します。
 }
-```
-
-## Where to Put Context Files
-
-```
-src/
-  contexts/           ← preferred: dedicated folder
+「」## コンテキスト ファイルを置く場所「」
+ソース/
+  contexts/ ← 推奨: 専用フォルダー
     AuthContext.js
-    ThemeContext.js
-```
+    テーマコンテキスト.js
+「」代替可能な場所:「」
+src/context/ ← 単数形でも大丈夫
+src/store/contexts/ ← 状態管理と同じ場所にある場合
+「」コンテキスト ファイルをコンポーネント フォルダー内に置かないでください。コンテキストは横断的なものであり、1 つのコンポーネントによって所有されるべきではありません。
 
-Alternative acceptable locations:
+## アプリ内のプロバイダーの配置
 
-```
-src/context/          ← singular is also fine
-src/store/contexts/   ← if co-located with state management
-```
-
-Do NOT put context files inside a component folder - contexts are cross-cutting and shouldn't be owned by any one component.
-
-## Provider Placement in the App
-
-Context providers wrap the components that need access. Place as low in the tree as possible, not always at root:
-
-```jsx
+コンテキスト プロバイダーは、アクセスが必要なコンポーネントをラップします。ツリーのできるだけ低い位置に配置します。必ずしも根元に配置する必要はありません。```jsx
 // App.js
 import { ThemeProvider } from './ThemeProvider';
-import { AuthProvider } from './AuthProvider';
+import { AuthProvider } から './AuthProvider';
 
-function App() {
-  return (
-    // Auth wraps everything - login state is needed everywhere
-    <AuthProvider>
-      {/* Theme wraps only the UI shell - not needed in pure data providers */}
-      <ThemeProvider>
-        <Router>
+関数 App() {
+  戻る (
+    // 認証はすべてをラップします - どこでもログイン状態が必要です
+    <認証プロバイダ>
+      {/* テーマは UI シェルのみをラップします - 純粋なデータ プロバイダでは必要ありません */}
+      <テーマプロバイダー>
+        <ルーター>
           <AppShell />
-        </Router>
-      </ThemeProvider>
-    </AuthProvider>
+        </ルーター>
+      </テーマプロバイダ>
+    </認証プロバイダ>
   );
 }
-```
+「」

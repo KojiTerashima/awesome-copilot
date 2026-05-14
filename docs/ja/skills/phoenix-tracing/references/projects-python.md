@@ -1,73 +1,49 @@
-# Phoenix Tracing: Projects (Python)
+# Phoenix トレーシング: プロジェクト (Python)
 
-**Organize traces by application using projects (Phoenix's top-level grouping).**
+**プロジェクトを使用してアプリケーションごとにトレースを整理します (Phoenix の最上位グループ)。**
 
-## Overview
+## 概要
 
-Projects group traces for a single application or experiment.
+プロジェクトは、単一のアプリケーションまたは実験のトレースをグループ化します。
 
-**Use for:** Environments (dev/staging/prod), A/B testing, versioning
+**用途:** 環境 (開発/ステージング/本番)、A/B テスト、バージョン管理
 
-## Setup
+## セットアップ
 
-### Environment Variable (Recommended)
+### 環境変数 (推奨)「」バッシュ
+エクスポート PHOENIX_PROJECT_NAME="my-app-prod"
+「」
 
-```bash
-export PHOENIX_PROJECT_NAME="my-app-prod"
-```
-
-```python
-import os
+「」パイソン
+OSをインポートする
 os.environ["PHOENIX_PROJECT_NAME"] = "my-app-prod"
-from phoenix.otel import register
-register()  # Uses "my-app-prod"
-```
-
-### Code
-
-```python
-from phoenix.otel import register
+phoenix.otelインポートレジスタから
+register() # 「my-app-prod」を使用します
+「」### コード「」パイソン
+phoenix.otelインポートレジスタから
 register(project_name="my-app-prod")
-```
+「」## 使用例
 
-## Use Cases
-
-**Environments:**
-
-```python
-# Dev, staging, prod
+**環境:**「」パイソン
+# 開発、ステージング、本番
 register(project_name="my-app-dev")
 register(project_name="my-app-staging")
 register(project_name="my-app-prod")
-```
-
-**A/B Testing:**
-
-```python
-# Compare models
-register(project_name="chatbot-gpt4")
-register(project_name="chatbot-claude")
-```
-
-**Versioning:**
-
-```python
-# Track versions
+「」**A/B テスト:**「」パイソン
+# モデルを比較する
+register(プロジェクト名="チャットボット-gpt4")
+register(project_name="チャットボット クロード")
+「」**バージョン管理:**「」パイソン
+# バージョンを追跡する
 register(project_name="my-app-v1")
 register(project_name="my-app-v2")
-```
-
-## Switching Projects (Python Notebooks Only)
-
-```python
-from openinference.instrumentation import dangerously_using_project
-from phoenix.otel import register
+「」## プロジェクトの切り替え (Python ノートブックのみ)「」パイソン
+openinference.instrumentation から、dangerly_using_project をインポート
+phoenix.otelインポートレジスタから
 
 register(project_name="my-app")
 
-# Switch temporarily for evals
-with dangerously_using_project("my-eval-project"):
+# eval のために一時的に切り替える
+危険なほど_using_project("my-eval-project") を使用:
     run_evaluations()
-```
-
-**⚠️ Only use in notebooks/scripts, not production.**
+「」**⚠️ 運用環境ではなく、ノートブック/スクリプトでのみ使用してください。**

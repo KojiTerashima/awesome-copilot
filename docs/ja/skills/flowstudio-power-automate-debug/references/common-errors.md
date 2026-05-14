@@ -1,188 +1,174 @@
-# FlowStudio MCP — Common Power Automate Errors
+# FlowStudio MCP — Power Automate の一般的なエラー
 
-Reference for error codes, likely causes, and recommended fixes when debugging
-Power Automate flows via the FlowStudio MCP server.
+デバッグ時のエラー コード、考えられる原因、推奨される修正方法のリファレンス
+Power Automate フローは、FlowStudio MCP サーバーを介して行われます。
 
 ---
 
-## Expression / Template Errors
+## 式/テンプレートのエラー
 
-### `InvalidTemplate` — Function Applied to Null
+### `InvalidTemplate` — Null に適用される関数
 
-**Full message pattern**: `"Unable to process template language expressions... function 'split' expects its first argument 'text' to be of type string"`
+**完全なメッセージ パターン**: `"Unable to process template language expressions... function 'split' expects its first argument 'text' to be of type string"`
 
-**Root cause**: An expression like `@split(item()?['Name'], ' ')` received a null value.
+**根本原因**: `@split(item()?['Name'], ' ')` のような式が null 値を受け取りました。
 
-**Diagnosis**:
-1. Note the action name in the error message
-2. Call `get_live_flow_run_action_outputs` on the action that produces the array
-3. Find items where `Name` (or the referenced field) is `null`
+**診断**:
+1. エラー メッセージ内のアクション名をメモします。
+2. 配列を生成するアクションで `get_live_flow_run_action_outputs` を呼び出します。
+3. `Name` (または参照されるフィールド) が `null` である項目を検索します。
 
-**Fixes**:
-```
+**修正**:```
 Before: @split(item()?['Name'], ' ')
 After:  @split(coalesce(item()?['Name'], ''), ' ')
 
 Or guard the whole foreach body with a condition:
   expression: "@not(empty(item()?['Name']))"
-```
+```---
 
----
+### `InvalidTemplate` — 間違った式パス
 
-### `InvalidTemplate` — Wrong Expression Path
+**完全なメッセージ パターン**: `"Unable to process template language expressions... 'triggerBody()?['FieldName']' is of type 'Null'"`
 
-**Full message pattern**: `"Unable to process template language expressions... 'triggerBody()?['FieldName']' is of type 'Null'"`
+**根本原因**: 式内のフィールド名が実際のペイロード スキーマと一致しません。
 
-**Root cause**: The field name in the expression doesn't match the actual payload schema.
-
-**Diagnosis**:
-```python
+**診断**：```python
 # Check trigger output shape
 mcp("get_live_flow_run_action_outputs",
     environmentName=ENV, flowName=FLOW_ID, runName=RUN_ID,
     actionName="<trigger-name>")
 # Compare actual keys vs expression
-```
-
-**Fix**: Update expression to use the correct key name. Common mismatches:
-- `triggerBody()?['body']` vs `triggerBody()?['Body']` (case-sensitive)
-- `triggerBody()?['Subject']` vs `triggerOutputs()?['body/Subject']`
+```**修正**: 正しいキー名を使用するように式を更新します。よくある不一致:
+- `triggerBody()?['body']` と `triggerBody()?['Body']` (大文字と小文字を区別)
+- `triggerBody()?['Subject']` 対 `triggerOutputs()?['body/Subject']`
 
 ---
 
-### `InvalidTemplate` — Type Mismatch
+### `InvalidTemplate` — 型の不一致
 
-**Full message pattern**: `"... expected type 'Array' but got type 'Object'"`
+**完全なメッセージ パターン**: `"... expected type 'Array' but got type 'Object'"`
 
-**Root cause**: Passing an object where the expression expects an array (e.g. a single item HTTP response vs a list response).
+**根本原因**: 式で配列が必要な場所にオブジェクトを渡します (例: 単一項目の HTTP 応答とリスト応答)。
 
-**Fix**:
-```
+**修理**：```
 Before: @outputs('HTTP')?['body']
 After:  @outputs('HTTP')?['body/value']    ← for OData list responses
         @createArray(outputs('HTTP')?['body'])  ← wrap single object in array
-```
+```---
 
----
-
-## Connection / Auth Errors
+## 接続/認証エラー
 
 ### `ConnectionAuthorizationFailed`
 
-**Full message**: `"The API connection ... is not authorized."`
+**メッセージ全文**: `"The API connection ... is not authorized."`
 
-**Root cause**: The connection referenced in the flow is owned by a different
-user/service account than the one whose JWT is being used.
+**根本原因**: フロー内で参照されている接続は、別のユーザーによって所有されています。
+JWT が使用されているアカウントよりもユーザー/サービス アカウントが異なります。
 
-**Diagnosis**: Check `properties.connectionReferences` — the `connectionName` GUID
-identifies the owner. Cannot be fixed via API.
+**診断**: `properties.connectionReferences` — `connectionName` GUID を確認してください
+所有者を特定します。 API経由では修正できません。
 
-**Fix options**:
-1. Open flow in Power Automate designer → re-authenticate the connection
-2. Use a connection owned by the service account whose token you hold
-3. Share the connection with the service account in PA admin
+**修正オプション**:
+1. Power Automate デザイナーでフローを開く → 接続を再認証する
+2. トークンを保持しているサービス アカウントが所有する接続を使用します。
+3. PA 管理者のサービス アカウントと接続を共有します。
 
 ---
 
 ### `InvalidConnectionCredentials`
 
-**Root cause**: The underlying OAuth token for the connection has expired or
-the user's credentials changed.
+**根本原因**: 接続の基礎となる OAuth トークンの有効期限が切れているか、
+ユーザーの資格情報が変更されました。
 
-**Fix**: Owner must sign in to Power Automate and refresh the connection.
+**修正**: 所有者は Power Automate にサインインし、接続を更新する必要があります。
 
 ---
 
-## HTTP Action Errors
+## HTTP アクション エラー
 
 ### `ActionFailed` — HTTP 4xx/5xx
 
-**Full message pattern**: `"An HTTP request to... failed with status code '400'"`
+**完全なメッセージ パターン**: `"An HTTP request to... failed with status code '400'"`
 
-**Diagnosis**:
-```python
+**診断**:```python
 actions_out = mcp("get_live_flow_run_action_outputs", ..., actionName="HTTP_My_Call")
 item = actions_out[0]   # first entry in the returned array
 print(item["outputs"]["statusCode"])   # 400, 401, 403, 500...
 print(item["outputs"]["body"])         # error details from target API
-```
-
-**Common causes**:
-- 401 — missing or expired auth header
-- 403 — permission denied on target resource
-- 404 — wrong URL / resource deleted
-- 400 — malformed JSON body (check expression that builds the body)
+```**一般的な原因**:
+- 401 — 認証ヘッダーが見つからないか期限切れです
+- 403 — ターゲットリソースに対する権限が拒否されました
+- 404 — 間違った URL / リソースが削除されました
+- 400 — 不正な形式の JSON 本文 (本文を構築する式を確認してください)
 
 ---
 
-### `ActionFailed` — HTTP Timeout
+### `ActionFailed` — HTTP タイムアウト
 
-**Root cause**: Target endpoint did not respond within the connector's timeout
-(default 90 s for HTTP action).
+**根本原因**: ターゲット エンドポイントがコネクタのタイムアウト内に応答しませんでした
+(HTTP アクションのデフォルトは 90 秒)。
 
-**Fix**: Add retry policy to the HTTP action, or split the payload into smaller
-batches to reduce per-request processing time.
-
----
-
-## Control Flow Errors
-
-### `ActionSkipped` Instead of Running
-
-**Root cause**: The `runAfter` condition wasn't met. E.g. an action set to
-`runAfter: { "Prev": ["Succeeded"] }` won't run if `Prev` failed or was skipped.
-
-**Diagnosis**: Check the preceding action's status. Deliberately skipped
-(e.g. inside a false branch) is intentional — unexpected skip is a logic gap.
-
-**Fix**: Add `"Failed"` or `"Skipped"` to the `runAfter` status array if the
-action should run on those outcomes too.
+**修正**: HTTP アクションに再試行ポリシーを追加するか、ペイロードをより小さいものに分割します。
+バッチを使用してリクエストごとの処理時間を短縮します。
 
 ---
 
-### Foreach Runs in Wrong Order / Race Condition
+## 制御フローのエラー
 
-**Root cause**: `Foreach` without `operationOptions: "Sequential"` runs
-iterations in parallel, causing write conflicts or undefined ordering.
+### `ActionSkipped` を実行する代わりに
 
-**Fix**: Add `"operationOptions": "Sequential"` to the Foreach action.
+**根本原因**: `runAfter` 条件が満たされませんでした。例えば。に設定されたアクション
+`Prev` が失敗したかスキップされた場合、`runAfter: { "Prev": ["Succeeded"] }` は実行されません。
+
+**診断**: 前のアクションのステータスを確認します。意図的にスキップした
+(例: false ブランチ内) は意図的です。予期しないスキップは論理ギャップです。
+
+**修正**:
+それらの結果に対してもアクションを実行する必要があります。
 
 ---
 
-## Update / Deploy Errors
+### Foreach が間違った順序で実行される / 競合状態
 
-### `update_live_flow` Returns No-Op
+**根本原因**: `operationOptions: "Sequential"` なしで `Foreach` が実行される
+並列で反復すると、書き込み競合や未定義の順序付けが発生します。
 
-**Symptom**: `result["updated"]` is empty list or `result["created"]` is empty.
+**修正**: `"operationOptions": "Sequential"` を Foreach アクションに追加します。
 
-**Likely cause**: Passing wrong parameter name. The required key is `definition`
-(object), not `flowDefinition` or `body`.
+---
+
+## 更新/デプロイのエラー
+
+### `update_live_flow` は NoOp を返します
+
+**症状**: `result["updated"]` が空のリスト、または `result["created"]` が空です。
+
+**考えられる原因**: 間違ったパラメータ名を渡しています。必要なキーは `definition` です
+(オブジェクト)、`flowDefinition` または `body` ではありません。
 
 ---
 
 ### `update_live_flow` — `"Supply connectionReferences"`
 
-**Root cause**: The definition contains `OpenApiConnection` or
-`OpenApiConnectionWebhook` actions but `connectionReferences` was not passed.
+**根本原因**: 定義に `OpenApiConnection` または
+`OpenApiConnectionWebhook` アクションが渡されませんでした。
 
-**Fix**: Fetch the existing connection references with `get_live_flow` and pass
-them as the `connectionReferences` argument.
+**修正**: `get_live_flow` を使用して既存の接続参照をフェッチし、渡します
+それらを `connectionReferences` 引数として使用します。
 
 ---
 
-## Data Logic Errors
+## データロジックエラー
 
-### `union()` Overriding Correct Records with Nulls
+### `union()` 正しいレコードを Null で上書きする
 
-**Symptom**: After merging two arrays, some records have null fields that existed
-in one of the source arrays.
+**症状**: 2 つの配列をマージした後、一部のレコードに null フィールドが存在します。
+ソース配列の 1 つで。
 
-**Root cause**: `union(old_data, new_data)` — `union()` first-wins, so old_data
-values override new_data for matching records.
+**根本原因**: `union(old_data, new_data)` — `union()` が先勝のため、old_data
+値は、一致するレコードの new_data をオーバーライドします。
 
-**Fix**: Swap argument order: `union(new_data, old_data)`
-
-```
+**修正**: 引数の順序を入れ替えます: `union(new_data, old_data)````
 Before: @sort(union(outputs('Old_Array'), body('New_Array')), 'Date')
 After:  @sort(union(body('New_Array'), outputs('Old_Array')), 'Date')
 ```

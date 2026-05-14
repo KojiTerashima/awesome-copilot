@@ -1,154 +1,150 @@
-# Web Protocols & Standards Reference
+# Web プロトコルと標準のリファレンス
 
-Organizations, specifications, and standards that govern the web.
+Web を管理する組織、仕様、標準。
 
-## Standards Organizations
+## 標準化団体
 
-### W3C (World Wide Web Consortium)
+### W3C (ワールドワイドウェブコンソーシアム)
 
-International community developing web standards.
+Web 標準を開発する国際コミュニティ。
 
-**Key Standards**:
+**主要な基準**:
 - HTML
 - CSS
 - XML
 - SVG
-- WCAG (Accessibility)
-- Web APIs
+- WCAG (アクセシビリティ)
+- Web API
 
-**Website**: https://www.w3.org/
+**ウェブサイト**: https://www.w3.org/
 
-### WHATWG (Web Hypertext Application Technology Working Group)
+### WHATWG (Web ハイパーテキスト アプリケーション テクノロジ ワーキング グループ)
 
-Community maintaining HTML and DOM Living Standards.
+HTML と DOM の生活標準を維持するコミュニティ。
 
-**Key Standards**:
-- HTML Living Standard
-- DOM Living Standard
-- Fetch Standard
-- URL Standard
+**主要な基準**:
+- HTML リビング スタンダード
+- DOM リビング スタンダード
+- フェッチ標準
+- URL標準
 
-**Website**: https://whatwg.org/
+**ウェブサイト**: https://whatwg.org/
 
-### IETF (Internet Engineering Task Force)
+### IETF (インターネット エンジニアリング タスク フォース)
 
-Develops internet standards.
+インターネット標準を開発します。
 
-**Key Standards**:
+**主要な基準**:
 - HTTP
-- TLS
+-TLS
 - TCP/IP
 - DNS
-- WebRTC protocols
+- WebRTCプロトコル
 
-**Website**: https://www.ietf.org/
+**ウェブサイト**: https://www.ietf.org/
 
-### ECMA International
+### ECMAインターナショナル
 
-Standards organization for information systems.
+情報システムの標準化団体。
 
-**Key Standards**:
+**主要な基準**:
 - ECMAScript (JavaScript)
 - JSON
 
-**Website**: https://www.ecma-international.org/
+**ウェブサイト**: https://www.ecma-international.org/
 
-### TC39 (Technical Committee 39)
+### TC39 (技術委員会 39)
 
-ECMAScript standardization committee.
+ECMAScript 標準化委員会。
 
-**Proposal Stages**:
-- **Stage 0**: Strawperson
-- **Stage 1**: Proposal
-- **Stage 2**: Draft
-- **Stage 3**: Candidate
-- **Stage 4**: Finished (included in next version)
+**提案段階**:
+- **ステージ 0**: ストローパーソン
+- **ステージ 1**: 提案
+- **ステージ 2**: ドラフト
+- **ステージ 3**: 候補者
+- **ステージ 4**: 完了 (次のバージョンに含まれます)
 
-### IANA (Internet Assigned Numbers Authority)
+### IANA (インターネット割り当て番号局)
 
-Coordinates internet protocol resources.
+インターネットプロトコルリソースを調整します。
 
-**Responsibilities**:
-- MIME types
-- Port numbers
-- Protocol parameters
-- TLDs (Top-Level Domains)
+**責任**:
+- MIME タイプ
+- ポート番号
+- プロトコルパラメータ
+- TLD (トップレベル ドメイン)
 
-### ICANN (Internet Corporation for Assigned Names and Numbers)
+### ICANN (割り当てられた名前と番号のためのインターネット会社)
 
-Coordinates DNS and IP addresses.
+DNS と IP アドレスを調整します。
 
-## Web Standards
+## ウェブ標準
 
-### HTML Standards
+### HTML標準
 
-**HTML5 Features**:
-- Semantic elements (`<article>`, `<section>`, etc.)
-- Audio and video elements
-- Canvas and SVG
-- Form enhancements
-- LocalStorage and SessionStorage
-- Web Workers
-- Geolocation API
+**HTML5 の機能**:
+- 意味要素 (`<article>`、`<section>` など)
+- オーディオおよびビデオ要素
+- キャンバスとSVG
+- フォームの強化
+- LocalStorage と SessionStorage
+- ウェブワーカー
+- 地理位置情報 API
 
-### CSS Specifications
+### CSS仕様
 
-**CSS Modules** (each specification is a module):
-- CSS Selectors Level 4
-- CSS Flexbox Level 1
-- CSS Grid Level 2
-- CSS Animations
-- CSS Transitions
-- CSS Custom Properties
+**CSS モジュール** (各仕様はモジュールです):
+- CSS セレクター レベル 4
+- CSS フレックスボックス レベル 1
+- CSS グリッド レベル 2
+- CSSアニメーション
+- CSSトランジション
+- CSS カスタム プロパティ
 
-### JavaScript Standards
+### JavaScript 標準**ECMAScript のバージョン**:
+- **ES5** (2009): 厳密モード、JSON
+- **ES6/ES2015**: クラス、モジュール、アロー関数、プロミス
+- **ES2016**: Array.includes()、べき乗演算子 (`**`)
+- **ES2017**: async/await、Object.values/entries
+- **ES2018**: オブジェクトのレスト/スプレッド、非同期反復
+- **ES2019**: Array. flat()、Object.fromEntries
+- **ES2020**: オプションのチェイニング、ヌル合体、BigInt
+- **ES2021**: 論理割り当て、Promise.any
+- **ES2022**: 最上位の待機、クラス フィールド
+- **ES2023**: Array.findLast()、Object.groupBy
 
-**ECMAScript Versions**:
-- **ES5** (2009): Strict mode, JSON
-- **ES6/ES2015**: Classes, modules, arrow functions, promises
-- **ES2016**: Array.includes(), exponentiation operator (`**`)
-- **ES2017**: async/await, Object.values/entries
-- **ES2018**: Rest/spread for objects, async iteration
-- **ES2019**: Array.flat(), Object.fromEntries
-- **ES2020**: Optional chaining, nullish coalescing, BigInt
-- **ES2021**: Logical assignment, Promise.any
-- **ES2022**: Top-level await, class fields
-- **ES2023**: Array.findLast(), Object.groupBy
+### Web API仕様
 
-### Web API Specifications
-
-**Common APIs**:
-- DOM (Document Object Model)
-- Fetch API
-- Service Workers
-- Web Storage
-- IndexedDB
+**一般的な API**:
+- DOM (ドキュメント オブジェクト モデル)
+- APIの取得
+- サービスワーカー
+- ウェブストレージ
+- インデックス付きDB
 - WebRTC
 - WebGL
-- Web Audio API
-- Payment Request API
-- Web Authentication API
+- ウェブオーディオAPI
+- 支払いリクエストAPI
+- Web認証API
 
-## Specifications
+## 仕様
 
-### Normative vs Non-Normative
+### 規範的 vs 非規範的
 
-- **Normative**: Required for compliance
-- **Non-normative**: Informative only (examples, notes)
+- **規格**: 準拠のために必要です
+- **非規範**: 参考のみ (例、メモ)
 
-### Specification Lifecycle
+### 仕様のライフサイクル
 
-1. **Editor's Draft**: Work in progress
-2. **Working Draft**: Community review
-3. **Candidate Recommendation**: Implementation and testing
-4. **Proposed Recommendation**: Final review
-5. **W3C Recommendation**: Official standard
+1. **編集者草案**: 作業中です
+2. **作業草案**: コミュニティによるレビュー
+3. **推奨事項**: 実装とテスト
+4. **推奨案**: 最終レビュー
+5. **W3C 勧告**: 公式規格
 
-## Browser Compatibility
+## ブラウザの互換性
 
-### Feature Detection
-
-```javascript
+### 特徴検出```javascript
 // Check feature support
 if ('serviceWorker' in navigator) {
   // Use service workers
@@ -161,19 +157,15 @@ if (window.IntersectionObserver) {
 if (CSS.supports('display', 'grid')) {
   // Use CSS Grid
 }
-```
+```### ベースラインの互換性
 
-### Baseline Compatibility
+新しく標準化された機能により、ブラウザの幅広いサポートが実現します。
 
-Newly standardized features achieving widespread browser support.
+**広く利用可能**: Firefox、Chrome、Edge、Safari のサポート
 
-**Widely Available**: Firefox, Chrome, Edge, Safari support
+### ポリフィル
 
-### Polyfills
-
-Code providing modern functionality in older browsers:
-
-```javascript
+古いブラウザで最新の機能を提供するコード:```javascript
 // Promise polyfill
 if (!window.Promise) {
   window.Promise = PromisePolyfill;
@@ -183,13 +175,9 @@ if (!window.Promise) {
 if (!window.fetch) {
   window.fetch = fetchPolyfill;
 }
-```
+```### プログレッシブ機能強化
 
-### Progressive Enhancement
-
-Build for basic browsers, enhance for modern ones:
-
-```css
+基本的なブラウザ向けに構築し、最新のブラウザ向けに強化します。```css
 /* Base styles */
 .container {
   display: block;
@@ -202,64 +190,58 @@ Build for basic browsers, enhance for modern ones:
     grid-template-columns: repeat(3, 1fr);
   }
 }
-```
+```## IDL (インターフェース定義言語)
 
-## IDL (Interface Definition Language)
-
-**WebIDL**: Defines Web APIs
-
-```webidl
+**WebIDL**: Web API を定義します。```webidl
 interface Element : Node {
   readonly attribute DOMString? tagName;
   DOMString? getAttribute(DOMString qualifiedName);
   undefined setAttribute(DOMString qualifiedName, DOMString value);
 };
-```
+```## 知っておくべき仕様
 
-## Specifications to Know
-
-- **HTML Living Standard**
-- **CSS Specifications** (modular)
-- **ECMAScript Language Specification**
+- **HTML リビング スタンダード**
+- **CSS 仕様** (モジュール式)
+- **ECMAScript 言語仕様**
 - **HTTP/1.1 (RFC 9112)**
 - **HTTP/2 (RFC 9113)**
 - **HTTP/3 (RFC 9114)**
 - **TLS 1.3 (RFC 8446)**
-- **WebSocket Protocol (RFC 6455)**
-- **CORS (Fetch Standard)**
-- **Service Workers**
-- **Web Authentication (WebAuthn)**
+- **WebSocket プロトコル (RFC 6455)**
+- **CORS (フェッチ標準)**
+- **サービスワーカー**
+- **Web 認証 (WebAuthn)**
 
-## Glossary Terms
+## 用語集の用語
 
-**Key Terms Covered**:
-- Baseline (compatibility)
-- BCP 47 language tag
+**対象となる重要な用語**:
+- ベースライン (互換性)
+- BCP 47 言語タグ
 - ECMA
 - ECMAScript
 - HTML5
-- IANA
+- イアナ
 - ICANN
 - IDL
 - IETF
 - ISO
 - ITU
-- Non-normative
-- Normative
-- Polyfill
-- Shim
-- Specification
+- 非規範的
+- 規範的
+- ポリフィル
+- シム
+- 仕様
 - W3C
-- WAI
+- ワイ
 - WCAG
-- WHATWG
-- Web standards
+- 何WG
+- ウェブ標準
 - WebIDL
 
-## Additional Resources
+## 追加のリソース
 
-- [W3C Standards](https://www.w3.org/TR/)
-- [WHATWG Living Standards](https://spec.whatwg.org/)
-- [MDN Web Docs](https://developer.mozilla.org/)
-- [Can I Use](https://caniuse.com/)
-- [TC39 Proposals](https://github.com/tc39/proposals)
+- [W3C標準](https://www.w3.org/TR/)
+- [WHATWG 生活基準](https://spec.whatwg.org/)
+- [MDN Web ドキュメント](https://developer.mozilla.org/)
+- [使用できますか](https://caniuse.com/)
+- [TC39 プロポーザル](https://github.com/tc39/proposals)

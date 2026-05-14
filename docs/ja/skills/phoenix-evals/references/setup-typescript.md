@@ -1,41 +1,27 @@
-# Setup: TypeScript
+# セットアップ: TypeScript
 
-Packages required for Phoenix evals and experiments.
+Phoenix の評価と実験に必要なパッケージ。
 
-## Installation
-
-```bash
-# Using npm
+## インストール「」バッシュ
+# npm を使用する
 npm install @arizeai/phoenix-client @arizeai/phoenix-evals @arizeai/phoenix-otel
 
-# Using pnpm
+# pnpm を使用する
 pnpm add @arizeai/phoenix-client @arizeai/phoenix-evals @arizeai/phoenix-otel
-```
+「」## LLM プロバイダー
 
-## LLM Providers
+LLM-as-judge 評価者の場合は、Vercel AI SDK プロバイダーをインストールします。「」バッシュ
+npm install @ai-sdk/opennai # Vercel AI SDK + OpenAI
+npm install @ai-sdk/anthropic # Anthropic
+npm install @ai-sdk/google # Google
+「」または、直接プロバイダー SDK を使用します。「」バッシュ
+npm install openai # OpenAI ダイレクト
+npm install @anthropic-ai/sdk # Anthropic direct
+「」## クイック検証```タイプスクリプト
+import { createClient } から "@arizeai/phoenix-client";
+import { createClassificationEvaluator } から "@arizeai/phoenix-evals";
+import { registerPhoenix } から "@arizeai/phoenix-otel";
 
-For LLM-as-judge evaluators, install Vercel AI SDK providers:
-
-```bash
-npm install ai @ai-sdk/openai      # Vercel AI SDK + OpenAI
-npm install @ai-sdk/anthropic      # Anthropic
-npm install @ai-sdk/google         # Google
-```
-
-Or use direct provider SDKs:
-
-```bash
-npm install openai                 # OpenAI direct
-npm install @anthropic-ai/sdk      # Anthropic direct
-```
-
-## Quick Verify
-
-```typescript
-import { createClient } from "@arizeai/phoenix-client";
-import { createClassificationEvaluator } from "@arizeai/phoenix-evals";
-import { registerPhoenix } from "@arizeai/phoenix-otel";
-
-// All imports should work
-console.log("Phoenix TypeScript setup complete");
-```
+// すべてのインポートが機能するはずです
+console.log("Phoenix TypeScript のセットアップが完了しました");
+「」

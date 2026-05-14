@@ -1,148 +1,116 @@
-# Phoenix Tracing: Production Guide (TypeScript)
+# Phoenix Tracing: 制作ガイド (TypeScript)
 
-**CRITICAL: Configure batching, data masking, and span filtering for production deployment.**
+**重要: 本番展開用にバッチ処理、データ マスキング、およびスパン フィルタリングを構成します。**
 
-## Metadata
+## メタデータ
 
-| Attribute | Value |
-|-----------|-------|
-| Priority | Critical - production readiness |
-| Impact | Security, Performance |
-| Setup Time | 5-15 min |
+|属性 |値 |
+|----------|----------|
+|優先順位 |重要 - 本番環境の準備 |
+|影響 |セキュリティ、パフォーマンス |
+|セットアップ時間 | 5～15分 |
 
-## Batch Processing
+## バッチ処理
 
-**Enable batch processing for production efficiency.** Batching reduces network overhead by sending spans in groups rather than individually.
-
-```typescript
+**バッチ処理を有効にして生産効率を高めます。** バッチ処理では、スパンを個別に送信するのではなくグループで送信することで、ネットワークのオーバーヘッドを削減します。```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
 
-const provider = register({
-  projectName: "my-app",
-  batch: true,  // Production default
+const プロバイダー = register({
+  プロジェクト名: "私のアプリ",
+  バッチ: true, // 本番環境のデフォルト
 });
-```
+「」### シャットダウン処理
 
-### Shutdown Handling
-
-**CRITICAL:** Spans may not be exported if still queued in the processor when your process exits. Call `provider.shutdown()` to explicitly flush before exit.
-
-```typescript
-// Explicit shutdown to flush queued spans
-const provider = register({
-  projectName: "my-app",
-  batch: true,
+**重要:** プロセスの終了時にプロセッサー内でキューに残っている場合、スパンはエクスポートされない可能性があります。 `provider.shutdown()` を呼び出して、終了する前に明示的にフラッシュします。```タイプスクリプト
+// キューに入れられたスパンをフラッシュするための明示的なシャットダウン
+const プロバイダー = register({
+  プロジェクト名: "私のアプリ",
+  バッチ: true、
 });
 
-async function main() {
-  await doWork();
-  await provider.shutdown();  // Flush spans before exit
+非同期関数 main() {
+  doWork() を待ちます;
+  プロバイダーを待ちます.shutdown();  // 終了前にスパンをフラッシュします
 }
 
-main().catch(async (error) => {
-  console.error(error);
-  await provider.shutdown();  // Flush on error too
-  process.exit(1);
+main().catch(async (エラー) => {
+  コンソール.エラー(エラー);
+  プロバイダーを待ちます.shutdown();  // エラー時もフラッシュ
+  プロセス終了(1);
 });
-```
-
-**Graceful termination signals:**
-
-```typescript
-// Graceful shutdown on SIGTERM
-const provider = register({
-  projectName: "my-server",
-  batch: true,
+「」**正常な終了シグナル:**```タイプスクリプト
+// SIGTERM での正常なシャットダウン
+const プロバイダー = register({
+  プロジェクト名: "私のサーバー",
+  バッチ: true、
 });
 
 process.on("SIGTERM", async () => {
-  await provider.shutdown();
-  process.exit(0);
+  プロバイダーを待ちます.shutdown();
+  プロセス終了(0);
 });
-```
+「」---
 
----
+## データマスキング (PII 保護)
 
-## Data Masking (PII Protection)
-
-**Environment variables:**
-
-```bash
-export OPENINFERENCE_HIDE_INPUTS=true          # Hide input.value
-export OPENINFERENCE_HIDE_OUTPUTS=true         # Hide output.value
-export OPENINFERENCE_HIDE_INPUT_MESSAGES=true  # Hide LLM input messages
-export OPENINFERENCE_HIDE_OUTPUT_MESSAGES=true # Hide LLM output messages
-export OPENINFERENCE_HIDE_INPUT_IMAGES=true    # Hide image content
-export OPENINFERENCE_HIDE_INPUT_TEXT=true      # Hide embedding text
-export OPENINFERENCE_BASE64_IMAGE_MAX_LENGTH=10000  # Limit image size
-```
-
-**TypeScript TraceConfig:**
-
-```typescript
+**環境変数:**「」バッシュ
+import OPENINFERENCE_HIDE_INPUTS=true # input.value を非表示にする
+import OPENINFERENCE_HIDE_OUTPUTS=true # 出力値を非表示にする
+import OPENINFERENCE_HIDE_INPUT_MESSAGES=true # LLM 入力メッセージを非表示にする
+import OPENINFERENCE_HIDE_OUTPUT_MESSAGES=true # LLM 出力メッセージを非表示にする
+import OPENINFERENCE_HIDE_INPUT_IMAGES=true # 画像コンテンツを非表示にする
+import OPENINFERENCE_HIDE_INPUT_TEXT=true # 埋め込みテキストを非表示にする
+import OPENINFERENCE_BASE64_IMAGE_MAX_LENGTH=10000 # 画像サイズを制限する
+「」**TypeScript TraceConfig:**```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
 import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
 
 const traceConfig = {
-  hideInputs: true,
-  hideOutputs: true,
-  hideInputMessages: true
+  入力を隠す: true、
+  出力を隠す: true、
+  HideInputMessages: true
 };
 
-const instrumentation = new OpenAIInstrumentation({ traceConfig });
-```
-
-**Precedence:** Code > Environment variables > Defaults
+const計測 = new OpenAIInstrumentation({traceConfig});
+「」**優先順位:** コード > 環境変数 > デフォルト
 
 ---
 
-## Span Filtering
+## スパンフィルタリング
 
-**Suppress specific code blocks:**
-
-```typescript
-import { suppressTracing } from "@opentelemetry/core";
-import { context } from "@opentelemetry/api";
+**特定のコード ブロックを抑制します:**```タイプスクリプト
+「@opentelemetry/core」からインポート {suppressTracing};
+import { context } から "@opentelemetry/api";
 
 await context.with(suppressTracing(context.active()), async () => {
-  internalLogging(); // No spans generated
+  内部ログ(); // スパンは生成されません
 });
-```
+「」**サンプリング：**「」バッシュ
+エクスポート OTEL_TRACES_SAMPLER="parentbased_traceidratio"
+エクスポート OTEL_TRACES_SAMPLER_ARG="0.1" # サンプル 10%
+「」---
 
-**Sampling:**
+## エラー処理```タイプスクリプト
+"@opentelemetry/api" から { SpanStatusCode } をインポートします。
 
-```bash
-export OTEL_TRACES_SAMPLER="parentbased_traceidratio"
-export OTEL_TRACES_SAMPLER_ARG="0.1"  # Sample 10%
-```
-
----
-
-## Error Handling
-
-```typescript
-import { SpanStatusCode } from "@opentelemetry/api";
-
-try {
-  result = await riskyOperation();
-  span?.setStatus({ code: SpanStatusCode.OK });
-} catch (e) {
-  span?.recordException(e);
-  span?.setStatus({ code: SpanStatusCode.ERROR });
-  throw e;
+{を試してください
+  結果 =riskyOperation() を待ちます;
+  scan?.setStatus({ コード: SpanStatusCode.OK });
+} キャッチ (e) {
+  スパン?.recordException(e);
+  scan?.setStatus({ コード: SpanStatusCode.ERROR });
+  eを投げます。
 }
-```
+「」---
 
----
+## 制作チェックリスト
 
-## Production Checklist
-
-- [ ] Batch processing enabled
-- [ ] **Shutdown handling:** Call `provider.shutdown()` before exit to flush queued spans
-- [ ] **Graceful termination:** Flush spans on SIGTERM/SIGINT signals
-- [ ] Data masking configured (`HIDE_INPUTS`/`HIDE_OUTPUTS` if PII)
-- [ ] Span filtering for health checks/noisy paths
-- [ ] Error handling implemented
-- [ ] Graceful degradation if Phoenix unavailable
-- [ ] Performance tested
-- [ ] Monitoring configured (Phoenix UI checked)
+- [ ] バッチ処理が有効です
+- [ ] **シャットダウン処理:** キューに入れられたスパンをフラッシュするには、終了する前に `provider.shutdown()` を呼び出します。
+- [ ] **正常な終了:** SIGTERM/SIGINT シグナルのフラッシュ スパン
+- [ ] データマスキング設定済み (PII の場合は `HIDE_INPUTS`/`HIDE_OUTPUTS`)
+- [ ] ヘルスチェック/ノイズの多いパスのスパンフィルタリング
+- [ ] エラー処理が実装されました
+- [ ] Phoenix が使用できない場合の正常な機能低下
+- [ ] パフォーマンステスト済み
+- [ ] モニタリングが設定されています (Phoenix UI がチェックされています)

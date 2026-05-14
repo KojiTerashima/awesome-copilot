@@ -2,155 +2,150 @@
 name: power-platform-mcp-connector-suite
 description: 'Generate complete Power Platform custom connector with MCP integration for Copilot Studio - includes schema generation, troubleshooting, and validation'
 ---
+# Power Platform MCP コネクタ スイート
 
-# Power Platform MCP Connector Suite
+Microsoft Copilot Studio のモデル コンテキスト プロトコル統合により、包括的な Power Platform カスタム コネクタ実装を生成します。
 
-Generate comprehensive Power Platform custom connector implementations with Model Context Protocol integration for Microsoft Copilot Studio.
+## Copilot Studio の MCP 機能
 
-## MCP Capabilities in Copilot Studio
+**現在サポートされている内容:**
+- ✅ **ツール**: LLM が呼び出すことができる関数 (ユーザーの承認あり)
+- ✅ **リソース**: エージェントが読み取ることができるファイルのようなデータ (ツールの出力である必要があります)
 
-**Currently Supported:**
-- ✅ **Tools**: Functions that the LLM can call (with user approval)
-- ✅ **Resources**: File-like data that agents can read (must be tool outputs)
+**まだサポートされていません:**
+- ❌ **プロンプト**: 事前に作成されたテンプレート (将来のサポートに備えて)
 
-**Not Yet Supported:**
-- ❌ **Prompts**: Pre-written templates (prepare for future support)
+## コネクタの生成
 
-## Connector Generation
+以下を使用して完全な Power Platform コネクタを作成します。
 
-Create complete Power Platform connector with:
+**コア ファイル:**
+- `apiDefinition.swagger.json` と `x-ms-agentic-protocol: mcp-streamable-1.0`
+- `apiProperties.json` コネクタのメタデータと認証を使用
+- `script.csx` MCP JSON-RPC 処理用のカスタム C# 変換
+- `readme.md` コネクタのドキュメント付き
 
-**Core Files:**
-- `apiDefinition.swagger.json` with `x-ms-agentic-protocol: mcp-streamable-1.0`
-- `apiProperties.json` with connector metadata and authentication
-- `script.csx` with custom C# transformations for MCP JSON-RPC handling
-- `readme.md` with connector documentation
+**MCP の統合:**
+- JSON-RPC 2.0通信用のPOST `/mcp`エンドポイント
+- McpResponse および McpErrorResponse スキーマ定義
+- Copilot Studio の制約準拠 (参照タイプなし、単一タイプ)
+- ツール出力としてのリソースの統合 (リソースとツールはサポートされていますが、プロンプトはまだサポートされていません)
 
-**MCP Integration:**
-- POST `/mcp` endpoint for JSON-RPC 2.0 communication
-- McpResponse and McpErrorResponse schema definitions
-- Copilot Studio constraint compliance (no reference types, single types)
-- Resource integration as tool outputs (Resources and Tools supported; Prompts not yet supported)
+## スキーマの検証とトラブルシューティング
 
-## Schema Validation & Troubleshooting
+**Copilot Studio への準拠のためのスキーマの検証:**
+- ✅ ツールの入力/出力に参照タイプ (`$ref`) がありません
+- ✅ 単一型の値のみ (`["string", "number"]` ではない)
+- ✅ プリミティブ型: 文字列、数値、整数、ブール値、配列、オブジェクト
+- ✅ 個別のエンティティではなく、ツールの出力としてのリソース
+- ✅ すべてのエンドポイントの完全な URI
 
-**Validate schemas for Copilot Studio compliance:**
-- ✅ No reference types (`$ref`) in tool inputs/outputs
-- ✅ Single type values only (not `["string", "number"]`)
-- ✅ Primitive types: string, number, integer, boolean, array, object
-- ✅ Resources as tool outputs, not separate entities
-- ✅ Full URIs for all endpoints
+**一般的な問題と修正:**
+- フィルタリングされたツール → 参照型を削除し、プリミティブを使用
+- 型エラー → 検証ロジックを備えた単一型
+- リソースが利用できない → ツールの出力に含める
+- 接続失敗 → `x-ms-agentic-protocol` ヘッダーを確認
 
-**Common issues and fixes:**
-- Tools filtered → Remove reference types, use primitives
-- Type errors → Single types with validation logic
-- Resources unavailable → Include in tool outputs
-- Connection failures → Verify `x-ms-agentic-protocol` header
+## コンテキスト変数
 
-## Context Variables
+- **コネクタ名**: [コネクタの表示名]
+- **サーバーの目的**: [MCP サーバーが達成すべきこと]
+- **必要なツール**: [実装する MCP ツールのリスト]
+- **リソース**: [提供するリソースの種類]
+- **認証**: [なし、API キー、oauth2、基本]
+- **ホスト環境**: [Azure Function、Express.js など]
+- **対象 API**: [統合する外部 API]
 
-- **Connector Name**: [Display name for the connector]
-- **Server Purpose**: [What the MCP server should accomplish]
-- **Tools Needed**: [List of MCP tools to implement]
-- **Resources**: [Types of resources to provide]
-- **Authentication**: [none, api-key, oauth2, basic]
-- **Host Environment**: [Azure Function, Express.js, etc.]
-- **Target APIs**: [External APIs to integrate with]
+## 生成モード
 
-## Generation Modes
+### モード 1: 新しいコネクタの完成
+CLI 検証セットアップを含む、新しい Power Platform MCP コネクタのすべてのファイルを最初から生成します。
 
-### Mode 1: Complete New Connector
-Generate all files for a new Power Platform MCP connector from scratch, including CLI validation setup.
+### モード 2: スキーマの検証
+paconn および検証ツールを使用して、Copilot Studio に準拠するように既存のスキーマを分析および修正します。
 
-### Mode 2: Schema Validation
-Analyze and fix existing schemas for Copilot Studio compliance using paconn and validation tools.
+### モード 3: 統合のトラブルシューティング
+CLI デバッグ ツールを使用して、Copilot Studio との MCP 統合の問題を診断し、解決します。
 
-### Mode 3: Integration Troubleshooting
-Diagnose and resolve MCP integration issues with Copilot Studio using CLI debugging tools.
+### モード 4: ハイブリッド コネクタ
+適切な検証ワークフローを使用して、既存の Power Platform コネクタに MCP 機能を追加します。
 
-### Mode 4: Hybrid Connector
-Add MCP capabilities to existing Power Platform connector with proper validation workflows.
+### モード 5: 認定の準備
+完全なメタデータと検証準拠を備えた Microsoft 認定申請用のコネクタを準備します。
 
-### Mode 5: Certification Preparation
-Prepare connector for Microsoft certification submission with complete metadata and validation compliance.
+### モード 6: OAuth セキュリティ強化
+MCP セキュリティのベスト プラクティスと高度なトークン検証で強化された OAuth 2.0 認証を実装します。
 
-### Mode 6: OAuth Security Hardening
-Implement OAuth 2.0 authentication enhanced with MCP security best practices and advanced token validation.
-
-## Expected Output
-
-**1. apiDefinition.swagger.json**
-- Swagger 2.0 format with Microsoft extensions
-- MCP endpoint: `POST /mcp` with proper protocol header
-- Compliant schema definitions (primitive types only)
-- McpResponse/McpErrorResponse definitions
+## 期待される出力**1. apiDefinition.swagger.json**
+- Microsoft 拡張機能を備えた Swagger 2.0 形式
+- MCP エンドポイント: `POST /mcp` と適切なプロトコル ヘッダー
+- 準拠したスキーマ定義 (プリミティブ型のみ)
+- McpResponse/McpErrorResponse の定義
 
 **2. apiProperties.json**
-- Connector metadata and branding (`iconBrandColor` required)
-- Authentication configuration
-- Policy templates for MCP transformations
+- コネクタのメタデータとブランディング (`iconBrandColor` が必要)
+- 認証設定
+- MCP 変換用のポリシー テンプレート
 
-**3. script.csx**
-- JSON-RPC 2.0 message handling
-- Request/response transformations
-- MCP protocol compliance logic
-- Error handling and validation
+**3.スクリプト.csx**
+- JSON-RPC 2.0 メッセージ処理
+- リクエスト/レスポンスの変換
+- MCP プロトコル準拠ロジック
+- エラー処理と検証
 
-**4. Implementation guidance**
-- Tool registration and execution patterns
-- Resource management strategies
-- Copilot Studio integration steps
-- Testing and validation procedures
+**4.実装ガイダンス**
+- ツールの登録と実行パターン
+- リソース管理戦略
+- Copilot Studio の統合手順
+- テストと検証の手順
 
-## Validation Checklist
+## 検証チェックリスト
 
-### Technical Compliance
-- [ ] `x-ms-agentic-protocol: mcp-streamable-1.0` in MCP endpoint
-- [ ] No reference types in any schema definitions
-- [ ] All type fields are single types (not arrays)
-- [ ] Resources included as tool outputs
-- [ ] JSON-RPC 2.0 compliance in script.csx
-- [ ] Full URI endpoints throughout
-- [ ] Clear descriptions for Copilot Studio agents
-- [ ] Authentication properly configured
-- [ ] Policy templates for MCP transformations
-- [ ] Generative Orchestration compatibility
+### 技術的準拠
+- MCP エンドポイントの [ ] `x-ms-agentic-protocol: mcp-streamable-1.0`
+- [ ] どのスキーマ定義にも参照型がありません
+- [ ] すべての型フィールドは単一型 (配列ではありません)
+- [ ] ツール出力として含まれるリソース
+- [ ] script.csx の JSON-RPC 2.0 準拠
+- [ ] 全体にわたる完全な URI エンドポイント
+- [ ] Copilot Studio エージェントの明確な説明
+- [ ] 認証は正しく設定されています
+- [ ] MCP 変換用のポリシー テンプレート
+- [ ] ジェネレーティブ オーケストレーションの互換性
 
-### CLI Validation
-- [ ] **paconn validate**: `paconn validate --api-def apiDefinition.swagger.json` passes without errors
-- [ ] **pac CLI ready**: Connector can be created/updated with `pac connector create/update`
-- [ ] **Script validation**: script.csx passes automatic validation during pac CLI upload
-- [ ] **Package validation**: `ConnectorPackageValidator.ps1` runs successfully
+### CLI の検証
+- [ ] **paconn validate**: `paconn validate --api-def apiDefinition.swagger.json` はエラーなしで合格しました
+- [ ] **pac CLI 対応**: コネクタは `pac connector create/update` で作成/更新できます
+- [ ] **スクリプト検証**: script.csx は、pac CLI アップロード中に自動検証に合格します。
+- [ ] **パッケージの検証**: `ConnectorPackageValidator.ps1` は正常に実行されます
 
-### OAuth and Security Requirements
-- [ ] **OAuth 2.0 Enhanced**: Standard OAuth 2.0 with MCP security best practices implementation
-- [ ] **Token Validation**: Implement token audience validation to prevent passthrough attacks
-- [ ] **Custom Security Logic**: Enhanced validation in script.csx for MCP compliance
-- [ ] **State Parameter Protection**: Secure state parameters for CSRF prevention
-- [ ] **HTTPS Enforcement**: All production endpoints use HTTPS only
-- [ ] **MCP Security Practices**: Implement confused deputy attack prevention within OAuth 2.0
+### OAuth とセキュリティ要件
+- [ ] **OAuth 2.0 Enhanced**: MCP セキュリティのベスト プラクティス実装を備えた標準 OAuth 2.0
+- [ ] **トークン検証**: パススルー攻撃を防ぐためにトークン オーディエンス検証を実装します。
+- [ ] **カスタム セキュリティ ロジック**: MCP 準拠のための script.csx での検証の強化
+- [ ] **状態パラメータ保護**: CSRF 防止のための安全な状態パラメータ
+- [ ] **HTTPS の強制**: すべての運用エンドポイントは HTTPS のみを使用します
+- [ ] **MCP セキュリティ実践**: OAuth 2.0 内で混乱した副攻撃防止を実装する
 
-### Certification Requirements
-- [ ] **Complete metadata**: settings.json with product and service information
-- [ ] **Icon compliance**: PNG format, 230x230 or 500x500 dimensions
-- [ ] **Documentation**: Certification-ready readme with comprehensive examples
-- [ ] **Security compliance**: OAuth 2.0 enhanced with MCP security practices, privacy policy
-- [ ] **Authentication flow**: OAuth 2.0 with custom security validation properly configured
+### 認定要件
+- [ ] **完全なメタデータ**: 製品およびサービス情報を含む settings.json
+- [ ] **アイコンの準拠**: PNG 形式、230x230 または 500x500 の寸法
+- [ ] **ドキュメント**: 包括的な例を含む認定に対応した Readme
+- [ ] **セキュリティ コンプライアンス**: MCP セキュリティ実践により強化された OAuth 2.0、プライバシー ポリシー
+- [ ] **認証フロー**: カスタム セキュリティ検証が適切に構成された OAuth 2.0
 
-## Example Usage
-
-```yaml
-Mode: Complete New Connector
-Connector Name: Customer Analytics MCP
-Server Purpose: Customer data analysis and insights
-Tools Needed:
-  - searchCustomers: Find customers by criteria
-  - getCustomerProfile: Retrieve detailed customer data
-  - analyzeCustomerTrends: Generate trend analysis
-Resources:
-  - Customer profiles (JSON data)
-  - Analysis reports (structured data)
-Authentication: oauth2
-Host Environment: Azure Function
-Target APIs: CRM REST API
-```
+## 使用例```ヤムル
+モード: 新しいコネクタの完成
+コネクタ名: Customer Analytics MCP
+サーバーの目的: 顧客データの分析と洞察
+必要なツール:
+  - searchCustomers: 条件に基づいて顧客を検索します
+  - getCustomerProfile: 詳細な顧客データを取得します
+  -analyzeCustomerTrends: 傾向分析を生成します。
+リソース:
+  ・顧客プロフィール（JSONデータ）
+  - 分析レポート（構造化データ）
+認証: oauth2
+ホスト環境：Azure機能
+対象API：CRM REST API
+「」

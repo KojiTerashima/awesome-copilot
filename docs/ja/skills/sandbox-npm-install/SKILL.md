@@ -2,79 +2,70 @@
 name: sandbox-npm-install
 description: 'Install npm packages in a Docker sandbox environment. Use this skill whenever you need to install, reinstall, or update node_modules inside a container where the workspace is mounted via virtiofs. Native binaries (esbuild, lightningcss, rollup) crash on virtiofs, so packages must be installed on the local ext4 filesystem and symlinked back.'
 ---
+# サンドボックス npm インストール
 
-# Sandbox npm Install
+## このスキルを使用する場合
 
-## When to Use This Skill
+このスキルは次の場合に使用します。
+- 新しいサンドボックス セッションで初めて npm パッケージをインストールする必要があります
+- `package.json` または `package-lock.json` が変更されたため、再インストールする必要があります
+- `SIGILL`、`SIGSEGV`、`mmap`、`unaligned sysNoHugePageOS` などのエラーによるネイティブ バイナリ クラッシュが発生する
+- `node_modules` ディレクトリが見つからないか破損しています
 
-Use this skill whenever:
-- You need to install npm packages for the first time in a new sandbox session
-- `package.json` or `package-lock.json` has changed and you need to reinstall
-- You encounter native binary crashes with errors like `SIGILL`, `SIGSEGV`, `mmap`, or `unaligned sysNoHugePageOS`
-- The `node_modules` directory is missing or corrupted
+## 前提条件
 
-## Prerequisites
+- virtiofs がマウントされたワークスペースを備えた Docker サンドボックス環境
+- コンテナーで Node.js と npm が利用可能
+- ターゲット ワークスペース内の `package.json` ファイル
 
-- A Docker sandbox environment with a virtiofs-mounted workspace
-- Node.js and npm available in the container
-- A `package.json` file in the target workspace
+## 背景
 
-## Background
+Docker サンドボックス ワークスペースは通常、**virtiofs** (ホストと Linux VM 間のファイル同期) を介してマウントされます。ネイティブ Go および Rust バイナリ (esbuild、lightningcss、rollup など) は、aarch64 上の virtiofs から実行すると mmap アライメント エラーでクラッシュします。修正するには、コンテナーのローカル ext4 ファイルシステムにインストールし、シンボリックリンクをワークスペースに戻します。
 
-Docker sandbox workspaces are typically mounted via **virtiofs** (file sync between the host and Linux VM). Native Go and Rust binaries (esbuild, lightningcss, rollup, etc.) crash with mmap alignment failures when executed from virtiofs on aarch64. The fix is to install on the container's local ext4 filesystem and symlink back into the workspace.
+## 段階的なインストール
 
-## Step-by-Step Installation
-
-Run the bundled install script from the workspace root:
-
-```bash
+バンドルされているインストール スクリプトをワークスペース ルートから実行します。```bash
 bash scripts/install.sh
-```
+```### 共通オプション
 
-### Common Options
-
-| Option | Description |
+|オプション |説明 |
 |---|---|
-| `--workspace <path>` | Path to directory containing `package.json` (auto-detected if omitted) |
-| `--playwright` | Also install Playwright Chromium browser for E2E testing |
+| `--workspace <path>` | `package.json` を含むディレクトリへのパス (省略した場合は自動検出) |
+| `--playwright` | E2E テスト用に Playwright Chromium ブラウザもインストールします。
 
-### What the Script Does
+### スクリプトの動作
 
-1. Copies `package.json`, `package-lock.json`, and `.npmrc` (if present) to a local ext4 directory
-2. Runs `npm ci` (or `npm install` if no lockfile) on the local filesystem
-3. Symlinks `node_modules` back into the workspace
-4. Verifies known native binaries (esbuild, rollup, lightningcss, vite) if present
-5. Optionally installs Playwright browsers and system dependencies (uses `sudo` when available)
+1. `package.json`、`package-lock.json`、および `.npmrc` (存在する場合) をローカルの ext4 ディレクトリにコピーします
+2. ローカル ファイル システムで `npm ci` (ロックファイルがない場合は `npm install`) を実行します。
+3. `node_modules` をワークスペースにシンボリックリンクします。
+4. 既知のネイティブ バイナリ (esbuild、rollup、lightningcss、vite) が存在する場合は検証します。
+5. オプションで Playwright ブラウザとシステムの依存関係をインストールします (使用可能な場合は `sudo` を使用します)
 
-If verification fails, run the script again — crashes can be intermittent during initial setup.
+検証が失敗した場合は、スクリプトを再度実行します。初期セットアップ中にクラッシュが断続的に発生する可能性があります。
 
-## Post-Install Verification
+## インストール後の検証
 
-After the script completes, verify your toolchain works. For example:
-
-```bash
+スクリプトが完了したら、ツールチェーンが動作することを確認します。例えば：```bash
 npm test             # Run project tests
 npm run build        # Build the project
 npm run dev          # Start dev server
-```
+```## 重要な注意事項
 
-## Important Notes
+- ローカル インストール ディレクトリ (例: `/home/agent/project-deps`) は **container-local** であり、ホストに同期されていません。
+- `node_modules` シンボリックリンクはホスト上で壊れたリンクとして表示されます。`node_modules` は通常 gitignored されるため、これは無害です
+- ホスト上で `npm ci` または `npm install` を実行すると、シンボリックリンクは自然に実際のディレクトリに置き換えられます。
+- `package.json` または `package-lock.json` を変更した後、インストール スクリプトを再実行します。
+- マウントされたワークスペースで `npm ci` または `npm install` を直接実行しないでください。ネイティブ バイナリがクラッシュします。
 
-- The local install directory (e.g., `/home/agent/project-deps`) is **container-local** and is NOT synced back to the host
-- The `node_modules` symlink appears as a broken link on the host — this is harmless since `node_modules` is typically gitignored
-- Running `npm ci` or `npm install` on the host naturally replaces the symlink with a real directory
-- After any `package.json` or `package-lock.json` change, re-run the install script
-- Do NOT run `npm ci` or `npm install` directly in the mounted workspace — native binaries will crash
+## トラブルシューティング
 
-## Troubleshooting
-
-| Problem | Solution |
+|問題 |ソリューション |
 |---|---|
-| `SIGILL` or `SIGSEGV` when running dev server | Re-run the install script; ensure you're not running `npm install` directly in the workspace |
-| `node_modules` not found after install | Check that the symlink exists: `ls -la node_modules` |
-| Permission errors during install | Ensure the local deps directory is writable by the current user |
-| Verification fails intermittently | Run the script again — native binary crashes can be non-deterministic on first load |
+|開発サーバーを実行する場合は `SIGILL` または `SIGSEGV` |インストール スクリプトを再実行します。 `npm install` をワークスペースで直接実行していないことを確認してください。
+| `node_modules` がインストール後に見つかりません |シンボリックリンクが存在することを確認してください: `ls -la node_modules` |
+|インストール中の権限エラー |ローカルの deps ディレクトリが現在のユーザーによって書き込み可能であることを確認してください。
+|検証が断続的に失敗する |スクリプトを再度実行します。ネイティブ バイナリのクラッシュは、最初のロード時に決定的ではない可能性があります。
 
-## Vite Compatibility
+## Vite の互換性
 
-If your project uses Vite, you may need to allow the symlinked path in `server.fs.allow`. Add the symlink target's parent directory (e.g., `/home/agent/project-deps/`) to your Vite config so that Vite can serve files through the symlink.
+プロジェクトで Vite を使用している場合は、`server.fs.allow` でシンボリックリンクされたパスを許可する必要がある場合があります。 Vite がシンボリックリンクを通じてファイルを提供できるように、シンボリックリンクターゲットの親ディレクトリ (例: `/home/agent/project-deps/`) を Vite 設定に追加します。

@@ -1,133 +1,113 @@
-# Experiments: Datasets in Python
+# 実験: Python のデータセット
 
-Creating and managing evaluation datasets.
+評価データセットの作成と管理。
 
-## Creating Datasets
+## データセットの作成「」パイソン
+phoenix.clientインポートクライアントから
 
-```python
-from phoenix.client import Client
+client = クライアント()
 
-client = Client()
-
-# From examples
-dataset = client.datasets.create_dataset(
-    name="qa-test-v1",
-    examples=[
+# 例から
+データセット = client.datasets.create_dataset(
+    名前 = "qa-テスト-v1",
+    例=[
         {
-            "input": {"question": "What is 2+2?"},
-            "output": {"answer": "4"},
-            "metadata": {"category": "math"},
-        },
-    ],
-)
+            "input": {"question": "2+2 とは何ですか?"},
+            "出力": {"答え": "4"},
+            "メタデータ": {"カテゴリ": "数学"},
+        }、
+    ]、
+）
 
-# From DataFrame
-dataset = client.datasets.create_dataset(
-    dataframe=df,
-    name="qa-test-v1",
-    input_keys=["question"],
-    output_keys=["answer"],
-    metadata_keys=["category"],
-)
-```
-
-## From Production Traces
-
-```python
+# データフレームから
+データセット = client.datasets.create_dataset(
+    データフレーム=df、
+    名前 = "qa-テスト-v1",
+    input_keys=["質問"],
+    Output_keys=["答え"],
+    metadata_keys=["カテゴリ"]、
+）
+「」## 本番環境のトレースから「」パイソン
 spans_df = client.spans.get_spans_dataframe(project_identifier="my-app")
 
-dataset = client.datasets.create_dataset(
+データセット = client.datasets.create_dataset(
     dataframe=spans_df[["input.value", "output.value"]],
-    name="production-sample-v1",
+    name="本番サンプルv1",
     input_keys=["input.value"],
-    output_keys=["output.value"],
-)
-```
-
-## Retrieving Datasets
-
-```python
-dataset = client.datasets.get_dataset(name="qa-test-v1")
+    Output_keys=["output.value"],
+）
+「」## データセットの取得「」パイソン
+データセット = client.datasets.get_dataset(name="qa-test-v1")
 df = dataset.to_dataframe()
-```
+「」## 主要なパラメータ
 
-## Key Parameters
-
-| Parameter | Description |
+|パラメータ |説明 |
 | --------- | ----------- |
-| `input_keys` | Columns for task input |
-| `output_keys` | Columns for expected output |
-| `metadata_keys` | Additional context |
+| `input_keys` |タスク入力用の列 |
+| `output_keys` |予想される出力の列 |
+| `metadata_keys` |追加のコンテキスト |
 
-## Using Evaluators in Experiments
+## 実験でのエバリュエーターの使用
 
-### Evaluators as experiment evaluators
+### 実験評価者としての評価者
 
-Pass phoenix-evals evaluators directly to `run_experiment` as the `evaluators` argument:
+phoenix-evals エバリュエーターを `evaluators` 引数として `run_experiment` に直接渡します。「」パイソン
+functools から部分的なインポートを行う
+phoenix.clientからAsyncClientをインポート
+phoenix.evals からのインポート、ClassificationEvaluator、LLM、bind_evaluator
 
-```python
-from functools import partial
-from phoenix.client import AsyncClient
-from phoenix.evals import ClassificationEvaluator, LLM, bind_evaluator
+# LLM エバリュエーターを定義する
+拒否 = 分類評価者(
+    名前=「拒否」、
+    prompt_template="これは拒否ですか?\n質問: {{query}}\n応答: {{response}}",
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
+    選択肢={"拒否": 0, "回答": 1},
+）
 
-# Define an LLM evaluator
-refusal = ClassificationEvaluator(
-    name="refusal",
-    prompt_template="Is this a refusal?\nQuestion: {{query}}\nResponse: {{response}}",
-    llm=LLM(provider="openai", model="gpt-4o"),
-    choices={"refusal": 0, "answer": 1},
-)
+# データセット列を評価パラメータにマップするためにバインドします
+拒否_評価 = バインド_評価(拒否, {"クエリ": "入力クエリ", "応答": "出力"})
 
-# Bind to map dataset columns to evaluator params
-refusal_evaluator = bind_evaluator(refusal, {"query": "input.query", "response": "output"})
-
-# Define experiment task
+# 実験タスクを定義する
 async def run_rag_task(input, rag_engine):
     return rag_engine.query(input["query"])
 
-# Run experiment with the evaluator
-experiment = await AsyncClient().experiments.run_experiment(
-    dataset=ds,
+# エバリュエーターを使用して実験を実行する
+実験 = await AsyncClient().experiments.run_experiment(
+    データセット=ds、
     task=partial(run_rag_task, rag_engine=query_engine),
-    experiment_name="baseline",
-    evaluators=[refusal_evaluator],
-    concurrency=10,
-)
-```
+    実験名 = "ベースライン",
+    評価者=[拒否評価者]、
+    同時実行数=10、
+）
+「」### タスクとしての評価者 (メタ評価)
 
-### Evaluators as the task (meta evaluation)
+LLM エバリュエーターを実験 **タスク**として使用して、エバリュエーター自体をテストします
+人間による注釈に対して:「」パイソン
+phoenix.evals からインポート create_evaluator
 
-Use an LLM evaluator as the experiment **task** to test the evaluator itself
-against human annotations:
+# エバリュエーターはテストされるタスクです
+def run_refusal_eval(入力、評価者):
+    結果 = 評価者.評価(入力)
+    結果を返す[0]
 
-```python
-from phoenix.evals import create_evaluator
-
-# The evaluator IS the task being tested
-def run_refusal_eval(input, evaluator):
-    result = evaluator.evaluate(input)
-    return result[0]
-
-# A simple heuristic checks judge vs human agreement
+# 単純なヒューリスティック チェック ジャッジ vs 人間の合意
 @create_evaluator(name="exact_match")
-def exact_match(output, expected):
+def strict_match(出力、期待値):
     return float(output["score"]) == float(expected["refusal_score"])
 
-# Run: evaluator is the task, exact_match evaluates it
-experiment = await AsyncClient().experiments.run_experiment(
-    dataset=annotated_dataset,
+# 実行: evaluator がタスクであり、exact_match がそれを評価します
+実験 = await AsyncClient().experiments.run_experiment(
+    データセット=注釈付きデータセット、
     task=partial(run_refusal_eval, evaluator=refusal),
-    experiment_name="judge-v1",
-    evaluators=[exact_match],
-    concurrency=10,
-)
-```
+    実験名 = "審査員-v1",
+    評価者=[完全一致]、
+    同時実行数=10、
+）
+「」このパターンを使用すると、人間の判断と一致するまで評価者のプロンプトを繰り返すことができます。
+完全な動作例については、`tutorials/evals/evals-2/evals_2.0_rag_demo.ipynb` を参照してください。
 
-This pattern lets you iterate on evaluator prompts until they align with human judgments.
-See `tutorials/evals/evals-2/evals_2.0_rag_demo.ipynb` for a full worked example.
+## ベストプラクティス
 
-## Best Practices
-
-- **Versioning**: Create new datasets (e.g., `qa-test-v2`), don't modify
-- **Metadata**: Track source, category, difficulty
-- **Balance**: Ensure diverse coverage across categories
+- **バージョン管理**: 新しいデータセットを作成します (例: `qa-test-v2`)。変更しないでください。
+- **メタデータ**: トラックソース、カテゴリ、難易度
+- **バランス**: カテゴリ全体で多様なカバレッジを確保します

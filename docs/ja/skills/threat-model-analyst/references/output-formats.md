@@ -1,36 +1,36 @@
-# Output Formats — Report File Templates
+# 出力形式 — レポート ファイル テンプレート
 
-⛔ **SELF-CORRECT DIRECTIVE:** After writing ANY file using templates from this document, immediately run the Self-Check section at the bottom. Your response to the orchestrator MUST include the filled checklist with ✅/❌ for each item. If ANY item is ❌, fix the file before proceeding to the next step.
+⛔ **自己修正指示:** このドキュメントのテンプレートを使用してファイルを作成した後、すぐに下部にあるセルフチェック セクションを実行してください。オーケストレーターへの応答には、各項目について ✅/❌ を記入したチェックリストを含める必要があります。いずれかの項目が ❌ の場合は、次の手順に進む前にファイルを修正してください。
 
-This file defines the structure and content of every output file produced by the Threat Model Analyst. Each section is self-contained with templates, rules, and validation checklists.
+このファイルは、脅威モデル アナリストによって生成されるすべての出力ファイルの構造と内容を定義します。各セクションにはテンプレート、ルール、検証チェックリストが含まれています。
 
-**Diagram conventions** are in a separate file: [diagram-conventions.md](./diagram-conventions.md)
-**Analysis methodology** is in a separate file: [analysis-principles.md](./analysis-principles.md)
-
----
-
-## Output Folder
-
-Create a timestamped folder at the start of analysis:
-- Format: `threat-model-YYYYMMDD-HHmmss` (UTC time)
-- Example: `threat-model-20260130-073845`
-- Write ALL output files to this folder
+**図の規則** は別のファイルにあります: [diagram-conventions.md](./diagram-conventions.md)
+**分析方法** は別のファイルにあります: [analysis-principles.md](./analysis-principles.md)
 
 ---
 
-## File Content Formatting — CRITICAL RULE
+## 出力フォルダー
 
-**NEVER wrap `.md` file content in code fences.** When using `create_file` or `edit_file`:
-- The tool writes raw content to disk. If you include ` ```markdown ` at the start, it becomes literal text in the file.
-- **WRONG**: Content starts with ` ```markdown ` — the file will contain the fence as literal text
-- **CORRECT**: Content starts directly with `# Heading` on line 1
-- This applies to ALL `.md` files: `0.1-architecture.md`, `0-assessment.md`, `1-threatmodel.md`, `2-stride-analysis.md`, `3-findings.md`
+分析の開始時にタイムスタンプ付きのフォルダーを作成します。
+- 形式: `threat-model-YYYYMMDD-HHmmss` (UTC 時間)
+- 例: `threat-model-20260130-073845`
+- すべての出力ファイルをこのフォルダーに書き込みます
 
-**NEVER wrap `.mmd` file content in code fences.** The `.mmd` file is raw Mermaid source:
-- **WRONG**: Content starts with ` ```plaintext ` or ` ```mermaid `
-- **CORRECT**: Content starts with `%%{init:` on line 1, followed by `flowchart` or `graph` on line 2
+---
 
-**Self-check before every file write:** Look at the first characters of your content. If they are ` ``` ` — STOP and remove the fence.
+## ファイルコンテンツのフォーマット - 重要なルール
+
+**`.md` ファイルのコンテンツをコード フェンスでラップしないでください。** `create_file` または `edit_file` を使用する場合:
+- このツールは生のコンテンツをディスクに書き込みます。 `を含めると```markdown ` at the start, it becomes literal text in the file.
+- **WRONG**: Content starts with ` ```markdown ` — ファイルにはフェンスがリテラルテキストとして含まれます
+- **正解**: コンテンツは 1 行目の `# Heading` で直接始まります
+- これはすべての `.md` ファイルに適用されます: `0.1-architecture.md`、`0-assessment.md`、`1-threatmodel.md`、`2-stride-analysis.md`、`3-findings.md`
+
+**`.mmd` ファイルのコンテンツをコード フェンスでラップしないでください。** `.mmd` ファイルは生の Mermaid ソースです。
+- **間違い**: コンテンツは ` で始まります```plaintext ` or ` ```人魚
+- **正解**: コンテンツは 1 行目の `%%{init:` で始まり、2 行目の `flowchart` または `graph` が続きます
+
+**すべてのファイルに書き込む前にセルフチェックを行ってください:** コンテンツの最初の文字を確認してください。 ` の場合``` ` — STOP and remove the fence.
 
 ---
 
@@ -60,52 +60,51 @@ Create a timestamped folder at the start of analysis:
 
 ### Content Structure
 
-```markdown
-# Architecture Overview
+```値下げ
+# アーキテクチャの概要
 
-## System Purpose
-<!-- 2-4 sentences: What is this system? What problem does it solve? Who are the users? -->
+## システムの目的
+<!-- 2 ～ 4 文: このシステムは何ですか?それはどのような問題を解決しますか?ユーザーとは誰ですか? -->
 
-## Key Components
-| Component | Type | Description |
-|-----------|------|-------------|
-| [Name] | [Process / Data Store / External Service / External Interactor] | [One-line role description] |
+## 主要コンポーネント
+|コンポーネント |タイプ |説明 |
+|----------|------|---------------|
+| [名前] | [プロセス / データ ストア / 外部サービス / 外部インタラクター] | [役割を 1 行で説明] |
 
-## Component Diagram
-<!-- Architecture diagram using service/external/datastore classDef (NOT DFD circles). See diagram-conventions.md for styles. -->
+## コンポーネント図
+<!-- service/external/datastore classDef (DFD サークルではありません) を使用したアーキテクチャ図。スタイルについては、diagram-conventions.md を参照してください。 -->
 
-## Top Scenarios
-<!-- 3-5 most important workflows. First 3 MUST include sequence diagrams. -->
+## トップのシナリオ
+<!-- 3 ～ 5 つの最も重要なワークフロー。最初の 3 つはシーケンス図を含める必要があります。 -->
 
-### Scenario 1: [Name]
-[2-3 sentence description]
-<!-- Mermaid sequenceDiagram here -->
+### シナリオ 1: [名前]
+【2-3文の説明】
+<!-- マーメイドシーケンス図はここにあります -->
 
-### Scenario 2: [Name]
-### Scenario 3: [Name]
+### シナリオ 2: [名前]
+### シナリオ 3: [名前]
 
-## Technology Stack
-| Layer | Technologies |
-|-------|--------------|
-| Languages | ... |
-| Frameworks | ... |
-| Data Stores | ... |
-| Infrastructure | ... |
-| Security | ... |
+## テクノロジースタック
+|レイヤー |テクノロジー |
+|------|--------------|
+|言語 | ... |
+|フレームワーク | ... |
+|データストア | ... |
+|インフラ | ... |
+|セキュリティ | ... |
 
-## Deployment Model
-<!-- How deployed? On-prem, cloud, hybrid? Containers, VMs? -->
+## 導入モデル
+<!-- 導入方法は?オンプレミス、クラウド、ハイブリッド?コンテナ、VM? -->
 
-## Security Infrastructure Inventory
-| Component | Security Role | Configuration | Notes |
-|-----------|---------------|---------------|-------|
-| [e.g., MISE Sidecar] | [e.g., Authentication proxy] | [e.g., Entra ID OIDC] | [e.g., All API pods] |
+## セキュリティ インフラストラクチャのインベントリ
+|コンポーネント |セキュリティの役割 |構成 |メモ |
+|----------|------|------|------|
+| [例: MISE サイドカー] | [例: 認証プロキシ] | [例: Entra ID OIDC] | [例: すべての API ポッド] |
 
-## Repository Structure
-| Directory | Purpose |
-|-----------|---------|
-| [path/] | [Contents] |
-```
+## リポジトリ構造
+|ディレクトリ |目的 |
+|----------|----------|
+| [パス/] | 【目次】 |```
 
 ### Processing Rules
 
@@ -139,11 +138,11 @@ Create a timestamped folder at the start of analysis:
 
 ### 1-threatmodel.md Content
 
-```markdown
-# Threat Model
+```値下げ
+# 脅威モデル
 
-## Data Flow Diagram
-<!-- Copy EXACT diagram from 1.1-threatmodel.mmd wrapped in ```mermaid fence -->
+## データフロー図
+<!-- でラップされた 1.1-threatmodel.mmd から正確な図をコピーします。```mermaid fence -->
 
 ## Element Table
 | Element | Type | TMT Category | Description | Trust Boundary |
@@ -166,42 +165,38 @@ Create a timestamped folder at the start of analysis:
 
 ## Summary to Detailed Mapping
 | Summary Element | Contains | Summary Flows | Maps to Detailed Flows |
-```
-
-**Key rules:**
-- Diagram in `.mmd` and `.md` must be IDENTICAL (copy, don't regenerate)
-- Use `DF01`, `DF02` for detailed flows; `SDF01`, `SDF02` for summary flows
+```**重要なルール:**
+- `.mmd` と `.md` の図は同一でなければなりません (コピーし、再生成しないでください)
+- 詳細なフローには `DF01`、`DF02` を使用します。 `SDF01`、`SDF02` (概要フロー用)
 
 ---
 
-## 2-stride-analysis.md
+## 2-ストライド分析.md
 
-**Purpose:** Full STRIDE + Abuse Cases threat analysis for every component.
+**目的:** すべてのコンポーネントの完全な STRIDE + Abuse Cases 脅威分析。
 
-### Structure Requirements
+### 構造要件
 
-1. Each component's threats **MUST be split into Tier 1, Tier 2, Tier 3 sub-sections** with separate tables
-2. Summary table **MUST include T1, T2, T3 columns**
-3. All three tier sub-sections appear for every component (even if empty — use "*No Tier N threats identified*")
+1. 各コンポーネントの脅威 ** 別の表を使用して、Tier 1、Tier 2、Tier 3 のサブセクションに分割する必要があります**
+2. 概要テーブル **T1、T2、T3 列を含める必要があります**
+3. コンポーネントごとに 3 つの階層サブセクションがすべて表示されます (空の場合でも、「*階層 N の脅威は識別されません*」を使用します)。
 
-### Anchor-Safe Headings (CRITICAL)
+### アンカーセーフな見出し (重要)
 
-Component `## ` headings become link targets from `3-findings.md`.
-- Use **only** letters, numbers, spaces, and hyphens
-- **FORBIDDEN in headings:** `&`, `/`, `(`, `)`, `.`, `:`, `'`, `"`, `+`, `@`, `!`
-- Replace: `&` → `and`, `/` → `-`, parentheses → remove
+コンポーネント `## ` の見出しは、`3-findings.md` からのリンク ターゲットになります。
+- 文字、数字、スペース、ハイフンのみ**を使用してください
+- **見出しの禁止:** `&`、`/`、`(`、`)`、`.`、`:`、`'`、`"`、`+`、`@`、`!`
+- 置換: `&` → `and`、`/` → `-`、括弧 → 削除
 
-**Anchor rule:** heading → lowercase, spaces → hyphens, strip non-alphanumeric except hyphens.
+**アンカー ルール:** 見出し→小文字、スペース→ハイフン、ハイフン以外の英数字以外は削除します。
 
-### Template
+### テンプレート
 
-> **⛔ CRITICAL: The `## Summary` table MUST appear at the TOP of the file, immediately after `## Exploitability Tiers` and BEFORE any individual `## Component` sections. It is a navigation aid — readers need it first. The model consistently moves it to the BOTTOM — that is WRONG. Follow this exact order: `# STRIDE + Abuse Cases — Threat Analysis` → `## Exploitability Tiers` → `## Summary` → `---` → `## Component 1` → `## Component 2` → ...**
+> **⛔ 重要: `## Summary` テーブルは、ファイルの先頭、`## Exploitability Tiers` の直後、個々の `## Component` セクションの前になければなりません。これはナビゲーション補助です。読者はまずそれを必要とします。モデルは一貫してそれを一番下に移動します。これは間違いです。次の順序に従ってください: `# STRIDE + Abuse Cases — Threat Analysis` → `## Exploitability Tiers` → `## Summary` → `---` → `## Component 1` → `## Component 2` → ...**
 
-> **⛔ RIGID TIER DEFINITIONS — Apply these EXACTLY. Do NOT use subjective judgment.** This is a skill directive — do NOT copy this line into the output. The tier table below is what goes into the report, WITHOUT this directive line.
+> **⛔ 厳格な層の定義 — これらを正確に適用してください。主観的な判断は使用しないでください。** これはスキル ディレクティブです。この行を出力にコピーしないでください。以下の層テーブルは、このディレクティブ行を除いたレポートに記載されているものです。
 
-> **⛔ LEAKED DIRECTIVE CHECK:** The output file MUST NOT contain the text "RIGID TIER DEFINITIONS", "Do NOT use subjective judgment", or any line starting with `⛔`. These are skill instructions, not report content. If you see them in your output, remove them before finalizing.
-
-```markdown
+> **⛔ LEAKED DIRECTIVE CHECK:** 出力ファイルには、テキスト「RIGID TIER DEFINITIONS」、「主観的判断を使用しないでください」、または `⛔` で始まる行を含めることはできません。これらはスキルの説明であり、レポートの内容ではありません。出力にそれらが含まれている場合は、ファイナライズする前に削除してください。```markdown
 # STRIDE + Abuse Cases — Threat Analysis
 
 ## Exploitability Tiers
@@ -213,43 +208,40 @@ Threats are classified into three exploitability tiers based on the prerequisite
 | **Tier 1** | Direct Exposure | `None` | Exploitable by unauthenticated external attacker with NO prior access. The prerequisite field MUST say `None`. |
 | **Tier 2** | Conditional Risk | Single prerequisite: `Authenticated User`, `Privileged User`, `Internal Network`, or single `{Boundary} Access` | Requires exactly ONE form of access. The prerequisite field has ONE item. |
 | **Tier 3** | Defense-in-Depth | `Host/OS Access`, `Admin Credentials`, `{Component} Compromise`, `Physical Access`, or MULTIPLE prerequisites joined with `+` | Requires significant prior breach, infrastructure access, or multiple combined prerequisites. |
-```
+```> **⛔ 階層テーブルをそのままコピーしてください。** 4 番目の列は `Assignment Rule` である必要があります (`Example`、`Description`、`Criteria`、またはその他の名前ではありません)。セルの値は上記のテキストとまったく同じである必要があります。配置固有の例に置き換えないでください。表の後に「階層割り当てに影響を与えるデプロイメント コンテキスト」段落を追加しないでください。デプロイメント コンテキストは、階層定義ではなく、個々のコンポーネント セクションに属します。
 
-> **⛔ COPY THE TIERS TABLE VERBATIM.** The 4th column must be `Assignment Rule` (NOT `Example`, `Description`, `Criteria`, or any other name). The cell values must be the exact text above — do NOT replace them with deployment-specific examples. Do NOT add a "Deployment context affecting tier assignment" paragraph after the table — deployment context belongs in the individual component sections, not in the tier definitions.
+> **⛔ ストライド A カテゴリのラベル (必須 - 「A」は「不正使用」であり、決して「認可」ではない):**
+> すべてのテーブル (概要、コンポーネントごとの階層テーブル、threat-inventory.json) で使用される 7 つの STRIDE-A カテゴリは次のとおりです。
+> **ふざけた行為 | **T**アンペアリング | **R**の証言 | **情報開示 | **サービス終了** | **E**特権の昇格 | **バス**
+> 「悪用」には、ビジネス ロジックの悪用、ワークフローの操作、機能の誤用、正当な機能の意図しない使用が含まれます。
+> モデルは A 列に「承認」を頻繁に生成します。これは誤りです。 STRIDE カテゴリ ラベルとして「Authorization」が表示されている場合は、「Abuse」に置き換えてください。脅威行のカテゴリ列には、(「認可」ではなく)「悪用」と表示する必要があります。 N/A エントリには、(「承認 - N/A」ではなく) 「不正使用 - N/A」と記載する必要があります。
 
-> **⛔ STRIDE-A CATEGORY LABELS (MANDATORY — the “A” is “Abuse”, NEVER “Authorization”):**
-> The 7 STRIDE-A categories used in ALL tables (Summary, per-component Tier tables, threat-inventory.json) are:
-> **S**poofing | **T**ampering | **R**epudiation | **I**nformation Disclosure | **D**enial of Service | **E**levation of Privilege | **A**buse
-> “Abuse” covers: business logic abuse, workflow manipulation, feature misuse, unintended use of legitimate features.
-> The model frequently generates “Authorization” for the A column — this is WRONG. If you see “Authorization” anywhere as a STRIDE category label, replace it with “Abuse”. The Category column in threat rows MUST say “Abuse” (not “Authorization”). N/A entries must also say “Abuse — N/A” (not “Authorization — N/A”).
-
-## Summary
-| Component | Link | S | T | R | I | D | E | A | Total | T1 | T2 | T3 | Risk |
-|-----------|------|---|---|---|---|---|---|---|-------|----|----|----|------|
+## 概要
+|コンポーネント |リンク | S |た | R |私 | D | E |あ |合計 | T1 | T2 | T3 |リスク |
+|----------|------|---|---|---|---|---|---|---|----------|----|----|----|------|
 
 ---
 
-## Component Name
+## コンポーネント名
 
-**Trust Boundary:** [boundary name]
-**Role:** [brief description]
-**Data Flows:** [list of DF IDs]
-**Pod Co-location:** [sidecars if K8s — see diagram-conventions.md]
+**信頼境界:** [境界名]
+**役割:** [簡単な説明]
+**データ フロー:** [DF ID のリスト]
+**ポッドのコロケーション:** [K8 の場合はサイドカー — 図-conventions.md を参照]
 
-### STRIDE-A Analysis
+### STRIDE-A 分析
 
-> **⛔ CATEGORY NAMING: The 7 STRIDE-A categories are: Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege, Abuse. The "A" category is ALWAYS "Abuse" — NEVER "Authorization". Authorization issues belong under Elevation of Privilege (E). This applies to N/A justification labels, threat table Category columns, and all prose.**
+> **⛔ カテゴリの名前: STRIDE-A の 7 つのカテゴリは、なりすまし、改ざん、否認、情報開示、サービス拒否、特権昇格、悪用です。 「A」カテゴリは常に「悪用」であり、決して「承認」ではありません。承認の問題は、特権の昇格 (E) に属します。これは、N/A 正当化ラベル、脅威テーブルのカテゴリ列、およびすべての散文に適用されます。**
 
-#### Tier 1 — Direct Exposure (No Prerequisites)
-| ID | Category | Threat | Prerequisites | Affected Flow | Mitigation | Status |
-|----|----------|--------|---------------|---------------|------------|--------|
+#### Tier 1 — 直接暴露 (前提条件なし)
+| ID |カテゴリー |脅威 |前提条件 |影響を受けるフロー |緩和 |ステータス |
+|----|----------|--------|---------------|--------------|------------|--------|
 
-#### Tier 2 — Conditional Risk
-| ID | Category | Threat | Prerequisites | Affected Flow | Mitigation | Status |
+#### 階層 2 — 条件付きリスク
+| ID |カテゴリー |脅威 |前提条件 |影響を受けるフロー |緩和 |ステータス |
 
-#### Tier 3 — Defense-in-Depth
-| ID | Category | Threat | Prerequisites | Affected Flow | Mitigation | Status |
-```
+#### Tier 3 — 多層防御
+| ID |カテゴリー |脅威 |前提条件 |影響を受けるフロー |緩和 |ステータス |```
 
 **⛔ STRIDE Status Column — Valid Values (must match Coverage table):**
 The `Status` column in each threat row MUST use exactly one of these values:
@@ -379,38 +371,37 @@ Sort by severity **within** each tier, then by CVSS descending.
 
 ### Full Finding Example
 
-```markdown
-### FIND-01: Missing Authentication on API
+```値下げ
+### FIND-01: API で認証がありません
 
-| Attribute | Value |
-|-----------|-------|
-| SDL Bugbar Severity | Critical |
-| CVSS 4.0 | 9.3 (CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N) |
-| CWE | [CWE-306](https://cwe.mitre.org/data/definitions/306.html): Missing Authentication for Critical Function |
-| OWASP | A07:2025 – Authentication Failures |
-| Exploitation Prerequisites | None (external attacker) |
-| Exploitability Tier | Tier 1 — Direct Exposure |
-| Remediation Effort | Medium |
-| Mitigation Type | Standard Mitigation |
-| Component | API Gateway |
-| Related Threats | [T01.S](2-stride-analysis.md#api-gateway), [T01.R](2-stride-analysis.md#api-gateway) |
+|属性 |値 |
+|----------|----------|
+| SDL バグバーの重大度 |クリティカル |
+| CVSS4.0 | 9.3 (CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N) |
+| CWE | [CWE-306](https://cwe.mitre.org/data/settings/306.html): 重要な機能の認証がありません |
+|オワスプ | A07:2025 – 認証の失敗 |
+|悪用の前提条件 |なし (外部攻撃者) |
+|悪用可能性の層 | Tier 1 — 直接暴露 |
+|修復の取り組み |中 |
+|緩和タイプ |標準的な緩和策 |
+|コンポーネント | APIゲートウェイ |
+|関連する脅威 | [T01.S](2-ストライド分析.md#api-ゲートウェイ)、[T01.R](2-ストライド分析.md#api-ゲートウェイ) |
 
-#### Description
+#### 説明
 
-The API endpoint /api/v1/resources accepts requests without any authentication check...
+API エンドポイント /api/v1/resources は、認証チェックなしでリクエストを受け入れます...
 
-#### Evidence
+#### 証拠
 
-`src/Controllers/ResourceController.cs` line 45 — no `[Authorize]` attribute on controller.
+`src/Controllers/ResourceController.cs` 45 行目 — コントローラーに `[Authorize]` 属性がありません。
 
-#### Remediation
+#### 修復
 
-Add `[Authorize]` attribute to the controller class and configure JWT bearer authentication in `Program.cs`.
+コントローラークラスに `[Authorize]` 属性を追加し、`Program.cs` に JWT ベアラー認証を設定します。
 
-#### Verification
+#### 検証
 
-Send an unauthenticated GET request to `/api/v1/resources` — should return 401 Unauthorized.
-```
+認証されていない GET リクエストを `/api/v1/resources` に送信します。401 Unauthorized が返されるはずです。```
 
 ### Related Threats Link Format
 
@@ -430,15 +421,14 @@ Send an unauthenticated GET request to `/api/v1/resources` — should return 401
 4. **CVSS-to-Tier consistency**: Scan every finding — if CVSS has `AV:L` or `PR:H`, finding MUST NOT be in Tier 1. Fix by downgrading the tier, not by changing the CVSS.
 5. **Threat Coverage Verification table**: At the end of `3-findings.md`, include:
 
-```markdown
-## Threat Coverage Verification
+```値下げ
+## 脅威カバレッジの検証
 
-| Threat ID | Finding ID | Status |
-|-----------|------------|--------|
-| T01.S | FIND-01 | ✅ Covered |
-| T01.T | FIND-05 | ✅ Mitigated (team implemented TLS) |
-| T02.I | — | 🔄 Mitigated by Platform (Azure AD) |
-```
+|脅威ID | IDを探す |ステータス |
+|----------|---------------|----------|
+| T01.S |ファインド-01 | ✅ 対象 |
+| T01.T | FIND-05 | ✅ 緩和されました (チーム実装の TLS) |
+| T02.I | — | 🔄 プラットフォーム (Azure AD) によって軽減 |```
 
 Every threat from `2-stride-analysis.md` must appear in this table. Status is one of:
 - `✅ Covered (FIND-XX)` — finding documents a vulnerability that needs remediation
@@ -480,19 +470,18 @@ If a threat in `2-stride-analysis.md` has a non-empty `Mitigation` column, it MU
 
 The Report Files table MUST list `0-assessment.md` (this file) as the FIRST row, followed by the other files:
 
-```markdown
-## Report Files
+```値下げ
+## レポート ファイル
 
-| File | Description |
-|------|-------------|
-| [0-assessment.md](0-assessment.md) | This document — executive summary, risk rating, action plan, metadata |
-| [0.1-architecture.md](0.1-architecture.md) | Architecture overview, components, scenarios, tech stack |
-| [1-threatmodel.md](1-threatmodel.md) | Threat model DFD diagram with element, flow, and boundary tables |
-| [1.1-threatmodel.mmd](1.1-threatmodel.mmd) | Pure Mermaid DFD source file |
-| [1.2-threatmodel-summary.mmd](1.2-threatmodel-summary.mmd) | Summary DFD (only if generated) |
-| [2-stride-analysis.md](2-stride-analysis.md) | Full STRIDE-A analysis for all components |
-| [3-findings.md](3-findings.md) | Prioritized security findings with remediation |
-```
+|ファイル |説明 |
+|------|---------------|
+| [0-評価.md](0-評価.md) |この文書 — エグゼクティブ サマリー、リスク評価、アクション プラン、メタデータ |
+| [0.1-アーキテクチャ.md](0.1-アーキテクチャ.md) |アーキテクチャの概要、コンポーネント、シナリオ、技術スタック |
+| [1-threatmodel.md](1-threatmodel.md) |要素、フロー、境界テーブルを含む脅威モデルの DFD 図 |
+| [1.1-threatmodel.mmd](1.1-threatmodel.mmd) |ピュアマーメイド DFD ソース ファイル |
+| [1.2-threatmodel-summary.mmd](1.2-threatmodel-summary.mmd) |概要 DFD (生成された場合のみ) |
+| [2-ストライド分析.md](2-ストライド分析.md) |すべてのコンポーネントの完全な STRIDE-A 分析 |
+| [3-所見.md](3-所見.md) |セキュリティに関する発見事項を優先的に修正 |```
 
 ⚠️ **`0-assessment.md` MUST be the first row.** The model consistently lists `0.1-architecture.md` first — that is WRONG. This file IS the front page of the report and lists itself first.
 
@@ -504,9 +493,8 @@ The heading must be plain text with NO emojis: `### Risk Rating: Elevated`, NOT 
 
 Include at end of Executive Summary:
 
-```markdown
-> **Note on threat counts:** This analysis identified [N] threats across [M] components. This count reflects comprehensive STRIDE-A coverage, not systemic insecurity. Of these, **[T1 count] are directly exploitable** without prerequisites (Tier 1). The remaining [T2+T3 count] represent conditional risks and defense-in-depth considerations.
-```
+```値下げ
+> **脅威数に関する注意:** この分析では、[M] 個のコンポーネントにわたって [N] 個の脅威が特定されました。この数は、体系的な不安ではなく、包括的な STRIDE-A の対象範囲を反映しています。このうち、**[T1 カウント] は前提条件なしで直接悪用可能です** (Tier 1)。残りの [T2+T3 カウント] は、条件付きリスクと多層防御の考慮事項を表します。```
 
 ### Action Summary Template
 
@@ -519,27 +507,25 @@ Include at end of Executive Summary:
 >
 > **NEVER change the priority based on how many threats or findings exist in that tier.** Even if Tier 1 has 0 threats and 0 findings, the priority is still 🔴 Critical Risk — because IF a Tier 1 threat existed, it would be critical. The priority reflects the tier's inherent severity, not the count. A report with Tier 1 = "🟢 Low Risk" is WRONG and must be fixed.
 
-```markdown
-## Action Summary
+```値下げ
+## アクションの概要
 
-| Tier | Description | Threats | Findings | Priority |
-|------|-------------|---------|----------|----------|
-| Tier 1 | Directly exploitable | 5 | 3 | 🔴 Critical Risk |
-| Tier 2 | Requires authenticated access | 8 | 4 | 🟠 Elevated Risk |
-| Tier 3 | Requires prior compromise | 12 | 5 | 🟡 Moderate Risk |
-| **Total** | | **25** | **12** | |
-```
+|階層 |説明 |脅威 |調査結果 |優先順位 |
+|------|---------------|----------|----------|----------|
+|ティア 1 |直接悪用可能 | 5 | 3 | 🔴 重大なリスク |
+|階層 2 |認証されたアクセスが必要です | 8 | 4 | 🟠 リスクの上昇 |
+|ティア 3 |事前の妥協が必要 | 12 | 5 | 🟡 中程度のリスク |
+| **合計** | | **25** | **12** | |```
 
 > **⛔ EXACTLY 4 ROWS: The Action Summary table MUST have exactly 4 data rows: Tier 1, Tier 2, Tier 3, and Total. Do NOT add rows for "Mitigated", "Platform", "Fixed", "Accepted", or any other status. Mitigated threats are distributed across their respective tiers — they are NOT a separate tier. If you find yourself adding a "Mitigated" row, STOP and remove it.**
 
-```markdown
+```値下げ
 
-### Quick Wins
-<!-- Tier 1 findings with Low remediation effort — high impact, quick fixes -->
-| Finding | Title | Why Quick |
-|---------|-------|-----------|
-| FIND-XX | [title] | [reason] |
-```
+### 即効性
+<!-- 修復作業が少ない Tier 1 の結果 — 影響が大きく、迅速な修正 -->
+|発見 |タイトル |なぜ速いのか |
+|----------|----------|----------|
+|検索-XX | [タイトル] | 【理由】 |```
 
 ⚠️ **Quick Wins is a REQUIRED subsection.** The `### Quick Wins` heading and table MUST appear after the tier summary table inside Action Summary. If no low-effort findings exist, write: `### Quick Wins\n\nNo low-effort findings identified. All findings require Medium or High effort.`
 
@@ -567,65 +553,59 @@ Include at end of Executive Summary:
 
 ⚠️ **This ENTIRE section is REQUIRED.** Previous iterations skipped it entirely. Include ALL sub-sections below, even if tables are empty.
 
-```markdown
-## Analysis Context & Assumptions
+```値下げ
+## 分析のコンテキストと仮定
 
-### Analysis Scope
-| Constraint | Description |
-|------------|-------------|
-| Scope | [Full repo or specific area] |
-| Excluded | [What was excluded] |
-| Focus Areas | [Special focus if any] |
+### 分析範囲
+|制約 |説明 |
+|-----------|---------------|
+|範囲 | [完全なリポジトリまたは特定の領域] |
+|除外 | 【対象外となるもの】 |
+|重点分野 | [特別な焦点がある場合] |
 
-### Infrastructure Context
-| Category | Discovered from Codebase | Findings Affected |
-|----------|--------------------------|-------------------|
+### インフラストラクチャコンテキスト
+|カテゴリー |コードベースから発見 |影響を受ける調査結果 |
+|----------|--------------------------|----------|
 
-**Every entry in "Discovered from Codebase" MUST include a relative link to the source file or document from which the information was inferred.** Example:
-
-```
+**「コードベースから発見」のすべてのエントリには、情報が推測されたソース ファイルまたはドキュメントへの相対リンクが含まれなければなりません。** 例:```
 | Deployment Model | Air-gapped, single-admin workstation ([daemon.json](src/Container/Moby/daemon.json), [InstallAzureEdgeDiagnosticTool.ps1](src/Setup/InstallArtifacts/InstallAzureEdgeDiagnosticTool.ps1)) | All findings — no Tier 1 |
 | Network Exposure | All services bind to localhost:80 only ([KustoContainerHelper.psm1](src/Container/Kusto/KustoContainerHelper.psm1)) | FIND-01, FIND-03 |
-```
-
-### Needs Verification
-| Item | Question | What to Check | Why Uncertain |
+```### 確認が必要です
+|アイテム |質問 |何を確認するか |なぜ不確実なのか |
 |------|----------|---------------|---------------|
 
-### Finding Overrides
-| Finding ID | Original Severity | Override | Justification | New Status |
-|------------|-------------------|----------|---------------|------------|
-| — | — | — | No overrides applied. Update this section after review. | — |
+### オーバーライドの検索
+| IDを探す |元の重大度 |オーバーライド |正当化 |新しいステータス |
+|-----------|---------------------|----------|------|------------|
+| — | — | — |オーバーライドは適用されません。レビュー後にこのセクションを更新します。 | — |
 
-### Additional Notes
-<!-- Any other context from the user's prompt -->
+### 追加メモ
+<!-- ユーザーのプロンプトからのその他のコンテキスト -->
 
-[Freeform notes provided by user]
-```
+[ユーザーが提供する自由形式のメモ]```
 
 ### References Consulted Template
 
 > **⛔ CRITICAL: This section MUST have TWO subsections with THREE-column tables including full URLs. Do NOT flatten into a simple 2-column `| Reference | Usage |` table. The model ALWAYS tries to simplify this — do NOT simplify it.**
 
-```markdown
-## References Consulted
+```値下げ
+## 参照した参考文献
 
-### Security Standards
-| Standard | URL | How Used |
+### セキュリティ基準
+|標準 | URL |使用方法 |
 |----------|-----|----------|
-| Microsoft SDL Bug Bar | https://www.microsoft.com/en-us/msrc/sdlbugbar | Severity classification |
-| OWASP Top 10:2025 | https://owasp.org/Top10/2025/ | Threat categorization |
-| CVSS 4.0 | https://www.first.org/cvss/v4.0/specification-document | Risk scoring |
-| CWE | https://cwe.mitre.org/ | Weakness classification |
-| STRIDE | https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats | Threat enumeration methodology |
-| NIST SP 800-53 Rev. 5 | https://csrc.nist.gov/pubs/sp/800-53/r5/upd1/final | Control mapping |
+| Microsoft SDL バグ バー | https://www.microsoft.com/en-us/msrc/sdlbugbar |重大度分類 |
+| OWASP トップ 10:2025 | https://owasp.org/Top10/2025/ |脅威の分類 |
+| CVSS4.0 | https://www.first.org/cvss/v4.0/specation-document |リスクスコア |
+| CWE | https://cwe.mitre.org/ |弱点分類 |
+|ストライド | https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats |脅威の列挙方法 |
+| NIST SP 800-53 Rev. 5 | https://csrc.nist.gov/pubs/sp/800-53/r5/upd1/final |コントロールマッピング |
 
-### Component Documentation
-| Component | Documentation URL | Relevant Section |
-|-----------|------------------|------------------|
-| [e.g., Dapr] | [e.g., https://docs.dapr.io/operations/security/] | [e.g., mTLS configuration] |
-| [e.g., Redis] | [e.g., https://redis.io/docs/management/security/] | [e.g., Authentication] |
-```
+### コンポーネントのドキュメント
+|コンポーネント |ドキュメントの URL |関連セクション |
+|-----------|---------------|------|
+| [例: Dapr] | [例: https://docs.dapr.io/operations/security/] | [例: mTLS 構成] |
+| [例: Redis] | [例: https://redis.io/docs/management/security/] | [例: 認証] |```
 
 **Processing Rules:**
 1. Always include the Security Standards table — populate with actual standards consulted
@@ -637,23 +617,22 @@ Include at end of Executive Summary:
 
 > **⛔ CRITICAL: ALL fields below are MANDATORY. Do NOT skip Model, Analysis Started, Analysis Completed, or Duration. The previous run omitted these — that is a critical failure. Run `Get-Date` at start and end to compute Duration.**
 
-```markdown
-## Report Metadata
+```値下げ
+## レポートのメタデータ
 
-| Field | Value |
-|-------|-------|
-| Source Location | `[Full path]` |
-| Git Repository | `[Remote URL or "Unavailable"]` |
-| Git Branch | `[Branch name or "Unavailable"]` |
-| Git Commit | `[Short SHA]` (`[YYYY-MM-DD]` — run `git log -1 --format="%cs" [SHA]` to get commit date) |
-| Model | `[Model name — ask the system or state the model you are running as]` |
-| Machine Name | `[hostname]` |
-| Analysis Started | `[UTC timestamp from command]` |
-| Analysis Completed | `[UTC timestamp from command]` |
-| Duration | `[Computed difference between started and completed]` |
-| Output Folder | `[folder name]` |
-| Prompt | `[The user's prompt text that triggered this analysis]` |
-```
+|フィールド |値 |
+|------|------|
+|ソースの場所 | `[Full path]` |
+| Git リポジトリ | `[Remote URL or "Unavailable"]` |
+| Git ブランチ | `[Branch name or "Unavailable"]` |
+| Git コミット | `[Short SHA]` (`[YYYY-MM-DD]` — `git log -1 --format="%cs" [SHA]` を実行してコミット日を取得します) |
+|モデル | `[Model name — ask the system or state the model you are running as]` |
+|マシン名 | `[hostname]` |
+|分析開始 | `[UTC timestamp from command]` |
+|分析が完了しました | `[UTC timestamp from command]` |
+|期間 | `[Computed difference between started and completed]` |
+|出力フォルダー | `[folder name]` |
+|プロンプト | `[The user's prompt text that triggered this analysis]` |```
 
 **Gathering rules:**
 - START_TIME: Run `Get-Date -Format "yyyy-MM-dd HH:mm:ss" -AsUTC` at workflow Step 1
@@ -690,41 +669,37 @@ These are the most observed deviations. Check after writing each file:
 2. ❌ Flat STRIDE tables → ✅ Split into Tier 1/2/3 sub-sections per component
 3. ❌ Missing `Exploitability Tier` and `Remediation Effort` → ✅ MANDATORY on every finding
 4. ❌ STRIDE summary missing T1/T2/T3 columns → ✅ Include T1|T2|T3 columns
-5. ❌ Wrapping `.md` in ` ```markdown ` code fences → ✅ Start with `# Heading` on line 1. The `create_file` tool writes raw content — fences become literal text in the file.
-6. ❌ Wrapping `.mmd` in ` ```plaintext ` or ` ```mermaid ` → ✅ Start with `%%{init:` on line 1. The `.mmd` file is raw Mermaid source.
-7. ❌ Missing Action Summary → ✅ Section MUST be titled exactly `## Action Summary`. MUST include `### Quick Wins` subsection with table of Tier 1 low-effort findings.
-8. ❌ Missing threat count context paragraph → ✅ Include `> **Note on threat counts:**` blockquote in Executive Summary
-9. ❌ Omitting empty tier sections → ✅ Always include all three tiers per component
-10. ❌ Adding separate `### Key Recommendations` or `### Top Recommendations` or `### Priority Remediation Roadmap` → ✅ Action Summary IS the recommendations — no other name.
-11. ❌ Drawing sidecars as separate nodes → ✅ See `diagram-conventions.md` Rule 1
-12. ❌ Missing CVSS 4.0 vector string → ✅ Every finding MUST have both score AND full vector (e.g., `CVSS:4.0/AV:N/AC:L/...`)
-13. ❌ Missing CWE or OWASP on findings → ✅ MANDATORY on every finding
-14. ❌ Using OWASP `:2021` suffix → ✅ ALWAYS use `:2025` (e.g., `A01:2025 – Broken Access Control`). The 2025 edition is current.
-15. ❌ Missing Threat Coverage Verification table → ✅ Required at end of `3-findings.md`
-16. ❌ Architecture component not in STRIDE analysis → ✅ Every component in 0.1-architecture.md must have a STRIDE section
-17. ❌ Missing sequence diagrams for top scenarios → ✅ First 3 scenarios in 0.1-architecture.md MUST have Mermaid sequence diagrams
-18. ❌ Missing Needs Verification section in 0-assessment.md → ✅ Include under Analysis Context & Assumptions
-19. ❌ Missing `## Analysis Context & Assumptions` section entirely → ✅ REQUIRED. Previous iterations skipped this section. Must include Scope, Needs Verification, and Finding Overrides sub-tables.
-20. ❌ Missing `### Quick Wins` subsection → ✅ REQUIRED under Action Summary. List Tier 1 low-effort findings; if none, include heading with note.
-21. ❌ Skipping `## Report Files`, `## References Consulted`, or `## Report Metadata` → ✅ ALL 7 sections in 0-assessment.md are MANDATORY. Never omit any.
-22. ❌ Finding IDs out of order (FIND-06 before FIND-04) → ✅ Finding IDs MUST be sequential top-to-bottom: FIND-01, FIND-02, FIND-03, ... Renumber after sorting.
-23. ❌ CWE without hyperlink → ✅ CWE MUST include hyperlink: `[CWE-306](https://cwe.mitre.org/data/definitions/306.html): Missing Authentication for Critical Function`
-24. ❌ Time estimates or scheduling in output → ✅ NEVER generate `~1 hour`, `Sprint 1-2`, `Phase 1 — Immediate`, `(hours)`, or any timeline/duration in ANY output file. The report says WHAT to fix, not WHEN.
+5. ❌ Wrapping `.md` in ` ```markdown ` code fences → ✅ Start with `# Heading` on line 1. The `create_file` ツールは生のコンテンツを書き込みます。フェンスはファイル内のリテラル テキストになります。
+6. ❌ `.mmd` を ` で囲む```plaintext ` or ` ```mermaid ` → ✅ Start with `%%{init:` on line 1. The `.mmd` ファイルは生の Mermaid ソースです。
+7. ❌ アクションの概要が欠落しています → ✅ セクションのタイトルは正確に `## Action Summary` にする必要があります。 Tier 1 の低労力の結果の表を含む `### Quick Wins` サブセクションを含めなければなりません。
+8. ❌ 脅威カウントのコンテキスト段落が欠落している → ✅ エグゼクティブサマリーに `> **Note on threat counts:**` ブロック引用符を含める
+9. ❌ 空の層セクションを省略する → ✅ コンポーネントごとに 3 つの層すべてを常に含める
+10. ❌ 個別の `### Key Recommendations` または `### Top Recommendations` または `### Priority Remediation Roadmap` を追加する → ✅ アクションの概要は推奨事項であり、他の名前はありません。
+11. ❌ サイドカーを別のノードとして描画 → ✅ `diagram-conventions.md` ルール 1 を参照
+12. ❌ CVSS 4.0 ベクトル文字列が欠落しています → ✅ すべての結果にはスコアと完全なベクトルの両方が必要です (例: `CVSS:4.0/AV:N/AC:L/...`)
+13. ❌ 所見に CWE または OWASP がない → ✅ すべての所見に必須
+14. ❌ OWASP `:2021` サフィックスを使用する → ✅ 常に `:2025` を使用します (例: `A01:2025 – Broken Access Control`)。 2025 年版が最新です。
+15. ❌ 脅威カバレッジ検証テーブルが欠落しています → ✅ `3-findings.md` の末尾に必須
+16. ❌ STRIDE 解析に含まれないアーキテクチャコンポーネント → ✅ 0.1-architecture.md 内のすべてのコンポーネントには STRIDE セクションが必要
+17. ❌ 最上位シナリオのシーケンス図が欠落している → ✅ 0.1-architecture.md の最初の 3 つのシナリオには Mermaid シーケンス図が必要です
+18. ❌ 0-assesment.md に「ニーズ検証」セクションが存在しない → ✅ 分析コンテキストと仮定の下に含める
+19. ❌ `## Analysis Context & Assumptions` セクションが完全に欠落しています → ✅ 必須。前回の反復ではこのセクションをスキップしました。 「範囲」、「検証が必要」、および「オーバーライドの検索」サブテーブルを含める必要があります。
+20. ❌ `### Quick Wins` サブセクションがありません → ✅ [アクションの概要] で必須です。 Tier 1 の低労力の調査結果をリストします。存在しない場合は、見出しに注記を含めます。
+21. ❌ `## Report Files`、`## References Consulted`、または `## Report Metadata` をスキップ → ✅ 0-assessment.md の 7 つのセクションはすべて必須です。決して省略しないでください。
+22. ❌ ID の検索順序が間違っている (FIND-04 の前の FIND-06) → ✅ ID の検索は上から下に連続していなければなりません: FIND-01、FIND-02、FIND-03、... ソート後に番号を付け直します。
+23. ❌ ハイパーリンクのない CWE → ✅ CWE にはハイパーリンクを含める必要があります: `[CWE-306](https://cwe.mitre.org/data/definitions/306.html): Missing Authentication for Critical Function`
+24. ❌ 出力での時間の見積もりやスケジュール設定 → ✅ いかなる出力ファイルでも `~1 hour`、`Sprint 1-2`、`Phase 1 — Immediate`、`(hours)`、またはタイムライン/期間を決して生成しないでください。レポートには、「いつ」ではなく、「何を修正するか」が記載されています。
 
 ---
 
-## threat-inventory.json
+## 脅威インベントリー.json
 
-**Purpose:** Structured JSON inventory of all components, data flows, boundaries, threats, and findings.
-This file enables automated comparison between two threat model runs.
+**目的:** すべてのコンポーネント、データ フロー、境界、脅威、および調査結果の構造化された JSON インベントリ。
+このファイルにより、2 つの脅威モデルの実行間の自動比較が可能になります。**いつ生成するか:** 実行ごと (ステップ 8b)。すべてのマークダウン ファイルが書き込まれた後に生成されます。
 
-**When to generate:** Every run (Step 8b). Generated AFTER all markdown files are written.
+**`0-assessment.md`** にはリンクされていません - これは機械が読み取り可能なアーティファクトであり、人間が読めるレポート ファイルではありません。
 
-**NOT linked in `0-assessment.md`** — this is a machine-readable artifact, not a human-readable report file.
-
-### Schema
-
-```json
+### スキーマ```json
 {
   "schema_version": "1.0",
   "commit": "abc1234",
@@ -842,221 +817,205 @@ This file enables automated comparison between two threat model runs.
     "threats_by_stride": { "S": 14, "T": 19, "R": 8, "I": 20, "D": 15, "E": 14, "A": 7 }
   }
 }
-```
+```> **⛔ stride_category は単一の文字である必要があります:** `S`、`T`、`R`、`I`、`D`、`E`、または `A`。 `"Spoofing"` や `"Denial of Service"` のようなフルネームは決して使用しないでください。ヒートマップの計算と比較マッチングは、単一文字コードに依存します。 `"stride_category": "D"` の代わりに `"stride_category": "Denial of Service"` を記述すると、ヒートマップでは STRIDE 列にはすべてゼロが表示されますが、階層列には正しい値が表示されます。これはデータ整合性に関する重大なバグです。
 
-> **⛔ stride_category MUST be a SINGLE LETTER:** `S`, `T`, `R`, `I`, `D`, `E`, or `A`. NEVER use full names like `"Spoofing"` or `"Denial of Service"`. The heatmap computation and comparison matching depend on single-letter codes. If you write `"stride_category": "Denial of Service"` instead of `"stride_category": "D"`, the heatmap will show all zeros for STRIDE columns while tier columns have correct values — this is a critical data integrity bug.
+### 増分分析拡張機能
 
-### Incremental Analysis Extensions
+**増分分析**用に `threat-inventory.json` を生成する場合 (`incremental-orchestrator.md` を参照)、次のフィールドを追加します。
 
-When generating `threat-inventory.json` for an **incremental analysis** (see `incremental-orchestrator.md`), add these fields:
+**トップレベルのフィールド:**
+- `"incremental": true` — これを増分レポートとしてマークします
+- `"baseline_report": "threat-model-20260309-174425"` — ベースライン レポート フォルダーへのパス
+- `"baseline_commit": "2dd84ab"` — ベースライン レポートのコミット SHA
+- `"target_commit": "abc1234"` — 分析中のコミット
+- `"schema_version": "1.1"` — 増分レポートはスキーマ バージョン 1.1 を使用します
 
-**Top-level fields:**
-- `"incremental": true` — marks this as an incremental report
-- `"baseline_report": "threat-model-20260309-174425"` — path to baseline report folder
-- `"baseline_commit": "2dd84ab"` — the commit SHA of the baseline report
-- `"target_commit": "abc1234"` — the commit being analyzed
-- `"schema_version": "1.1"` — incremental reports use schema version 1.1
+**コンポーネントごと:** `"change_status"` — 次のいずれか:
+- `"unchanged"` — ソース ファイルが同一か、表面のみの変更
+- `"modified"` — セキュリティ関連のソース ファイルの変更
+- `"restructured"` — ファイルの移動/名前変更、同じ論理コンポーネント
+- `"removed"` — ソース ファイルが削除されました
+- `"new"` — コンポーネントはベースラインに存在しませんでした
+- `"merged_into:{id}"` — 別のコンポーネントにマージ
+- `"split_into:{id1},{id2}"` — 複数のコンポーネントに分割
 
-**Per-component:** `"change_status"` — one of:
-- `"unchanged"` — source files identical or cosmetic-only changes
-- `"modified"` — security-relevant source file changes
-- `"restructured"` — files moved/renamed, same logical component
-- `"removed"` — source files deleted
-- `"new"` — component didn't exist at baseline
-- `"merged_into:{id}"` — merged into another component
-- `"split_into:{id1},{id2}"` — split into multiple components
+**脅威ごと:** `"change_status"` — 次のいずれか:
+- `"still_present"` — 以前と同様に、現在のコードに脅威が存在します
+- `"fixed"` — 脆弱性は修正されました (コード変更を引用する必要があります)
+- `"mitigated"` — 部分的な修復が適用されました
+- `"modified"` — 脅威は依然として存在しますが、詳細は変更されました
+- `"new_code"` — まったく新しいコンポーネントによる脅威
+- `"new_in_modified"` — 既存のコンポーネントのコード変更によってもたらされる脅威
+- `"previously_unidentified"` — 脅威はベースライン コードに存在しましたが、古いレポートには存在しませんでした
+- `"removed_with_component"` — コンポーネントが削除されました
 
-**Per-threat:** `"change_status"` — one of:
-- `"still_present"` — threat exists in current code, same as before
-- `"fixed"` — vulnerability was remediated (must cite code change)
-- `"mitigated"` — partial remediation applied
-- `"modified"` — threat still exists but details changed
-- `"new_code"` — threat from a genuinely new component
-- `"new_in_modified"` — threat introduced by code changes in existing component
-- `"previously_unidentified"` — threat existed in baseline code but wasn't in old report
-- `"removed_with_component"` — component was removed
+**検出結果ごと:** `"change_status"` — 脅威ごとと同じ値に次の値を加えます。
+- `"partially_mitigated"` — コードが部分的に変更され、脆弱性が部分的に残っています
 
-**Per-finding:** `"change_status"` — same values as per-threat, plus:
-- `"partially_mitigated"` — code changed partially, vulnerability partially remains
+**metrics.status_summary** — `change_status` ごとのコンポーネント、脅威、検出結果の数。完全なスキーマについては、`incremental-orchestrator.md` §4f を参照してください。
 
-**metrics.status_summary** — counts per `change_status` for components, threats, and findings. See `incremental-orchestrator.md` §4f for the full schema.
+### 正規の命名規則
 
-### Canonical Naming Rules
-
-**Component IDs** — Derived from actual class/file names, PascalCase:
+**コンポーネント ID** — 実際のクラス/ファイル名から派生した PascalCase:
 - `SupportabilityAgent.cs` → `SupportabilityAgent`
 - `PowerShellCommandExecutor.cs` → `PowerShellCommandExecutor`
-- "Redis State Store" → `RedisStateStore`
-- "Ingress-NGINX" → `IngressNginx`
+- 「Redis ステート ストア」 → `RedisStateStore`
+- 「Ingress-NGINX」 → `IngressNginx`
 
-**Flow IDs** — Deterministic from endpoints:
-- Format: `DF_{Source}_to_{Target}`
+**フロー ID** — エンドポイントから決定的:
+- 形式：`DF_{Source}_to_{Target}`
 - `DF_Operator_to_TerminalUI`
-- `DF_InferencingFlow_to_RedisStateStore`
+- `DF_InferencingFlow_to_RedisStateStore`**ID キー** - 各脅威と検出結果は正規の ID キーを取得します。
+- 脅威: `component_id` + `stride_category` + `attack_surface` + `data_flow_id`
+- 調査結果: `component_id` + `vulnerability` (CWE) + `attack_surface`
+- これらのキーは、LLM で生成された散文から独立しています。コード アーティファクトにアンカーされます。
 
-**Identity Keys** — Each threat and finding gets a canonical identity key:
-- Threats: `component_id` + `stride_category` + `attack_surface` + `data_flow_id`
-- Findings: `component_id` + `vulnerability` (CWE) + `attack_surface`
-- These keys are independent of LLM-generated prose — they anchor to code artifacts
+### 決定的アイデンティティ ルール (必須)
 
-### Deterministic Identity Rules (MANDATORY)
+これらのルールを使用して、変更されていないコードを繰り返し実行すると、同等のインベントリが生成されます。
 
-Use these rules so repeated runs on unchanged code produce comparable inventories.
+1. **正規 ID と表示名**
+  - `id` は安定した ID です。 `display` はプレゼンテーションのテキストです
+  - 調査結果や図のラベルの散文的な表現からアイデンティティを導き出さないでください
 
-1. **Canonical ID vs display name**
-  - `id` is stable identity; `display` is presentation text
-  - Never derive identity from prose wording in findings or diagram labels
+2. **エイリアスのキャプチャ**
+  - すべてのコンポーネントと境界には `aliases` 配列が含まれている必要があります
+  - アーキテクチャ/DFD/STRIDE/調査結果から発見された同義語を含めます (重複排除、ソート)
+  - 実行ごとに表示文言が変わっても、正規の `id` を安定させます
 
-2. **Alias capture**
-  - Every component and boundary must include an `aliases` array
-  - Include discovered synonyms from architecture/DFD/STRIDE/findings (deduplicated, sorted)
-  - Keep canonical `id` stable even if display wording changes across runs
-
-3. **Boundary kind taxonomy (TMT-aligned)**
-  - Use `boundary_kind`/`kind` from this set — describes the NATURE of the trust transition, not what's inside:
-    - `MachineBoundary` — between different hosts/VMs (e.g., host ↔ guest, VM1 ↔ VM2)
-    - `NetworkBoundary` — between network zones (e.g., corporate LAN ↔ internet, DMZ ↔ internal)
-    - `ClusterBoundary` — between K8s/container cluster and outside (e.g., cluster ↔ external services)
-    - `ProcessBoundary` — between OS processes or containers on same host (e.g., sidecar ↔ main container)
-    - `PrivilegeBoundary` — between different privilege levels (e.g., user mode ↔ kernel, unprivileged ↔ admin)
-    - `SandboxBoundary` — between sandboxed and unsandboxed execution (e.g., browser sandbox, WASM)
-  - Each value answers: "what changes when you cross this line?" (different machine, network, cluster, process, privilege, sandbox)
-  - Do NOT use component-grouping labels (DataStorage, ApplicationCore, AgentExecution) as boundary kinds — those describe WHAT's inside, not the nature of the trust transition
-
-3b. **Boundary ID derivation** (MANDATORY — apply the same deterministic naming as components)
-  - Derive boundary IDs from deployment/infrastructure names, NOT abstract concepts:
-    - Docker host → `Docker` (never `DockerEnvironment` or `ContainerRuntime`)
-    - Kubernetes cluster → `K8sCluster` (never `KubernetesEnvironment`)
-    - Operator's machine → `OperatorWorkstation` (never `HostOS` or `LocalMachine`)
-    - External cloud services → `ExternalServices` (never `CloudBoundary`)
-    - Data storage grouped → `DataStorage` (never `DataLayer` or `PersistenceLayer`)
-    - Backend application services → `BackendServices` (never `AppBoundary` or `ApplicationCore`)
-    - ML/AI inference models → `MLModels` (never `InferenceModels` or `ModelBoundary`)
-    - DMZ/public zone → `PublicZone` (never `DMZBoundary` or `IngressZone`)
-    - Agent execution → `AgentExecution` (keep this exact ID)
-    - Tool execution → `ToolExecution` (keep this exact ID)
-  - Once a boundary ID is chosen in Step 1, use it EVERYWHERE (DFD, tables, JSON)
-  - Never restructure containment between runs on the same code (same component → same boundary)
-
-4. **Component fingerprint**
-  - `fingerprint` must be built from stable evidence:
-    - sorted `source_files` — full file paths to primary source files
-    - sorted `source_directories` — parent directory paths of source files (more stable than filenames across refactors)
-    - sorted `class_names` — primary class, struct, or interface names defined in the component's source files (e.g., `["HealthServer", "IHealthService"]`). For non-code components (datastores, external services), leave empty.
-    - `namespace` — the primary namespace/package (e.g., `"MCP.Core.Servers.Health"` for C#, `"ragapp.src.ingestflow"` for Python). Empty for non-code components.
-    - sorted `api_routes` — HTTP API endpoint patterns exposed by this component (e.g., `["/api/health", "/api/v1/chat"]`). Empty if not an HTTP service.
-    - sorted `config_keys` — environment variables and configuration keys consumed by this component (e.g., `["AZURE_OPENAI_ENDPOINT", "REDIS_HOST"]`). Extract from appsettings.json, .env files, Helm values, or code that reads env vars.
-    - sorted `dependencies` — external package/library dependencies specific to this component (e.g., `["Microsoft.SemanticKernel", "Azure.AI.OpenAI"]` for NuGet, `["pymilvus", "fastapi"]` for pip). Only include packages that are characteristic of this component, not framework-wide dependencies.
-    - sorted `inbound_from` and `outbound_to` component IDs
-    - sorted `protocols`
-    - `component_type` and `boundary_kind`
-  - Do not include mutable prose in the fingerprint
-  - **Deterministic matching priority:** `source_directories` > `class_names` > `namespace` > `api_routes` > `config_keys` are all highly stable signals that survive component renames. Two components sharing any of these are almost certainly the same real component.
-
-  **Fingerprint Field → Comparison Matching Signal Map:**
-  | Fingerprint Field | Comparison Signal | Max Points | Stability |
+3. **境界種類分類法 (TMT に準拠)**
+  - このセットの `boundary_kind`/`kind` を使用します。信頼の移行の内容ではなく、性質を説明します。
+    - `MachineBoundary` — 異なるホスト/VM間 (例: ホスト ↔ ゲスト、VM1 ↔ VM2)
+    - `NetworkBoundary` — ネットワーク ゾーン間 (例: 企業 LAN ↔ インターネット、DMZ ↔ 内部)
+    - `ClusterBoundary` — K8/コンテナクラスタと外部の間（例：クラスタ ↔ 外部サービス）
+    - `ProcessBoundary` — 同じホスト上の OS プロセスまたはコンテナ間 (例: サイドカー ↔ メイン コンテナ)
+    - `PrivilegeBoundary` — 異なる権限レベル間（例：ユーザーモード ↔ カーネル、非特権 ↔ 管理者）
+    - `SandboxBoundary` — サンドボックス実行とサンドボックスなしの実行の間 (ブラウザ サンドボックス、WASM など)
+  - それぞれの値は、「この線を越えると何が変わるでしょうか?」と答えます。 (別のマシン、ネットワーク、クラスター、プロセス、特権、サンドボックス)
+  - コンポーネント グループ ラベル (DataStorage、ApplicationCore、AgentExecution) を境界の種類として使用しないでください。これらは、内部の内容を説明するものであり、信頼遷移の性質を説明するものではありません。3b. **境界 ID の導出** (必須 — コンポーネントと同じ決定論的な名前を適用します)
+  - 抽象的な概念ではなく、展開/インフラストラクチャ名から境界 ID を導き出します。
+    - Docker ホスト → `Docker` (決して `DockerEnvironment` や `ContainerRuntime` ではありません)
+    - Kubernetes クラスター → `K8sCluster` (決して `KubernetesEnvironment` ではありません)
+    - オペレータのマシン → `OperatorWorkstation` (決して `HostOS` や `LocalMachine` ではありません)
+    - 外部クラウド サービス → `ExternalServices` (決して `CloudBoundary` ではありません)
+    - グループ化されたデータ ストレージ → `DataStorage` (決して `DataLayer` や `PersistenceLayer` ではありません)
+    - バックエンド アプリケーション サービス → `BackendServices` (決して `AppBoundary` や `ApplicationCore` ではありません)
+    - ML/AI 推論モデル → `MLModels` (`InferenceModels` や `ModelBoundary` は使用しないでください)
+    - DMZ/パブリックゾーン → `PublicZone` (`DMZBoundary` または `IngressZone` は使用しないでください)
+    - エージェントの実行 → `AgentExecution` (この正確な ID を保持)
+    - ツール実行 → `ToolExecution` (この正確な ID を保持)
+  - ステップ 1 で境界 ID を選択したら、それをあらゆる場所 (DFD、テーブル、JSON) で使用します。
+  - 同じコードの実行間で包含を再構築しないでください (同じコンポーネント→同じ境界)4. **コンポーネントのフィンガープリント**
+  - `fingerprint` は安定した証拠に基づいて構築する必要があります。
+    - ソート済み `source_files` — プライマリ ソース ファイルへの完全なファイル パス
+    - ソートされた `source_directories` — ソース ファイルの親ディレクトリ パス (リファクタリング間でのファイル名よりも安定しています)
+    - ソートされた `class_names` — コンポーネントのソース ファイルで定義されたプライマリ クラス、構造体、またはインターフェイス名 (例: `["HealthServer", "IHealthService"]`)。コード以外のコンポーネント (データストア、外部サービス) の場合は、空のままにします。
+    - `namespace` — プライマリ名前空間/パッケージ (例: C# の場合は `"MCP.Core.Servers.Health"`、Python の場合は `"ragapp.src.ingestflow"`)。コード以外のコンポーネントの場合は空です。
+    - ソートされた `api_routes` — このコンポーネントによって公開される HTTP API エンドポイント パターン (例: `["/api/health", "/api/v1/chat"]`)。 HTTP サービスでない場合は空です。
+    - ソートされた `config_keys` — このコンポーネントによって使用される環境変数と構成キー (例: `["AZURE_OPENAI_ENDPOINT", "REDIS_HOST"]`)。 appsettings.json、.env ファイル、Helm 値、または環境変数を読み取るコードから抽出します。
+    - ソートされた `dependencies` — このコンポーネントに固有の外部パッケージ/ライブラリの依存関係 (例: NuGet の場合は `["Microsoft.SemanticKernel", "Azure.AI.OpenAI"]`、pip の場合は `["pymilvus", "fastapi"]`)。フレームワーク全体の依存関係ではなく、このコンポーネントの特徴であるパッケージのみを含めます。
+    - ソートされた `inbound_from` および `outbound_to` コンポーネント ID
+    - `protocols` を並べ替えました
+    - `component_type` および `boundary_kind`
+  - フィンガープリントに可変散文を含めないでください
+  - **決定的マッチング優先度:** `source_directories` > `class_names` > `namespace` > `api_routes` > `config_keys` はすべて、コンポーネントの名前が変更されても存続する非常に安定した信号です。これらのいずれかを共有する 2 つのコンポーネントは、ほぼ確実に同じ実コンポーネントです。**指紋フィールド → 比較一致信号マップ:**
+  |指紋フィールド |比較信号 |最大ポイント |安定性 |
   |---|---|---|---|
-  | `source_files` | Signal 2 — Source file/directory overlap | +30 | High (files rarely move) |
-  | `source_directories` | Signal 2 — Source file/directory overlap | +25 | Very High (directories almost never change) |
-  | `class_names` | Signal 3 — Class/Namespace match | +25 | Very High (classes rarely rename) |
-  | `namespace` | Signal 3 — Class/Namespace match | +20 | Very High (namespaces are structural) |
-  | `api_routes` | Signal 4 — API route / Config key overlap | +15 | High (API contracts are versioned) |
-  | `config_keys` | Signal 4 — API route / Config key overlap | +10 | High (config keys are stable) |
-  | `dependencies` | Signal 4 — API route / Config key overlap | +5 | Medium (packages change with upgrades) |
-  | `inbound_from` / `outbound_to` | Signal 5 — Topology overlap | +15 | Low (uses component IDs which may drift) |
-  | `component_type` + `boundary_kind` | Signal 6 — Type + boundary kind | +10 | Medium (boundary naming may vary) |
-  | `protocols` | (Not directly scored — used as tiebreaker) | — | Medium |
+  | `source_files` |信号 2 — ソース ファイル/ディレクトリの重複 | +30 |高 (ファイルはめったに移動しない) |
+  | `source_directories` |信号 2 — ソース ファイル/ディレクトリの重複 | +25 |非常に高い (ディレクトリはほとんど変更されません) |
+  | `class_names` |信号 3 — クラス/名前空間の一致 | +25 |非常に高い (クラス名が変更されることはほとんどありません) |
+  | `namespace` |信号 3 — クラス/名前空間の一致 | +20 |非常に高い (名前空間は構造的) |
+  | `api_routes` |シグナル 4 — API ルート / 構成キーの重複 | +15 |高 (API コントラクトはバージョン管理されています) |
+  | `config_keys` |シグナル 4 — API ルート / 構成キーの重複 | +10 |高 (設定キーは安定しています) |
+  | `dependencies` |シグナル 4 — API ルート / 構成キーの重複 | +5 |中 (アップグレードによりパッケージが変更されます) |
+  | `inbound_from` / `outbound_to` |信号 5 — トポロジの重複 | +15 |低 (ドリフトする可能性のあるコンポーネント ID を使用) |
+  | `component_type` + `boundary_kind` |信号 6 — タイプ + 境界の種類 | +10 |中 (境界の名前は異なる場合があります) |
+  | `protocols` | (直接得点ではない - タイブレークとして使用) | — |中 |
 
-  **Every field in this table MUST be populated during analysis (Step 8b).** Empty arrays `[]` are acceptable when the field genuinely doesn't apply (e.g., `api_routes` for a datastore). But `source_directories` and `class_names` must NEVER be empty for process-type components — these are the primary matching anchors.
+  **このテーブルのすべてのフィールドは、分析中に入力する必要があります (ステップ 8b)。** フィールドが実際には適用されない場合は、空の配列 `[]` を使用できます (データストアの場合は `api_routes` など)。ただし、`source_directories` と `class_names` は、プロセス タイプのコンポーネントでは決して空にしてはなりません。これらは主に一致するアンカーです。
 
-5. **Boundary containment fingerprint**
-  - `contains_fingerprint` = sorted `contains` joined with `|`
-  - Use this for boundary rename detection during comparison
+5. **境界封じ込めの指紋**
+  - `contains_fingerprint` = ソートされた `contains` と `|` が結合
+  - 比較時の境界変更の検出に使用します。
 
-6. **Deterministic ordering**
-  - Sort all arrays and nested list fields before writing JSON
-  - This makes diffs stable and prevents accidental churn
+6. **決定的な順序付け**
+  - JSON を書き込む前に、すべての配列とネストされたリスト フィールドを並べ替えます。
+  - これにより差分が安定し、偶発的なチャーンが防止されます。
 
-### Processing Rules
+### 処理ルール1. すべてのマークダウン ファイルが書き込まれた後に生成します (ステップ 8b)
+2. マークダウン ファイルの作成に使用したのと同じ分析データからデータを入力します。
+3. コンポーネント ID が実際のクラス/ファイル名から派生した PascalCase を使用していることを確認します。
+4. フロー ID が正規の `DF_{Source}_to_{Target}` 形式を使用していることを確認します。
+5. すべての脅威と検出 ID キーは、実際のコード アーティファクト (ファイル パス、構成キー) を参照する必要があります。
+6. ステップ 1 の git メタデータ (コミット、ブランチ、日付) を含めます。
+7. `metrics` オブジェクトは、マークダウン レポートのカウントと一致する必要があります
+8. このファイルは `0-assessment.md` のレポート ファイル テーブルにリストされていません。
+9. 決定的マッチングのために `aliases`、`boundary_kind`/`kind`、`fingerprint`、および `contains_fingerprint` を入力します
+10. コンポーネントに同じ実行で複数の監視名がある場合は、1 つの正規 `id` を保持し、すべての代替名を `aliases` に保存します。
 
-1. Generate AFTER all markdown files are written (Step 8b)
-2. Populate from the same analysis data used to write the markdown files
-3. Ensure component IDs use PascalCase derived from actual class/file names
-4. Ensure flow IDs use the canonical `DF_{Source}_to_{Target}` format
-5. All threat and finding identity keys must reference actual code artifacts (file paths, config keys)
-6. Include git metadata from Step 1 (commit, branch, date)
-7. The `metrics` object must match the counts in the markdown reports
-8. This file is NOT listed in the Report Files table of `0-assessment.md`
-9. Populate `aliases`, `boundary_kind`/`kind`, `fingerprint`, and `contains_fingerprint` for deterministic matching
-10. If a component has multiple observed names in the same run, keep one canonical `id` and store all alternates in `aliases`
-
-> **⚠️ CRITICAL — Array completeness:**
-> The `threats` array MUST contain one entry for every threat listed in `2-stride-analysis.md`.
-> The `findings` array MUST contain one entry for every finding in `3-findings.md`.
-> The `components` array MUST contain one entry for every component in the Element Table.
-> **Verify:** `threats.length == metrics.total_threats`, `findings.length == metrics.total_findings`,
-> `components.length == metrics.total_components`. If mismatched, the JSON is incomplete — go back
-> and add the missing entries. Do NOT truncate arrays to save space.
+> **⚠️ クリティカル — 配列の完全性:**
+> `threats` 配列には、`2-stride-analysis.md` にリストされている脅威ごとに 1 つのエントリが含まれなければなりません。
+> `findings` 配列には、`3-findings.md` の検出結果ごとに 1 つのエントリが含まれなければなりません。
+> `components` 配列には、要素テーブル内のコンポーネントごとに 1 つのエントリが含まれなければなりません。
+> **確認:** `threats.length == metrics.total_threats`、`findings.length == metrics.total_findings`、
+>`components.length == metrics.total_components`。一致しない場合、JSON は不完全です - 戻ってください
+> 不足しているエントリを追加します。スペースを節約するために配列を切り詰めないでください。
 
 ---
 
-## Self-Check — Run After Writing Each File
+## セルフチェック — 各ファイルの書き込み後に実行
 
-⛔ **MANDATORY:** After writing each file, verify these checks and report results. Fix any ❌ before proceeding.
+⛔ **必須:** 各ファイルを書き込んだ後、これらのチェックを確認し、結果を報告します。続行する前に、❌ を修正してください。
 
-### After `2-stride-analysis.md`:
-- [ ] Summary table appears BEFORE individual component sections
-- [ ] 3 tier sub-sections per component (Tier 1, Tier 2, Tier 3)
-- [ ] Status column uses only: `Open`, `Mitigated`, `Platform` (no `Accepted Risk`, no `Needs Review`)
-- [ ] Platform ratio within limit (≤20% standalone, ≤35% K8s operator)
-- [ ] Every threat has single-letter STRIDE category (S/T/R/I/D/E/A)
+### `2-stride-analysis.md` の後:
+- [ ] 概要テーブルは、個々のコンポーネント セクションの前に表示されます。
+- [ ] コンポーネントごとに 3 層のサブセクション (層 1、層 2、層 3)
+- [ ] ステータス列は次のみを使用します: `Open`、`Mitigated`、`Platform` (`Accepted Risk`、`Needs Review` は不可)
+- [ ] 制限内のプラットフォーム比率 (≤20% スタンドアロン、≤35% K8s オペレーター)
+- [ ] すべての脅威には 1 文字の STRIDE カテゴリ (S/T/R/I/D/E/A) があります。
 
-### After `3-findings.md`:
-- [ ] 3 tier headings: `## Tier 1`, `## Tier 2`, `## Tier 3` (all present)
-- [ ] Zero occurrences of "Accepted Risk" anywhere in the file
-- [ ] Every finding has CVSS 4.0 vector string
-- [ ] Action Summary: T1=Critical, T2=Elevated, T3=Moderate priorities
-- [ ] 4th column header is "Assignment Rule" (not "Example")
+### `3-findings.md` の後:
+- [ ] 3 層見出し: `## Tier 1`、`## Tier 2`、`## Tier 3` (すべて存在)
+- [ ] ファイル内のどこにも「受け入れられたリスク」がゼロ発生
+- [ ] すべての検出結果には CVSS 4.0 ベクトル文字列が含まれています
+- [ ] アクションの概要: T1=重大、T2=昇格、T3=中優先度
+- [ ] 4 列目のヘッダーは「割り当てルール」です (「例」ではありません)。### `threat-inventory.json` の後:
+- [ ] `threats.length == metrics.total_threats` (ゼロトレランス)
+- [ ] `findings.length == metrics.total_findings` (ゼロトレランス)
+- [ ] 脅威が 50 を超える場合、サブエージェント/Python/チャンクが使用されます — 単一の `create_file` ではありません
+- [ ] すべてのコンポーネントには空ではない `fingerprint.source_directories` があります
+- [ ] 正規キーでソートされた配列
+- [ ] **フィールド名はスキーマと正確に一致します:** コンポーネントは `display` (`display_name` ではありません) を使用し、脅威は `stride_category` (`category` ではありません) を使用し、脅威→コンポーネントのリンクは `identity_key.component_id` 内にあります (トップレベルの `component_id` ではありません)、脅威には両方の `title` が含まれています(短い名前) と `description` (長い散文) — `description` だけではありません
 
-### After `threat-inventory.json`:
-- [ ] `threats.length == metrics.total_threats` (zero tolerance)
-- [ ] `findings.length == metrics.total_findings` (zero tolerance)
-- [ ] If threats > 50, used sub-agent/Python/chunked — NOT single `create_file`
-- [ ] Every component has non-empty `fingerprint.source_directories`
-- [ ] Arrays sorted by canonical key
-- [ ] **Field names match schema exactly:** components use `display` (NOT `display_name`), threats use `stride_category` (NOT `category`), threat→component link is inside `identity_key.component_id` (NOT top-level `component_id`), threats have BOTH `title` (short name) AND `description` (longer prose) — NOT just `description` alone
-
-### After `0-assessment.md`:
-- [ ] Exactly 7 sections: Report Files, Executive Summary, Action Summary, Analysis Context & Assumptions, References Consulted, Report Metadata, Classification Reference
-- [ ] `---` horizontal rule between every pair of `##` sections
+### `0-assessment.md` の後:
+- [ ] 正確に 7 つのセクション: レポート ファイル、エグゼクティブ サマリー、アクション サマリー、分析コンテキストと前提条件、参照した参考文献、レポート メタデータ、分類リファレンス
+- [ ] `---` `##` セクションの各ペア間の水平罫線
 
 ---
 
-## Enumeration Reference
+## 列挙型リファレンス
 
-All reports MUST use these exact values. Do NOT abbreviate, substitute, or invent alternatives.
+すべてのレポートはこれらの正確な値を使用しなければなりません。省略したり、置き換えたり、代替案を発明したりしないでください。
 
-**Component Types:** `process` | `data_store` | `external_service` | `external_interactor`
+**コンポーネント タイプ:** `process` | `data_store` | `external_service` | `external_interactor`
 
-**Boundary Kinds (TMT-aligned):** `MachineBoundary` | `NetworkBoundary` | `ClusterBoundary` | `ProcessBoundary` | `PrivilegeBoundary` | `SandboxBoundary`
+**境界の種類 (TMT に合わせて):** `MachineBoundary` | `NetworkBoundary` | `ClusterBoundary` | `ProcessBoundary` | `PrivilegeBoundary` | `SandboxBoundary`
 
-**Exploitability Tiers:** `Tier 1` (Direct Exposure — no prerequisites) | `Tier 2` (Conditional Risk — single prerequisite) | `Tier 3` (Defense-in-Depth — multiple prerequisites)
+**悪用可能性の階層:** `Tier 1` (直接暴露 — 前提条件なし) | `Tier 2` (条件付きリスク — 単一の前提条件) | `Tier 3` (多層防御 — 複数の前提条件)
 
-**STRIDE + Abuse Categories:** `S` Spoofing | `T` Tampering | `R` Repudiation | `I` Information Disclosure | `D` Denial of Service | `E` Elevation of Privilege | `A` Abuse
+**STRIDE + 悪用カテゴリ:** `S` なりすまし | `T` 改ざん | `R` 否認 | `I` 情報開示 | `D` サービス拒否 | `E` 権限の昇格 | `A` 虐待
 
-**SDL Bugbar Severity:** `Critical` | `Important` | `Moderate` | `Low`
+**SDL バグバーの重大度:** `Critical` | `Important` | `Moderate` | `Low`
 
-**Remediation Effort:** `Low` | `Medium` | `High`
+**修復作業:** `Low` | `Medium` | `High`
 
-**Mitigation Type (OWASP-aligned):** `Redesign` | `Standard Mitigation` | `Custom Mitigation` | `Existing Control` | `Accept Risk` | `Transfer Risk`
+**緩和タイプ (OWASP に準拠):** `Redesign` | `Standard Mitigation` | `Custom Mitigation` | `Existing Control` | `Accept Risk` | `Transfer Risk`
 
-**Threat Status:** `Open` | `Mitigated` | `Platform`
+**脅威ステータス:** `Open` | `Mitigated` | `Platform`
 
-**Finding Change Status (incremental):** `Still Present` | `Fixed` | `New` | `New (Code)` | `New (Previously Unidentified)` | `Removed`
+**変更ステータスの検索 (増分):** `Still Present` | `Fixed` | `New` | `New (Code)` | `New (Previously Unidentified)` | `Removed`
 
-**OWASP Top 10:2025 suffix:** Always `:2025` (e.g., `A01:2025 – Broken Access Control`)
-- [ ] Quick Wins, Needs Verification, Finding Overrides subsections present
-- [ ] Deployment pattern documented (K8s operator vs standalone)
-- [ ] All metadata values in backticks
-
-**Also verify (applies to ALL files):** No leaked directives (⛔, RIGID, NON-NEGOTIABLE in output), no time estimates, no nested output folders. See `verification-checklist.md` Phase 0 for the full common deviation list.
+**OWASP Top 10:2025 サフィックス:** 常に `:2025` (例: `A01:2025 – Broken Access Control`)
+- [ ] クイック ウィン、要検証、オーバーライドの検索サブセクションが存在します
+- [ ] 導入パターンを文書化 (K8s オペレーターとスタンドアロン)
+- [ ] バックティック内のすべてのメタデータ値**また確認してください (すべてのファイルに適用):** リークしたディレクティブ (⛔、RIGID、出力内の NON-NEGOTIABLE)、時間の見積もり、ネストされた出力フォルダーはありません。完全な共通偏差リストについては、`verification-checklist.md` フェーズ 0 を参照してください。

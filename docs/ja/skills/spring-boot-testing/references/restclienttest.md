@@ -1,18 +1,16 @@
 # @RestClientTest
 
-Testing REST clients in isolation with MockRestServiceServer.
+MockRestServiceServer を使用して REST クライアントを分離してテストします。
 
-## Overview
+## 概要
 
-`@RestClientTest` auto-configures:
+`@RestClientTest` は自動構成します:
 
-- RestTemplate/RestClient with mock server support
-- Jackson ObjectMapper
-- MockRestServiceServer
+- モックサーバーをサポートする RestTemplate/RestClient
+- ジャクソンオブジェクトマッパー
+- モックレストサービスサーバー
 
-## Basic Setup
-
-```java
+## 基本セットアップ```java
 @RestClientTest(WeatherService.class)
 class WeatherServiceTest {
   
@@ -22,11 +20,7 @@ class WeatherServiceTest {
   @Autowired
   private MockRestServiceServer server;
 }
-```
-
-## Testing RestTemplate
-
-```java
+```## RestTemplate のテスト```java
 @RestClientTest(WeatherService.class)
 class WeatherServiceTest {
   
@@ -54,11 +48,7 @@ class WeatherServiceTest {
     assertThat(weather.getCondition()).isEqualTo("Sunny");
   }
 }
-```
-
-## Testing RestClient (Spring 6.1+)
-
-```java
+```## RestClient のテスト (Spring 6.1 以降)```java
 @RestClientTest(WeatherService.class)
 class WeatherServiceTest {
   
@@ -79,81 +69,45 @@ class WeatherServiceTest {
     assertThat(weather.getTemperature()).isEqualTo(22);
   }
 }
-```
+```## リクエストのマッチング
 
-## Request Matching
-
-### Exact URL
-
-```java
+### 正確な URL```java
 server.expect(requestTo("https://api.example.com/users/1"))
   .andRespond(withSuccess());
-```
-
-### URL Pattern
-
-```java
+```### URL パターン```java
 server.expect(requestTo(matchesPattern("https://api.example.com/users/\\d+")))
   .andRespond(withSuccess());
-```
-
-### HTTP Method
-
-```java
+```### HTTP メソッド```java
 server.expect(ExpectedCount.once(), 
   requestTo("https://api.example.com/users"))
   .andExpect(method(HttpMethod.POST))
   .andRespond(withCreatedEntity(URI.create("/users/1")));
-```
-
-### Request Body
-
-```java
+```### リクエスト本文```java
 server.expect(requestTo("https://api.example.com/users"))
   .andExpect(content().contentType(MediaType.APPLICATION_JSON))
   .andExpect(content().json("{\"name\": \"John\"}"))
   .andRespond(withSuccess());
-```
-
-### Headers
-
-```java
+```### ヘッダー```java
 server.expect(requestTo("https://api.example.com/users"))
   .andExpect(header("Authorization", "Bearer token123"))
   .andExpect(header("X-Api-Key", "secret"))
   .andRespond(withSuccess());
-```
+```## 応答タイプ
 
-## Response Types
-
-### Success with Body
-
-```java
+### 体を使って成功する```java
 server.expect(requestTo("/users/1"))
   .andRespond(withSuccess()
     .contentType(MediaType.APPLICATION_JSON)
     .body("{\"id\": 1, \"name\": \"John\"}"));
-```
-
-### Success from Resource
-
-```java
+```### リソースからの成功```java
 server.expect(requestTo("/users/1"))
   .andRespond(withSuccess()
     .body(new ClassPathResource("user-response.json")));
-```
-
-### Created
-
-```java
+```### 作成されました```java
 server.expect(requestTo("/users"))
   .andExpect(method(HttpMethod.POST))
   .andRespond(withCreatedEntity(URI.create("/users/1")));
-```
-
-### Error Response
-
-```java
+```### エラー応答```java
 server.expect(requestTo("/users/999"))
   .andRespond(withResourceNotFound());
 
@@ -164,11 +118,7 @@ server.expect(requestTo("/users"))
 server.expect(requestTo("/users"))
   .andRespond(withStatus(HttpStatus.BAD_REQUEST)
     .body("{\"error\": \"Invalid input\"}"));
-```
-
-## Verifying Requests
-
-```java
+```## リクエストの検証```java
 @Test
 void shouldCallApi() {
   server.expect(ExpectedCount.once(), 
@@ -179,11 +129,7 @@ void shouldCallApi() {
   
   server.verify(); // Verify all expectations met
 }
-```
-
-## Ignoring Extra Requests
-
-```java
+```## 余分なリクエストを無視する```java
 @Test
 void shouldHandleMultipleCalls() {
   server.expect(ExpectedCount.manyTimes(),
@@ -195,33 +141,23 @@ void shouldHandleMultipleCalls() {
   service.callApi();
   service.callApi();
 }
-```
-
-## Reset Between Tests
-
-```java
+```## テスト間でリセット```java
 @BeforeEach
 void setUp() {
   server.reset();
 }
-```
-
-## Testing Timeouts
-
-```java
+```## テストのタイムアウト```java
 server.expect(requestTo("/slow-endpoint"))
   .andRespond(withSuccess()
     .body("{\"data\": \"test\"}")
     .delay(100, TimeUnit.MILLISECONDS));
 
 // Test timeout handling
-```
+```## ベストプラクティス
 
-## Best Practices
-
-1. Always verify `server.verify()` at end of test
-2. Use resource files for large JSON responses
-3. Match on minimal set of request attributes
-4. Reset server in @BeforeEach
-5. Test error responses, not just success
-6. Verify request body for POST/PUT calls
+1. テストの最後に `server.verify()` を必ず確認します
+2. 大規模な JSON 応答にはリソース ファイルを使用する
+3. リクエスト属性の最小限のセットに基づいて照合する
+4. @BeforeEach でサーバーをリセットする
+5. 成功だけでなくエラー応答をテストする
+6. POST/PUT 呼び出しのリクエスト本文を確認する

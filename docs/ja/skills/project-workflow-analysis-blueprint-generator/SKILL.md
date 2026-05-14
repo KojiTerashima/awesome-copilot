@@ -2,292 +2,240 @@
 name: project-workflow-analysis-blueprint-generator
 description: 'Comprehensive technology-agnostic prompt generator for documenting end-to-end application workflows. Automatically detects project architecture patterns, technology stacks, and data flow patterns to generate detailed implementation blueprints covering entry points, service layers, data access, error handling, and testing approaches across multiple technologies including .NET, Java/Spring, React, and microservices architectures.'
 ---
+# プロジェクト ワークフロー ドキュメント ジェネレーター
 
-# Project Workflow Documentation Generator
+## 構成変数「」
+${PROJECT_TYPE="自動検出|.NET|Java|Spring|Node.js|Python|React|Angular|マイクロサービス|その他"}
+<!-- 主要なテクノロジースタック -->
 
-## Configuration Variables
+${ENTRY_POINT="API|GraphQL|フロントエンド|CLI|メッセージ コンシューマ|スケジュールされたジョブ|カスタム"}
+<!-- フローの開始点 -->
 
-```
-${PROJECT_TYPE="Auto-detect|.NET|Java|Spring|Node.js|Python|React|Angular|Microservices|Other"}
-<!-- Primary technology stack -->
+${PERSISTENCE_TYPE="自動検出|SQL データベース|NoSQL データベース|ファイル システム|外部 API|メッセージ キュー|キャッシュ|なし"}
+<!-- データ ストレージ タイプ -->
 
-${ENTRY_POINT="API|GraphQL|Frontend|CLI|Message Consumer|Scheduled Job|Custom"}
-<!-- Starting point for the flow -->
-
-${PERSISTENCE_TYPE="Auto-detect|SQL Database|NoSQL Database|File System|External API|Message Queue|Cache|None"}
-<!-- Data storage type -->
-
-${ARCHITECTURE_PATTERN="Auto-detect|Layered|Clean|CQRS|Microservices|MVC|MVVM|Serverless|Event-Driven|Other"}
-<!-- Primary architecture pattern -->
+${ARCHITECTURE_PATTERN="自動検出|階層化|クリーン|CQRS|マイクロサービス|MVC|MVVM|サーバーレス|イベントドリブン|その他"}
+<!-- 主なアーキテクチャ パターン -->
 
 ${WORKFLOW_COUNT=1-5}
-<!-- Number of workflows to document -->
+<!-- 文書化するワークフローの数 -->
 
-${DETAIL_LEVEL="Standard|Implementation-Ready"}
-<!-- Level of implementation detail to include -->
+${DETAIL_LEVEL="標準|実装準備完了"}
+<!-- 含める実装の詳細レベル -->
 
 ${INCLUDE_SEQUENCE_DIAGRAM=true|false}
-<!-- Generate sequence diagram -->
+<!-- シーケンス図の生成 -->
 
 ${INCLUDE_TEST_PATTERNS=true|false}
-<!-- Include testing approach -->
-```
+<!-- テスト手法を含める -->
+「」## 生成されたプロンプト「」
+「コードベースを分析し、${WORKFLOW_COUNT} 個の代表的なエンドツーエンド ワークフローを文書化します 
+同様の機能の実装テンプレートとして機能します。次のアプローチを使用します。
+「」### 初期検出フェーズ「」
+${PROJECT_TYPE == "自動検出" ? 
+  「コードベースの構造を調べてテクノロジーを特定することから始めます。
+   - .NET ソリューション/プロジェクト、Spring 構成、Node.js/Express ファイルなどを確認します。
+   - 使用されている主なプログラミング言語とフレームワークを特定する
+   - フォルダー構造と主要コンポーネントに基づいてアーキテクチャ パターンを決定します。 
+  : "${PROJECT_TYPE} のパターンと規則に焦点を当てます"}
+「」
 
-## Generated Prompt
+「」
+${ENTRY_POINT == "自動検出" ? 
+  「以下を探して典型的なエントリ ポイントを特定します。
+   - API コントローラーまたはルート定義
+   - GraphQL リゾルバー
+   - ネットワークリクエストを開始するUIコンポーネント
+   - メッセージ ハンドラーまたはイベント サブスクライバー
+   - スケジュールされたジョブの定義」 
+  : "${ENTRY_POINT} のエントリ ポイントに注目します"}
+「」
 
-```
-"Analyze the codebase and document ${WORKFLOW_COUNT} representative end-to-end workflows 
-that can serve as implementation templates for similar features. Use the following approach:
-```
+「」
+${PERSISTENCE_TYPE == "自動検出" ? 
+  「以下を調べて永続化メカニズムを決定します。
+   - データベースコンテキスト/接続構成
+   - リポジトリの実装
+   - ORMマッピング
+   - 外部 API クライアント
+   - ファイルシステムの相互作用」 
+  : "${PERSISTENCE_TYPE} のインタラクションに焦点を当てます"}
+「」### ワークフローの文書化手順
 
-### Initial Detection Phase
+システム内の `${WORKFLOW_COUNT}` の最も代表的なワークフローごとに:
 
-```
-${PROJECT_TYPE == "Auto-detect" ? 
-  "Begin by examining the codebase structure to identify technologies:
-   - Check for .NET solutions/projects, Spring configurations, Node.js/Express files, etc.
-   - Identify the primary programming language(s) and frameworks in use
-   - Determine the architectural patterns based on folder structure and key components" 
-  : "Focus on ${PROJECT_TYPE} patterns and conventions"}
-```
+#### 1. ワークフローの概要
+   - ワークフローの名前と簡単な説明を入力します。
+   - ビジネス目的を説明する
+   - トリガーとなるアクションまたはイベントを特定する
+   - 完全なワークフローに関係するすべてのファイル/クラスをリストします。
 
-```
-${ENTRY_POINT == "Auto-detect" ? 
-  "Identify typical entry points by looking for:
-   - API controllers or route definitions
-   - GraphQL resolvers
-   - UI components that initiate network requests
-   - Message handlers or event subscribers
-   - Scheduled job definitions" 
-  : "Focus on ${ENTRY_POINT} entry points"}
-```
+#### 2. エントリ ポイントの実装
 
-```
-${PERSISTENCE_TYPE == "Auto-detect" ? 
-  "Determine persistence mechanisms by examining:
-   - Database context/connection configurations
-   - Repository implementations
-   - ORM mappings
-   - External API clients
-   - File system interactions" 
-  : "Focus on ${PERSISTENCE_TYPE} interactions"}
-```
+**API エントリ ポイント:**「」
+${ENTRY_POINT == "API" || ENTRY_POINT == "自動検出" ? 
+  " - リクエストを受け取る API コントローラーのクラスとメソッドを文書化します。
+   - 属性/注釈を含む完全なメソッド署名を表示します。
+   - 完全なリクエスト DTO/モデル クラス定義を含めます。
+   - ドキュメント検証属性とカスタムバリデーター
+   - 認証/認可属性とチェックを表示します" : ""}
+「」**GraphQL エントリ ポイント:**「」
+${ENTRY_POINT == "GraphQL" || ENTRY_POINT == "自動検出" ? 
+  " - GraphQL リゾルバー クラスとメソッドを文書化します。
+   - クエリ/ミューテーションの完全なスキーマ定義を表示します。
+   - 入力タイプの定義を含める
+   - パラメーター処理を伴うリゾルバー メソッドの実装を表示します" : ""}
+「」**フロントエンド エントリ ポイント:**「」
+${ENTRY_POINT == "フロントエンド" || ENTRY_POINT == "自動検出" ? 
+  "- API 呼び出しを開始するコンポーネントを文書化します。
+   - リクエストをトリガーするイベント ハンドラーを表示します。
+   - APIクライアントサービスメソッドを含める
+   - リクエストに関連する状態管理コードを表示します" : ""}
+「」**メッセージ消費者のエントリ ポイント:**「」
+${ENTRY_POINT == "メッセージ コンシューマ" || ENTRY_POINT == "自動検出" ? 
+  " - メッセージ ハンドラーのクラスとメソッドを文書化します。
+   - メッセージサブスクリプション設定を表示
+   - 完全なメッセージ モデル定義を含める
+   - 逆シリアル化と検証ロジックを表示します" : ""}
+「」#### 3. サービス層の実装
+   - 依存関係に関係する各サービス クラスを文書化します。
+   - パラメータと戻り値の型を含む完全なメソッド シグネチャを表示します。
+   - 主要なビジネス ロジックを含む実際のメソッド実装を含める
+   - 該当する場合、インターフェース定義を文書化します。
+   - 依存関係注入の登録パターンを表示する
 
-### Workflow Documentation Instructions
+**CQRS パターン:**「」
+${ARCHITECTURE_PATTERN == "CQRS" || ARCHITECTURE_PATTERN == "自動検出" ? 
+  "- 完全なコマンド/クエリ ハンドラー実装を含めます" : ""}
+「」**クリーンなアーキテクチャ パターン:**「」
+${ARCHITECTURE_PATTERN == "クリーン" || ARCHITECTURE_PATTERN == "自動検出" ? 
+  "- ユースケース/インタラクターの実装を表示" : ""}
+「」#### 4. データ マッピング パターン
+   - DTO からドメイン モデルへのマッピング コードを文書化する
+   - オブジェクト マッパー設定または手動マッピング方法を表示します。
+   - マッピング中に検証ロジックを含める
+   - マッピング中に作成されたドメイン イベントを文書化します。
 
-For each of the `${WORKFLOW_COUNT}` most representative workflow(s) in the system:
+#### 5. データアクセスの実装
+   - ドキュメント リポジトリ インターフェイスとその実装
+   - パラメータと戻り値の型を含む完全なメソッド シグネチャを表示します
+   - 実際のクエリ実装を含める
+   - すべてのプロパティを含むエンティティ/モデル クラス定義を文書化する
+   - トランザクション処理パターンを表示する
 
-#### 1. Workflow Overview
-   - Provide a name and brief description of the workflow
-   - Explain the business purpose it serves
-   - Identify the triggering action or event
-   - List all files/classes involved in the complete workflow
+**SQL データベース パターン:**「」
+${PERSISTENCE_TYPE == "SQL データベース" || PERSISTENCE_TYPE == "自動検出" ? 
+  "- ORM 構成、注釈、または Fluent API の使用法を含める
+   - 実際の SQL クエリまたは ORM ステートメントを表示します" : ""}
+「」**NoSQL データベース パターン:**「」
+${PERSISTENCE_TYPE == "NoSQL データベース" || PERSISTENCE_TYPE == "自動検出" ? 
+  "- 文書構造定義を表示する
+   - ドキュメントのクエリ/更新操作を含めます" : ""}
+「」#### 6. 対応構築
+   - 応答 DTO/モデル クラス定義の文書化
+   - ドメイン/エンティティ モデルから応答モデルへのマッピングを表示
+   - ステータスコード選択ロジックを含める
+   - エラー応答の構造と生成を文書化する
 
-#### 2. Entry Point Implementation
+#### 7. エラー処理パターン
+   - ワークフローで使用される例外タイプを文書化する
+   - 各レイヤーのトライ/キャッチパターンを表示
+   - グローバル例外ハンドラー構成を含める
+   - エラーログの実装を文書化する
+   - 再試行ポリシーまたはサーキット ブレーカー パターンを表示します
+   - 障害シナリオを補うアクションを含める
 
-**API Entry Points:**
-```
-${ENTRY_POINT == "API" || ENTRY_POINT == "Auto-detect" ? 
-  "- Document the API controller class and method that receives the request
-   - Show the complete method signature including attributes/annotations
-   - Include the full request DTO/model class definition
-   - Document validation attributes and custom validators
-   - Show authentication/authorization attributes and checks" : ""}
-```
+#### 8. 非同期処理パターン
+   - バックグラウンドジョブのスケジュールコードを文書化する
+   - イベント発行の実装を表示する
+   - メッセージキュー送信パターンを含める
+   - コールバックまたは Webhook の実装を文書化する
+   - 非同期操作がどのように追跡および監視されるかを示す
 
-**GraphQL Entry Points:**
-```
-${ENTRY_POINT == "GraphQL" || ENTRY_POINT == "Auto-detect" ? 
-  "- Document the GraphQL resolver class and method
-   - Show the complete schema definition for the query/mutation
-   - Include input type definitions
-   - Show resolver method implementation with parameter handling" : ""}
-```
-
-**Frontend Entry Points:**
-```
-${ENTRY_POINT == "Frontend" || ENTRY_POINT == "Auto-detect" ? 
-  "- Document the component that initiates the API call
-   - Show the event handler that triggers the request
-   - Include the API client service method
-   - Show state management code related to the request" : ""}
-```
-
-**Message Consumer Entry Points:**
-```
-${ENTRY_POINT == "Message Consumer" || ENTRY_POINT == "Auto-detect" ? 
-  "- Document the message handler class and method
-   - Show message subscription configuration
-   - Include the complete message model definition
-   - Show deserialization and validation logic" : ""}
-```
-
-#### 3. Service Layer Implementation
-   - Document each service class involved with their dependencies
-   - Show the complete method signatures with parameters and return types
-   - Include actual method implementations with key business logic
-   - Document interface definitions where applicable
-   - Show dependency injection registration patterns
-
-**CQRS Patterns:**
-```
-${ARCHITECTURE_PATTERN == "CQRS" || ARCHITECTURE_PATTERN == "Auto-detect" ? 
-  "- Include complete command/query handler implementations" : ""}
-```
-
-**Clean Architecture Patterns:**
-```
-${ARCHITECTURE_PATTERN == "Clean" || ARCHITECTURE_PATTERN == "Auto-detect" ? 
-  "- Show use case/interactor implementations" : ""}
-```
-
-#### 4. Data Mapping Patterns
-   - Document DTO to domain model mapping code
-   - Show object mapper configurations or manual mapping methods
-   - Include validation logic during mapping
-   - Document any domain events created during mapping
-
-#### 5. Data Access Implementation
-   - Document repository interfaces and their implementations
-   - Show complete method signatures with parameters and return types
-   - Include actual query implementations
-   - Document entity/model class definitions with all properties
-   - Show transaction handling patterns
-
-**SQL Database Patterns:**
-```
-${PERSISTENCE_TYPE == "SQL Database" || PERSISTENCE_TYPE == "Auto-detect" ? 
-  "- Include ORM configurations, annotations, or Fluent API usage
-   - Show actual SQL queries or ORM statements" : ""}
-```
-
-**NoSQL Database Patterns:**
-```
-${PERSISTENCE_TYPE == "NoSQL Database" || PERSISTENCE_TYPE == "Auto-detect" ? 
-  "- Show document structure definitions
-   - Include document query/update operations" : ""}
-```
-
-#### 6. Response Construction
-   - Document response DTO/model class definitions
-   - Show mapping from domain/entity models to response models
-   - Include status code selection logic
-   - Document error response structure and generation
-
-#### 7. Error Handling Patterns
-   - Document exception types used in the workflow
-   - Show try/catch patterns at each layer
-   - Include global exception handler configurations
-   - Document error logging implementations
-   - Show retry policies or circuit breaker patterns
-   - Include compensating actions for failure scenarios
-
-#### 8. Asynchronous Processing Patterns
-   - Document background job scheduling code
-   - Show event publication implementations
-   - Include message queue sending patterns
-   - Document callback or webhook implementations
-   - Show how async operations are tracked and monitored
-
-**Testing Approach (Optional):**
-```
+**テストアプローチ (オプション):**「」
 ${INCLUDE_TEST_PATTERNS ? 
-  "9. **Testing Approach**
-     - Document unit test implementations for each layer
-     - Show mocking patterns and test fixture setup
-     - Include integration test implementations
-     - Document test data generation approaches
-     - Show API/controller test implementations" : ""}
-```
-
-**Sequence Diagram (Optional):**
-```
+  「9. **テストのアプローチ**
+     - 各層の単体テストの実装を文書化する
+     - モックパターンとテストフィクスチャのセットアップを表示
+     - 統合テストの実装を含める
+     - テストデータ生成アプローチの文書化
+     - API/コントローラーのテスト実装を表示します" : ""}
+「」**シーケンス図 (オプション):**「」
 ${INCLUDE_SEQUENCE_DIAGRAM ? 
-  "10. **Sequence Diagram**
-      - Generate a detailed sequence diagram showing all components
-      - Include method calls with parameter types
-      - Show return values between components
-      - Document conditional flows and error paths" : ""}
-```
+  「10. **シーケンス図**
+      - すべてのコンポーネントを示す詳細なシーケンス図を生成します
+      - パラメーター型を含むメソッド呼び出しを含める
+      - コンポーネント間の戻り値を表示する
+      - 条件付きフローとエラー パスを文書化します" : ""}
+「」#### 11. 命名規則
+以下の一貫したパターンを文書化します。
+- コントローラーの名前 (例: `EntityNameController`)
+- サービスの名前付け (例: `EntityNameService`)
+- リポジトリの命名 (例: `IEntityNameRepository`)
+- DTO 命名 (例: `EntityNameRequest`、`EntityNameResponse`)
+- CRUD操作のメソッド命名パターン
+- 変数の命名規則
+- ファイル構成パターン
 
-#### 11. Naming Conventions
-Document consistent patterns for:
-- Controller naming (e.g., `EntityNameController`)
-- Service naming (e.g., `EntityNameService`)
-- Repository naming (e.g., `IEntityNameRepository`)
-- DTO naming (e.g., `EntityNameRequest`, `EntityNameResponse`)
-- Method naming patterns for CRUD operations
-- Variable naming conventions
-- File organization patterns
+#### 12. 実装テンプレート
+以下の再利用可能なコード テンプレートを提供します。
+- パターンに従って新しい API エンドポイントを作成する
+- 新しいサービスメソッドの実装
+- 新しいリポジトリ メソッドの追加
+- 新しいドメイン モデル クラスの作成
+- 適切なエラー処理の実装
 
-#### 12. Implementation Templates
-Provide reusable code templates for:
-- Creating a new API endpoint following the pattern
-- Implementing a new service method
-- Adding a new repository method
-- Creating new domain model classes
-- Implementing proper error handling
+### テクノロジー固有の実装パターン
 
-### Technology-Specific Implementation Patterns
+**.NET 実装パターン (検出された場合):**「」
+${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "自動検出" ? 
+  "- 属性、フィルター、依存関係注入を備えた完全なコントローラー クラス
+   - Startup.cs または Program.cs でのサービスの登録
+   - Entity FrameworkのDbContext構成
+   - EF Core または Dapper を使用したリポジトリの実装
+   - AutoMapper プロファイル構成
+   - 横断的な問題に対応するミドルウェアの実装
+   - 拡張メソッドのパターン
+   - 設定用のオプションパターンの実装
+   - ILogger によるログの実装
+   - 認証/認可フィルターまたはポリシーの実装" : ""}
+「」**Spring 実装パターン (検出された場合):**「」
+${PROJECT_TYPE == "Java" || PROJECT_TYPE == "春" || PROJECT_TYPE == "自動検出" ? 
+  "- アノテーションと依存性注入を備えた完全なコントローラー クラス
+   - トランザクション境界を使用したサービスの実装
+   - リポジトリのインターフェースと実装
+   - リレーションシップを含む JPA エンティティ定義
+   - DTO クラスの実装
+   - Bean 設定とコンポーネントのスキャン
+   - 例外ハンドラーの実装
+   - カスタムバリデータの実装" : ""}
+「」**React 実装パターン (検出された場合):**「」
+${PROJECT_TYPE == "反応" || PROJECT_TYPE == "自動検出" ? 
+  "- props と state を含むコンポーネント構造
+   - フックの実装パターン (useState、useEffect、カスタム フック)
+   - APIサービスの実装
+   - 状態管理パターン（Context、Redux）
+   - フォーム処理の実装
+   - ルート設定" : ""}
+「」### 実装ガイドライン
 
-**.NET Implementation Patterns (if detected):**
-```
-${PROJECT_TYPE == ".NET" || PROJECT_TYPE == "Auto-detect" ? 
-  "- Complete controller class with attributes, filters, and dependency injection
-   - Service registration in Startup.cs or Program.cs
-   - Entity Framework DbContext configuration
-   - Repository implementation with EF Core or Dapper
-   - AutoMapper profile configurations
-   - Middleware implementations for cross-cutting concerns
-   - Extension method patterns
-   - Options pattern implementation for configuration
-   - Logging implementation with ILogger
-   - Authentication/authorization filter or policy implementations" : ""}
-```
+文書化されたワークフローに基づいて、新機能を実装するための具体的なガイダンスを提供します。
 
-**Spring Implementation Patterns (if detected):**
-```
-${PROJECT_TYPE == "Java" || PROJECT_TYPE == "Spring" || PROJECT_TYPE == "Auto-detect" ? 
-  "- Complete controller class with annotations and dependency injection
-   - Service implementation with transaction boundaries
-   - Repository interface and implementation
-   - JPA entity definitions with relationships
-   - DTO class implementations
-   - Bean configuration and component scanning
-   - Exception handler implementations
-   - Custom validator implementations" : ""}
-```
+#### 1. 段階的な実装プロセス
+- 同様の機能を追加する場合、どこから始めるべきか
+- 実装の順序 (例: モデル → リポジトリ → サービス → コントローラー)
+- 既存の分野横断的な懸念事項と統合する方法
 
-**React Implementation Patterns (if detected):**
-```
-${PROJECT_TYPE == "React" || PROJECT_TYPE == "Auto-detect" ? 
-  "- Component structure with props and state
-   - Hook implementation patterns (useState, useEffect, custom hooks)
-   - API service implementation
-   - State management patterns (Context, Redux)
-   - Form handling implementations
-   - Route configuration" : ""}
-```
+#### 2. 避けるべきよくある落とし穴
+- 現在の実装でエラーが発生しやすい領域を特定する
+- パフォーマンスに関する考慮事項に注意してください
+- 発生した一般的なバグや問題をリストします。
 
-### Implementation Guidelines
+#### 3. 拡張メカニズム
+- 既存の拡張ポイントにプラグインする方法を文書化する
+- 既存のコードを変更せずに新しい動作を追加する方法を示す
+- 構成主導の機能パターンについて説明する
 
-Based on the documented workflows, provide specific guidance for implementing new features:
-
-#### 1. Step-by-Step Implementation Process
-- Where to start when adding a similar feature
-- Order of implementation (e.g., model → repository → service → controller)
-- How to integrate with existing cross-cutting concerns
-
-#### 2. Common Pitfalls to Avoid
-- Identify error-prone areas in the current implementation
-- Note performance considerations
-- List common bugs or issues encountered
-
-#### 3. Extension Mechanisms
-- Document how to plug into existing extension points
-- Show how to add new behavior without modifying existing code
-- Explain configuration-driven feature patterns
-
-**Conclusion:**
-Conclude with a summary of the most important patterns that should be followed when 
-implementing new features to maintain consistency with the codebase."
+**結論:**
+最後に、次の場合に従うべき最も重要なパターンの概要を示します。 
+コードベースとの一貫性を維持するために新機能を実装します。」

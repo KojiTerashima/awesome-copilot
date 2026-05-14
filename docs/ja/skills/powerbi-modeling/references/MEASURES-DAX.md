@@ -1,195 +1,163 @@
-# DAX Measures and Naming Conventions
+# DAX メジャーと命名規則
 
-## Naming Conventions
+## 命名規則
 
-### General Rules
-- Use human-readable names (spaces allowed)
-- Be descriptive: `Total Sales Amount` not `TSA`
-- Avoid abbreviations unless universally understood
-- Use consistent capitalization (Title Case recommended)
-- Avoid special characters except spaces
+### 一般規則
+- 人間が判読できる名前を使用します (スペースは許可されます)
+- わかりやすいものにしてください: `TSA` ではなく `Total Sales Amount`
+- 広く理解されている場合を除き、略語は避けてください。
+- 一貫した大文字を使用します (タイトルを大文字にすることを推奨)
+- スペース以外の特殊文字は避けてください
 
-### Table Naming
-| Type | Convention | Example |
-|------|------------|---------|
-| Dimension | Singular noun | Customer, Product, Date |
-| Fact | Business process | Sales, Orders, Inventory |
-| Bridge | Combined names | CustomerAccount, ProductCategory |
-| Measure Table | Underscore prefix | _Measures, _KPIs |
+### テーブルの命名
+|タイプ |大会 |例 |
+|------|-----------|----------|
+|寸法 |単数名詞 |顧客、製品、日付 |
+|事実 |ビジネスプロセス |販売、注文、在庫 |
+|橋 |組み合わせた名前 |顧客アカウント、製品カテゴリ |
+|測定テーブル |アンダースコア接頭辞 | _対策、_KPI |
 
-### Column Naming
-| Type | Convention | Example |
-|------|------------|---------|
-| Keys | Suffix with "Key" or "ID" | CustomerKey, ProductID |
-| Dates | Suffix with "Date" | OrderDate, ShipDate |
-| Amounts | Descriptive with unit hint | SalesAmount, QuantitySold |
-| Flags | Prefix with "Is" or "Has" | IsActive, HasDiscount |
+### 列の名前
+|タイプ |大会 |例 |
+|------|-----------|----------|
+|キー | 「キー」または「ID」をサフィックスに付ける |顧客キー、製品 ID |
+|日付 |末尾に「日付」を付ける |注文日、発送日 |
+|金額 |単位ヒント付きの説明 |売上金額、販売数量 |
+|フラグ | 「Is」または「Has」を接頭辞として付けます。アクティブ、割引あり |
 
-### Measure Naming
-| Type | Convention | Example |
-|------|------------|---------|
-| Aggregations | Verb + Noun | Total Sales, Count of Orders |
-| Ratios | X per Y or X Rate | Sales per Customer, Conversion Rate |
-| Time Intelligence | Period + Metric | YTD Sales, PY Total Sales |
-| Comparisons | Metric + vs + Baseline | Sales vs Budget, Growth vs PY |
+### メジャーの名前付け
+|タイプ |大会 |例 |
+|------|-----------|----------|
+|集計 |動詞 + 名詞 |総売上高、注文数 |
+|比率 | Y または X あたりの X レート |顧客あたりの売上高、コンバージョン率 |
+|タイムインテリジェンス |期間 + 指標 |年初来売上高、前年同期累計売上高 |
+|比較 |メトリック + 対 + ベースライン |売上と予算、成長と前年比 |
 
-## Explicit vs Implicit Measures
+## 明示的な対策と暗黙的な対策
 
-### Always Create Explicit Measures For:
-1. Key business metrics users will query
-2. Complex calculations with filter manipulation
-3. Measures used in MDX (Excel PivotTables)
-4. Controlled aggregation (prevent sum of averages)
+### 常に次の明示的なメジャーを作成します:
+1. ユーザーが問い合わせる主要なビジネス指標
+2. フィルター操作による複雑な計算
+3. MDX (Excel ピボットテーブル) で使用されるメジャー
+4. 制御された集計 (平均値の合計を防止)
 
-### Implicit Measures (Column Aggregations)
-- Acceptable for simple exploration
-- Set correct SummarizeBy property:
-  - Amounts: Sum
-  - Keys/IDs: None (Do Not Summarize)
-  - Rates/Prices: None or Average
+### 暗黙的なメジャー (列集計)
+- 単純な探索には許容可能
+- 正しい SummarizeBy プロパティを設定します。
+  - 金額: 合計
+  - キー/ID: なし (要約しない)
+  - 料金/価格: なしまたは平均
 
-## Measure Patterns
+## パターンを測定する
 
-### Basic Aggregations
-```dax
-Total Sales = SUM(Sales[SalesAmount])
-Order Count = COUNTROWS(Sales)
-Average Order Value = DIVIDE([Total Sales], [Order Count])
-Distinct Customers = DISTINCTCOUNT(Sales[CustomerKey])
-```
+### 基本的な集計「ダックス」
+合計売上 = SUM(売上[売上金額])
+注文数 = COUNTROWS(売上)
+平均注文額 = DIVIDE([総売上高], [注文数])
+個別の顧客 = DISTINCTCOUNT(Sales[CustomerKey])
+「」### タイム インテリジェンス (日付テーブルが必要)「ダックス」
+YTD 売上 = TOTALYTD([総売上高], '日付'[日付])
+MTD 売上 = TOTALMTD([総売上高], '日付'[日付])
+PY 売上高 = CALCULATE([総売上高], SAMEPERIODLASTYEAR('日付'[日付]))
+前年比成長率 = DIVIDE([総売上高] - [前年同期売上高], [前年同期売上高])
+「」### パーセンテージの計算「ダックス」
+全体に占める売上高の割合 = 
+除算(
+    [総売上高]、
+    CALCULATE([総売上高], REMOVEFILTERS(製品))
+）
 
-### Time Intelligence (Requires Date Table)
-```dax
-YTD Sales = TOTALYTD([Total Sales], 'Date'[Date])
-MTD Sales = TOTALMTD([Total Sales], 'Date'[Date])
-PY Sales = CALCULATE([Total Sales], SAMEPERIODLASTYEAR('Date'[Date]))
-YoY Growth = DIVIDE([Total Sales] - [PY Sales], [PY Sales])
-```
+利益率 % = DIVIDE([売上総利益], [総売上高])
+「」### 現在の合計「ダックス」
+現在の合計 = 
+計算(
+    [総売上高]、
+    フィルター(
+        ALL('日付'),
+        '日付'[日付] <= MAX('日付'[日付])
+    ）
+）
+「」## 列参照
 
-### Percentage Calculations
-```dax
-Sales % of Total = 
-DIVIDE(
-    [Total Sales],
-    CALCULATE([Total Sales], REMOVEFILTERS(Product))
-)
+### ベスト プラクティス: 列名を常に修飾する「ダックス」
+// GOOD - 完全に修飾されています
+売上金額 = SUM(売上[売上金額])
 
-Margin % = DIVIDE([Gross Profit], [Total Sales])
-```
+// BAD - 修飾されていません (曖昧さの原因となる可能性があります)
+売上金額 = SUM([売上金額])
+「」### 基準の測定: 絶対に適格としない「ダックス」
+// GOOD - 修飾されていないメジャー
+YTD 売上 = TOTALYTD([総売上高], '日付'[日付])
 
-### Running Totals
-```dax
-Running Total = 
-CALCULATE(
-    [Total Sales],
-    FILTER(
-        ALL('Date'),
-        'Date'[Date] <= MAX('Date'[Date])
-    )
-)
-```
+// BAD - 修飾されたメジャー (ホーム テーブルが変更されると中断)
+YTD 売上 = TOTALYTD(売上[総売上], '日付'[日付])
+「」## ドキュメント
 
-## Column References
-
-### Best Practice: Always Qualify Column Names
-```dax
-// GOOD - Fully qualified
-Sales Amount = SUM(Sales[SalesAmount])
-
-// BAD - Unqualified (can cause ambiguity)
-Sales Amount = SUM([SalesAmount])
-```
-
-### Measure References: Never Qualify
-```dax
-// GOOD - Unqualified measure
-YTD Sales = TOTALYTD([Total Sales], 'Date'[Date])
-
-// BAD - Qualified measure (breaks if home table changes)
-YTD Sales = TOTALYTD(Sales[Total Sales], 'Date'[Date])
-```
-
-## Documentation
-
-### Measure Descriptions
-Always add descriptions explaining:
-- What the measure calculates
-- Business context/usage
-- Any important assumptions
-
-```
-measure_operations(
-  operation: "Update",
-  definitions: [{
-    name: "Total Sales",
-    tableName: "Sales",
-    description: "Sum of all completed sales transactions. Excludes returns and cancelled orders."
+### 測定の説明
+以下を説明する説明を必ず追加してください。
+- メジャーで計算される内容
+- ビジネスコンテキスト/用途
+- 重要な前提条件「」
+測定操作(
+  操作: "更新"、
+  定義: [{
+    名前: 「総売上高」、
+    テーブル名: "売上",
+    説明: 「完了したすべての販売取引の合計。返品とキャンセルされた注文は除きます。」
   }]
-)
-```
+）
+「」### フォーマット文字列
+|データ型 |フォーマット文字列 |出力例 |
+|----------|-----------------|--------------|
+|通貨 | $#,##0.00 | $1,234.56 |
+|パーセンテージ | 0.0% | 12.3% |
+|整数 | #,##0 | 1,234 |
+| 10 進数 | #,##0.00 | 1,234.56 |
 
-### Format Strings
-| Data Type | Format String | Example Output |
-|-----------|---------------|----------------|
-| Currency | $#,##0.00 | $1,234.56 |
-| Percentage | 0.0% | 12.3% |
-| Whole Number | #,##0 | 1,234 |
-| Decimal | #,##0.00 | 1,234.56 |
+## フォルダーを表示する
 
-## Display Folders
-
-Organize measures into logical groups:
-```
-measure_operations(
-  operation: "Update",
-  definitions: [{
-    name: "YTD Sales",
-    tableName: "_Measures",
-    displayFolder: "Time Intelligence\\Year"
+メジャーを論理グループに整理します。「」
+測定操作(
+  操作: "更新"、
+  定義: [{
+    名前: "YTD 売上高"、
+    テーブル名: "_Measures",
+    displayFolder: "タイム インテリジェンス\\年"
   }]
-)
-```
+）
+「」一般的なフォルダー構造:「」
+_対策
+§── 販売
+│ §── 総売上高
+│ └── 平均売上
+§── タイムインテリジェンス
+│ §── 年
+│ │ §── 年初来売上高
+│ │ └─ 前年売上高
+│ ━─ 月
+│ └── MTD販売
+└── 比率
+    §── マージン率
+    └── 換算率
+「」## パフォーマンスのための変数
 
-Common folder structure:
-```
-_Measures
-├── Sales
-│   ├── Total Sales
-│   └── Average Sale
-├── Time Intelligence
-│   ├── Year
-│   │   ├── YTD Sales
-│   │   └── PY Sales
-│   └── Month
-│       └── MTD Sales
-└── Ratios
-    ├── Margin %
-    └── Conversion Rate
-```
+変数を使用して次のことを行います。
+- 同じ式の再計算を避ける
+- 可読性の向上
+- デバッグを有効にする「ダックス」
+粗利益率 % = 
+VAR TotalSales = [総売上高]
+VAR TotalCost = [総コスト]
+VAR 総利益 = 総売上高 - 総コスト
+戻る
+    DIVIDE(売上総利益、売上高)
+「」## 検証チェックリスト
 
-## Variables for Performance
-
-Use variables to:
-- Avoid recalculating the same expression
-- Improve readability
-- Enable debugging
-
-```dax
-Gross Margin % = 
-VAR TotalSales = [Total Sales]
-VAR TotalCost = [Total Cost]
-VAR GrossProfit = TotalSales - TotalCost
-RETURN
-    DIVIDE(GrossProfit, TotalSales)
-```
-
-## Validation Checklist
-
-- [ ] All key business metrics have explicit measures
-- [ ] Measures have clear, descriptive names
-- [ ] Measures have descriptions
-- [ ] Appropriate format strings applied
-- [ ] Display folders organize related measures
-- [ ] Column references are fully qualified
-- [ ] Measure references are not qualified
-- [ ] Variables used for complex calculations
+- [ ] すべての主要なビジネス指標には明示的な測定値があります
+- [ ] メジャーには明確でわかりやすい名前が付けられています
+- [ ] メジャーには説明があります
+- [ ] 適切なフォーマット文字列が適用される
+- [ ] フォルダーに関連する対策を整理して表示します
+- [ ] 列参照は完全修飾されています
+- [ ] メジャー参照は修飾されていません
+- [ ] 複雑な計算に使用される変数

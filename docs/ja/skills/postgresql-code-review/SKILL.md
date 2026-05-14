@@ -2,211 +2,186 @@
 name: postgresql-code-review
 description: 'PostgreSQL-specific code review assistant focusing on PostgreSQL best practices, anti-patterns, and unique quality standards. Covers JSONB operations, array usage, custom types, schema design, function optimization, and PostgreSQL-exclusive security features like Row Level Security (RLS).'
 ---
+# PostgreSQL コードレビューアシスタント
 
-# PostgreSQL Code Review Assistant
+${selection} (選択がない場合はプロジェクト全体) の専門家による PostgreSQL コード レビュー。 PostgreSQL 固有のベスト プラクティス、アンチパターン、および PostgreSQL に固有の品質基準に焦点を当てます。
 
-Expert PostgreSQL code review for ${selection} (or entire project if no selection). Focus on PostgreSQL-specific best practices, anti-patterns, and quality standards that are unique to PostgreSQL.
+## 🎯 PostgreSQL 固有のレビュー領域
 
-## 🎯 PostgreSQL-Specific Review Areas
+### JSONB のベスト プラクティス```SQL
+-- ❌ 悪い点: 非効率的な JSONB の使用法
+SELECT * FROM 注文 WHERE data->>'ステータス' = '発送済み';  -- インデックスはサポートされていません
 
-### JSONB Best Practices
-```sql
--- ❌ BAD: Inefficient JSONB usage
-SELECT * FROM orders WHERE data->>'status' = 'shipped';  -- No index support
+-- ✅ 良い: インデックス可能な JSONB クエリ
+CREATE INDEX idx_orders_status ON 注文 USING gin((data->'status'));
+SELECT * FROM 注文 WHERE データ @> '{"ステータス": "発送済み"}';
 
--- ✅ GOOD: Indexable JSONB queries
-CREATE INDEX idx_orders_status ON orders USING gin((data->'status'));
-SELECT * FROM orders WHERE data @> '{"status": "shipped"}';
+-- ❌ 悪い点: 考慮せずに深いネストを作成する
+UPDATE 命令 SET データ = データ || '{"配送":{"追跡":{"番号":"123"}}}';
 
--- ❌ BAD: Deep nesting without consideration
-UPDATE orders SET data = data || '{"shipping":{"tracking":{"number":"123"}}}';
+-- ✅ 良い: 検証付きの構造化 JSONB
+ALTER TABLE は ADD CONSTRAINT を命令します valid_status 
+CHECK (データ->>'ステータス' IN ('保留', '発送済み', '配達済み'));
+「」### 配列操作のレビュー```SQL
+-- ❌ 悪い点: 非効率的な配列操作
+SELECT * FROM products WHERE 'エレクトロニクス' = ANY(カテゴリ);  -- インデックスなし
 
--- ✅ GOOD: Structured JSONB with validation
-ALTER TABLE orders ADD CONSTRAINT valid_status 
-CHECK (data->>'status' IN ('pending', 'shipped', 'delivered'));
-```
+-- ✅ 良い: GIN インデックス付き配列クエリ
+ジン(カテゴリ)を使用して製品に関するインデックスidx_products_categoriesを作成します。
+SELECT * FROM products WHERE カテゴリ @> ARRAY['electronics'];
 
-### Array Operations Review
-```sql
--- ❌ BAD: Inefficient array operations
-SELECT * FROM products WHERE 'electronics' = ANY(categories);  -- No index
+-- ❌ 悪い: ループ内の配列の連結
+-- これは関数/プロシージャでは非効率的です
 
--- ✅ GOOD: GIN indexed array queries
-CREATE INDEX idx_products_categories ON products USING gin(categories);
-SELECT * FROM products WHERE categories @> ARRAY['electronics'];
-
--- ❌ BAD: Array concatenation in loops
--- This would be inefficient in a function/procedure
-
--- ✅ GOOD: Bulk array operations
-UPDATE products SET categories = categories || ARRAY['new_category']
-WHERE id IN (SELECT id FROM products WHERE condition);
-```
-
-### PostgreSQL Schema Design Review
-```sql
--- ❌ BAD: Not using PostgreSQL features
-CREATE TABLE users (
-    id INTEGER,
-    email VARCHAR(255),
+-- ✅ 良い点: 一括配列操作
+商品を更新 カテゴリ = カテゴリを設定 || ARRAY['新しいカテゴリ']
+WHERE id IN (製品 WHERE 条件から ID を選択);
+「」### PostgreSQL スキーマ設計のレビュー```SQL
+-- ❌ 悪い点: PostgreSQL の機能を使用していない
+CREATE TABLE ユーザー (
+    id 整数、
+    電子メール VARCHAR(255)、
     created_at TIMESTAMP
 );
 
--- ✅ GOOD: PostgreSQL-optimized schema
-CREATE TABLE users (
-    id BIGSERIAL PRIMARY KEY,
-    email CITEXT UNIQUE NOT NULL,  -- Case-insensitive email
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    metadata JSONB DEFAULT '{}',
-    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+-- ✅ 良い: PostgreSQL に最適化されたスキーマ
+CREATE TABLE ユーザー (
+    id BIGSERIAL 主キー、
+    電子メール CITEXT UNIQUE NOT NULL、 -- 大文字と小文字を区別しない電子メール
+    created_at TIMESTAMPTZ DEFAULT NOW()、
+    メタデータ JSONB DEFAULT '{}'、
+    CONSTRAINT valid_email CHECK (電子メール ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
 );
 
--- Add JSONB GIN index for metadata queries
+-- メタデータ クエリ用の JSONB GIN インデックスを追加
 CREATE INDEX idx_users_metadata ON users USING gin(metadata);
-```
-
-### Custom Types and Domains
-```sql
--- ❌ BAD: Using generic types for specific data
-CREATE TABLE transactions (
-    amount DECIMAL(10,2),
-    currency VARCHAR(3),
-    status VARCHAR(20)
+「」### カスタムタイプとドメイン```SQL
+-- ❌ 悪い点: 特定のデータにジェネリック型を使用する
+CREATE TABLE トランザクション (
+    金額 DECIMAL(10,2)、
+    通貨 VARCHAR(3)、
+    ステータス VARCHAR(20)
 );
 
--- ✅ GOOD: PostgreSQL custom types
-CREATE TYPE currency_code AS ENUM ('USD', 'EUR', 'GBP', 'JPY');
-CREATE TYPE transaction_status AS ENUM ('pending', 'completed', 'failed', 'cancelled');
-CREATE DOMAIN positive_amount AS DECIMAL(10,2) CHECK (VALUE > 0);
+-- ✅ 良い点: PostgreSQL のカスタム タイプ
+CREATE TYPE 通貨コード AS ENUM ('USD', 'EUR', 'GBP', 'JPY');
+CREATE TYPEtransaction_status AS ENUM ('保留中'、'完了'、'失敗'、'キャンセル');
+CREATE DOMAIN 正の量 AS DECIMAL(10,2) CHECK (VALUE > 0);
 
-CREATE TABLE transactions (
-    amount positive_amount NOT NULL,
-    currency currency_code NOT NULL,
-    status transaction_status DEFAULT 'pending'
+CREATE TABLE トランザクション (
+    金額positive_amount NOT NULL、
+    通貨通貨コードが NULL ではありません。
+    ステータスtransaction_status DEFAULT '保留中'
 );
-```
+「」## 🔍 PostgreSQL 固有のアンチパターン
 
-## 🔍 PostgreSQL-Specific Anti-Patterns
+### パフォーマンスのアンチパターン
+- **PostgreSQL 固有のインデックスの回避**: 適切なデータ型に GIN/GiST を使用しない
+- **JSONB の誤用**: JSONB を単純な文字列フィールドのように扱う
+- **配列演算子の無視**: 非効率的な配列演算の使用
+- **パーティション キーの選択が不適切**: PostgreSQL のパーティション分割が効果的に活用されていない
 
-### Performance Anti-Patterns
-- **Avoiding PostgreSQL-specific indexes**: Not using GIN/GiST for appropriate data types
-- **Misusing JSONB**: Treating JSONB like a simple string field
-- **Ignoring array operators**: Using inefficient array operations
-- **Poor partition key selection**: Not leveraging PostgreSQL partitioning effectively
+### スキーマ設計の問題
+- **ENUM 型を使用しない**: 制限された値セットには VARCHAR を使用する
+- **制約の無視**: データ検証のための CHECK 制約がありません
+- **間違ったデータ型**: TEXT または CITEXT の代わりに VARCHAR を使用しています
+- **JSONB 構造がありません**: 検証されていない構造化されていない JSONB
 
-### Schema Design Issues
-- **Not using ENUM types**: Using VARCHAR for limited value sets
-- **Ignoring constraints**: Missing CHECK constraints for data validation
-- **Wrong data types**: Using VARCHAR instead of TEXT or CITEXT
-- **Missing JSONB structure**: Unstructured JSONB without validation
+### 関数とトリガーの問題```SQL
+-- ❌ BAD: 非効率的なトリガー機能
+関数の作成または置換 update_modified_time()
+トリガーを $$ として返します
+始める
+    NEW.updated_at = NOW();  -- TIMESTAMPTZ を使用する必要があります
+    新しいものを返します。
+終わり;
+$$ 言語 plpgsql;
 
-### Function and Trigger Issues
-```sql
--- ❌ BAD: Inefficient trigger function
-CREATE OR REPLACE FUNCTION update_modified_time()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();  -- Should use TIMESTAMPTZ
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- ✅ GOOD: Optimized trigger function
-CREATE OR REPLACE FUNCTION update_modified_time()
-RETURNS TRIGGER AS $$
-BEGIN
+-- ✅ 良い: 最適化されたトリガー機能
+関数の作成または置換 update_modified_time()
+トリガーを $$ として返します
+始める
     NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+    新しいものを返します。
+終わり;
+$$ 言語 plpgsql;
 
--- Set trigger to fire only when needed
-CREATE TRIGGER update_modified_time_trigger
-    BEFORE UPDATE ON table_name
-    FOR EACH ROW
-    WHEN (OLD.* IS DISTINCT FROM NEW.*)
-    EXECUTE FUNCTION update_modified_time();
-```
+-- 必要な場合にのみトリガーを起動するように設定します。
+トリガーの作成 update_modified_time_trigger
+    table_name の更新前
+    行ごとに
+    いつ (古い.* は新しい.* と区別されます)
+    関数の実行 update_modified_time();
+「」## 📊 PostgreSQL 拡張機能の使用状況のレビュー
 
-## 📊 PostgreSQL Extension Usage Review
+### 拡張機能のベストプラクティス```SQL
+-- ✅ 作成する前に拡張機能が存在するかどうかを確認してください
+「uuid-ossp」が存在しない場合は拡張機能を作成します。
+「pgcrypto」が存在しない場合は拡張機能を作成します。
+「pg_trgm」が存在しない場合は拡張機能を作成します。
 
-### Extension Best Practices
-```sql
--- ✅ Check if extension exists before creating
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "pg_trgm";
-
--- ✅ Use extensions appropriately
--- UUID generation
+-- ✅ 拡張機能を適切に使用する
+-- UUID の生成
 SELECT uuid_generate_v4();
 
--- Password hashing
-SELECT crypt('password', gen_salt('bf'));
+-- パスワードのハッシュ化
+SELECT crypt('パスワード', gen_salt('bf'));
 
--- Fuzzy text matching
+-- ファジーテキストマッチング
 SELECT word_similarity('postgres', 'postgre');
-```
+「」## 🛡️ PostgreSQL セキュリティのレビュー
 
-## 🛡️ PostgreSQL Security Review
+### 行レベルセキュリティ (RLS)```SQL
+-- ✅ 良い点: RLS の実装
+ALTER TABLEsensitive_data 行レベルのセキュリティを有効にする;
 
-### Row Level Security (RLS)
-```sql
--- ✅ GOOD: Implementing RLS
-ALTER TABLE sensitive_data ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY user_data_policy ON sensitive_data
-    FOR ALL TO application_role
+CREATE POLICY user_data_policy ONsensitive_data
+    application_role に対するすべての者
     USING (user_id = current_setting('app.current_user_id')::INTEGER);
-```
+「」### 権限管理```SQL
+-- ❌ 悪い点: 権限が広すぎる
+スキーマ public 内のすべてのテーブルに対するすべての権限を app_user に付与します。
 
-### Privilege Management
-```sql
--- ❌ BAD: Overly broad permissions
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_user;
+-- ✅ 良い点: きめ細かな権限
+app_user に specific_table の SELECT、INSERT、UPDATE を許可します。
+シーケンス specific_table_id_seq の使用を app_user に許可します。
+「」## 🎯 PostgreSQL コード品質チェックリスト
 
--- ✅ GOOD: Granular permissions
-GRANT SELECT, INSERT, UPDATE ON specific_table TO app_user;
-GRANT USAGE ON SEQUENCE specific_table_id_seq TO app_user;
-```
+### スキーマ設計
+- [ ] 適切な PostgreSQL データ型 (CITEXT、JSONB、配列) の使用
+- [ ] 制約された値に ENUM タイプを利用する
+- [ ] 適切な CHECK 制約の実装
+- [ ] TIMESTAMP の代わりに TIMESTAMPTZ を使用する
+- [ ] 再利用可能な制約のためのカスタム ドメインの定義
 
-## 🎯 PostgreSQL Code Quality Checklist
+### パフォーマンスに関する考慮事項
+- [ ] 適切なインデックス タイプ (JSONB/配列の場合は GIN、範囲の場合は GiST)
+- [ ] 包含演算子 (@>、?) を使用した JSONB クエリ
+- [ ] PostgreSQL 固有の演算子を使用した配列操作
+- [ ] ウィンドウ関数と CTE の適切な使用
+- [ ] PostgreSQL 固有の機能の効率的な使用
 
-### Schema Design
-- [ ] Using appropriate PostgreSQL data types (CITEXT, JSONB, arrays)
-- [ ] Leveraging ENUM types for constrained values
-- [ ] Implementing proper CHECK constraints
-- [ ] Using TIMESTAMPTZ instead of TIMESTAMP
-- [ ] Defining custom domains for reusable constraints
+### PostgreSQL の機能の利用
+- [ ] 必要に応じて拡張機能を使用する
+- [ ] PL/pgSQL にストアド プロシージャを実装すると効果的です
+- [ ] PostgreSQL の高度な SQL 機能の活用
+- [ ] PostgreSQL 固有の最適化手法の使用
+- [ ] 関数での適切なエラー処理の実装
 
-### Performance Considerations
-- [ ] Appropriate index types (GIN for JSONB/arrays, GiST for ranges)
-- [ ] JSONB queries using containment operators (@>, ?)
-- [ ] Array operations using PostgreSQL-specific operators
-- [ ] Proper use of window functions and CTEs
-- [ ] Efficient use of PostgreSQL-specific functions
+### セキュリティとコンプライアンス
+- [ ] 必要に応じて行レベル セキュリティ (RLS) を実装
+- [ ] 適切な役割と権限の管理
+- [ ] PostgreSQL の組み込み暗号化関数の使用
+- [ ] PostgreSQL 機能を使用した監査証跡の実装
 
-### PostgreSQL Features Utilization
-- [ ] Using extensions where appropriate
-- [ ] Implementing stored procedures in PL/pgSQL when beneficial
-- [ ] Leveraging PostgreSQL's advanced SQL features
-- [ ] Using PostgreSQL-specific optimization techniques
-- [ ] Implementing proper error handling in functions
+## 📝 PostgreSQL 固有のレビュー ガイドライン
 
-### Security and Compliance
-- [ ] Row Level Security (RLS) implementation where needed
-- [ ] Proper role and privilege management
-- [ ] Using PostgreSQL's built-in encryption functions
-- [ ] Implementing audit trails with PostgreSQL features
+1. **データ型の最適化**: PostgreSQL 固有の型が適切に使用されていることを確認します。
+2. **インデックス戦略**: インデックスの種類を確認し、PostgreSQL 固有のインデックスが確実に使用されるようにする
+3. **JSONB 構造**: JSONB スキーマ設計とクエリ パターンを検証する
+4. **関数の品質**: PL/pgSQL 関数の効率性とベスト プラクティスを確認します。
+5. **拡張機能の使用方法**: PostgreSQL 拡張機能の適切な使用を確認します。
+6. **パフォーマンス機能**: PostgreSQL の高度な機能の使用状況を確認する
+7. **セキュリティの実装**: PostgreSQL 固有のセキュリティ機能を確認する
 
-## 📝 PostgreSQL-Specific Review Guidelines
-
-1. **Data Type Optimization**: Ensure PostgreSQL-specific types are used appropriately
-2. **Index Strategy**: Review index types and ensure PostgreSQL-specific indexes are utilized
-3. **JSONB Structure**: Validate JSONB schema design and query patterns
-4. **Function Quality**: Review PL/pgSQL functions for efficiency and best practices
-5. **Extension Usage**: Verify appropriate use of PostgreSQL extensions
-6. **Performance Features**: Check utilization of PostgreSQL's advanced features
-7. **Security Implementation**: Review PostgreSQL-specific security features
-
-Focus on PostgreSQL's unique capabilities and ensure the code leverages what makes PostgreSQL special rather than treating it as a generic SQL database.
+PostgreSQL の独自の機能に焦点を当て、コードが PostgreSQL を汎用 SQL データベースとして扱うのではなく、PostgreSQL の特別な点を活用していることを確認します。

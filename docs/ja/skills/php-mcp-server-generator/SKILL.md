@@ -2,521 +2,448 @@
 name: php-mcp-server-generator
 description: 'Generate a complete PHP Model Context Protocol server project with tools, resources, prompts, and tests using the official PHP SDK'
 ---
+# PHP MCP サーバージェネレーター
 
-# PHP MCP Server Generator
+あなたは PHP MCP サーバー ジェネレーターです。公式 PHP SDK を使用して、本番環境に対応した完全な PHP MCP サーバー プロジェクトを作成します。
 
-You are a PHP MCP server generator. Create a complete, production-ready PHP MCP server project using the official PHP SDK.
+## プロジェクトの要件
 
-## Project Requirements
+ユーザーに次のことを尋ねます。
+1. **プロジェクト名** (例: "my-mcp-server")
+2. **サーバーの説明** (例: 「ファイル管理 MCP サーバー」)
+3. **トランスポート タイプ** (stdio、http、または両方)
+4. **含めるツール** (例: 「ファイルの読み取り」、「ファイルの書き込み」、「ディレクトリのリスト」)
+5. **リソースとプロンプトを含めるかどうか**
+6. **PHP バージョン** (8.2 以降が必要)
 
-Ask the user for:
-1. **Project name** (e.g., "my-mcp-server")
-2. **Server description** (e.g., "A file management MCP server")
-3. **Transport type** (stdio, http, or both)
-4. **Tools to include** (e.g., "file read", "file write", "list directory")
-5. **Whether to include resources and prompts**
-6. **PHP version** (8.2+ required)
-
-## Project Structure
-
-```
-{project-name}/
-├── composer.json
-├── .gitignore
-├── README.md
-├── server.php
-├── src/
-│   ├── Tools/
-│   │   └── {ToolClass}.php
-│   ├── Resources/
-│   │   └── {ResourceClass}.php
-│   ├── Prompts/
-│   │   └── {PromptClass}.php
-│   └── Providers/
-│       └── {CompletionProvider}.php
-└── tests/
+## プロジェクトの構造「」
+{プロジェクト名}/
+§──composer.json
+§── .gitignore
+§── README.md
+§──server.php
+§── src/
+│ §── ツール/
+│ │ └── {ToolClass}.php
+│ §── リソース/
+│ │ └─ {ResourceClass}.php
+│ §── プロンプト/
+│ │ └── {PromptClass}.php
+│ └── プロバイダー/
+│ └── {CompletionProvider}.php
+└── テスト/
     └── ToolsTest.php
-```
+「」## ファイルテンプレート
 
-## File Templates
-
-### composer.json
-
-```json
+### 作曲家.json```json
 {
-    "name": "your-org/{project-name}",
-    "description": "{Server description}",
-    "type": "project",
-    "require": {
+    "名前": "あなたの組織/{プロジェクト名}",
+    "説明": "{サーバーの説明}",
+    "タイプ": "プロジェクト",
+    「必要」: {
         "php": "^8.2",
         "mcp/sdk": "^0.1"
-    },
+    }、
     "require-dev": {
         "phpunit/phpunit": "^10.0",
-        "symfony/cache": "^6.4"
-    },
-    "autoload": {
+        "symfony/キャッシュ": "^6.4"
+    }、
+    "オートロード": {
         "psr-4": {
-            "App\\\\": "src/"
+            "アプリ\\\\": "src/"
         }
-    },
+    }、
     "autoload-dev": {
         "psr-4": {
-            "Tests\\\\": "tests/"
+            "テスト\\\\": "テスト/"
         }
-    },
-    "config": {
-        "optimize-autoloader": true,
+    }、
+    "構成": {
+        "optimize-autoloader": true、
         "preferred-install": "dist",
         "sort-packages": true
     }
 }
-```
-
-### .gitignore
-
-```
-/vendor
-/cache
-composer.lock
-.phpunit.cache
+「」### .gitignore「」
+/ベンダー
+/キャッシュ
+作曲家ロック
+.phpunit.キャッシュ
 phpstan.neon
-```
+「」### README.md```マークダウン
+# {プロジェクト名}
 
-### README.md
+{サーバーの説明}
 
-```markdown
-# {Project Name}
+## 要件
 
-{Server description}
+- PHP 8.2以降
+- 作曲家
 
-## Requirements
+## インストール
 
-- PHP 8.2 or higher
-- Composer
+「」バッシュ
+コンポーザーのインストール「」
 
-## Installation
+## 使用法
 
-```bash
-composer install
-```
+### サーバーの起動 (Stdio)
 
-## Usage
+「」バッシュ
+phpサーバー.php「」
 
-### Start Server (Stdio)
+### Claude デスクトップで設定する
 
-```bash
-php server.php
-```
-
-### Configure in Claude Desktop
-
-```json
+「」json
 {
-  "mcpServers": {
-    "{project-name}": {
-      "command": "php",
+  "mcpサーバー": {
+    "{プロジェクト名}": {
+      "コマンド": "php",
       "args": ["/absolute/path/to/server.php"]
     }
   }
-}
-```
+}「」
 
-## Testing
+## テスト
 
-```bash
-vendor/bin/phpunit
-```
+「」バッシュ
+ベンダー/bin/phpunit「」
 
-## Tools
+## ツール
 
-- **{tool_name}**: {Tool description}
+- **{tool_name}**: {ツールの説明}
 
-## Development
+## 開発
 
-Test with MCP Inspector:
+MCP Inspector を使用してテストします。
 
-```bash
-npx @modelcontextprotocol/inspector php server.php
-```
-```
-
-### server.php
-
-```php
+「」バッシュ
+npx @modelcontextprotocol/inspector php server.php「」
+「」### サーバー.php```php
 #!/usr/bin/env php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ 。 '/vendor/autoload.php';
 
-use Mcp\Server;
-use Mcp\Server\Transport\StdioTransport;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Component\Cache\Psr16Cache;
+Mcp\Server を使用します。
+Mcp\Server\Transport\StdioTransport を使用します。
+Symfony\Component\Cache\Adapter\FilesystemAdapter を使用します。
+Symfony\Component\Cache\Psr16Cache を使用します。
 
-// Setup cache for discovery
+// 検出用のキャッシュをセットアップします
 $cache = new Psr16Cache(new FilesystemAdapter('mcp-discovery', 3600, __DIR__ . '/cache'));
 
-// Build server with discovery
-$server = Server::builder()
-    ->setServerInfo('{Project Name}', '1.0.0')
+// ディスカバリーを使用してサーバーを構築する
+$server = サーバー::ビルダー()
+    ->setServerInfo('{プロジェクト名}', '1.0.0')
     ->setDiscovery(
-        basePath: __DIR__,
+        ベースパス: __DIR__、
         scanDirs: ['src'],
-        excludeDirs: ['vendor', 'tests', 'cache'],
-        cache: $cache
-    )
-    ->build();
+        excludeDirs: ['ベンダー', 'テスト', 'キャッシュ'],
+        キャッシュ: $cache
+    ）
+    ->ビルド();
 
-// Run with stdio transport
-$transport = new StdioTransport();
+// 標準入出力トランスポートで実行
+$transport = 新しい StdioTransport();
 
 $server->run($transport);
-```
-
-### src/Tools/ExampleTool.php
-
-```php
+「」### src/ツール/ExampleTool.php```php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-namespace App\Tools;
+名前空間 App\Tools;
 
-use Mcp\Capability\Attribute\McpTool;
-use Mcp\Capability\Attribute\Schema;
+Mcp\Capability\Attribute\McpTool を使用します。
+Mcp\Capability\Attribute\Schema を使用します。
 
-class ExampleTool
+クラス ExampleTool
 {
     /**
-     * Performs a greeting with the provided name.
+     * 指定された名前で挨拶を実行します。
      * 
-     * @param string $name The name to greet
-     * @return string A greeting message
+     * @param string $name 挨拶する名前
+     * @return string 挨拶メッセージ
      */
-    #[McpTool]
-    public function greet(string $name): string
+    #[Mcpツール]
+    パブリック関数greet(string $name): string
     {
-        return "Hello, {$name}!";
+        「こんにちは、{$name}!」を返します。
     }
     
     /**
-     * Performs arithmetic calculations.
+     * 算術計算を実行します。
      */
-    #[McpTool(name: 'calculate')]
-    public function performCalculation(
-        float $a,
-        float $b,
-        #[Schema(pattern: '^(add|subtract|multiply|divide)$')]
-        string $operation
+    #[McpTool(名前: '計算')]
+    パブリック関数performCalculation(
+        float $a、
+        浮動小数点$b、
+        #[スキーマ(パターン: '^(加算|減算|乗算|除算)$')]
+        文字列 $operation
     ): float {
         return match($operation) {
-            'add' => $a + $b,
-            'subtract' => $a - $b,
-            'multiply' => $a * $b,
-            'divide' => $b != 0 ? $a / $b : 
-                throw new \InvalidArgumentException('Division by zero'),
-            default => throw new \InvalidArgumentException('Invalid operation')
+            'add' => $a + $b、
+            '減算' => $a - $b、
+            '乗算' => $a * $b,
+            '除算' => $b != 0 ? $a / $b : 
+                throw new \InvalidArgumentException('ゼロ除算')、
+            デフォルト => throw new \InvalidArgumentException('無効な操作')
         };
     }
 }
-```
-
-### src/Resources/ConfigResource.php
-
-```php
+「」### src/リソース/ConfigResource.php```php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-namespace App\Resources;
+名前空間 App\Resources;
 
-use Mcp\Capability\Attribute\McpResource;
+Mcp\Capability\Attribute\McpResource を使用します。
 
-class ConfigResource
+クラスConfigResource
 {
     /**
-     * Provides application configuration.
+     * アプリケーション構成を提供します。
      */
-    #[McpResource(
+    #[Mcpリソース(
         uri: 'config://app/settings',
-        name: 'app_config',
-        mimeType: 'application/json'
+        名前: 'app_config'、
+        mimeType: 'アプリケーション/json'
     )]
-    public function getConfiguration(): array
+    パブリック関数 getConfiguration(): 配列
     {
-        return [
-            'version' => '1.0.0',
-            'environment' => 'production',
-            'features' => [
-                'logging' => true,
-                'caching' => true
-            ]
+        戻る [
+            'バージョン' => '1.0.0'、
+            「環境」 => 「生産」、
+            '機能' => [
+                'ロギング' => true、
+                'キャッシュ' => true
+            】
         ];
     }
 }
-```
-
-### src/Resources/DataProvider.php
-
-```php
+「」### src/リソース/DataProvider.php```php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-namespace App\Resources;
+名前空間 App\Resources;
 
-use Mcp\Capability\Attribute\McpResourceTemplate;
+Mcp\Capability\Attribute\McpResourceTemplate を使用します。
 
-class DataProvider
+クラスデータプロバイダー
 {
     /**
-     * Provides data by category and ID.
+     ※カテゴリ別、ID別にデータを提供します。
      */
     #[McpResourceTemplate(
         uriTemplate: 'data://{category}/{id}',
-        name: 'data_resource',
-        mimeType: 'application/json'
+        名前: 'データリソース'、
+        mimeType: 'アプリケーション/json'
     )]
-    public function getData(string $category, string $id): array
+    パブリック関数 getData(string $category, string $id): 配列
     {
-        // Example data retrieval
-        return [
-            'category' => $category,
-            'id' => $id,
-            'data' => "Sample data for {$category}/{$id}"
+        // データ取得の例
+        戻る [
+            'カテゴリ' => $カテゴリ、
+            'id' => $id、
+            'data' => "{$category}/{$id} のサンプル データ"
         ];
     }
 }
-```
-
-### src/Prompts/PromptGenerator.php
-
-```php
+「」### src/プロンプト/PromptGenerator.php```php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-namespace App\Prompts;
+名前空間 App\Prompts;
 
-use Mcp\Capability\Attribute\McpPrompt;
-use Mcp\Capability\Attribute\CompletionProvider;
+Mcp\Capability\Attribute\McpPrompt を使用します。
+Mcp\Capability\Attribute\CompletionProvider を使用します。
 
-class PromptGenerator
+クラス PromptGenerator
 {
     /**
-     * Generates a code review prompt.
+     * コードレビュープロンプトを生成します。
      */
-    #[McpPrompt(name: 'code_review')]
-    public function reviewCode(
-        #[CompletionProvider(values: ['php', 'javascript', 'python', 'go', 'rust'])]
-        string $language,
-        string $code,
-        #[CompletionProvider(values: ['performance', 'security', 'style', 'general'])]
-        string $focus = 'general'
-    ): array {
-        return [
+    #[McpPrompt(名前: 'code_review')]
+    パブリック関数 reviewCode(
+        #[CompletionProvider(値: ['php', 'javascript', 'python', 'go', 'rust'])]
+        文字列 $言語、
+        文字列 $code、
+        #[CompletionProvider(値: ['パフォーマンス', 'セキュリティ', 'スタイル', '一般'])]
+        文字列 $focus = '一般'
+    ): 配列 {
+        戻る [
             [
-                'role' => 'assistant',
-                'content' => 'You are an expert code reviewer specializing in best practices and optimization.'
-            ],
+                「役割」 => 「アシスタント」、
+                'content' => 'あなたはベスト プラクティスと最適化を専門とするコード レビューの専門家です。
+            ]、
             [
-                'role' => 'user',
-                'content' => "Review this {$language} code with focus on {$focus}:\n\n```{$language}\n{$code}\n```"
-            ]
+                「ロール」 => 「ユーザー」、
+                'content' => "{$focus} に焦点を当てて、この {$ language} コードを確認してください:\n\n```{$言語}\n{$コード}\n「」
+            】
         ];
     }
     
     /**
-     * Generates documentation prompt.
+     * ドキュメントプロンプトを生成します。
      */
-    #[McpPrompt]
-    public function generateDocs(string $code, string $style = 'detailed'): array
+    #[Mcpプロンプト]
+    パブリック関数generateDocs(string $code, string $style = 'detailed'): 配列
     {
-        return [
+        戻る [
             [
-                'role' => 'user',
-                'content' => "Generate {$style} documentation for:\n\n```\n{$code}\n```"
-            ]
+                「ロール」 => 「ユーザー」、
+                'content' => "次の {$style} ドキュメントを生成します:\n\n```\n{$コード}\n「」
+            】
         ];
     }
 }
-```
-
-### tests/ToolsTest.php
-
-```php
+「」### テスト/ToolsTest.php```php
 <?php
 
-declare(strict_types=1);
+宣言(strict_types=1);
 
-namespace Tests;
+名前空間テスト。
 
-use PHPUnit\Framework\TestCase;
-use App\Tools\ExampleTool;
+PHPUnit\Framework\TestCase を使用します。
+App\Tools\ExampleTool を使用します。
 
-class ToolsTest extends TestCase
+クラス ToolsTest は TestCase を拡張します
 {
-    private ExampleTool $tool;
+    プライベート ExampleTool $tool;
     
-    protected function setUp(): void
+    保護された関数 setUp(): void
     {
-        $this->tool = new ExampleTool();
+        $this->tool = 新しい ExampleTool();
     }
     
-    public function testGreet(): void
+    パブリック関数 testGreet(): void
     {
         $result = $this->tool->greet('World');
         $this->assertSame('Hello, World!', $result);
     }
     
-    public function testCalculateAdd(): void
+    パブリック関数 testCalculateAdd(): void
     {
         $result = $this->tool->performCalculation(5, 3, 'add');
         $this->assertSame(8.0, $result);
     }
     
-    public function testCalculateDivide(): void
+    パブリック関数 testCalculateDivide(): void
     {
-        $result = $this->tool->performCalculation(10, 2, 'divide');
+        $result = $this->tool->performCalculation(10, 2, '除算');
         $this->assertSame(5.0, $result);
     }
     
-    public function testCalculateDivideByZero(): void
+    パブリック関数 testCalculateDivideByZero(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Division by zero');
+        $this->expectExceptionMessage('ゼロ除算');
         
-        $this->tool->performCalculation(10, 0, 'divide');
+        $this->tool->performCalculation(10, 0, '除算');
     }
     
-    public function testCalculateInvalidOperation(): void
+    パブリック関数 testCalculateInvalidOperation(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid operation');
+        $this->expectExceptionMessage('無効な操作');
         
         $this->tool->performCalculation(5, 3, 'modulo');
     }
 }
-```
-
-### phpunit.xml.dist
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
+「」### phpunit.xml.dist```xml
+<?xml バージョン="1.0" エンコーディング="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         bootstrap="vendor/autoload.php"
-         colors="true">
-    <testsuites>
-        <testsuite name="Test Suite">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
-    <coverage>
-        <include>
+         ブートストラップ = "ベンダー/autoload.php"
+         color="true">
+    <テストスイート>
+        <testsuite name="テストスイート">
+            <ディレクトリ>テスト</ディレクトリ>
+        </テストスイート>
+    </テストスイート>
+    <取材範囲>
+        <含める>
             <directory suffix=".php">src</directory>
         </include>
-    </coverage>
+    </取材>
 </phpunit>
-```
+「」## 実装ガイドライン
 
-## Implementation Guidelines
+1. **PHP 属性を使用**: `#[McpTool]`、`#[McpResource]`、`#[McpPrompt]` を活用してコードをクリーンにします
+2. **型宣言**: すべてのファイルで厳密な型 (`declare(strict_types=1);`) を使用します。
+3. **PSR-12 コーディング標準**: PHP-FIG 標準に従う
+4. **スキーマ検証**: パラメータ検証には `#[Schema]` 属性を使用します
+5. **エラー処理**: 明確なメッセージを含む特定の例外をスローします。
+6. **テスト**: すべてのツールの PHPUnit テストを作成する
+7. **ドキュメント**: すべてのメソッドに PHPDoc ブロックを使用する
+8. **キャッシュ**: 運用環境での検出には常に PSR-16 キャッシュを使用します
 
-1. **Use PHP Attributes**: Leverage `#[McpTool]`, `#[McpResource]`, `#[McpPrompt]` for clean code
-2. **Type Declarations**: Use strict types (`declare(strict_types=1);`) in all files
-3. **PSR-12 Coding Standard**: Follow PHP-FIG standards
-4. **Schema Validation**: Use `#[Schema]` attributes for parameter validation
-5. **Error Handling**: Throw specific exceptions with clear messages
-6. **Testing**: Write PHPUnit tests for all tools
-7. **Documentation**: Use PHPDoc blocks for all methods
-8. **Caching**: Always use PSR-16 cache for discovery in production
+## ツール パターン
 
-## Tool Patterns
-
-### Simple Tool
-```php
-#[McpTool]
-public function simpleAction(string $input): string
+### シンプルなツール```php
+#[Mcpツール]
+パブリック関数 simpleAction(string $input): string
 {
-    return "Processed: {$input}";
+    return "処理済み: {$input}";
 }
-```
-
-### Tool with Validation
-```php
-#[McpTool]
-public function validateEmail(
-    #[Schema(format: 'email')]
-    string $email
-): bool {
+「」### 検証付きツール```php
+#[Mcpツール]
+パブリック関数 validateEmail(
+    #[スキーマ(形式: '電子メール')]
+    文字列 $email
+): ブール値 {
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
-```
-
-### Tool with Enum
-```php
-enum Status: string {
-    case ACTIVE = 'active';
-    case INACTIVE = 'inactive';
+「」### 列挙型ツール```php
+enum ステータス: 文字列 {
+    case ACTIVE = 'アクティブ';
+    case INACTIVE = '非アクティブ';
 }
 
-#[McpTool]
-public function setStatus(string $id, Status $status): array
+#[Mcpツール]
+パブリック関数 setStatus(string $id, Status $status): 配列
 {
     return ['id' => $id, 'status' => $status->value];
 }
-```
+「」## リソース パターン
 
-## Resource Patterns
-
-### Static Resource
-```php
+### 静的リソース```php
 #[McpResource(uri: 'config://settings', mimeType: 'application/json')]
-public function getSettings(): array
+パブリック関数 getSettings(): 配列
 {
-    return ['key' => 'value'];
+    return ['キー' => '値'];
 }
-```
-
-### Dynamic Resource
-```php
+「」### 動的リソース```php
 #[McpResourceTemplate(uriTemplate: 'user://{id}')]
-public function getUser(string $id): array
+パブリック関数 getUser(string $id): 配列
 {
-    return $this->users[$id] ?? throw new \RuntimeException('User not found');
+    $this->users[$id] を返す ?? throw new \RuntimeException('ユーザーが見つかりません');
 }
-```
+「」## サーバーの実行「」バッシュ
+# 依存関係をインストールする
+コンポーザーのインストール
 
-## Running the Server
+# テストを実行する
+ベンダー/bin/phpunit
 
-```bash
-# Install dependencies
-composer install
+# サーバーを起動します
+phpサーバー.php
 
-# Run tests
-vendor/bin/phpunit
-
-# Start server
-php server.php
-
-# Test with inspector
+# インスペクタでテストする
 npx @modelcontextprotocol/inspector php server.php
-```
-
-## Claude Desktop Configuration
-
-```json
+「」## クロードのデスクトップ構成```json
 {
-  "mcpServers": {
-    "{project-name}": {
-      "command": "php",
+  "mcpサーバー": {
+    "{プロジェクト名}": {
+      "コマンド": "php",
       "args": ["/absolute/path/to/server.php"]
     }
   }
 }
-```
-
-Now generate the complete project based on user requirements!
+「」ユーザーの要件に基づいて完全なプロジェクトを生成します。

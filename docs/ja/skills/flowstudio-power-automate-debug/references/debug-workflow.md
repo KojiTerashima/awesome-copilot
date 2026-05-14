@@ -1,12 +1,10 @@
-# FlowStudio MCP — Debug Workflow
+# FlowStudio MCP — デバッグワークフロー
 
-End-to-end decision tree for diagnosing Power Automate flow failures.
+Power Automate フローの障害を診断するためのエンドツーエンドのデシジョン ツリー。
 
 ---
 
-## Top-Level Decision Tree
-
-```
+## トップレベルの意思決定ツリー```
 Flow is failing
 │
 ├── Flow never starts / no runs appear
@@ -33,13 +31,9 @@ Flow is failing
 └── Flow Succeeds but output is wrong
     └── ► Inspect intermediate actions with get_live_flow_run_action_outputs
         └── See: Data Quality Workflow below
-```
+```---
 
----
-
-## Expression Error Workflow
-
-```
+## 式エラーのワークフロー```
 InvalidTemplate error
 │
 ├── 1. Read error.message — identifies the action name and function
@@ -55,13 +49,9 @@ InvalidTemplate error
 │       └── Wrong field name → correct the key (case-sensitive)
 │
 └── 4. Apply fix with update_live_flow, then resubmit
-```
+```---
 
----
-
-## HTTP Action Workflow
-
-```
+## HTTP アクションのワークフロー```
 ActionFailed on HTTP action
 │
 ├── 1. get_live_flow_run_action_outputs on the HTTP action
@@ -86,13 +76,9 @@ ActionFailed on HTTP action
 └── statusCode = 500 / timeout
     └── ► Target system error; retry policy may help
         Add: "retryPolicy": {"type": "Fixed", "count": 3, "interval": "PT10S"}
-```
+```---
 
----
-
-## Data Quality Workflow
-
-```
+## データ品質ワークフロー```
 Flow succeeds but output data is wrong
 │
 ├── 1. Identify the first "wrong" output — which action produces it?
@@ -115,15 +101,11 @@ Flow succeeds but output data is wrong
 │
 └── Date/time values wrong timezone
     └── Use convertTimeZone() — utcNow() is always UTC
-```
+```---
 
----
+## ウォークバック分析 (不明な障害)
 
-## Walk-Back Analysis (Unknown Failure)
-
-When the error message doesn't clearly name a root cause:
-
-```python
+エラー メッセージに根本原因が明確に示されていない場合:```python
 # 1. Get all action names from definition
 defn = mcp("get_live_flow", environmentName=ENV, flowName=FLOW_ID)
 actions = list(defn["properties"]["definition"]["actions"].keys())
@@ -140,18 +122,16 @@ for action in actions:
 
 # 3. Find the boundary between Succeeded and Failed/Skipped
 # The first Failed action is likely the root cause (unless skipped by design)
-```
-
-Actions inside Foreach / Condition branches may appear nested —
-check the parent action first to confirm the branch ran at all.
+```Foreach / Condition ブランチ内のアクションが入れ子になっているように見える場合があります -
+まず親アクションをチェックして、ブランチが実際に実行されたことを確認してください。
 
 ---
 
-## Post-Fix Verification Checklist
+## 修正後の検証チェックリスト
 
-1. `update_live_flow` returns `error: null` — definition accepted  
-2. `resubmit_live_flow_run` confirms new run started  
-3. Wait for run completion (poll `get_live_flow_runs` every 15 s)  
-4. Confirm new run `status = "Succeeded"`  
-5. If flow has downstream consumers (child flows, emails, SharePoint writes),
-   spot-check those too
+1. `update_live_flow` は `error: null` を返します — 定義は受け入れられます  
+2. `resubmit_live_flow_run` は、新しい実行が開始されたことを確認します  
+3. 実行が完了するまで待ちます (`get_live_flow_runs` を 15 秒ごとにポーリングします)  
+4. 新しい実行を確認 `status = "Succeeded"`  
+5. フローに下流のコンシューマー (子フロー、電子メール、SharePoint 書き込み) がある場合、
+   それらもスポットチェックしてください

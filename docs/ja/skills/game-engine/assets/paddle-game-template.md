@@ -1,24 +1,22 @@
-# Paddle Game Template (2D Breakout)
+# パドルゲームテンプレート (2D ブレイクアウト)
 
-A complete step-by-step guide for building a 2D Breakout game with pure JavaScript and the HTML5 Canvas API. This template walks through every stage of development, from setting up the canvas to implementing a lives system and polished game loop.
+純粋な JavaScript と HTML5 Canvas API を使用して 2D ブレークアウト ゲームを構築するための完全なステップバイステップ ガイド。このテンプレートは、キャンバスのセットアップからライフ システムと洗練されたゲーム ループの実装に至るまで、開発のあらゆる段階を順を追って説明します。
 
-**What you will build:** A classic breakout/paddle game where the player controls a paddle to bounce a ball and destroy a field of bricks, with score tracking, win/lose conditions, keyboard and mouse controls, and a lives system.
+**構築するもの:** プレイヤーがパドルを操作してボールを跳ね返し、レンガのフィールドを破壊する古典的なブレイクアウト/パドル ゲーム。スコア追跡、勝敗条件、キーボードとマウスのコントロール、ライフ システムが備わっています。
 
-**Prerequisites:** Basic to intermediate JavaScript knowledge and familiarity with HTML.
+**前提条件:** 基本から中級の JavaScript の知識と HTML に精通していること。
 
-**Source:** Based on the [MDN 2D Breakout Game Tutorial](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript).
+**出典:** [MDN 2D ブレイクアウト ゲーム チュートリアル](https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript) に基づいています。
 
 ---
 
-## Step 1: Create the Canvas and Draw on It
+## ステップ 1: キャンバスを作成し、その上に描画します
 
-The first step is setting up the HTML document with a `<canvas>` element and learning to draw basic shapes using the 2D rendering context.
+最初のステップは、`<canvas>` 要素を使用して HTML ドキュメントを設定し、2D レンダリング コンテキストを使用して基本的な形状を描画する方法を学習することです。
 
-### HTML Structure
+### HTML 構造
 
-Create your base HTML file with an embedded canvas element:
-
-```html
+Canvas 要素が埋め込まれたベース HTML ファイルを作成します。```html
 <!doctype html>
 <html lang="en-US">
   <head>
@@ -44,86 +42,66 @@ Create your base HTML file with an embedded canvas element:
     </script>
   </body>
 </html>
-```
+```### キャンバス参照と 2D コンテキストの取得
 
-### Getting the Canvas Reference and 2D Context
-
-The canvas element provides a drawing surface. You access it through a 2D rendering context:
-
-```javascript
+Canvas 要素は描画面を提供します。 2D レンダリング コンテキストを通じてアクセスします。```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
-```
+```- `canvas` は、HTML `<canvas>` 要素への参照です。
+- `ctx` は、すべての描画メソッドを提供する 2D レンダリング コンテキスト オブジェクトです。
 
-- `canvas` is a reference to the HTML `<canvas>` element.
-- `ctx` is the 2D rendering context object, which provides all drawing methods.
+### 塗りつぶされた長方形の描画
 
-### Drawing a Filled Rectangle
-
-Use `rect()` to define a rectangle and `fill()` to render it:
-
-```javascript
+`rect()` を使用して四角形を定義し、 `fill()` を使用してそれをレンダリングします。```javascript
 ctx.beginPath();
 ctx.rect(20, 40, 50, 50);
 ctx.fillStyle = "red";
 ctx.fill();
 ctx.closePath();
-```
+```- 最初の 2 つのパラメータ (`20, 40`) は、左上隅の座標を設定します。
+- 2 番目の 2 つのパラメータ (`50, 50`) は、幅と高さを設定します。
+- `fillStyle` は塗りつぶしの色を設定します。
+- `fill()` は、形状を塗りつぶしとしてレンダリングします。
 
-- The first two parameters (`20, 40`) set the top-left corner coordinates.
-- The second two parameters (`50, 50`) set the width and height.
-- `fillStyle` sets the fill color.
-- `fill()` renders the shape as a solid fill.
+### 円を描く
 
-### Drawing a Circle
-
-Use `arc()` to define a circle:
-
-```javascript
+`arc()` を使用して円を定義します。```javascript
 ctx.beginPath();
 ctx.arc(240, 160, 20, 0, Math.PI * 2, false);
 ctx.fillStyle = "green";
 ctx.fill();
 ctx.closePath();
-```
+```- `240, 160` -- 中心の x、y 座標。
+- `20` -- 半径。
+- `0` -- 開始角度 (ラジアン)。
+- `Math.PI * 2` -- 終了角度 (全円)。
+- `false` -- 時計回りに描画します。
 
-- `240, 160` -- center x, y coordinates.
-- `20` -- radius.
-- `0` -- start angle (radians).
-- `Math.PI * 2` -- end angle (full circle).
-- `false` -- draw clockwise.
+### 線付き長方形の描画 (輪郭のみ)
 
-### Drawing a Stroked Rectangle (Outline Only)
-
-Use `stroke()` instead of `fill()` for outlines, and `strokeStyle` for outline color:
-
-```javascript
+アウトラインには `fill()` の代わりに `stroke()` を使用し、アウトラインの色には `strokeStyle` を使用します。```javascript
 ctx.beginPath();
 ctx.rect(160, 10, 100, 40);
 ctx.strokeStyle = "rgb(0 0 255 / 50%)";
 ctx.stroke();
 ctx.closePath();
-```
+```- 50% のアルファ透明度を持つ RGB カラーを使用します。
+- `stroke()` は輪郭のみを描画し、塗りつぶしは描画しません。
 
-- Uses an RGB color with 50% alpha transparency.
-- `stroke()` draws only the outline, not a solid fill.
+### 主要なメソッドのリファレンス
 
-### Key Methods Reference
+|方法 |目的 |
+|--------|--------|
+| `beginPath()` |新しい描画パスを開始する |
+| `closePath()` |現在のパスを閉じる |
+| `rect(x, y, width, height)` |長方形を定義する |
+| `arc(x, y, radius, startAngle, endAngle, counterclockwise)` |円または円弧を定義する |
+| `fillStyle` |塗りつぶしの色を設定する |
+| `fill()` |塗りつぶし色 | で形状を塗りつぶします。
+| `strokeStyle` |ストローク（輪郭）の色を設定 |
+| `stroke()` |図形の輪郭を描く |
 
-| Method | Purpose |
-|--------|---------|
-| `beginPath()` | Start a new drawing path |
-| `closePath()` | Close the current path |
-| `rect(x, y, width, height)` | Define a rectangle |
-| `arc(x, y, radius, startAngle, endAngle, counterclockwise)` | Define a circle or arc |
-| `fillStyle` | Set the fill color |
-| `fill()` | Fill the shape with the fill color |
-| `strokeStyle` | Set the stroke (outline) color |
-| `stroke()` | Draw an outline of the shape |
-
-### Complete Code for Step 1
-
-```html
+### ステップ 1 の完全なコード```html
 <canvas id="myCanvas" width="480" height="320"></canvas>
 
 <style>
@@ -156,84 +134,56 @@ ctx.closePath();
   ctx.stroke();
   ctx.closePath();
 </script>
-```
+```---
 
----
+## ステップ 2: ボールを移動する
 
-## Step 2: Move the Ball
+次に、各フレームでキャンバスを再描画し、速度変数を使用してボールの位置を更新するゲーム ループを作成して、ボールをアニメーション化します。
 
-Now we animate the ball by creating a game loop that redraws the canvas on each frame and updates the ball position using velocity variables.
+### 描画ループの作成
 
-### Creating the Draw Loop
-
-Define a `draw()` function that executes repeatedly using `setInterval`:
-
-```javascript
+`setInterval` を使用して、繰り返し実行する `draw()` 関数を定義します。```javascript
 function draw() {
   // drawing code
 }
 setInterval(draw, 10);
-```
+````setInterval(draw, 10)` calls the `draw` function every 10 milliseconds, creating approximately 100 frames per second.
 
-`setInterval(draw, 10)` calls the `draw` function every 10 milliseconds, creating approximately 100 frames per second.
+### ボールを描く
 
-### Drawing the Ball
-
-Inside the `draw()` function, draw a ball (circle) at a fixed position:
-
-```javascript
+Inside the `draw()` function, draw a ball (circle) at a fixed position:```javascript
 ctx.beginPath();
 ctx.arc(50, 50, 10, 0, Math.PI * 2);
 ctx.fillStyle = "#0095DD";
 ctx.fill();
 ctx.closePath();
-```
+```### 位置変数の追加
 
-### Adding Position Variables
-
-Instead of hardcoded positions, use variables so we can update them each frame. Place these above the `draw()` function:
-
-```javascript
+ハードコードされた位置の代わりに変数を使用して、フレームごとに更新できるようにします。これらを `draw()` 関数の上に配置します。```javascript
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-```
+```これにより、ボールはキャンバスの下部近くの水平方向の中央から開始されます。
 
-This starts the ball at the horizontal center, near the bottom of the canvas.
+### 速度変数の追加
 
-### Adding Velocity Variables
-
-Define speed and direction for horizontal (`dx`) and vertical (`dy`) movement:
-
-```javascript
+水平方向 (`dx`) と垂直方向 (`dy`) の移動の速度と方向を定義します。```javascript
 let dx = 2;
 let dy = -2;
-```
+```- `dx = 2` は、フレームごとにボールを 2 ピクセル右に移動します。
+- `dy = -2` はボールをフレームごとに 2 ピクセル上に移動します (負の y はキャンバス上で上になります)。
 
-- `dx = 2` moves the ball 2 pixels right per frame.
-- `dy = -2` moves the ball 2 pixels up per frame (negative y is upward on canvas).
+### 各フレームの位置を更新する
 
-### Updating Position Each Frame
-
-Add position updates at the end of the `draw()` function:
-
-```javascript
+`draw()` 関数の最後に位置の更新を追加します。```javascript
 x += dx;
 y += dy;
-```
+```### キャンバスをクリアする
 
-### Clearing the Canvas
-
-Without clearing, the ball leaves a trail. Add `clearRect()` at the start of each frame:
-
-```javascript
+クリアしないとボールに跡が残る。各フレームの先頭に `clearRect()` を追加します。```javascript
 ctx.clearRect(0, 0, canvas.width, canvas.height);
-```
+```### 別個のdrawBall() 関数へのリファクタリング
 
-### Refactoring Into a Separate drawBall() Function
-
-For clean, maintainable code, separate the ball-drawing logic:
-
-```javascript
+コードをクリーンで保守しやすいようにするには、ボール描画ロジックを分離します。```javascript
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, 10, 0, Math.PI * 2);
@@ -241,11 +191,7 @@ function drawBall() {
   ctx.fill();
   ctx.closePath();
 }
-```
-
-### Complete Code for Step 2
-
-```javascript
+```### ステップ 2 の完全なコード```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -270,31 +216,23 @@ function draw() {
 }
 
 setInterval(draw, 10);
-```
-
-**Key concepts:**
-- **Animation loop**: `setInterval(draw, 10)` continuously redraws the scene.
-- **Position variables**: `x` and `y` track the ball's current location.
-- **Velocity variables**: `dx` and `dy` determine movement per frame.
-- **Canvas clearing**: `clearRect()` removes the previous frame before drawing the new one.
+```**重要な概念:**
+- **アニメーション ループ**: `setInterval(draw, 10)` はシーンを継続的に再描画します。
+- **位置変数**: `x` および `y` はボールの現在位置を追跡します。
+- **速度変数**: `dx` および `dy` はフレームごとの動きを決定します。
+- **キャンバスのクリア**: `clearRect()` は、新しいフレームを描画する前に前のフレームを削除します。
 
 ---
 
-## Step 3: Bounce Off the Walls
+## ステップ 3: 壁から跳ね返る
 
-We add collision detection so the ball bounces off the canvas edges instead of disappearing.
+衝突検出を追加して、ボールが消えるのではなくキャンバスの端で跳ね返るようにします。
 
-### Defining the Ball Radius
+### ボール半径の定義
 
-Extract the ball radius into a named constant for reuse in collision calculations:
-
-```javascript
+衝突計算で再利用するために、ボールの半径を名前付き定数に抽出します。```javascript
 const ballRadius = 10;
-```
-
-Update `drawBall()` to use this variable:
-
-```javascript
+```この変数を使用するには `drawBall()` を更新します。```javascript
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -302,13 +240,9 @@ function drawBall() {
   ctx.fill();
   ctx.closePath();
 }
-```
+```### 基本的な壁衝突 (半径調整なし)
 
-### Basic Wall Collision (Without Radius Adjustment)
-
-The simplest approach checks if the next ball position goes beyond the canvas boundaries:
-
-```javascript
+最も単純なアプローチは、次のボールの位置がキャンバスの境界を越えるかどうかをチェックします。```javascript
 // Left and right walls
 if (x + dx > canvas.width || x + dx < 0) {
   dx = -dx;
@@ -318,15 +252,11 @@ if (x + dx > canvas.width || x + dx < 0) {
 if (y + dy > canvas.height || y + dy < 0) {
   dy = -dy;
 }
-```
+````dx` または `dy` を反転（-1 を掛ける）すると、ボールの方向が変わります。
 
-Reversing `dx` or `dy` (multiplying by -1) changes the ball's direction.
+### 衝突の改善 (ボールの半径を考慮)
 
-### Improved Collision (Accounting for Ball Radius)
-
-The basic version lets the ball sink halfway into the wall before bouncing. To fix this, account for the ball's radius:
-
-```javascript
+基本バージョンでは、ボールはバウンドする前に壁に半分沈みます。これを修正するには、ボールの半径を考慮します。```javascript
 // Left and right walls
 if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
   dx = -dx;
@@ -336,20 +266,16 @@ if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
 if (y + dy > canvas.height - ballRadius || y + dy < ballRadius) {
   dy = -dy;
 }
-```
+```### 衝突検出条件
 
-### Collision Detection Conditions
+|壁 |状態 |アクション |
+|------|-----------|----------|
+| **左** | `x + dx < ballRadius` | `dx = -dx` |
+| **右** | `x + dx > canvas.width - ballRadius` | `dx = -dx` |
+| **トップ** | `y + dy < ballRadius` | `dy = -dy` |
+| **下** | `y + dy > canvas.height - ballRadius` | `dy = -dy` |
 
-| Wall | Condition | Action |
-|------|-----------|--------|
-| **Left** | `x + dx < ballRadius` | `dx = -dx` |
-| **Right** | `x + dx > canvas.width - ballRadius` | `dx = -dx` |
-| **Top** | `y + dy < ballRadius` | `dy = -dy` |
-| **Bottom** | `y + dy > canvas.height - ballRadius` | `dy = -dy` |
-
-### Complete Code for Step 3
-
-```javascript
+### ステップ 3 の完全なコード```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const ballRadius = 10;
@@ -386,30 +312,22 @@ function draw() {
 }
 
 setInterval(draw, 10);
-```
+```---
 
----
+## ステップ 4: パドルとキーボードのコントロール
 
-## Step 4: Paddle and Keyboard Controls
+次に、プレーヤーが制御するパドルを画面の下部に追加し、キーボード入力 (左/右矢印キー) を接続します。
 
-Now we add a player-controlled paddle at the bottom of the screen and wire up keyboard input (left/right arrow keys).
-
-### Defining Paddle Variables
-
-```javascript
+### パドル変数の定義```javascript
 const paddleHeight = 10;
 const paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
-```
+```- `paddleHeight` および `paddleWidth` はパドルの寸法を定義します。
+- `paddleX` は、水平方向の中央にパドルを開始します。プレイヤーが動かすと変化するため、`let` です。
 
-- `paddleHeight` and `paddleWidth` define the paddle dimensions.
-- `paddleX` starts the paddle centered horizontally. It is a `let` because it will change as the player moves it.
+### パドルを描く
 
-### Drawing the Paddle
-
-Create a `drawPaddle()` function. The paddle sits at the very bottom of the canvas:
-
-```javascript
+`drawPaddle()` 関数を作成します。パドルはキャンバスの一番下にあります。```javascript
 function drawPaddle() {
   ctx.beginPath();
   ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
@@ -417,33 +335,17 @@ function drawPaddle() {
   ctx.fill();
   ctx.closePath();
 }
-```
-
-- The y-position is `canvas.height - paddleHeight`, placing it flush with the bottom edge.
-
-### Keyboard State Variables
-
-Track whether arrow keys are currently pressed:
-
-```javascript
+```Error 500 (Server Error)!!1500.That’s an error.There was an error. Please try again later.That’s all we know.```javascript
 let rightPressed = false;
 let leftPressed = false;
-```
+```### キー押下のイベント リスナー
 
-### Event Listeners for Key Presses
-
-Register handlers for `keydown` (key pressed) and `keyup` (key released):
-
-```javascript
+`keydown` (キーが押された) および `keyup` (キーが放された) のハンドラーを登録します。```javascript
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
-```
+```### キーハンドラー関数
 
-### Key Handler Functions
-
-Set the boolean flags based on which key is pressed or released:
-
-```javascript
+どのキーが押されたか、または放されたかに基づいてブール値フラグを設定します。```javascript
 function keyDownHandler(e) {
   if (e.key === "Right" || e.key === "ArrowRight") {
     rightPressed = true;
@@ -459,29 +361,21 @@ function keyUpHandler(e) {
     leftPressed = false;
   }
 }
-```
+````"ArrowRight"` (最新のブラウザ) と `"Right"` (従来の IE/Edge) の両方の互換性がチェックされます。
 
-Both `"ArrowRight"` (modern browsers) and `"Right"` (legacy IE/Edge) are checked for compatibility.
+### パドル移動ロジック (境界チェックあり)
 
-### Paddle Movement Logic (With Boundary Checking)
-
-Add this inside the `draw()` function to move the paddle based on key state, while keeping it within canvas bounds:
-
-```javascript
+これを `draw()` 関数内に追加して、キャンバスの境界内に保ちながら、キーの状態に基づいてパドルを移動します。```javascript
 if (rightPressed) {
   paddleX = Math.min(paddleX + 7, canvas.width - paddleWidth);
 } else if (leftPressed) {
   paddleX = Math.max(paddleX - 7, 0);
 }
-```
+```- パドルはフレームごとに 7 ピクセルを移動します。
+- `Math.min` は、パドルが右端を越えるのを防ぎます。
+- `Math.max` は、左端を越えることを防ぎます。
 
-- The paddle moves 7 pixels per frame.
-- `Math.min` prevents the paddle from going past the right edge.
-- `Math.max` prevents it from going past the left edge.
-
-### Complete Code for Step 4
-
-```javascript
+### ステップ 4 の完全なコード```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const ballRadius = 10;
@@ -556,33 +450,21 @@ function draw() {
 }
 
 setInterval(draw, 10);
-```
+```---
 
----
+## ステップ 5: ゲームオーバー
 
-## Step 5: Game Over
+底壁のバウンドを実際のゲーム ロジックに置き換えます。ボールはパドルから跳ね返るはずですが、外れた場合はゲーム オーバーです。
 
-We replace the bottom-wall bounce with actual game logic: the ball should bounce off the paddle, but if it misses, it is game over.
+### 間隔リファレンスの保存
 
-### Storing the Interval Reference
-
-To stop the game loop on game over, store the interval ID:
-
-```javascript
+ゲームオーバー時にゲームループを停止するには、インターバル ID を保存します。```javascript
 let interval = 0;
-```
-
-Then assign the return value of `setInterval`:
-
-```javascript
+```次に、`setInterval` の戻り値を割り当てます。```javascript
 interval = setInterval(draw, 10);
-```
+```### ゲームオーバーとパドル衝突の実装
 
-### Implementing Game Over and Paddle Collision
-
-Replace the bottom-wall collision check. Instead of bouncing off the bottom edge, we now check whether the ball hits the paddle or misses it:
-
-```javascript
+底壁衝突チェックを交換します。下端で跳ね返るのではなく、ボールがパドルに当たるか外れるかを確認します。```javascript
 if (y + dy < ballRadius) {
   // Ball hits top wall -- bounce
   dy = -dy;
@@ -598,17 +480,13 @@ if (y + dy < ballRadius) {
     clearInterval(interval);
   }
 }
-```
+```**パドル衝突の仕組み:**
+- `x > paddleX` -- ボールはパドルの左端を越えました。
+- `x < paddleX + paddleWidth` -- ボールはパドルの右端の前にあります。
+- 両方が真の場合、ボールはパドルの上にあるため、バウンドします。
+- ボールがパドルに当たらずに底に到達した場合、ゲームは終了します。
 
-**How paddle collision works:**
-- `x > paddleX` -- the ball is past the paddle's left edge.
-- `x < paddleX + paddleWidth` -- the ball is before the paddle's right edge.
-- If both are true, the ball is above the paddle, so it bounces.
-- If the ball reaches the bottom without hitting the paddle, the game ends.
-
-### Complete Code for Step 5
-
-```javascript
+### ステップ 5 の完全なコード```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const ballRadius = 10;
@@ -697,19 +575,15 @@ function draw() {
 }
 
 interval = setInterval(draw, 10);
-```
+```---
 
----
+## ステップ 6: レンガフィールドを構築する
 
-## Step 6: Build the Brick Field
+次に、ボールが破壊するレンガのグリッドを作成します。レンガは 2D 配列に保存され、行と列で描画されます。
 
-Now we create the grid of bricks that the ball will destroy. The bricks are stored in a 2D array and drawn in rows and columns.
+### ブリック構成変数
 
-### Brick Configuration Variables
-
-Define constants that control the layout of the brick field:
-
-```javascript
+ブリック フィールドのレイアウトを制御する定数を定義します。```javascript
 const brickRowCount = 3;
 const brickColumnCount = 5;
 const brickWidth = 75;
@@ -717,18 +591,14 @@ const brickHeight = 20;
 const brickPadding = 10;
 const brickOffsetTop = 30;
 const brickOffsetLeft = 30;
-```
+```- `brickRowCount` / `brickColumnCount` -- レンガの行数と列数。
+- `brickWidth` / `brickHeight` -- 個々のレンガの寸法。
+- `brickPadding` -- レンガ間のスペース。
+- `brickOffsetTop` / `brickOffsetLeft` -- キャンバスの上端と左端から最初のレンガまでの距離。
 
-- `brickRowCount` / `brickColumnCount` -- how many rows and columns of bricks.
-- `brickWidth` / `brickHeight` -- dimensions of each individual brick.
-- `brickPadding` -- space between bricks.
-- `brickOffsetTop` / `brickOffsetLeft` -- distance from the top and left canvas edges to the first brick.
+### Bricks 2D 配列の作成
 
-### Creating the Bricks 2D Array
-
-Use nested loops to create a 2D array. Each brick stores its `x` and `y` position (initially `0`, calculated during drawing):
-
-```javascript
+ネストされたループを使用して 2D 配列を作成します。各ブリックは、その `x` および `y` の位置 (最初は `0`、描画中に計算されます) を保存します。```javascript
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
@@ -736,13 +606,9 @@ for (let c = 0; c < brickColumnCount; c++) {
     bricks[c][r] = { x: 0, y: 0 };
   }
 }
-```
+```###drawBricks() 関数
 
-### The drawBricks() Function
-
-Loop through every brick, calculate its position, store it, and draw it:
-
-```javascript
+すべてのレンガをループし、その位置を計算して保存し、描画します。```javascript
 function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -758,19 +624,15 @@ function drawBricks() {
     }
   }
 }
-```
-
-**Position calculation formula:**
+```**位置計算式:**
 - `brickX = column * (brickWidth + brickPadding) + brickOffsetLeft`
 - `brickY = row * (brickHeight + brickPadding) + brickOffsetTop`
 
-This creates an evenly-spaced grid with consistent padding and margins.
+これにより、一貫したパディングとマージンを持つ等間隔のグリッドが作成されます。
 
-### Calling drawBricks() in the Game Loop
+### ゲームループでのdrawBricks()の呼び出し
 
-Add the call at the beginning of your `draw()` function, after clearing the canvas:
-
-```javascript
+キャンバスをクリアした後、`draw()` 関数の先頭に呼び出しを追加します。```javascript
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
@@ -778,11 +640,7 @@ function draw() {
   drawPaddle();
   // ... rest of draw function
 }
-```
-
-### Complete Code for Step 6
-
-```javascript
+```### ステップ 6 の完全なコード```javascript
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const ballRadius = 10;
@@ -899,19 +757,15 @@ function draw() {
 }
 
 interval = setInterval(draw, 10);
-```
+```---
 
----
+## ステップ 7: 衝突検出
 
-## Step 7: Collision Detection
+画面上のレンガでは、ボールがレンガに当たったときを検出して、レンガを消す必要があります。各ブリックは `status` プロパティを取得します。`1` は表示を意味し、`0` は破棄を意味します。
 
-With bricks on screen, we need to detect when the ball hits one and make it disappear. Each brick gets a `status` property: `1` means visible, `0` means destroyed.
+### Status プロパティをブリックに追加する
 
-### Adding the Status Property to Bricks
-
-Update the brick initialization to include a `status` flag:
-
-```javascript
+`status` フラグを含めるようにブリックの初期化を更新します。```javascript
 const bricks = [];
 for (let c = 0; c < brickColumnCount; c++) {
   bricks[c] = [];
@@ -919,13 +773,9 @@ for (let c = 0; c < brickColumnCount; c++) {
     bricks[c][r] = { x: 0, y: 0, status: 1 };
   }
 }
-```
+```###collisionDetection() 関数
 
-### The collisionDetection() Function
-
-Loop through every brick and check if the ball's center is within the brick's bounding box:
-
-```javascript
+すべてのレンガをループし、ボールの中心がレンガの境界ボックス内にあるかどうかを確認します。```javascript
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -944,23 +794,19 @@ function collisionDetection() {
     }
   }
 }
-```
+```**衝突条件 (4 つすべてが同時に満たされる必要があります):**
+- `x > b.x` -- ボールの中心はレンガの左端の右側にあります。
+- `x < b.x + brickWidth` -- ボールの中心はレンガの右端の左側にあります。
+- `y > b.y` -- ボールの中心がレンガの上端の下にあります。
+- `y < b.y + brickHeight` -- ボールの中心がレンガの下端の上にあります。
 
-**Collision conditions (all four must be true simultaneously):**
-- `x > b.x` -- ball center is to the right of the brick's left edge.
-- `x < b.x + brickWidth` -- ball center is to the left of the brick's right edge.
-- `y > b.y` -- ball center is below the brick's top edge.
-- `y < b.y + brickHeight` -- ball center is above the brick's bottom edge.
+衝突が検出された場合:
+- `dy = -dy` はボールの垂直方向を反転します (バウンス)。
+- `b.status = 0` はレンガを破壊済みとしてマークします。
 
-When a collision is detected:
-- `dy = -dy` reverses the ball's vertical direction (bounce).
-- `b.status = 0` marks the brick as destroyed.
+### ステータスを尊重するためのdrawBricks()の更新
 
-### Updating drawBricks() to Respect Status
-
-Only draw bricks that are still active (`status === 1`):
-
-```javascript
+まだアクティブなレンガのみを描画します (`status === 1`):```javascript
 function drawBricks() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -978,13 +824,9 @@ function drawBricks() {
     }
   }
 }
-```
+```### ゲームループでのcollisionDetection()の呼び出し
 
-### Calling collisionDetection() in the Game Loop
-
-Add the call in your `draw()` function, after drawing all elements:
-
-```javascript
+すべての要素を描画した後、`draw()` 関数に呼び出しを追加します。```javascript
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
@@ -993,64 +835,44 @@ function draw() {
   collisionDetection();
   // ... rest of draw function
 }
-```
+```---
 
----
+## ステップ 8: スコアを追跡して勝利する
 
-## Step 8: Track the Score and Win
+レンガが破壊されるたびに増加するスコア カウンターと、すべてのレンガがなくなったときにトリガーされる勝利条件を追加します。
 
-We add a score counter that increments each time a brick is destroyed, and a win condition that triggers when all bricks are gone.
-
-### Initializing the Score
-
-```javascript
+### スコアの初期化```javascript
 let score = 0;
-```
+```###drawScore() 関数
 
-### The drawScore() Function
-
-Display the current score on the canvas using text rendering:
-
-```javascript
+テキストレンダリングを使用して現在のスコアをキャンバスに表示します。```javascript
 function drawScore() {
   ctx.font = "16px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.fillText(`Score: ${score}`, 8, 20);
 }
-```
+```- `ctx.font` は、フォント サイズとファミリー (CSS など) を設定します。
+- `ctx.fillText(text, x, y)` は、指定された座標でテキストをレンダリングします。
+- 位置 `(8, 20)` は、スコアを左上隅に配置します。
 
-- `ctx.font` sets the font size and family (like CSS).
-- `ctx.fillText(text, x, y)` renders text at the given coordinates.
-- Position `(8, 20)` places the score in the top-left corner.
+### スコアの増加
 
-### Incrementing the Score
-
-In the `collisionDetection()` function, increment the score when a brick is hit:
-
-```javascript
+`collisionDetection()` 関数で、レンガがヒットしたときにスコアを増加させます。```javascript
 dy = -dy;
 b.status = 0;
 score++;
-```
+```### 勝利条件の追加
 
-### Adding the Win Condition
-
-After incrementing the score, check if the player has destroyed all bricks:
-
-```javascript
+スコアを増やした後、プレイヤーがすべてのレンガを破壊したかどうかを確認します。```javascript
 score++;
 if (score === brickRowCount * brickColumnCount) {
   alert("YOU WIN, CONGRATULATIONS!");
   document.location.reload();
   clearInterval(interval);
 }
-```
+```レンガの合計数は `brickRowCount * brickColumnCount` です。スコアがその数値に達すると、すべてのレンガが破壊されます。
 
-The total number of bricks is `brickRowCount * brickColumnCount`. When the score reaches that number, every brick has been destroyed.
-
-### Complete collisionDetection() with Score and Win
-
-```javascript
+### スコアと勝利を伴ってcollisionDetection()を完了する```javascript
 function collisionDetection() {
   for (let c = 0; c < brickColumnCount; c++) {
     for (let r = 0; r < brickRowCount; r++) {
@@ -1075,13 +897,9 @@ function collisionDetection() {
     }
   }
 }
-```
+```### ゲームループでのdrawScore()の呼び出し
 
-### Calling drawScore() in the Game Loop
-
-Add the call in your `draw()` function:
-
-```javascript
+`draw()` 関数に呼び出しを追加します。```javascript
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
@@ -1091,89 +909,65 @@ function draw() {
   collisionDetection();
   // ... rest of draw function
 }
-```
+```### キャンバス テキスト メソッドのリファレンス
 
-### Canvas Text Methods Reference
-
-| Method/Property | Purpose |
-|-----------------|---------|
-| `ctx.font` | Set font size and family |
-| `ctx.fillStyle` | Set text color |
-| `ctx.fillText(text, x, y)` | Draw filled text at coordinates |
+|メソッド/プロパティ |目的 |
+|-----------------|-----------|
+| `ctx.font` |フォント サイズとファミリーを設定する |
+| `ctx.fillStyle` |テキストの色を設定する |
+| `ctx.fillText(text, x, y)` |座標 | に塗りつぶしテキストを描画します。
 
 ---
 
-## Step 9: Mouse Controls
+## ステップ 9: マウス コントロール
 
-In addition to keyboard controls, we add mouse support so the player can move the paddle by moving the mouse.
+キーボード コントロールに加えて、マウスのサポートも追加され、プレイヤーはマウスを動かしてパドルを動かすことができます。
 
-### Adding the mousemove Event Listener
+### Mousemove イベント リスナーの追加
 
-Register the handler alongside the existing keyboard listeners:
-
-```javascript
+既存のキーボード リスナーと一緒にハンドラーを登録します。```javascript
 document.addEventListener("mousemove", mouseMoveHandler);
-```
+```### MouseMoveHandler 関数
 
-### The mouseMoveHandler Function
-
-Calculate the mouse's horizontal position relative to the canvas and update the paddle position:
-
-```javascript
+キャンバスに対するマウスの水平位置を計算し、パドルの位置を更新します。```javascript
 function mouseMoveHandler(e) {
   const relativeX = e.clientX - canvas.offsetLeft;
   if (relativeX > 0 && relativeX < canvas.width) {
     paddleX = relativeX - paddleWidth / 2;
   }
 }
-```
+```**仕組み:**
+- `e.clientX` -- ブラウザのビューポート内のマウスの水平位置。
+- `canvas.offsetLeft` -- キャンバスの左端からビューポートの左端までの距離。
+- `relativeX` -- キャンバス (ビューポートではない) を基準としたマウスの位置。
+- 境界チェック (`relativeX > 0 && relativeX < canvas.width`) により、マウスがキャンバス上にある場合にのみパドルが移動することが保証されます。
+- `paddleX = relativeX - paddleWidth / 2` は、パドルの幅の半分を引いて、パドルをマウス カーソルの下の中央に配置します。
 
-**How it works:**
-- `e.clientX` -- the mouse's horizontal position in the browser viewport.
-- `canvas.offsetLeft` -- the distance from the canvas's left edge to the viewport's left edge.
-- `relativeX` -- the mouse position relative to the canvas (not the viewport).
-- The boundary check (`relativeX > 0 && relativeX < canvas.width`) ensures the paddle only moves when the mouse is over the canvas.
-- `paddleX = relativeX - paddleWidth / 2` centers the paddle under the mouse cursor by subtracting half the paddle width.
-
-### Complete Event Listener Setup (Keyboard + Mouse)
-
-```javascript
+### イベント リスナーのセットアップを完了する (キーボード + マウス)```javascript
 document.addEventListener("keydown", keyDownHandler);
 document.addEventListener("keyup", keyUpHandler);
 document.addEventListener("mousemove", mouseMoveHandler);
-```
-
-Both control methods work simultaneously. The player can use arrow keys or mouse -- or switch between them at any time.
+```両方の制御方法が同時に機能します。プレーヤーは矢印キーまたはマウスを使用したり、いつでもそれらを切り替えることができます。
 
 ---
 
-## Step 10: Finishing Up
+## ステップ 10: 仕上げ
 
-The final step adds a lives system (so the player gets multiple chances) and upgrades the game loop from `setInterval` to `requestAnimationFrame` for smoother rendering.
+最後のステップでは、ライフ システムを追加し (プレイヤーに複数のチャンスが与えられるように)、ゲーム ループを `setInterval` から `requestAnimationFrame` にアップグレードして、レンダリングをよりスムーズにします。
 
-### Adding the Lives Variable
-
-```javascript
+### Lives 変数の追加```javascript
 let lives = 3;
-```
+```###drawLives() 関数
 
-### The drawLives() Function
-
-Display the remaining lives in the top-right corner:
-
-```javascript
+右上隅に残りのライフを表示します。```javascript
 function drawLives() {
   ctx.font = "16px Arial";
   ctx.fillStyle = "#0095DD";
   ctx.fillText(`Lives: ${lives}`, canvas.width - 65, 20);
 }
-```
+```### ライブシステムの実装
 
-### Implementing the Lives System
-
-Replace the immediate game-over logic with a lives-based system. When the ball misses the paddle:
-
-```javascript
+即時ゲームオーバーのロジックをライフベースのシステムに置き換えます。ボールがパドルを外したとき:```javascript
 if (y + dy < ballRadius) {
   dy = -dy;
 } else if (y + dy > canvas.height - ballRadius) {
@@ -1194,26 +988,19 @@ if (y + dy < ballRadius) {
     }
   }
 }
-```
+```**人命が失われるとどうなるか:**
+- `lives--` は、ライフ カウンタをデクリメントします。
+- `lives` が `0` に達すると、アラートが表示されてゲームが終了し、ページがリロードされます。
+- それ以外の場合、ボールは中央下にリセットされ、速度はリセットされ、パドルは中央にリセットされます。
 
-**What happens when a life is lost:**
-- `lives--` decrements the lives counter.
-- If `lives` reaches `0`, the game ends with an alert and page reload.
-- Otherwise, the ball resets to center-bottom, velocity resets, and the paddle resets to center.
+### requestAnimationFrame へのアップグレード
 
-### Upgrading to requestAnimationFrame
+よりスムーズでブラウザーに最適化されたゲーム ループを実現するには、`setInterval` を `requestAnimationFrame` に置き換えます。
 
-Replace `setInterval` with `requestAnimationFrame` for a smoother, browser-optimized game loop:
-
-**Old approach (remove):**
-```javascript
+**古いアプローチ (削除):**```javascript
 interval = setInterval(draw, 10);
-```
-
-**New approach:**
-Add `requestAnimationFrame(draw)` at the end of the `draw()` function:
-
-```javascript
+```**新しいアプローチ:**
+`draw()` 関数の最後に `requestAnimationFrame(draw)` を追加します。```javascript
 function draw() {
   // ... all drawing and logic ...
   requestAnimationFrame(draw);
@@ -1221,13 +1008,9 @@ function draw() {
 
 // Start the game by calling draw() once:
 draw();
-```
+````requestAnimationFrame` を使用すると、ブラウザーは最適なフレーム レート (通常は 60fps) でレンダリングをスケジュールできます。これは、固定の 10 ミリ秒間隔よりも効率的です。
 
-`requestAnimationFrame` lets the browser schedule rendering at the optimal frame rate (typically 60fps), which is more efficient than a fixed 10ms interval.
-
-### Calling drawLives() in the Game Loop
-
-```javascript
+### ゲームループでのdrawLives()の呼び出し```javascript
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawBricks();
@@ -1239,15 +1022,11 @@ function draw() {
   // ... rest of logic ...
   requestAnimationFrame(draw);
 }
-```
+```---
 
----
+## 最終的なゲーム コードを完了する
 
-## Complete Final Game Code
-
-Below is the entire game in a single, self-contained HTML file. This is the final product of all 10 steps combined.
-
-```html
+以下は、単一の自己完結型 HTML ファイル内のゲーム全体です。これは、10 のステップすべてを組み合わせた最終製品です。```html
 <!doctype html>
 <html lang="en-US">
   <head>
@@ -1483,46 +1262,44 @@ Below is the entire game in a single, self-contained HTML file. This is the fina
     </script>
   </body>
 </html>
-```
+```---
 
----
+## クイック リファレンス: すべてのゲーム変数
 
-## Quick Reference: All Game Variables
+|変数 |タイプ |目的 |
+|----------|------|----------|
+| `canvas` |定数 | HTML キャンバス要素への参照 |
+| `ctx` |定数 | 2D レンダリング コンテキスト |
+| `ballRadius` |定数 |ボールの半径 (10) |
+| `x`、`y` |させてください |現在のボールの位置 |
+| `dx`、`dy` |させてください |ボール速度 (フレームあたりのピクセル) |
+| `paddleHeight` |定数 |パドルの高さ (10) |
+| `paddleWidth` |定数 |パドルの幅 (75) |
+| `paddleX` |させてください |パドルの現在の水平位置 |
+| `rightPressed` |させてください |右矢印キーが押されているかどうか |
+| `leftPressed` |させてください |左矢印キーが押されているかどうか |
+| `brickRowCount` |定数 |レンガの列の数 (3) |
+| `brickColumnCount` |定数 |レンガ柱の数 (5) |
+| `brickWidth` |定数 |各レンガの幅 (75) |
+| `brickHeight` |定数 |各レンガの高さ (20) |
+| `brickPadding` |定数 |レンガ間のスペース (10) |
+| `brickOffsetTop` |定数 |キャンバスの上部から最初のレンガ列までの距離 (30) |
+| `brickOffsetLeft` |定数 |キャンバスの左から最初のレンガ柱までの距離 (30) |
+| `bricks` |定数 |すべてのレンガ オブジェクトを保持する 2D 配列 |
+| `score` |させてください |現在のプレイヤーのスコア |
+| `lives` |させてください |残機(3からスタート) |
 
-| Variable | Type | Purpose |
-|----------|------|---------|
-| `canvas` | const | Reference to the HTML canvas element |
-| `ctx` | const | 2D rendering context |
-| `ballRadius` | const | Radius of the ball (10) |
-| `x`, `y` | let | Current ball position |
-| `dx`, `dy` | let | Ball velocity (pixels per frame) |
-| `paddleHeight` | const | Height of the paddle (10) |
-| `paddleWidth` | const | Width of the paddle (75) |
-| `paddleX` | let | Current horizontal position of the paddle |
-| `rightPressed` | let | Whether the right arrow key is held down |
-| `leftPressed` | let | Whether the left arrow key is held down |
-| `brickRowCount` | const | Number of brick rows (3) |
-| `brickColumnCount` | const | Number of brick columns (5) |
-| `brickWidth` | const | Width of each brick (75) |
-| `brickHeight` | const | Height of each brick (20) |
-| `brickPadding` | const | Space between bricks (10) |
-| `brickOffsetTop` | const | Distance from top of canvas to first brick row (30) |
-| `brickOffsetLeft` | const | Distance from left of canvas to first brick column (30) |
-| `bricks` | const | 2D array holding all brick objects |
-| `score` | let | Current player score |
-| `lives` | let | Remaining lives (starts at 3) |
+## クイックリファレンス: すべての関数
 
-## Quick Reference: All Functions
-
-| Function | Purpose |
-|----------|---------|
-| `keyDownHandler(e)` | Sets `rightPressed` or `leftPressed` to `true` on key press |
-| `keyUpHandler(e)` | Sets `rightPressed` or `leftPressed` to `false` on key release |
-| `mouseMoveHandler(e)` | Moves paddle to follow mouse horizontal position |
-| `collisionDetection()` | Checks ball against all active bricks; destroys hit bricks, increments score, checks win |
-| `drawBall()` | Renders the ball at current `(x, y)` position |
-| `drawPaddle()` | Renders the paddle at current `paddleX` position |
-| `drawBricks()` | Renders all bricks with `status === 1` |
-| `drawScore()` | Renders the score text in the top-left corner |
-| `drawLives()` | Renders the lives text in the top-right corner |
-| `draw()` | Main game loop: clears canvas, draws everything, handles collisions, updates positions |
+|機能 |目的 |
+|----------|----------|
+| `keyDownHandler(e)` |キーを押すと `rightPressed` または `leftPressed` を `true` に設定します |
+| `keyUpHandler(e)` |キーを放したときに `rightPressed` または `leftPressed` を `false` に設定します。
+| `mouseMoveHandler(e)` |マウスの水平位置に合わせてパドルを移動します。
+| `collisionDetection()` |すべてのアクティブなレンガに対してボールをチェックします。ヒットしたレンガを破壊し、スコアを増加させ、勝利を確認します |
+| `drawBall()` |現在の `(x, y)` 位置でボールをレンダリングします。
+| `drawPaddle()` |現在の `paddleX` 位置でパドルをレンダリングします。
+| `drawBricks()` | `status === 1` を使用してすべてのレンガをレンダリングします。
+| `drawScore()` |左上隅にスコアテキストをレンダリングします。
+| `drawLives()` |右上隅にライフのテキストを表示します。
+| `draw()` |メイン ゲーム ループ: キャンバスをクリアし、すべてを描画し、衝突を処理し、位置を更新します。

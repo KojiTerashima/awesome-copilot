@@ -1,14 +1,12 @@
-# FlowStudio MCP — Trigger Types
+# FlowStudio MCP — トリガーの種類
 
-Copy-paste trigger definitions for Power Automate flow definitions.
+Power Automate フロー定義のトリガー定義をコピーして貼り付けます。
 
 ---
 
-## Recurrence
+## 再発
 
-Run on a schedule.
-
-```json
+スケジュールに従って実行します。```json
 "Recurrence": {
   "type": "Recurrence",
   "recurrence": {
@@ -18,10 +16,7 @@ Run on a schedule.
     "timeZone": "AUS Eastern Standard Time"
   }
 }
-```
-
-Weekly on specific days:
-```json
+```毎週特定の日に:```json
 "Recurrence": {
   "type": "Recurrence",
   "recurrence": {
@@ -34,23 +29,19 @@ Weekly on specific days:
     "timeZone": "AUS Eastern Standard Time"
   }
 }
-```
-
-Common `timeZone` values:
-- `"AUS Eastern Standard Time"` — Sydney/Melbourne (UTC+10/+11)
-- `"UTC"` — Universal time
-- `"E. Australia Standard Time"` — Brisbane (UTC+10 no DST)
-- `"New Zealand Standard Time"` — Auckland (UTC+12/+13)
-- `"Pacific Standard Time"` — Los Angeles (UTC-8/-7)
-- `"GMT Standard Time"` — London (UTC+0/+1)
+```一般的な `timeZone` 値:
+- `"AUS Eastern Standard Time"` — シドニー/メルボルン (UTC+10/+11)
+- `"UTC"` — 世界時
+- `"E. Australia Standard Time"` — ブリスベン (UTC+10 夏時間なし)
+- `"New Zealand Standard Time"` — オークランド (UTC+12/+13)
+- `"Pacific Standard Time"` — ロサンゼルス (UTC-8/-7)
+- `"GMT Standard Time"` — ロンドン (UTC+0/+1)
 
 ---
 
-## Manual (HTTP Request / Power Apps)
+## マニュアル (HTTP リクエスト / Power Apps)
 
-Receive an HTTP POST with a JSON body.
-
-```json
+JSON 本文を含む HTTP POST を受信します。```json
 "manual": {
   "type": "Request",
   "kind": "Http",
@@ -65,17 +56,13 @@ Receive an HTTP POST with a JSON body.
     }
   }
 }
-```
+```アクセス値: `@triggerBody()?['name']`  
+保存後に使用できるトリガー URL: `@listCallbackUrl()`
 
-Access values: `@triggerBody()?['name']`  
-Trigger URL available after saving: `@listCallbackUrl()`
+#### スキーマなしバリアント (任意の JSON を受け入れる)
 
-#### No-Schema Variant (Accept Arbitrary JSON)
-
-When the incoming payload structure is unknown or varies, omit the schema
-to accept any valid JSON body without validation:
-
-```json
+受信ペイロード構造が不明または異なる場合は、スキーマを省略します。
+検証なしで有効な JSON 本文を受け入れるには:```json
 "manual": {
   "type": "Request",
   "kind": "Http",
@@ -83,19 +70,15 @@ to accept any valid JSON body without validation:
     "schema": {}
   }
 }
-```
+```任意のフィールドに動的にアクセス: `@triggerBody()?['anyField']`
 
-Access any field dynamically: `@triggerBody()?['anyField']`
-
-> Use this for external webhooks (Stripe, GitHub, Employment Hero, etc.) where the
-> payload shape may change or is not fully documented. The flow accepts any
-> JSON without returning 400 for unexpected properties.
+> これを外部 Webhook (Stripe、GitHub、Employment Hero など) に使用します。
+> ペイロードの形状は変更されるか、完全に文書化されていない可能性があります。フローは何でも受け入れます
+> 予期しないプロパティに対して 400 を返さない JSON。
 
 ---
 
-## Automated (SharePoint Item Created)
-
-```json
+## 自動化 (SharePoint アイテムが作成されました)```json
 "When_an_item_is_created": {
   "type": "OpenApiConnectionNotification",
   "inputs": {
@@ -117,15 +100,11 @@ Access any field dynamically: `@triggerBody()?['anyField']`
     }
   }
 }
-```
-
-Access trigger data: `@triggerBody()?['ID']`, `@triggerBody()?['Title']`, etc.
+```アクセストリガーデータ：`@triggerBody()?['ID']`、`@triggerBody()?['Title']`など
 
 ---
 
-## Automated (SharePoint Item Modified)
-
-```json
+## 自動化 (SharePoint アイテムの変更)```json
 "When_an_existing_item_is_modified": {
   "type": "OpenApiConnectionNotification",
   "inputs": {
@@ -147,13 +126,9 @@ Access trigger data: `@triggerBody()?['ID']`, `@triggerBody()?['Title']`, etc.
     }
   }
 }
-```
+```---
 
----
-
-## Automated (Outlook: When New Email Arrives)
-
-```json
+## 自動化 (Outlook: 新しいメールの到着時)```json
 "When_a_new_email_arrives": {
   "type": "OpenApiConnectionNotification",
   "inputs": {
@@ -172,13 +147,9 @@ Access trigger data: `@triggerBody()?['ID']`, `@triggerBody()?['Title']`, etc.
     }
   }
 }
-```
+```---
 
----
-
-## Child Flow (Called by Another Flow)
-
-```json
+## 子フロー (別のフローによって呼び出される)```json
 "manual": {
   "type": "Request",
   "kind": "Button",
@@ -194,12 +165,9 @@ Access trigger data: `@triggerBody()?['ID']`, `@triggerBody()?['Title']`, etc.
     }
   }
 }
-```
+```親が提供するデータにアクセスする: `@triggerBody()?['items']`
 
-Access parent-supplied data: `@triggerBody()?['items']`
-
-To return data to the parent, add a `Response` action:
-```json
+データを親に返すには、`Response` アクションを追加します。```json
 "Respond_to_Parent": {
   "type": "Response",
   "runAfter": { "Compose_Result": ["Succeeded"] },

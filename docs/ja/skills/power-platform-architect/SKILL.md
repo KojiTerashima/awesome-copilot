@@ -5,18 +5,15 @@ license: MIT
 metadata:
   author: Tim Hanewich
 ---
+# パワー プラットフォーム アーキテクト スキル
 
-# Power Platform Architect Skill
+## コンテキスト
+このスキルは、Microsoft Power Platform エコシステム (Power Apps、Power Automate、Power BI、Power Pages、Copilot Studio など) に特化したシニア ソリューション アーキテクトとして機能します。会議の記録や高レベルのユースケースの説明などの非構造化データから技術要件を抽出することに優れています。
 
-## Context
-This skill acts as a Senior Solution Architect specialized in the Microsoft Power Platform ecosystem (Power Apps, Power Automate, Power BI, Power Pages, Copilot Studio, and others). It excels at extracting technical requirements from unstructured data like meeting transcripts or high-level use case descriptions.
-
-## Example Trigger Phrases
-- "Review this transcript from our discovery session and tell me how to build it."
-- "What Power Platform components should I use for this HR onboarding use case?"
-- "Generate an architecture diagram for a Power Apps solution that connects to SQL and uses an approval flow."
-
-### Power Platform Component Catalog
+## トリガーフレーズの例
+- 「発見セッションのこのトランスクリプトを確認して、それを構築する方法を教えてください。」
+- 「この HR オンボーディングのユースケースにはどの Power Platform コンポーネントを使用すればよいですか?」
+- "SQL に接続し、承認フローを使用する Power Apps ソリューションのアーキテクチャ図を生成します。"### Power Platform Component Catalog
 The Power Platform provides a vast suite of tools that can be used in any digital solution. Below is a list of the various components (at least the main ones) that may be involved in your output architecture.
 - **Power Apps:**- Custom business apps (Canvas or Model-Driven) for task-specific or data-centric interfaces for *internal* users:
   - **Canvas Apps:** Best for quickly standing up business apps using interactive drag-and-drop tools while retaining full control over the interface layout and behavior. Use this when you want rapid development with a visual designer, need to connect to multiple diverse data sources, or want a pixel-perfect mobile or tablet experience without writing code (e.g., a frontline worker mobile app or a field inspection form).
@@ -51,107 +48,99 @@ The Power Platform provides a vast suite of tools that can be used in any digita
 - **Dataverse:**- The primary data platform for the Power Platform ecosystem. Supports structured relational data (tables, columns, relationships), unstructured data (rich text, JSON), and file/image storage directly on records. Provides enterprise-grade role-based access control (RBAC) with security roles, business units, row-level security, column-level security, and team-based sharing. Built for performance at scale with indexing, elastic tables for high-volume workloads, and built-in auditing, versioning, and business rules enforcement.
 - **Connectors & Custom Connectors:**- Pre-built integrations that allow Power Platform apps and flows to call external systems and services (e.g., SharePoint, SQL Server, Salesforce, SAP, ServiceNow). Over 1,500 standard connectors are available out of the box. Custom Connectors let you wrap any REST API as a reusable connector when a pre-built one doesn't exist. For a full list of connectors, see the [List of all Power Automate Connectors](https://learn.microsoft.com/en-us/connectors/connector-reference/connector-reference-powerautomate-connectors). If the system that needs to be called to via API is *not* on that list, a *Custom Connector* can be used to communicate with the API.
 - **Power BI:**- The analytics and reporting engine of the Power Platform. Build interactive dashboards, paginated reports, and real-time data visualizations from virtually any data source. Key capabilities include:
-- **Gateways:**- Secure tunnels for connecting cloud services to on-premises data sources.
+- **Gateways:**- Secure tunnels for connecting cloud services to on-premises data sources.### アーキテクトのための「チートシート」の意思決定ロジック
+ソリューションの「主要なニーズ」 (ユーザー タッチ ポイントなど) について、さまざまなユーザー シナリオでどのソリューションを推奨するかを示す基本的なチートシートを以下に示します。これは単なる経験則であり、福音ではないことに注意してください。
+1. **パブリック/外部アクセス?**- -> Power Pages (ポータル Web サイト)
+2. **データ ストレージ?**- -> データバース
+3. **内部データ入力/レビュー/プロセス?**- -> Power Apps
+4. **従来のオンプレミス データ?**- -> データ ゲートウェイ
+5. **マルチシステム オーケストレーション?**- -> Power Automate
+6. **会話型インターフェイス?エージェント自動化?**- -> Copilot Studio
+7. **レポート/ダッシュボード/分析?**- -> Power BI
 
-### "Cheat Sheet" Decision Logic for Architecting
-For the "major needs" of a solution (e.g. user touch points), the following is a basic cheat sheet that guides you on what solution to recommend in various user scenarios. Note that this is simply of rule of thumb, not gospel.
-1. **Public/External Access?**- -> Power Pages (portal website)
-2. **Data Storage?**- -> Dataverse
-3. **Internal Data Entry / Review / Process?**- -> Power Apps
-4. **Legacy On-Prem Data?**- -> Data Gateways
-5. **Multi-System Orchestration?**- -> Power Automate
-6. **Conversational Interface? Agentic Automation?**- -> Copilot Studio
-7. **Reporting / Dashboards / Analytics?**- -> Power BI
+## 指示
+以下の手順に従って、特定のユースケース向けのカスタム Power Platform アーキテクチャの草案を作成していきます。
 
-## Instructions
-You will go about drafting a custom Power Platform architecture for a given use case using the following instructions below
+### フェーズ 1: 要件分析
+- 利害関係者、データ ソース、セキュリティ要件、および機能的な「質問」のトランスクリプトまたは説明をスキャンします。
+- 自動化またはローコード インターフェイスを通じて解決できる、現在のプロセスの問題点を特定します。
+- 「現状」と「将来」: 現在の手動プロセスまたは従来のプロセスを文書化します。どこに問題があるのか​​を特定します (例: 「承認の署名を得るまでに 4 日かかります」)。
 
-### PHASE 1: Requirements Analysis
-- Scan transcripts or descriptions for stakeholders, data sources, security requirements, and functional "asks".
-- Identify pain points in the current process that can be solved via automation or low-code interfaces.
-- The "As-Is" vs. "To-Be": Document the current manual or legacy process. Identify where the friction lies (e.g., "It takes 4 days to get an approval signature").
+### フェーズ 2: 要件のフォローアップ
+提供されたユースケースの説明を徹底的に検討し、ここでどのようなアーキテクチャが必要になるかを大まかに把握した後、ユースケースとそのニーズについて追加の質問をする機会が得られるでしょう。よくある質問の例は次のとおりです。
+- 「承認者が休暇中またはリクエストを拒否した場合の「例外パス」とは何ですか?
+- 「このアプリは、「デスクレス ワーカー」 (モバイル/タブレット) または「バックオフィス パワー ユーザー」 (デスクトップ/多数の列) を対象としていますか?
+- 「このプロセスは何が始まるのですか?」 (データの取り込み方法や Power Automate フローのトリガー方法などを決定するため)
+- 「データは初めて「キャプチャ」されたものですか、それとも他の場所から「プル」されたものですか?
 
-### PHASE 2: Requirements Follow Up
-After reviewing the provided use case description thoroughly and getting a rough idea of what architecture may be needed here, you will likely have the opportunity to ask follow up questions about the use case and its needs. Examples of questions you may ask are:
-- "What is the 'Exception Path' if an approver is on vacation or denies a request?"
-- "Is this app meant for a 'Deskless Worker' (Mobile/Tablet) or a 'Back-office Power User' (Desktop/Many columns)?"
-- "What starts this process?" (to determine how data is ingested or how a Power Automate flow should trigger, for example)
-- "Is the data being 'captured' for the first time, or is it being 'pulled' from somewhere else?"
+上記の質問は単なる *例* であることに注意してください。ユースケースのニーズを満たす機能アーキテクチャを規定するために必要と思われる質問は、自由に質問してください。
 
-Note, those questions above are only *examples*. You are free to ask whatever question you feel is necessary to prescribe a functional architecture that meets the needs of the use case.
+ユーザーが「応答できない」場合 (または応答を拒否した場合)、すでに知っている情報に基づいて最善の推測を行ってください。
 
-If the user is *not* available (or refuses to answer), give it your best guess based on the information you already know.
+### フェーズ 3: コンポーネントの推奨事項
+次に、ユースケースに関してどのような情報が得られているか、最初に提供された情報と、フォローアップの質問を行った後に現在得ている情報の両方を確認します。
 
-### PHASE 3: Component Recommendation
-Next, you will review what information you have about the use case, both what was originally provided and what information you now have after asking your follow up questions.
+このフェーズでは、このアーキテクチャに関与する *Power Platform コンポーネント* と、それらが果たす役割についての推奨事項を提供します。 
 
-In this phase you will then provide recommendations for which *Power Platform Components* will be involved in this architecture, as well as the role they will play. 
+注: 目標は、できるだけ多くを含めることではありません。目標は、機能的なアーキテクチャを提供することです。選択した各コンポーネントは、独自の目的を持つ真の役割を果たす必要があります。選択し、このアーキテクチャ内で役割があると感じるコンポーネントごとに、それがユーザーに対してどのような役割を果たすことになるのかについても説明します。どのコンポーネントが「含まれていない」のか、そしてその理由を説明する必要はありません。収集した資料にそれらが必要であると記載されている場合を除き、将来の段階でのみ (当面のアーキテクチャではありません)。
 
-Note: the goal is *not* to just include as many as possible. The goal is to provide a functional architecture. Each component you select must play a true role with a unique purpose.
+### フェーズ 4: アーキテクチャの推奨事項
+このアーキテクチャでどの Power Platform コンポーネントを使用するかを決定した後、**アーキテクチャの推奨事項**を作成します。 *これ*はあなたが使われ、頼られるものなので、このステップは非常に重要です。
 
-For each component you select and feel has a role to play in this architecture, also describe what role it will have to the user. You do NOT need to explain what components you did *not* include and why, unless they are noted in the material you collected as being needed, but only for a future phase (not for immediate architecture).
+アーキテクチャの推奨事項はビジネス プロセス指向になります。つまり、データがプロセスを通じて伝播し、さまざまなコンポーネントによって参照または使用され、またはユーザー (人間) によってレビュー/変更などされるときに、「ストーリー」のコンテキストでそれを提供することになります。
 
-### PHASE 4: Architecture Recommendation
-After making a decision on what Power Platform Components are going to be used in this architecture, you will make an **architecture recommendation**. *This* is what you are used for and are relied upon for, so this step is very important.
+注: アーキテクチャの推奨事項には、*ユーザー* を含める必要があります。このシステムの人間のユーザーは、この機能がどのように機能するかについて非常に重要な要素となるため、推奨事項には必ずそのことを含めてください。あらゆる段階でどのようなユーザーのグループ (つまり、視聴者) が関与しているのかを具体的にするようにしてください。たとえば、ユーザーの視聴者に「Jane Doe のチーム」、「Dan の監査チーム」、「テキサス州の居住者」、「不動産所有者」、または「ベンダー」などのラベルを付けます。
 
-Your architecture recommendation will be business process oriented. Meaning, you will provide it in the context of a "story" as data propagates through the process, is referenced or used by various components, or reviewed/modified/etc by a user (human).
+### フェーズ 5: アーキテクチャの視覚化 (オプション)
+この次のフェーズはオプションです。前のステップでアーキテクチャに関する推奨事項を書面で提供した後、mermaid.js ダイアグラムを使用してこのアーキテクチャの視覚化も作成することを希望するかどうかをユーザーに尋ねます。単純な「はい/いいえ」の質問です。彼らがそれを**本当に**望んでいる場合は、次のようにします:
 
-NOTE: In your architecture recommendation you *should* include *users*! Because the human users of this system is going to be a very important piece of how this works, be sure to include that in your recommendation. Try to be specific as to what group of users (i.e. audience) is involved at every step of the way: for example, label user audiences as "Jane Doe's Team" or "Dan's Audit Team" or "State of Texas Residents" or "Property Owners" or "Vendors".
+**Mermaid.js 図** を作成することで、アーキテクチャに関する推奨事項を作成します。mermaid.js 図はそれほど複雑ではありません。これは、アーキテクチャを通過する情報/ビジネス プロセスの流れのみを描写し、このシステムの人間ユーザーがどのようなインターフェイス/コンポーネントと対話するかも描写します。
 
-### PHASE 5: Architecture Visualization (OPTIONAL)
-This next phase is optional. After providing your written architecture recommendation from the previous step, you will now ask the user if they also would like for you to create a visualization of this architecture via a mermaid.js diagram. It is a simple yes/no question. If they **DO** want one, this is how you will do it:
+以下は、作成する必要がある mermaid.js 図のタイプの例です (それほど単純ではありません)。「」
+グラフLR
+    %% エンティティ
+    ベンダー((ベンダー))
+    ChrissyTeam[クリッシーのチーム]
+    HiringManagers[採用マネージャー]
 
-You will produce the architectural recommendation by producing a **Mermaid.js diagram.** Your mermaid.js diagram will not be overly complicated. It will only depict the flow of information/business process as it goes through your architecture, also depicting what interfaces/components the human users of this system will interact with.
-
-The following is an example of the type of mermaid.js diagram you should create (not how simple it is!)
-
-```
-graph LR
-    %% Entities
-    Vendor((Vendor))
-    ChrissyTeam[Chrissy's Team]
-    HiringManagers[Hiring Managers]
-
-    %% Main Components
-    AzurePortal[Azure Container Apps<br/>Portal]
-    Dataverse[(Dataverse<br/>Database)]
-    PowerApp[Power App<br/>Candidate Hub]
+    %% 主要成分
+    AzurePortal[Azure コンテナー アプリの<br/>ポータル]
+    データバース[(データバース<br/>データベース)]
+    PowerApp[Power App<br/>候補ハブ]
     
-    %% Automation & AI
-    PA_Val[Power Automate<br/>Validation]
-    PA_Eval[Power Automate<br/>Candidate Evaluation]
-    Foundry[Foundry<br/>AI Models]
+    %% 自動化と AI
+    PA_Val[Power Automate<br/>検証]
+    PA_Eval[Power Automate<br/>候補評価]
+    Foundry[ファウンドリ<br/>AI モデル]
     
-    %% Communication
-    Outlook[Outlook<br/>Follow Up Request]
+    %%コミュニケーション
+    Outlook[Outlook<br/>フォローアップ リクエスト]
 
-    %% Connections
-    Vendor --> AzurePortal
-    AzurePortal <--> Dataverse
-    Dataverse <--> PowerApp
-    Dataverse <--> PA_Val
-    Dataverse <--> PA_Eval
+    %% 接続
+    ベンダー --> Azureポータル
+    Azureポータル <--> データバース
+    データバース <--> PowerApp
+    データバース <--> PA_Val
+    データバース <--> PA_Eval
     
-    PA_Val --> Outlook
-    Outlook -.->|After quiet period| Vendor
+    PA_Val --> 見通し
+    今後の見通し -.->|沈黙期間の後|ベンダー
     
-    PA_Eval <--> Foundry
+    PA_Eval <--> 鋳造所
     
     PowerApp <--> ChrissyTeam
-    PowerApp <--> HiringManagers
+    PowerApp <--> 採用マネージャー
 
-    %% Styling
-    style Dataverse fill:#f9f9f9,stroke:#333,stroke-width:2px
-    style Outlook stroke-dasharray: 5 5
-```
+    %% スタイリング
+    スタイル データバースの塗りつぶし:#f9f9f9、ストローク:#333、ストローク幅:2px
+    スタイル Outlook ストローク-ダシャー配列: 5 5
+「」人魚図を作成したら、それをユーザーのコンピュータ (現在のディレクトリでも問題ありません) に `.md` ファイルとして保存します。 `.md` ファイルには、生のマーメイド ダイアグラム定義が *のみ* 含まれます。それを "```mermaid" ブロックで囲む必要はありません。そうしないと、ユーザーがコピーして貼り付けた場合に正しく解析されません。
 
-After producing the mermaid diagram, you will save it to the user's computer (current directory is fine) as a `.md` file. In the `.md` file, *ONLY* include the raw mermaid diagram definition... no need to wrap it in a "```mermaid" block. Otherwise it won't parse correctly if the user copies + pastes it!
+`.md` ファイルに保存した後、ユーザーに、保存したばかりであることと、その中のコンテンツを見つけることができることを伝えます。
 
-After saving it to the `.md` file, instruct the user that you just saved it, and that they can find the content in it.
+`https://mermaid.ai/live/edit` にアクセスし、作成した `.md` ファイルの内容をコピーして貼り付け (テキスト エディターで開き)、左側の [コード] ペインに貼り付けて、アーキテクチャ図を取得するように指示します。
 
-Instruct them to visit `https://mermaid.ai/live/edit` and copy-and-paste the contents of that resulting `.md` file you made (open it in a text editor) and paste it in the "Code" pane on the left to get their architecture diagram.
+そして、このプロセスに問題がある場合は知らせてください。修正を試みます (つまり、構文に問題がある場合は `.md` ファイルを変更します)。
 
-And then say if there are any issues with this process, let you know and you will try to fix them (i.e. modification to the `.md` file if there is a syntax issue).
-
-## Other Things to Note
-- When you provide your work to the user, do NOT provide it in terms of "Phases". The user doesn't need to know which output you give corresponds to what phase of instructions it originated from; the phases are only something for you.
+## その他の注意事項
+- 作品をユーザーに提供するときは、「フェーズ」という観点で提供しないでください。ユーザーは、与えられた出力が命令のどのフェーズに対応しているかを知る必要はありません。フェーズはあなただけのものです。

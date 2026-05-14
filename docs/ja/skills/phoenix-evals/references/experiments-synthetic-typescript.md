@@ -1,86 +1,70 @@
-# Experiments: Generating Synthetic Test Data (TypeScript)
+# 実験: 合成テスト データの生成 (TypeScript)
 
-Creating diverse, targeted test data for evaluation.
+評価用にターゲットを絞った多様なテストデータを作成します。
 
-## Dimension-Based Approach
+## ディメンションベースのアプローチ
 
-Define axes of variation, then generate combinations:
-
-```typescript
-const dimensions = {
-  issueType: ["billing", "technical", "shipping"],
-  customerMood: ["frustrated", "neutral", "happy"],
-  complexity: ["simple", "moderate", "complex"],
+変化の軸を定義し、組み合わせを生成します。```タイプスクリプト
+定数次元 = {
+  issueType: ["請求", "技術", "配送"],
+  顧客の気分: [「不満」、「どちらでもない」、「幸せ」]、
+  複雑さ: [「単純」、「中程度」、「複雑」]、
 };
-```
+「」## 2 段階の生成
 
-## Two-Step Generation
+1. **タプルの生成** (ディメンション値の組み合わせ)
+2. **自然なクエリに変換** (タプルごとに個別の LLM 呼び出し)```タイプスクリプト
+import {generateText} from "ai";
+import { openai } から "@ai-sdk/openai";
 
-1. **Generate tuples** (combinations of dimension values)
-2. **Convert to natural queries** (separate LLM call per tuple)
-
-```typescript
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
-
-// Step 1: Create tuples
-type Tuple = [string, string, string];
-const tuples: Tuple[] = [
-  ["billing", "frustrated", "complex"],
-  ["shipping", "neutral", "simple"],
+// ステップ 1: タプルを作成する
+type タプル = [文字列, 文字列, 文字列];
+const タプル: タプル[] = [
+  [「請求」、「イライラ」、「複雑」]、
+  [「配送」、「中立」、「シンプル」]、
 ];
 
-// Step 2: Convert to natural query
-async function tupleToQuery(t: Tuple): Promise<string> {
-  const { text } = await generateText({
-    model: openai("gpt-4o"),
-    prompt: `Generate a realistic customer message:
-    Issue: ${t[0]}, Mood: ${t[1]}, Complexity: ${t[2]}
+// ステップ 2: 自然なクエリに変換する
+非同期関数 tupleToQuery(t: Tuple): Promise<string> {
+  const { text } = await generatedText({
+    モデル: openai("gpt-4o")、
+    プロンプト: `現実的な顧客メッセージを生成します:
+    問題: ${t[0]}、気分: ${t[1]}、複雑さ: ${t[2]}
     
-    Write naturally, include typos if appropriate. Don't be formulaic.`,
+    自然に書き、必要に応じてタイプミスも含めてください。型にはまらないでください。」、
   });
-  return text;
+  テキストを返します。
 }
-```
+「」## ターゲットの障害モード
 
-## Target Failure Modes
-
-Dimensions should target known failures from error analysis:
-
-```typescript
-// From error analysis findings
-const dimensions = {
-  timezone: ["EST", "PST", "UTC", "ambiguous"], // Known failure
-  dateFormat: ["ISO", "US", "EU", "relative"], // Known failure
+ディメンションは、エラー分析からの既知の障害を対象にする必要があります。```タイプスクリプト
+// エラー分析結果から
+定数次元 = {
+  timezone: ["EST", "PST", "UTC", "ambiguous"], // 既知の障害
+  dateFormat: ["ISO", "US", "EU", "relative"], // 既知の障害
 };
-```
+「」## 品質管理
 
-## Quality Control
-
-- **Validate**: Check for placeholder text, minimum length
-- **Deduplicate**: Remove near-duplicate queries using embeddings
-- **Balance**: Ensure coverage across dimension values
-
-```typescript
-function validateQuery(query: string): boolean {
+- **検証**: プレースホルダー テキスト、最小長をチェックします。
+- **重複排除**: 埋め込みを使用して重複に近いクエリを削除します。
+- **バランス**: ディメンション値全体を確実にカバーします。```タイプスクリプト
+関数 validateQuery(クエリ: 文字列): ブール値 {
   const minLength = 20;
   const hasPlaceholder = /\[.*?\]|<.*?>/.test(query);
   return query.length >= minLength && !hasPlaceholder;
 }
-```
+「」## いつ使用するか
 
-## When to Use
-
-| Use Synthetic | Use Real Data |
+|合成繊維を使用 |実データを使用する |
 | ------------- | ------------- |
-| Limited production data | Sufficient traces |
-| Testing edge cases | Validating actual behavior |
-| Pre-launch evals | Post-launch monitoring |
+|限定生産データ |十分なトレース |
+|エッジケースのテスト |実際の動作を検証する |
+|起動前評価 |打ち上げ後のモニタリング |
 
-## Sample Sizes
+## サンプルサイズ
 
-| Purpose | Size |
+|目的 |サイズ |
 | ------- | ---- |
-| Initial exploration | 50-100 |
-| Comprehensive eval | 100-500 |
-| Per-dimension | 10-20 per combination |
+|初期の探索 | 50-100 |
+|総合評価 | 100-500 |
+|次元ごと |組み合わせごとに 10 ～ 20 |

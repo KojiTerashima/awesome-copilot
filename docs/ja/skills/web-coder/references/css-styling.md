@@ -1,55 +1,53 @@
-# CSS & Styling Reference
+# CSS とスタイリングのリファレンス
 
-Comprehensive reference for Cascading Style Sheets, layout systems, and modern styling techniques.
+カスケード スタイル シート、レイアウト システム、最新のスタイル手法に関する包括的なリファレンス。
 
-## Core Concepts
+## コアコンセプト
 
-### CSS (Cascading Style Sheets)
+### CSS (カスケード スタイル シート)
 
-Style sheet language used for describing the presentation of HTML documents.
+HTML ドキュメントのプレゼンテーションを記述するために使用されるスタイル シート言語。
 
-**Three Ways to Apply CSS**:
+**CSS を適用する 3 つの方法**:
 
-1. **Inline**: `<div style="color: blue;">`
-2. **Internal**: `<style>` tag in HTML
-3. **External**: Separate `.css` file (recommended)
+1. **インライン**: `<div style="color: blue;">`
+2. **内部**: HTML 内の `<style>` タグ
+3. **外部**: 個別の `.css` ファイル (推奨)
 
-### The Cascade
+### カスケード
 
-The algorithm that determines which CSS rules apply when multiple rules target the same element.
+複数のルールが同じ要素をターゲットとする場合に、どの CSS ルールが適用されるかを決定するアルゴリズム。
 
-**Priority Order** (highest to lowest):
+**優先順位** (最高から最低):
 
-1. Inline styles
-2. ID selectors (`#id`)
-3. Class selectors (`.class`), attribute selectors, pseudo-classes
-4. Element selectors (`div`, `p`)
-5. Inherited properties
+1. インラインスタイル
+2. IDセレクター(`#id`)
+3. クラスセレクター (`.class`)、属性セレクター、疑似クラス
+4. 要素セレクター (`div`、`p`)
+5. 継承されたプロパティ
 
-**Important**: `!important` declaration overrides normal specificity (use sparingly)
+**重要**: `!important` 宣言は通常の詳細性をオーバーライドします (慎重に使用してください)
 
-### CSS Selectors
+### CSS セレクター
 
-| Selector | Example | Description |
-|----------|---------|-------------|
-| Element | `p` | Selects all `<p>` elements |
-| Class | `.button` | Selects elements with `class="button"` |
-| ID | `#header` | Selects element with `id="header"` |
-| Universal | `*` | Selects all elements |
-| Descendant | `div p` | `<p>` inside `<div>` (any level) |
-| Child | `div > p` | Direct child `<p>` of `<div>` |
-| Adjacent Sibling | `h1 + p` | `<p>` immediately after `<h1>` |
-| General Sibling | `h1 ~ p` | All `<p>` siblings after `<h1>` |
-| Attribute | `[type="text"]` | Elements with specific attribute |
-| Attribute Contains | `[href*="example"]` | Contains substring |
-| Attribute Starts | `[href^="https"]` | Starts with string |
-| Attribute Ends | `[href$=".pdf"]` | Ends with string |
+|セレクター |例 |説明 |
+|----------|-----------|---------------|
+|要素 | `p` |すべての `<p>` 要素を選択します |
+|クラス | `.button` | `class="button"` を使用して要素を選択します |
+| ID | `#header` | `id="header"` で要素を選択します |
+|ユニバーサル | `*` |すべての要素を選択します |
+|子孫 | `div p` | `<div>` 内の `<p>` (任意のレベル) |
+|子供 | `div > p` | `<div>` の直接の子 `<p>` |
+|隣接する兄弟 | `h1 + p` | `<h1>` の直後 | `<p>`
+|一般的な兄弟 | `h1 ~ p` | `<h1>` 以降のすべての `<p>` 兄弟 |
+|属性 | `[type="text"]` |特定の属性を持つ要素 |
+|属性に含まれる | `[href*="example"]` |部分文字列 | が含まれています
+|属性の開始 | `[href^="https"]` |文字列で始まります |
+|属性の終了 | `[href$=".pdf"]` |文字列 | で終わる
 
-### Pseudo-Classes
+### 疑似クラス
 
-Target elements based on state or position:
-
-```css
+状態または位置に基づいて要素をターゲットにします。```css
 /* Link states */
 a:link { color: blue; }
 a:visited { color: purple; }
@@ -70,13 +68,9 @@ input:valid { border-color: green; }
 input:invalid { border-color: red; }
 input:disabled { opacity: 0.5; }
 input:checked + label { font-weight: bold; }
-```
+```### 擬似要素
 
-### Pseudo-Elements
-
-Style specific parts of elements:
-
-```css
+要素の特定の部分をスタイル設定します。```css
 /* First line/letter */
 p::first-line { font-weight: bold; }
 p::first-letter { font-size: 2em; }
@@ -90,18 +84,14 @@ p::first-letter { font-size: 2em; }
 
 /* Placeholder */
 input::placeholder { color: #999; }
-```
+```## ボックスモデル
 
-## Box Model
+すべての要素は次のような長方形のボックスです。
 
-Every element is a rectangular box with:
-
-1. **Content**: The actual content (text, images)
-2. **Padding**: Space around content, inside border
-3. **Border**: Line around padding
-4. **Margin**: Space outside border
-
-```css
+1. **コンテンツ**: 実際のコンテンツ (テキスト、画像)
+2. **パディング**: コンテンツの周囲、境界線の内側のスペース
+3. **境界線**: パディングの周囲の線
+4. **マージン**: 境界線の外側のスペース```css
 .box {
   /* Content size */
   width: 300px;
@@ -122,15 +112,11 @@ Every element is a rectangular box with:
   /* Box-sizing changes how width/height work */
   box-sizing: border-box; /* Include padding/border in width/height */
 }
-```
+```## レイアウト システム
 
-## Layout Systems
+### フレックスボックス
 
-### Flexbox
-
-One-dimensional layout system (row or column):
-
-```css
+1 次元レイアウト システム (行または列):```css
 .container {
   display: flex;
   
@@ -172,13 +158,9 @@ One-dimensional layout system (row or column):
   /* Order */
   order: 2; /* Change visual order (default: 0) */
 }
-```
+```### CSS グリッド
 
-### CSS Grid
-
-Two-dimensional layout system (rows and columns):
-
-```css
+2 次元レイアウト システム (行と列):```css
 .container {
   display: grid;
   
@@ -224,26 +206,22 @@ Two-dimensional layout system (rows and columns):
   justify-self: center; /* Horizontal alignment */
   align-self: center; /* Vertical alignment */
 }
-```
+```### グリッドとフレックスボックス
 
-### Grid vs Flexbox
+|使用例 |ベストチョイス |
+|----------|---------------|
+| 1 次元レイアウト (行または列) |フレックスボックス |
+| 2 次元レイアウト (行と列) |グリッド |
+|項目を 1 つの軸に沿って整列させる |フレックスボックス |
+|複雑なページ レイアウトを作成する |グリッド |
+|項目間のスペースを分散する |フレックスボックス |
+|行と列を正確に制御 |グリッド |
+|コンテンツファーストのレスポンシブデザイン |フレックスボックス |
+|レイアウトファーストのレスポンシブデザイン |グリッド |
 
-| Use Case | Best Choice |
-|----------|-------------|
-| One-dimensional layout (row or column) | Flexbox |
-| Two-dimensional layout (rows and columns) | Grid |
-| Align items along one axis | Flexbox |
-| Create complex page layouts | Grid |
-| Distribute space between items | Flexbox |
-| Precise control over rows and columns | Grid |
-| Content-first responsive design | Flexbox |
-| Layout-first responsive design | Grid |
+## 位置決め
 
-## Positioning
-
-### Position Types
-
-```css
+### ポジションの種類```css
 /* Static (default) - normal flow */
 .static { position: static; }
 
@@ -273,40 +251,28 @@ Two-dimensional layout system (rows and columns):
   position: sticky;
   top: 0; /* Sticks to top when scrolling */
 }
-```
+```### インセットのプロパティ
 
-### Inset Properties
-
-Shorthand for positioning:
-
-```css
+ポジショニングの略記:```css
 .element {
   position: absolute;
   inset: 0; /* All sides: top, right, bottom, left = 0 */
   inset: 10px 20px; /* Vertical | Horizontal */
   inset: 10px 20px 30px 40px; /* Top | Right | Bottom | Left */
 }
-```
+```### コンテキストのスタッキング
 
-### Stacking Context
-
-Control layering with `z-index`:
-
-```css
+`z-index` を使用して階層化を制御します。```css
 .behind { z-index: 1; }
 .ahead { z-index: 10; }
 .top { z-index: 100; }
-```
+```**注意**: `z-index` は位置決めされた要素に対してのみ機能します (`static` ではありません)。
 
-**Note**: `z-index` only works on positioned elements (not `static`)
+## レスポンシブデザイン
 
-## Responsive Design
+### メディアクエリ
 
-### Media Queries
-
-Apply styles based on device characteristics:
-
-```css
+デバイスの特性に基づいてスタイルを適用します。```css
 /* Mobile-first approach */
 .container {
   padding: 1rem;
@@ -353,26 +319,22 @@ Apply styles based on device characteristics:
     transition-duration: 0.01ms !important;
   }
 }
-```
+```### 対応ユニット
 
-### Responsive Units
+|単位 |説明 |例 |
+|------|---------------|----------|
+| `px` |ピクセル (絶対) | `16px` |
+| `em` |親のフォント サイズとの相対値 | `1.5em` |
+| `rem` |ルート font-size を基準とした値 | `1.5rem` |
+| `%` |親との相対 | `50%` |
+| `vw` |ビューポート幅 (1vw = ビューポート幅の 1%) | `50vw` |
+| `vh` |ビューポートの高さ | `100vh` |
+| `vmin` | vw または vh の小さい方 | `10vmin` |
+| `vmax` | vw または vh の大きい方 | `10vmax` |
+| `ch` | 「0」文字の幅 | `40ch` |
+| `fr` |利用可能なスペースの割合 (グリッドのみ) | `1fr` |
 
-| Unit | Description | Example |
-|------|-------------|---------|
-| `px` | Pixels (absolute) | `16px` |
-| `em` | Relative to parent font-size | `1.5em` |
-| `rem` | Relative to root font-size | `1.5rem` |
-| `%` | Relative to parent | `50%` |
-| `vw` | Viewport width (1vw = 1% of viewport width) | `50vw` |
-| `vh` | Viewport height | `100vh` |
-| `vmin` | Smaller of vw or vh | `10vmin` |
-| `vmax` | Larger of vw or vh | `10vmax` |
-| `ch` | Width of "0" character | `40ch` |
-| `fr` | Fraction of available space (Grid only) | `1fr` |
-
-### Responsive Images
-
-```css
+### レスポンシブ画像```css
 img {
   max-width: 100%;
   height: auto;
@@ -387,11 +349,7 @@ img {
   <source media="(min-width: 768px)" srcset="medium.jpg">
   <img src="small.jpg" alt="Responsive image">
 </picture>
-```
-
-## Typography
-
-```css
+```## タイポグラフィー```css
 .text {
   /* Font family */
   font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -441,11 +399,7 @@ img {
   word-wrap: break-word; /* Break long words */
   overflow-wrap: break-word; /* Modern version */
 }
-```
-
-## Colors
-
-```css
+```## 色```css
 .colors {
   /* Named colors */
   color: red;
@@ -469,13 +423,9 @@ img {
   color: currentColor; /* Inherit color */
   color: transparent;
 }
-```
+```### CSS カラースペース
 
-### CSS Color Space
-
-Modern color spaces for wider gamut:
-
-```css
+より広い色域を実現する最新の色空間:```css
 .modern-colors {
   /* Display P3 (Apple devices) */
   color: color(display-p3 1 0 0);
@@ -486,15 +436,11 @@ Modern color spaces for wider gamut:
   /* LCH color space */
   color: lch(50% 125 0deg);
 }
-```
+```## アニメーションとトランジション
 
-## Animations and Transitions
+### トランジション
 
-### Transitions
-
-Smooth changes between states:
-
-```css
+状態間のスムーズな変化:```css
 .button {
   background: blue;
   color: white;
@@ -514,11 +460,7 @@ Smooth changes between states:
   transition-timing-function: ease, ease-in-out;
   transition-delay: 0s, 0.1s;
 }
-```
-
-### Keyframe Animations
-
-```css
+```### キーフレーム アニメーション```css
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -545,11 +487,7 @@ Smooth changes between states:
 .slider {
   animation: slide 2s infinite alternate;
 }
-```
-
-## Transforms
-
-```css
+```## 変換```css
 .transform {
   /* Translate (move) */
   transform: translate(50px, 100px); /* X, Y */
@@ -573,11 +511,7 @@ Smooth changes between states:
   transform: rotateX(45deg) rotateY(30deg);
   transform: perspective(500px) translateZ(100px);
 }
-```
-
-## CSS Variables (Custom Properties)
-
-```css
+```## CSS 変数 (カスタム プロパティ)```css
 :root {
   --primary-color: #007bff;
   --secondary-color: #6c757d;
@@ -600,97 +534,95 @@ Smooth changes between states:
   --background: #222;
   --text: #fff;
 }
-```
+```## CSS プリプロセッサ
 
-## CSS Preprocessors
+### 共通機能
 
-### Common Features
+- 変数
+- ネスティング
+- ミックスイン (再利用可能なスタイル)
+- 機能
+- 輸入品
 
-- Variables
-- Nesting
-- Mixins (reusable styles)
-- Functions
-- Imports
+**人気のプリプロセッサ**: Sass/SCSS、Less、Stylus
 
-**Popular Preprocessors**: Sass/SCSS, Less, Stylus
+## ベストプラクティス
 
-## Best Practices
+### やるべきこと
 
-### Do's
+- ✅ 外部スタイルシートを使用する
+- ✅ ID セレクターではなくクラス セレクターを使用する
+- ✅ 特異性を低く保つ
+- ✅ 応答単位を使用する (rem、em、%)
+- ✅ モバイルファーストのアプローチ
+- ✅ テーマに CSS 変数を使用する
+- ✅ CSSを論理的に整理する
+- ✅ 省略表現プロパティを使用する
+- ✅ 本番用に CSS を縮小する
 
-- ✅ Use external stylesheets
-- ✅ Use class selectors over ID selectors
-- ✅ Keep specificity low
-- ✅ Use responsive units (rem, em, %)
-- ✅ Mobile-first approach
-- ✅ Use CSS variables for theming
-- ✅ Organize CSS logically
-- ✅ Use shorthand properties
-- ✅ Minify CSS for production
+### やってはいけないこと
 
-### Don'ts
+- ❌ `!important` を過度に使用する
+- ❌ インラインスタイルを使用する
+- ❌ 固定ピクセル幅を使用する
+- ❌ オーバーネストセレクター
+- ❌ ベンダー プレフィックスを手動で使用する (自動プレフィックスを使用する)
+- ❌ クロスブラウザのテストを忘れる
+- ❌ スタイル設定に ID を使用する
+- ❌ CSS の特異性を無視する
 
-- ❌ Use `!important` excessively
-- ❌ Use inline styles
-- ❌ Use fixed pixel widths
-- ❌ Over-nest selectors
-- ❌ Use vendor prefixes manually (use autoprefixer)
-- ❌ Forget to test cross-browser
-- ❌ Use IDs for styling
-- ❌ Ignore CSS specificity
+## 用語集の用語
 
-## Glossary Terms
+**対象となる重要な用語**:
 
-**Key Terms Covered**:
-
-- Alignment container
-- Alignment subject
-- Aspect ratio
-- Baseline
-- Block (CSS)
-- Bounding box
-- Cross Axis
+- 整列コンテナ
+- 調整対象
+- アスペクト比
+- ベースライン
+- ブロック(CSS)
+- 境界ボックス
+- クロス軸
 - CSS
-- CSS Object Model (CSSOM)
-- CSS pixel
-- CSS preprocessor
-- Descriptor (CSS)
-- Fallback alignment
-- Flex
-- Flex container
-- Flex item
-- Flexbox
-- Flow relative values
-- Grid
-- Grid areas
-- Grid Axis
-- Grid Cell
-- Grid Column
-- Grid container
-- Grid lines
-- Grid Row
-- Grid Tracks
-- Gutters
-- Ink overflow
-- Inset properties
-- Layout mode
-- Logical properties
-- Main axis
-- Media query
-- Physical properties
-- Pixel
-- Property (CSS)
-- Pseudo-class
-- Pseudo-element
-- Selector (CSS)
-- Stacking context
-- Style origin
-- Stylesheet
-- Vendor prefix
+- CSS オブジェクト モデル (CSSOM)
+- CSSピクセル
+- CSSプリプロセッサ
+- ディスクリプタ(CSS)
+- フォールバック調整
+- フレックス
+- フレックスコンテナ
+- フレックスアイテム
+- フレックスボックス
+- 流量相対値
+- グリッド
+- グリッドエリア
+- グリッド軸
+- グリッドセル
+- グリッド列
+- グリッドコンテナ
+- グリッド線
+- グリッド行
+- グリッドトラック
+- 側溝
+- インクオーバーフロー
+- インセットのプロパティ
+- レイアウトモード
+- 論理プロパティ
+- 主軸
+- メディアクエリ
+- 物理的性質
+- ピクセル
+- プロパティ(CSS)
+- 疑似クラス
+- 擬似要素
+- セレクター(CSS)
+- スタッキングコンテキスト
+- スタイルの起源
+- スタイルシート
+- ベンダープレフィックス
 
-## Additional Resources
+## 追加のリソース
 
-- [MDN CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS)
-- [CSS Tricks Complete Guide to Flexbox](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
-- [CSS Tricks Complete Guide to Grid](https://css-tricks.com/snippets/css/complete-guide-grid/)
-- [Can I Use](https://caniuse.com/) - Browser compatibility tables
+- [MDN CSS リファレンス](https://developer.mozilla.org/en-US/docs/Web/CSS)
+- [Flexbox の CSS トリック完全ガイド](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+- [CSS トリック グリッド完全ガイド](https://css-tricks.com/snippets/css/complete-guide-grid/)
+- [使用できますか](https://caniuse.com/) - ブラウザ互換性表

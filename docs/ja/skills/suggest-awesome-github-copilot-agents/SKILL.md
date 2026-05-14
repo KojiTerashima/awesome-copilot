@@ -2,105 +2,98 @@
 name: suggest-awesome-github-copilot-agents
 description: 'Suggest relevant GitHub Copilot Custom Agents files from the awesome-copilot repository based on current repository context and chat history, avoiding duplicates with existing custom agents in this repository, and identifying outdated agents that need updates.'
 ---
+# 素晴らしい GitHub Copilot カスタム エージェントを提案する
 
-# Suggest Awesome GitHub Copilot Custom Agents
+現在のリポジトリ コンテキストを分析し、このリポジトリでまだ利用できない関連するカスタム エージェント ファイルを [GitHub awesome-copilot リポジトリ](https://github.com/github/awesome-copilot/blob/main/docs/README.agents.md) から提案します。カスタム エージェント ファイルは、awesome-copilot リポジトリの [agents](https://github.com/github/awesome-copilot/tree/main/agents) フォルダーにあります。
 
-Analyze current repository context and suggest relevant Custom Agents files from the [GitHub awesome-copilot repository](https://github.com/github/awesome-copilot/blob/main/docs/README.agents.md) that are not already available in this repository. Custom Agent files are located in the [agents](https://github.com/github/awesome-copilot/tree/main/agents) folder of the awesome-copilot repository.
+## プロセス
 
-## Process
+1. **利用可能なカスタム エージェントを取得**: [awesome-copilot README.agents.md](https://github.com/github/awesome-copilot/blob/main/docs/README.agents.md) からカスタム エージェントのリストと説明を抽出します。 `fetch` ツールを使用する必要があります。
+2. **ローカル カスタム エージェントのスキャン**: `.github/agents/` フォルダー内の既存のカスタム エージェント ファイルを検出します。
+3. **説明の抽出**: ローカル カスタム エージェント ファイルから前付を読み取り、説明を取得します。
+4. **リモート バージョンの取得**: 各ローカル エージェントについて、生の GitHub URL (例: `https://raw.githubusercontent.com/github/awesome-copilot/main/agents/<filename>`) を使用して、awesome-copilot リポジトリから対応するバージョンを取得します。
+5. **バージョンの比較**: ローカル エージェントのコンテンツとリモート バージョンを比較して、以下を特定します。
+   - 最新のエージェント (完全一致)
+   - 古いエージェント（内容は異なります）
+   - 古いエージェントの主な違い (ツール、説明、コンテンツ)
+6. **コンテキストの分析**: チャット履歴、リポジトリ ファイル、および現在のプロジェクトのニーズを確認します。
+7. **関連性の一致**: 利用可能なカスタム エージェントを特定されたパターンおよび要件と比較します。
+8. **現在のオプション**: 古いエージェントを含む、関連するカスタム エージェントを説明、根拠、可用性ステータスとともに表示します。
+9. **検証**: 提案されたエージェントが、既存のエージェントではまだカバーされていない価値を追加することを確認します。
+10. **出力**: 提案、説明、awesome-copilot カスタム エージェントと同様のローカル カスタム エージェントの両方へのリンクを含む構造化テーブルを提供します。
+    **AWAIT** ユーザーは、特定のカスタム エージェントのインストールまたは更新を続行するよう要求します。指示がない限り、インストールまたはアップデートを行わないでください。
+11. **アセットのダウンロード/更新**: リクエストされたエージェントに対して、次のことが自動的に行われます。
+    - 新しいエージェントを `.github/agents/` フォルダーにダウンロードします
+    - 古いエージェントを、awesome-copilot の最新バージョンに置き換えて更新します
+    - ファイルの内容を調整しないでください
+    - アセットをダウンロードするには `#fetch` ツールを使用しますが、すべてのコンテンツが確実に取得されるように `#runInTerminal` ツールを使用して `curl` を使用することもできます
+    - `#todos` ツールを使用して進行状況を追跡する## コンテキスト分析基準
 
-1. **Fetch Available Custom Agents**: Extract Custom Agents list and descriptions from [awesome-copilot README.agents.md](https://github.com/github/awesome-copilot/blob/main/docs/README.agents.md). Must use `fetch` tool.
-2. **Scan Local Custom Agents**: Discover existing custom agent files in `.github/agents/` folder
-3. **Extract Descriptions**: Read front matter from local custom agent files to get descriptions
-4. **Fetch Remote Versions**: For each local agent, fetch the corresponding version from awesome-copilot repository using raw GitHub URLs (e.g., `https://raw.githubusercontent.com/github/awesome-copilot/main/agents/<filename>`)
-5. **Compare Versions**: Compare local agent content with remote versions to identify:
-   - Agents that are up-to-date (exact match)
-   - Agents that are outdated (content differs)
-   - Key differences in outdated agents (tools, description, content)
-6. **Analyze Context**: Review chat history, repository files, and current project needs
-7. **Match Relevance**: Compare available custom agents against identified patterns and requirements
-8. **Present Options**: Display relevant custom agents with descriptions, rationale, and availability status including outdated agents
-9. **Validate**: Ensure suggested agents would add value not already covered by existing agents
-10. **Output**: Provide structured table with suggestions, descriptions, and links to both awesome-copilot custom agents and similar local custom agents
-    **AWAIT** user request to proceed with installation or updates of specific custom agents. DO NOT INSTALL OR UPDATE UNLESS DIRECTED TO DO SO.
-11. **Download/Update Assets**: For requested agents, automatically:
-    - Download new agents to `.github/agents/` folder
-    - Update outdated agents by replacing with latest version from awesome-copilot
-    - Do NOT adjust content of the files
-    - Use `#fetch` tool to download assets, but may use `curl` using `#runInTerminal` tool to ensure all content is retrieved
-    - Use `#todos` tool to track progress
+🔍 **リポジトリ パターン**:
 
-## Context Analysis Criteria
+- 使用するプログラミング言語 (.cs、.js、.py など)
+- フレームワーク指標 (ASP.NET、React、Azure など)
+- プロジェクトの種類 (Web アプリ、API、ライブラリ、ツール)
+- ドキュメントの必要性 (README、仕様、ADR)
 
-🔍 **Repository Patterns**:
+🗨️ **チャット履歴コンテキスト**:
 
-- Programming languages used (.cs, .js, .py, etc.)
-- Framework indicators (ASP.NET, React, Azure, etc.)
-- Project types (web apps, APIs, libraries, tools)
-- Documentation needs (README, specs, ADRs)
+- 最近の議論と問題点
+- 機能のリクエストまたは実装のニーズ
+- コードレビューのパターン
+- 開発ワークフローの要件
 
-🗨️ **Chat History Context**:
+## 出力フォーマット
 
-- Recent discussions and pain points
-- Feature requests or implementation needs
-- Code review patterns
-- Development workflow requirements
+分析結果を、awesome-copilot カスタム エージェントと既存のリポジトリ カスタム エージェントを比較する構造化テーブルで表示します。|素晴らしい副操縦士カスタム エージェント |説明 |すでにインストールされています |同様のローカルカスタムエージェント |提案の根拠 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---------------------------------- | -------------------------------------------------------------- |
+| [amplitude-experiment-implementation.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/amplitude-experiment-implementation.agent.md) |このカスタム エージェントは、Amplitude の MCP ツールを使用して Amplitude 内に新しい実験を展開し、シームレスなバリアント テスト機能と製品機能の展開を可能にします。 ❌ いいえ |なし |製品内の実験機能を強化します |
+| [launchdarkly-flag-cleanup.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/launchdarkly-flag-cleanup.agent.md) | LaunchDarkly の機能フラグ クリーンアップ エージェント | ✅ はい |起動darkly-flag-cleanup.agent.md |既存の LaunchDarkly カスタム エージェントによってすでにカバーされています。
+| [principal-software-engineer.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/principal-software-engineer.agent.md) |エンジニアリングの卓越性、技術的なリーダーシップ、実践的な実装に焦点を当てた、プリンシパル レベルのソフトウェア エンジニアリング ガイダンスを提供します。                            | ⚠️ 古い |プリンシパル-ソフトウェア-エンジニア.エージェント.md |ツールの構成が異なります。リモートでは `'web/fetch'` を使用するのに対し、ローカルでは `'fetch'` を使用します - 更新をお勧めします |
 
-## Output Format
+## ローカル エージェントの検出プロセス1. `.github/agents/` ディレクトリ内のすべての `*.agent.md` ファイルを一覧表示します。
+2. 検出された各ファイルについて、前付を読んで `description` を抽出します。
+3. 既存のエージェントの包括的なインベントリを構築する
+4. 重複の提案を避けるためにこのインベントリを使用します
 
-Display analysis results in structured table comparing awesome-copilot custom agents with existing repository custom agents:
+## バージョン比較プロセス
 
-| Awesome-Copilot Custom Agent                                                                                                                            | Description                                                                                                                                                                | Already Installed | Similar Local Custom Agent         | Suggestion Rationale                                          |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---------------------------------- | ------------------------------------------------------------- |
-| [amplitude-experiment-implementation.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/amplitude-experiment-implementation.agent.md) | This custom agent uses Amplitude's MCP tools to deploy new experiments inside of Amplitude, enabling seamless variant testing capabilities and rollout of product features | ❌ No             | None                               | Would enhance experimentation capabilities within the product |
-| [launchdarkly-flag-cleanup.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/launchdarkly-flag-cleanup.agent.md)                     | Feature flag cleanup agent for LaunchDarkly                                                                                                                                | ✅ Yes            | launchdarkly-flag-cleanup.agent.md | Already covered by existing LaunchDarkly custom agents        |
-| [principal-software-engineer.agent.md](https://github.com/github/awesome-copilot/blob/main/agents/principal-software-engineer.agent.md)                 | Provide principal-level software engineering guidance with focus on engineering excellence, technical leadership, and pragmatic implementation.                            | ⚠️ Outdated       | principal-software-engineer.agent.md | Tools configuration differs: remote uses `'web/fetch'` vs local `'fetch'` - Update recommended |
+1. ローカル エージェント ファイルごとに、生の GitHub URL を構築してリモート バージョンを取得します。
+   - パターン: `https://raw.githubusercontent.com/github/awesome-copilot/main/agents/<filename>`
+2. `fetch` ツールを使用してリモート バージョンを取得します
+3. ファイルの内容全体 (前付、ツール配列、本文を含む) を比較します。
+4. 具体的な違いを特定します。
+   - **前付の変更** (説明、ツール)
+   - **ツール配列の変更** (ツールの追加、削除、または名前変更)
+   - **コンテンツの更新** (手順、例、ガイドライン)
+5. 古いエージェントの主な相違点を文書化する
+6. 類似性を計算して更新が必要かどうかを判断します
 
-## Local Agent Discovery Process
+## 要件
 
-1. List all `*.agent.md` files in `.github/agents/` directory
-2. For each discovered file, read front matter to extract `description`
-3. Build comprehensive inventory of existing agents
-4. Use this inventory to avoid suggesting duplicates
+- `githubRepo` ツールを使用して、awesome-copilot リポジトリ エージェント フォルダーからコンテンツを取得します
+- `.github/agents/` ディレクトリ内の既存のエージェントのローカル ファイル システムをスキャンします。
+- ローカル エージェント ファイルから YAML 前付を読み取り、説明を抽出します
+- ローカル エージェントとリモート バージョンを比較して、古いエージェントを検出します
+- 重複を避けるために、このリポジトリ内の既存のエージェントと比較します。
+- 現在のエージェント ライブラリの対象範囲のギャップに焦点を当てる
+- 提案されたエージェントがリポジトリの目的と標準に合致しているかを検証します
+- それぞれの提案に対して明確な根拠を提供する
+- awesome-copilot エージェントと同様のローカル エージェントの両方へのリンクを含めます
+- 特定の相違点が記載されている古いエージェントを明確に識別します
+- 表と分析以外の追加情報やコンテキストを提供しないでください。
 
-## Version Comparison Process
+## アイコンのリファレンス
 
-1. For each local agent file, construct the raw GitHub URL to fetch the remote version:
-   - Pattern: `https://raw.githubusercontent.com/github/awesome-copilot/main/agents/<filename>`
-2. Fetch the remote version using the `fetch` tool
-3. Compare entire file content (including front matter, tools array, and body)
-4. Identify specific differences:
-   - **Front matter changes** (description, tools)
-   - **Tools array modifications** (added, removed, or renamed tools)
-   - **Content updates** (instructions, examples, guidelines)
-5. Document key differences for outdated agents
-6. Calculate similarity to determine if update is needed
+- ✅ すでにインストールされており、最新の状態です
+- ⚠️ インストールされているが古い (アップデートが利用可能)
+- ❌ リポジトリにインストールされていません
 
-## Requirements
+## 更新処理
 
-- Use `githubRepo` tool to get content from awesome-copilot repository agents folder
-- Scan local file system for existing agents in `.github/agents/` directory
-- Read YAML front matter from local agent files to extract descriptions
-- Compare local agents with remote versions to detect outdated agents
-- Compare against existing agents in this repository to avoid duplicates
-- Focus on gaps in current agent library coverage
-- Validate that suggested agents align with repository's purpose and standards
-- Provide clear rationale for each suggestion
-- Include links to both awesome-copilot agents and similar local agents
-- Clearly identify outdated agents with specific differences noted
-- Don't provide any additional information or context beyond the table and the analysis
-
-## Icons Reference
-
-- ✅ Already installed and up-to-date
-- ⚠️ Installed but outdated (update available)
-- ❌ Not installed in repo
-
-## Update Handling
-
-When outdated agents are identified:
-1. Include them in the output table with ⚠️ status
-2. Document specific differences in the "Suggestion Rationale" column
-3. Provide recommendation to update with key changes noted
-4. When user requests update, replace entire local file with remote version
-5. Preserve file location in `.github/agents/` directory
+古いエージェントが特定された場合:
+1. ⚠️ ステータスを含む出力テーブルにそれらを含めます。
+2.「提案の根拠」列に具体的な相違点を文書化します。
+3. 重要な変更を記録して更新するよう推奨する
+4. ユーザーが更新を要求すると、ローカル ファイル全体がリモート バージョンに置き換えられます。
+5. ファイルの場所を `.github/agents/` ディレクトリに保存します

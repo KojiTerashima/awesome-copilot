@@ -2,40 +2,39 @@
 name: qdrant-minimize-latency
 description: "Guides Qdrant query latency optimization. Use when someone asks 'search is slow', 'how to reduce latency', 'p99 is too high', 'tail latency', 'single query too slow', 'how to make search faster', or 'latency spikes'."
 ---
+# クエリレイテンシーのスケーリング
 
-# Scaling for Query Latency
+単一クエリのレイテンシは、クエリ実行パス内の最も遅いコンポーネントによって決まります。スループットと相関関係がある場合もありますが、必ずしもそうとは限りません。スループットとレイテンシーは調整の方向が逆です。
 
-Latency of a single query is determined by the slowest component in the query execution path. It is sometimes correlated with throughput, but not always — throughput and latency are opposite tuning directions.
+低レイテンシーの最適化は、単一クエリのリソース飽和状態を最大限に活用することを目的としていますが、スループットの最適化は、クエリごとのリソース使用量を最小限に抑えて、より多くの並列クエリを可能にすることを目的としています。
 
-Low latency optimization is aimed at utilising maximum resource saturation for a single query, while throughput optimization is aimed at minimizing per-query resource usage to allow more parallel queries.
+## レイテンシを下げるためのパフォーマンス チューニング
 
-## Performance Tuning for Lower Latency
+- CPU コアに一致するようにセグメント数を増やす (`default_segment_number: 16`) [遅延の最小化](https://search.qdrant.tech/md/documentation/operations/optimize/?s=minimizing-latency)
+- 量子化ベクトルと HNSW を RAM に保持 (`always_ram=true`)
+- クエリ時に `hnsw_ef` を削減します (速度向上のためのトレード リコール) [検索パラメータ](https://search.qdrant.tech/md/documentation/operations/optimize/?s=fine-tuning-search-parameters)
+- ローカル NVMe を使用し、ネットワーク接続ストレージを避ける
 
-- Increase segment count to match CPU cores (`default_segment_number: 16`) [Minimizing latency](https://search.qdrant.tech/md/documentation/operations/optimize/?s=minimizing-latency)
-- Keep quantized vectors and HNSW in RAM (`always_ram=true`)
-- Reduce `hnsw_ef` at query time (trade recall for speed) [Search params](https://search.qdrant.tech/md/documentation/operations/optimize/?s=fine-tuning-search-parameters)
-- Use local NVMe, avoid network-attached storage
+## メモリプレッシャーとレイテンシー
 
-## Memory Pressure and Latency
+RAM は遅延にとって最も重要なリソースです。ワーキング セットが利用可能な RAM を超えると、OS キャッシュの削除により、レイテンシが大幅に持続的に低下します。
 
-RAM is the most critical resource for latency. If working set exceeds available RAM, OS cache eviction causes severe, sustained latency degradation.
-
-- Vertical scale RAM first. Critical if working set >80%.
-- Use quantization: scalar (4x reduction) or binary (16x reduction) [Quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
-- Move payload indexes to disk if filtering is infrequent [On-disk payload index](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=on-disk-payload-index)
-- Set `optimizer_cpu_budget` to limit background optimization CPUs
-- Schedule indexing: set high `indexing_threshold` during peak hours
-
-
-## Vertical Scaling for Latency
-
-More RAM and faster CPU directly reduce latency. See [Vertical Scaling](../scaling-data-volume/vertical-scaling/SKILL.md) for node sizing guidelines.
+- 垂直スケール RAM が最初です。ワーキングセットが 80% を超える場合は重大です。
+- 量子化を使用します: スカラー (4 倍縮小) またはバイナリ (16 倍縮小) [量子化](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+- フィルタリングが頻繁に行われない場合は、ペイロード インデックスをディスクに移動します [ディスク上のペイロード インデックス](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=on-disk-payload-index)
+- `optimizer_cpu_budget` を設定してバックグラウンド最適化 CPU を制限する
+- インデックス作成のスケジュール: ピーク時間帯には `indexing_threshold` を高く設定します
 
 
-## What NOT to Do
+## レイテンシの垂直スケーリング
 
-- Do not expect to optimize latency and throughput simultaneously on the same node
-- Do not use few large segments for latency-sensitive workloads (each segment takes longer to search)
-- Do not run at >90% RAM (cache eviction causes severe latency degradation that can last days)
-- Do not ignore optimizer status during performance debugging
-- Do not scale down RAM without load testing (cache eviction causes days-long latency incidents)
+より多くの RAM とより高速な CPU は、レイテンシを直接短縮します。ノードのサイジングのガイドラインについては、[Vertical Scaling](../scaling-data-volume/vertical-scaling/SKILL.md) を参照してください。
+
+
+## してはいけないこと
+
+- 同じノード上でレイテンシーとスループットを同時に最適化することは期待できません。
+- レイテンシーの影響を受けやすいワークロードには、少数の大きなセグメントを使用しないでください (各セグメントの検索に時間がかかります)。
+- 90% を超える RAM で実行しないでください (キャッシュの削除により、レイテンシが大幅に低下し、数日続く場合があります)
+- パフォーマンスのデバッグ中にオプティマイザのステータスを無視しないでください
+- 負荷テストを行わずに RAM をスケールダウンしないでください (キャッシュの削除により、数日間の遅延が発生する可能性があります)

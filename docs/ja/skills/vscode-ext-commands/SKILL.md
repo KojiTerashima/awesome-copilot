@@ -2,20 +2,19 @@
 name: vscode-ext-commands
 description: 'Guidelines for contributing commands in VS Code extensions. Indicates naming convention, visibility, localization and other relevant attributes, following VS Code extension development guidelines, libraries and good practices'
 ---
+# VS Code 拡張コマンドの貢献
 
-# VS Code extension command contribution
+このスキルは、VS Code 拡張機能でコマンドを提供するのに役立ちます
 
-This skill helps you to contribute commands in VS Code extensions
+## このスキルをいつ使用するか
 
-## When to use this skill
+このスキルは、次の場合に使用します。
+- VS Code 拡張機能にコマンドを追加または更新します
 
-Use this skill when you need to:
-- Add or update commands to your VS Code extension
+# 指示
 
-# Instructions
+VS Code コマンドは、カテゴリ、可視性、または場所に関係なく、常に `title` を定義する必要があります。コマンドの「種類」ごとに、以下に説明するいくつかの特徴を持ついくつかのパターンを使用します。
 
-VS Code commands must always define a `title`, independent of its category, visibility or location. We use a few patterns for each "kind" of command, with some characteristics, described below:
+* 通常のコマンド: デフォルトでは、すべてのコマンドはコマンド パレットでアクセス可能であり、`category` を定義する必要があります。コマンドがサイド バーで使用されない限り、`icon` は必要ありません。
 
-* Regular commands: By default, all commands should be accessible in the Command Palette, must define a `category`, and don't need an `icon`, unless the command will be used in the Side Bar.
-
-* Side Bar commands: Its name follows a special pattern, starting with underscore (`_`) and suffixed with `#sideBar`, like `_extensionId.someCommand#sideBar` for instance. Must define an `icon`, and may or may not have some rule for `enablement`. Side Bar exclusive commands should not be visible in the Command Palette. Contributing it to the `view/title` or `view/item/context`, we must inform _order/position_ that it will be displayed, and we can use terms "relative to other command/button" in order to you identify the correct `group` to be used. Also, it's a good practice to define the condition (`when`) for the new command is visible.
+* サイド バー コマンド: その名前は特別なパターンに従い、アンダースコア (`_`) で始まり、`#sideBar` という接尾辞が付けられます (例: `_extensionId.someCommand#sideBar` など)。 `icon` を定義する必要があり、`enablement` のルールがある場合とない場合があります。サイド バー専用のコマンドはコマンド パレットに表示しないでください。 `view/title` または `view/item/context` に提供する場合は、それが表示されることを _order/position_ に通知する必要があります。また、使用する正しい `group` を識別するために、「他のコマンド/ボタンに関連する」という用語を使用できます。また、新しいコマンドが表示されるように条件 (`when`) を定義することをお勧めします。

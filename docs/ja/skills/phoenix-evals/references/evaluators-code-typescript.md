@@ -1,51 +1,39 @@
-# Evaluators: Code Evaluators in TypeScript
+# エバリュエーター: TypeScript のコード エバリュエーター
 
-Deterministic evaluators without LLM. Fast, cheap, reproducible.
+LLM を使用しない決定論的評価器。速く、安く、再現可能。
 
-## Basic Pattern
+## 基本パターン```タイプスクリプト
+import { createEvaluator } から "@arizeai/phoenix-evals";
 
-```typescript
-import { createEvaluator } from "@arizeai/phoenix-evals";
-
-const containsCitation = createEvaluator<{ output: string }>(
-  ({ output }) => /\[\d+\]/.test(output) ? 1 : 0,
-  { name: "contains_citation", kind: "CODE" }
+const containsCitation = createEvaluator<{ 出力: 文字列 }>(
+  ({ 出力 }) => /\[\d+\]/.test(出力) ? 1：0、
+  { 名前: "引用を含む"、種類: "コード" }
 );
-```
-
-## With Full Results (asExperimentEvaluator)
-
-```typescript
-import { asExperimentEvaluator } from "@arizeai/phoenix-client/experiments";
+「」## 完全な結果 (ExperimentEvaluator として)```タイプスクリプト
+import { asExperimentEvaluator } から "@arizeai/phoenix-client/experiments";
 
 const jsonValid = asExperimentEvaluator({
-  name: "json_valid",
-  kind: "CODE",
-  evaluate: async ({ output }) => {
-    try {
-      JSON.parse(String(output));
-      return { score: 1.0, label: "valid_json" };
-    } catch (e) {
-      return { score: 0.0, label: "invalid_json", explanation: String(e) };
+  名前: "json_valid",
+  種類: "コード"、
+  評価: async ({ 出力 }) => {
+    {を試してください
+      JSON.parse(文字列(出力));
+      return { スコア: 1.0、ラベル: "valid_json" };
+    } キャッチ (e) {
+      return { スコア: 0.0、ラベル: "invalid_json"、説明: String(e) };
     }
-  },
+  }、
 });
-```
-
-## Parameter Types
-
-```typescript
-interface EvaluatorParams {
-  input: Record<string, unknown>;
-  output: unknown;
-  expected: Record<string, unknown>;
-  metadata: Record<string, unknown>;
+「」## パラメータのタイプ```タイプスクリプト
+インターフェース EvaluatorParams {
+  入力: レコード<文字列、不明>;
+  出力: 不明;
+  予期: Record<文字列、不明>;
+  メタデータ: レコード<文字列、不明>;
 }
-```
+「」## 一般的なパターン
 
-## Common Patterns
-
-- **Regex**: `/pattern/.test(output)`
-- **JSON**: `JSON.parse()` + zod schema
-- **Keywords**: `output.includes(keyword)`
-- **Similarity**: `fastest-levenshtein`
+- **正規表現**: `/pattern/.test(output)`
+- **JSON**: `JSON.parse()` + zod スキーマ
+- **キーワード**: `output.includes(keyword)`
+- **類似性**: `fastest-levenshtein`

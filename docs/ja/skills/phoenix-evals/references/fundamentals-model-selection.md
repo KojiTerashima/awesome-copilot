@@ -1,58 +1,46 @@
-# Model Selection
+# モデルの選択
 
-Error analysis first, model changes last.
+最初にエラー分析を行い、最後にモデル変更を行います。
 
-## Decision Tree
-
-```
-Performance Issue?
+## デシジョン ツリー「」
+パフォーマンスの問題?
        │
        ▼
-Error analysis suggests model problem?
-    NO  → Fix prompts, retrieval, tools
-    YES → Is it a capability gap?
-          YES → Consider model change
-          NO  → Fix the actual problem
-```
+エラー分析はモデルの問題を示唆していますか?
+    いいえ → プロンプト、取得、ツールを修正します
+    YES → 能力差でしょうか？
+          YES → 機種変更を検討
+          いいえ → 実際の問題を解決する
+「」## ジャッジモデルの選択
 
-## Judge Model Selection
-
-| Principle | Action |
+|原則 |アクション |
 | --------- | ------ |
-| Start capable | Use gpt-4o first |
-| Optimize later | Test cheaper after criteria stable |
-| Same model OK | Judge does different task |
-
-```python
-# Start with capable model
-judge = ClassificationEvaluator(
-    llm=LLM(provider="openai", model="gpt-4o"),
+|スタート可能 |最初に gpt-4o を使用してください。
+|後で最適化する |基準が安定した後はテストを安くする |
+|同じモデルOK |裁判官は別の仕事をする |「」パイソン
+# 対応モデルから始める
+裁判官 = 分類評価者(
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
     ...
-)
+）
 
-# After validation, test cheaper
-judge_cheap = ClassificationEvaluator(
-    llm=LLM(provider="openai", model="gpt-4o-mini"),
+# 検証後はテストを安くする
+ジャッジ_チープ = 分類評価者(
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o-mini"),
     ...
-)
-# Compare TPR/TNR on same test set
-```
+）
+# 同じテストセットで TPR/TNR を比較します
+「」## モデルショップはやめてください「」パイソン
+# 悪い
+["gpt-4o"、"claude-3"、"gemini-pro"] のモデルの場合:
+    results = run_experiment(データセット、タスク、モデル)
 
-## Don't Model Shop
+#良い
+失敗 = 分析エラー(結果)
+# 「コンテキストを無視する」→プロンプトを修正
+# 「数学ができない」 → より良いモデルを試してみてください
+「」## モデル変更が保証される場合
 
-```python
-# BAD
-for model in ["gpt-4o", "claude-3", "gemini-pro"]:
-    results = run_experiment(dataset, task, model)
-
-# GOOD
-failures = analyze_errors(results)
-# "Ignores context" → Fix prompt
-# "Can't do math" → Maybe try better model
-```
-
-## When Model Change Is Warranted
-
-- Failures persist after prompt optimization
-- Capability gaps (reasoning, math, code)
-- Error analysis confirms model limitation
+- プロンプトの最適化後も失敗が続く
+- 能力ギャップ (推論、数学、コード)
+- エラー分析によりモデルの制限が確認される

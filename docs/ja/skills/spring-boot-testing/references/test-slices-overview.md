@@ -1,27 +1,25 @@
-# Test Slices Overview
+# テストスライスの概要
 
-Quick reference for selecting the right Spring Boot test slice.
+適切な Spring Boot テスト スライスを選択するためのクイック リファレンス。
 
-## Decision Matrix
+## 意思決定マトリックス
 
-| Annotation | Use When | Loads | Speed |
+|注釈 |いつ使用する |負荷 |スピード |
 | ---------- | -------- | ----- | ----- |
-| **None** (plain JUnit) | Testing pure business logic | Nothing | Fastest |
-| `@WebMvcTest` | Controller + HTTP layer | Controllers, MVC, Jackson | Fast |
-| `@DataJpaTest` | Repository queries | Repositories, JPA, DataSource | Fast |
-| `@RestClientTest` | REST client code | RestTemplate/RestClient, Jackson | Fast |
-| `@JsonTest` | JSON serialization | ObjectMapper only | Fastest slice |
-| `@WebFluxTest` | Reactive controllers | Controllers, WebFlux | Fast |
-| `@DataJdbcTest` | JDBC repositories | Repositories, JDBC | Fast |
-| `@DataMongoTest` | MongoDB repositories | Repositories, MongoDB | Fast |
-| `@DataRedisTest` | Redis repositories | Repositories, Redis | Fast |
-| `@SpringBootTest` | Full integration | Entire application | Slow |
+| **なし** (プレーン JUnit) |純粋なビジネス ロジックのテスト |何も |最速 |
+| `@WebMvcTest` |コントローラー + HTTP レイヤー |コントローラー、MVC、ジャクソン |速い |
+| `@DataJpaTest` |リポジトリのクエリ |リポジトリ、JPA、データソース |速い |
+| `@RestClientTest` | REST クライアント コード | RestTemplate/RestClient、ジャクソン |速い |
+| `@JsonTest` | JSON シリアル化 | ObjectMapper のみ |最速のスライス |
+| `@WebFluxTest` |リアクティブコントローラー |コントローラー、WebFlux |速い |
+| `@DataJdbcTest` | JDBC リポジトリ |リポジトリ、JDBC |速い |
+| `@DataMongoTest` | MongoDB リポジトリ |リポジトリ、MongoDB |速い |
+| `@DataRedisTest` | Redis リポジトリ |リポジトリ、Redis |速い |
+| `@SpringBootTest` |完全な統合 |アプリケーション全体 |遅い |
 
-## Selection Guide
+## 選択ガイド
 
-### Use NO Annotation (Plain Unit Test)
-
-```java
+### アノテーションを使用しない (単純な単体テスト)```java
 class PriceCalculatorTest {
   private PriceCalculator calculator = new PriceCalculator();
   
@@ -31,27 +29,19 @@ class PriceCalculatorTest {
     assertThat(result).isEqualTo(new BigDecimal("90.00"));
   }
 }
-```
+```**いつ**: 純粋なビジネス ロジック。依存関係がない、またはコンストラクター インジェクションによって模擬可能な単純な依存関係。
 
-**When**: Pure business logic, no dependencies or simple dependencies mockable via constructor injection.
-
-### Use @WebMvcTest
-
-```java
+### @WebMvcTest を使用する```java
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
   @Autowired private MockMvcTester mvc;
   @MockitoBean private OrderService orderService;
 }
-```
+```**いつ**: リクエストのマッピング、検証、JSON マッピング、セキュリティ、フィルターをテストします。
 
-**When**: Testing request mapping, validation, JSON mapping, security, filters.
+**得られるもの**: MockMvc、ObjectMapper、Spring Security (存在する場合)、例外ハンドラー。
 
-**What you get**: MockMvc, ObjectMapper, Spring Security (if present), exception handlers.
-
-### Use @DataJpaTest
-
-```java
+### @DataJpaTest を使用する```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -59,70 +49,50 @@ class OrderRepositoryTest {
   @Container
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
 }
-```
+```**いつ**: カスタム JPA クエリ、エンティティ マッピング、トランザクション動作、カスケード操作をテストします。
 
-**When**: Testing custom JPA queries, entity mappings, transaction behavior, cascade operations.
+**得られるもの**: リポジトリ Bean、EntityManager、TestEntityManager、トランザクション サポート。
 
-**What you get**: Repository beans, EntityManager, TestEntityManager, transaction support.
-
-### Use @RestClientTest
-
-```java
+### @RestClientTest を使用する```java
 @RestClientTest(WeatherService.class)
 class WeatherServiceTest {
   @Autowired private WeatherService weatherService;
   @Autowired private MockRestServiceServer server;
 }
-```
+```**いつ**: 外部 API を呼び出す REST クライアントをテストします。
 
-**When**: Testing REST clients that call external APIs.
+**得られるもの**: HTTP 応答をスタブするための MockRestServiceServer。
 
-**What you get**: MockRestServiceServer to stub HTTP responses.
-
-### Use @JsonTest
-
-```java
+### @JsonTest を使用する```java
 @JsonTest
 class OrderJsonTest {
   @Autowired private JacksonTester<Order> json;
 }
-```
+```**時期**: カスタム シリアライザー/デシリアライザー、複雑な JSON マッピングをテストします。
 
-**When**: Testing custom serializers/deserializers, complex JSON mapping.
-
-### Use @SpringBootTest
-
-```java
+### @SpringBootTest を使用する```java
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class OrderIntegrationTest {
   @Autowired private RestTestClient restClient;
 }
-```
+```**時期**: 完全なリクエスト フロー、セキュリティ フィルター、データベース インタラクションを一緒にテストします。
 
-**When**: Testing full request flow, security filters, database interactions together.
+**得られるもの**: 完全なアプリケーション コンテキスト、組み込みサーバー (オプション)、実際の Bean。
 
-**What you get**: Full application context, embedded server (optional), real beans.
+## よくある間違い
 
-## Common Mistakes
+1. **すべてに @SpringBootTest を使用する** - テスト スイートが不必要に遅くなります
+2. **サービスをモックしない @WebMvcTest** - コンテキストの読み込みエラーが発生する
+3. **@DataJpaTest と @MockBean** - 目的を果たせません (実際のリポジトリが必要です)
+4. **1 つのテスト内の複数のスライス** - 各スライスは個別のテスト クラスです。
 
-1. **Using @SpringBootTest for everything** - Slows down your test suite unnecessarily
-2. **@WebMvcTest without mocking services** - Causes context loading failures
-3. **@DataJpaTest with @MockBean** - Defeats the purpose (you want real repositories)
-4. **Multiple slices in one test** - Each slice is a separate test class
+## テストにおける Java 25 の機能
 
-## Java 25 Features in Tests
-
-### Records for Test Data
-
-```java
+### テストデータの記録```java
 record OrderRequest(String product, int quantity) {}
 record OrderResponse(Long id, String status, BigDecimal total) {}
-```
-
-### Pattern Matching in Tests
-
-```java
+```### テストでのパターン マッチング```java
 @Test
 void shouldHandleDifferentOrderTypes() {
   var order = orderService.create(new OrderRequest("Product", 2));
@@ -133,11 +103,7 @@ void shouldHandleDifferentOrderTypes() {
     default -> throw new IllegalStateException("Unknown order type");
   }
 }
-```
-
-### Text Blocks for JSON
-
-```java
+```### JSON のテキスト ブロック```java
 @Test
 void shouldParseComplexJson() {
   var json = """
@@ -156,11 +122,7 @@ void shouldParseComplexJson() {
     .content(json))
     .hasStatus(CREATED);
 }
-```
-
-### Sequenced Collections
-
-```java
+```### シーケンスされたコレクション```java
 @Test
 void shouldReturnOrdersInSequence() {
   var orders = orderRepository.findAll();
@@ -169,11 +131,7 @@ void shouldReturnOrdersInSequence() {
   assertThat(orders.getLast().getStatus()).isEqualTo("COMPLETED");
   assertThat(orders.reversed().getFirst().getStatus()).isEqualTo("COMPLETED");
 }
-```
-
-## Dependencies by Slice
-
-```xml
+```## スライスごとの依存関係```xml
 <!-- WebMvcTest -->
 <dependency>
   <groupId>org.springframework.boot</groupId>

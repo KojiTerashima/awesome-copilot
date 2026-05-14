@@ -1,23 +1,22 @@
 # Servers & Infrastructure Reference
 
-Web servers, hosting, deployment, and infrastructure concepts.
+Web サーバー、ホスティング、展開、およびインフラストラクチャの概念。
 
-## Web Servers
+## Web サーバー
 
-### Popular Web Servers
+### 一般的な Web サーバー
 
 #### Nginx
 
 High-performance web server and reverse proxy.
 
-**Features**:
-- Load balancing
-- Reverse proxy
-- Static file serving
-- SSL/TLS termination
+**特徴**:
+- 負荷分散
+- リバースプロキシ
+- 静的ファイルの提供
+- SSL/TLS終端
 
-**Basic Configuration**:
-```nginx
+**基本構成**:```nginx
 server {
     listen 80;
     server_name example.com;
@@ -40,19 +39,16 @@ server {
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
 }
-```
+```#### Apache HTTP サーバー
 
-#### Apache HTTP Server
+広く使用されている Web サーバー。
 
-Widely-used web server.
+**特徴**:
+- .htaccessのサポート
+- モジュールシステム
+- 仮想ホスティング
 
-**Features**:
-- .htaccess support
-- Module system
-- Virtual hosting
-
-**Basic .htaccess**:
-```apache
+**基本的な .htaccess**:```apache
 # Redirect to HTTPS
 RewriteEngine On
 RewriteCond %{HTTPS} off
@@ -65,12 +61,9 @@ ErrorDocument 404 /404.html
 <FilesMatch "\.(jpg|jpeg|png|gif|css|js)$">
     Header set Cache-Control "max-age=31536000, public"
 </FilesMatch>
-```
+```#### Node.js サーバー
 
-#### Node.js Servers
-
-**Express.js**:
-```javascript
+**Express.js**:```javascript
 const express = require('express');
 const app = express();
 
@@ -84,10 +77,7 @@ app.get('/api/users', (req, res) => {
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });
-```
-
-**Built-in HTTP Server**:
-```javascript
+```**内蔵HTTPサーバー**:```javascript
 const http = require('http');
 
 const server = http.createServer((req, res) => {
@@ -96,23 +86,20 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(3000);
-```
+```## ホスティング オプション
 
-## Hosting Options
+### 静的ホスティング
 
-### Static Hosting
+静的サイトの場合 (HTML、CSS、JS)。
 
-For static sites (HTML, CSS, JS).
+**プラットフォーム**:
+- **Vercel**: 自動展開、サーバーレス機能
+- **Netlify**: ビルド自動化、エッジ機能
+- **GitHub ページ**: パブリック リポジトリは無料
+- **Cloudflare ページ**: 高速グローバル CDN
+- **AWS S3 + CloudFront**: スケーラブル、セットアップが必要
 
-**Platforms**:
-- **Vercel**: Automatic deployments, serverless functions
-- **Netlify**: Build automation, edge functions
-- **GitHub Pages**: Free for public repos
-- **Cloudflare Pages**: Fast global CDN
-- **AWS S3 + CloudFront**: Scalable, requires setup
-
-**Deployment**:
-```bash
+**展開**:```bash
 # Vercel
 npx vercel
 
@@ -121,21 +108,18 @@ npx netlify deploy --prod
 
 # GitHub Pages (via Git)
 git push origin main
-```
+```### サービスとしてのプラットフォーム (PaaS)
 
-### Platform as a Service (PaaS)
+マネージド アプリケーション ホスティング。
 
-Managed application hosting.
+**プラットフォーム**:
+- **Heraku**: 簡単な導入、アドオン
+- **鉄道**: 最新の開発者エクスペリエンス
+- **レンダリング**: 統合プラットフォーム
+- **Google App Engine**: 自動スケーリング
+- **Azure App Service**: Microsoft クラウド
 
-**Platforms**:
-- **Heroku**: Easy deployment, add-ons
-- **Railway**: Modern developer experience
-- **Render**: Unified platform
-- **Google App Engine**: Automatic scaling
-- **Azure App Service**: Microsoft cloud
-
-**Example (Heroku)**:
-```bash
+**例 (Heraku)**:```bash
 # Deploy
 git push heroku main
 
@@ -144,22 +128,19 @@ heroku ps:scale web=2
 
 # View logs
 heroku logs --tail
-```
+```### サービスとしてのインフラストラクチャ (IaaS)
 
-### Infrastructure as a Service (IaaS)
+仮想サーバー (より多くの制御、より多くのセットアップ)。
 
-Virtual servers (more control, more setup).
+**プロバイダー**:
+- **AWS EC2**: Amazon 仮想サーバー
+- **Google Compute Engine**: Google VM
+- **DigitalOcean Droplets**: シンプルな VPS
+- **Linode**: 開発者向けの VPS
 
-**Providers**:
-- **AWS EC2**: Amazon virtual servers
-- **Google Compute Engine**: Google VMs
-- **DigitalOcean Droplets**: Simple VPS
-- **Linode**: Developer-friendly VPS
+### コンテナ化
 
-### Containerization
-
-**Docker**:
-```dockerfile
+**ドッカー**:```dockerfile
 # Dockerfile
 FROM node:18-alpine
 WORKDIR /app
@@ -176,10 +157,7 @@ docker build -t my-app .
 
 # Run container
 docker run -p 3000:3000 my-app
-```
-
-**Docker Compose**:
-```yaml
+```**Docker Compose**:```yaml
 version: '3'
 services:
   web:
@@ -192,92 +170,79 @@ services:
     image: postgres:15
     environment:
       POSTGRES_PASSWORD: password
-```
+```### Kubernetes
 
-### Kubernetes
+コンテナ オーケストレーション プラットフォーム。
 
-Container orchestration platform.
+**コンセプト**:
+- **ポッド**: 展開可能な最小ユニット
+- **サービス**: ポッドを公開する
+- **展開**: レプリカの管理
+- **入力**: HTTP ルーティング
 
-**Concepts**:
-- **Pods**: Smallest deployable units
-- **Services**: Expose pods
-- **Deployments**: Manage replicas
-- **Ingress**: HTTP routing
+## コンテンツ配信ネットワーク (CDN)
 
-## Content Delivery Network (CDN)
+高速コンテンツ配信のための分散ネットワーク。
 
-Distributed network for fast content delivery.
+**利点**:
+- ロード時間の短縮
+- サーバー負荷の軽減
+- DDoS保護
+- 地理的分布
 
-**Benefits**:
-- Faster load times
-- Reduced server load
-- DDoS protection
-- Geographic distribution
-
-**Popular CDNs**:
-- **Cloudflare**: Free tier, DDoS protection
+**人気の CDN**:
+- **Cloudflare**: 無料利用枠、DDoS 保護
 - **AWS CloudFront**: Amazon CDN
-- **Fastly**: Edge computing
-- **Akamai**: Enterprise CDN
+- **高速**: エッジ コンピューティング
+- **Akamai**: エンタープライズ CDN
 
-**CDN for Libraries**:
-```html
+**図書館用 CDN**:```html
 <!-- CDN-hosted library -->
 <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
-```
+```## ドメイン ネーム システム (DNS)
 
-## Domain Name System (DNS)
+ドメイン名を IP アドレスに変換します。
 
-Translates domain names to IP addresses.
+### DNS レコード
 
-### DNS Records
+|タイプ |目的 |例 |
+|------|--------|----------|
+|あ | IPv4 アドレス | `example.com → 192.0.2.1` |
+|ああああ | IPv6 アドレス | `example.com → 2001:db8::1` |
+| CNAME |別のドメインへのエイリアス | `www → example.com` |
+| MX |メールサーバー | `mail.example.com` |
+| TXT |テキスト情報 | SPF、DKIM レコード |
+| NS |ネームサーバー | DNS 委任 |
 
-| Type | Purpose | Example |
-|------|---------|---------|
-| A | IPv4 address | `example.com → 192.0.2.1` |
-| AAAA | IPv6 address | `example.com → 2001:db8::1` |
-| CNAME | Alias to another domain | `www → example.com` |
-| MX | Mail server | `mail.example.com` |
-| TXT | Text information | SPF, DKIM records |
-| NS | Nameserver | DNS delegation |
-
-**DNS Lookup**:
-```bash
+**DNS ルックアップ**:```bash
 # Command line
 nslookup example.com
 dig example.com
 
 # JavaScript (not direct DNS, but IP lookup)
 fetch('https://dns.google/resolve?name=example.com')
-```
+```### DNS の伝播
 
-### DNS Propagation
+DNS の変更が世界中に広がるまでの時間 (通常は 24 ～ 48 時間)。
 
-Time for DNS changes to spread globally (typically 24-48 hours).
+## SSL/TLS 証明書
 
-## SSL/TLS Certificates
+クライアントとサーバー間のデータを暗号化します。
 
-Encrypt data between client and server.
+### 証明書の種類
 
-### Certificate Types
+- **ドメイン検証 (DV)**: 基本、自動化
+- **組織検証 (OV)**: 検証されたビジネス
+- **拡張検証 (EV)**: 最高の検証
 
-- **Domain Validation (DV)**: Basic, automated
-- **Organization Validation (OV)**: Verified business
-- **Extended Validation (EV)**: Highest validation
+### 証明書の取得
 
-### Getting Certificates
-
-**Let's Encrypt** (Free):
-```bash
+**暗号化しましょう** (無料):```bash
 # Certbot
 sudo certbot --nginx -d example.com
-```
+```**Cloudflare** (Cloudflare DNS を使用すると無料)
 
-**Cloudflare** (Free with Cloudflare DNS)
-
-### HTTPS Configuration
-
-```nginx
+### HTTPS 構成```nginx
 # Nginx HTTPS
 server {
     listen 443 ssl http2;
@@ -296,21 +261,18 @@ server {
     server_name example.com;
     return 301 https://$host$request_uri;
 }
-```
+```## ロードバランシング
 
-## Load Balancing
+トラフィックを複数のサーバーに分散します。
 
-Distribute traffic across multiple servers.
+### 負荷分散アルゴリズム
 
-### Load Balancing Algorithms
+- **ラウンドロビン**: サーバー間でローテーションします
+- **最小接続数**: 接続数が最も少ないサーバーに送信します
+- **IP ハッシュ**: クライアント IP に基づいたルート
+- **重み付け**: サーバーの容量は異なります
 
-- **Round Robin**: Rotate through servers
-- **Least Connections**: Send to server with fewest connections
-- **IP Hash**: Route based on client IP
-- **Weighted**: Servers have different capacities
-
-**Nginx Load Balancer**:
-```nginx
+**Nginx ロード バランサー**:```nginx
 upstream backend {
     server server1.example.com weight=3;
     server server2.example.com;
@@ -322,20 +284,17 @@ server {
         proxy_pass http://backend;
     }
 }
-```
+```## リバースプロキシ
 
-## Reverse Proxy
+リクエストをバックエンドサーバーに転送するサーバー。
 
-Server that forwards requests to backend servers.
+**利点**:
+- 負荷分散
+- SSL終端
+- キャッシング
+- セキュリティ (バックエンドを非表示)
 
-**Benefits**:
-- Load balancing
-- SSL termination
-- Caching
-- Security (hide backend)
-
-**Nginx Reverse Proxy**:
-```nginx
+**Nginx リバース プロキシ**:```nginx
 server {
     location / {
         proxy_pass http://localhost:3000;
@@ -346,20 +305,13 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
-```
+```## キャッシュ戦略
 
-## Caching Strategies
-
-### Browser Caching
-
-```http
+### ブラウザのキャッシュ```http
 Cache-Control: public, max-age=31536000, immutable
-```
+```### サーバー側のキャッシュ
 
-### Server-Side Caching
-
-**Redis**:
-```javascript
+**Redis**:```javascript
 const redis = require('redis');
 const client = redis.createClient();
 
@@ -370,17 +322,13 @@ await client.set('user:1', JSON.stringify(user), {
 
 // Retrieve cached data
 const cached = await client.get('user:1');
-```
+```### CDN キャッシング
 
-### CDN Caching
+エッジロケーションにキャッシュされた静的アセット。
 
-Static assets cached at edge locations.
+## 環境変数
 
-## Environment Variables
-
-Configuration without hardcoding.
-
-```bash
+ハードコーディングなしの構成。```bash
 # .env file
 DATABASE_URL=postgresql://localhost/mydb
 API_KEY=secret-key-here
@@ -391,22 +339,19 @@ NODE_ENV=production
 // Access in Node.js
 require('dotenv').config();
 const dbUrl = process.env.DATABASE_URL;
-```
+```**ベストプラクティス**:
+- .env を Git にコミットしないでください
+- .env.example をテンプレートとして使用する
+- 環境ごとに異なる値
+- 安全なシークレット値
 
-**Best Practices**:
-- Never commit .env to Git
-- Use .env.example as template
-- Different values per environment
-- Secure secret values
+## 導入戦略
 
-## Deployment Strategies
+### 継続的展開 (CD)
 
-### Continuous Deployment (CD)
+コードがプッシュされると自動的にデプロイされます。
 
-Automatically deploy when code is pushed.
-
-**GitHub Actions**:
-```yaml
+**GitHub アクション**:```yaml
 name: Deploy
 on:
   push:
@@ -420,27 +365,23 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run deploy
-```
+```### ブルーグリーン展開
 
-### Blue-Green Deployment
+2 つの同一の環境、スイッチ トラフィック。
 
-Two identical environments, switch traffic.
+### カナリアのデプロイメント
 
-### Canary Deployment
+ユーザーのサブセットに段階的に展開します。
 
-Gradually roll out to subset of users.
+### ローリング展開
 
-### Rolling Deployment
+インスタンスを段階的に更新します。
 
-Update instances incrementally.
+## プロセスマネージャー
 
-## Process Managers
+アプリケーションを実行し続けます。
 
-Keep applications running.
-
-### PM2
-
-```bash
+### PM2```bash
 # Start application
 pm2 start app.js
 
@@ -465,13 +406,9 @@ pm2 logs
 # Startup script (restart on reboot)
 pm2 startup
 pm2 save
-```
+```### システムド
 
-### systemd
-
-Linux service manager.
-
-```ini
+Linux サービスマネージャー。```ini
 # /etc/systemd/system/myapp.service
 [Unit]
 Description=My Node App
@@ -490,54 +427,50 @@ WantedBy=multi-user.target
 sudo systemctl enable myapp
 sudo systemctl start myapp
 sudo systemctl status myapp
-```
+```## 監視とロギング
 
-## Monitoring & Logging
+### アプリケーションの監視
 
-### Application Monitoring
+- **New Relic**: APM、モニタリング
+- **Datadog**: インフラストラクチャ監視
+- **Grafana**: 視覚化
+- **Prometheus**: メトリクスの収集
 
-- **New Relic**: APM, monitoring
-- **Datadog**: Infrastructure monitoring
-- **Grafana**: Visualization
-- **Prometheus**: Metrics collection
+### ログの集約
 
-### Log Aggregation
+- **Elasticsearch + Kibana**: ログの検索と視覚化
+- **Splunk**: エンタープライズ ログ管理
+- **Papertrail**: クラウド ロギング
 
-- **Elasticsearch + Kibana**: Search and visualize logs
-- **Splunk**: Enterprise log management
-- **Papertrail**: Cloud logging
+### 稼働時間の監視
 
-### Uptime Monitoring
+- **UptimeRobot**: 無料の稼働時間チェック
+- **Pingdom**: 監視サービス
+- **StatusCake**: Web サイト監視
 
-- **UptimeRobot**: Free uptime checks
-- **Pingdom**: Monitoring service
-- **StatusCake**: Website monitoring
+## セキュリティのベストプラクティス
 
-## Security Best Practices
+### サーバーの強化
 
-### Server Hardening
+- ソフトウェアを常に最新の状態に保つ
+- ファイアウォールを使用する (ufw、iptables)
+- root SSH ログインを無効にする
+- SSH キー (パスワードではない) を使用します。
+- ユーザー権限を制限する
+- 定期的なバックアップ
 
-- Keep software updated
-- Use firewall (ufw, iptables)
-- Disable root SSH login
-- Use SSH keys (not passwords)
-- Limit user permissions
-- Regular backups
+### アプリケーションのセキュリティ
 
-### Application Security
+- どこでも HTTPS を使用する
+- レート制限を実装する
+- すべての入力を検証します
+- セキュリティヘッダーを使用する
+- 依存関係を常に最新の状態に保つ
+- 定期的なセキュリティ監査
 
-- Use HTTPS everywhere
-- Implement rate limiting
-- Validate all input
-- Use security headers
-- Keep dependencies updated
-- Regular security audits
+## バックアップ戦略
 
-## Backup Strategies
-
-### Database Backups
-
-```bash
+### データベースのバックアップ```bash
 # PostgreSQL
 pg_dump dbname > backup.sql
 
@@ -546,70 +479,68 @@ mysqldump -u user -p dbname > backup.sql
 
 # MongoDB
 mongodump --db mydb --out /backup/
-```
+```### 自動バックアップ
 
-### Automated Backups
+- 毎日のバックアップ
+- 複数の保存期間
+- オフサイトストレージ
+- 定期的に復元テストを行う
 
-- Daily backups
-- Multiple retention periods
-- Off-site storage
-- Test restores regularly
+## スケーラビリティ
 
-## Scalability
+### 垂直スケーリング
 
-### Vertical Scaling
+サーバーのリソース (CPU、RAM) を増やします。
 
-Increase server resources (CPU, RAM).
+**長所**: シンプル  
+**短所**: 制限があり、高価です
 
-**Pros**: Simple  
-**Cons**: Limited, expensive
+### 水平方向のスケーリング
 
-### Horizontal Scaling
+さらにサーバーを追加します。
 
-Add more servers.
+**長所**: 無制限のスケーリング  
+**短所**: 複雑でロードバランサが必要
 
-**Pros**: Unlimited scaling  
-**Cons**: Complex, requires load balancer
+### データベースのスケーリング
 
-### Database Scaling
+- **レプリケーション**: リードレプリカ
+- **シャーディング**: データベース間でデータを分割します。
+- **キャッシュ**: データベースの負荷を軽減します。
 
-- **Replication**: Read replicas
-- **Sharding**: Split data across databases
-- **Caching**: Reduce database load
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Apache
-- Bandwidth
+**対象となる重要な用語**:
+- アパッチ
+- 帯域幅
 - CDN
-- Cloud computing
+- クラウドコンピューティング
 - CNAME
 - DNS
-- Domain
-- Domain name
-- Firewall
-- Host
-- Hotlink
-- IP address
+- ドメイン
+- ドメイン名
+- ファイアウォール
+- ホスト
+- ホットリンク
+- IPアドレス
 - ISP
-- Latency
-- localhost
+- レイテンシー
+- ローカルホスト
 - Nginx
-- Origin
-- Port
-- Proxy servers
-- Round Trip Time (RTT)
-- Server
-- Site
+- 起源
+- ポート
+- プロキシサーバー
+- 往復時間 (RTT)
+- サーバー
+- サイト
 - TLD
-- Web server
-- Website
+- Webサーバー
+- ウェブサイト
 
-## Additional Resources
+## 追加のリソース
 
-- [Nginx Documentation](https://nginx.org/en/docs/)
-- [Docker Documentation](https://docs.docker.com/)
-- [AWS Documentation](https://docs.aws.amazon.com/)
-- [Let's Encrypt](https://letsencrypt.org/)
-- [PM2 Documentation](https://pm2.keymetrics.io/docs/)
+- [Nginxドキュメント](https://nginx.org/en/docs/)
+- [Docker ドキュメント](https://docs.docker.com/)
+- [AWS ドキュメント](https://docs.aws.amazon.com/)
+- [暗号化してみよう](https://letsencrypt.org/)
+- [PM2 ドキュメント](https://pm2.keymetrics.io/docs/)

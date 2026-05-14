@@ -1,160 +1,150 @@
-# Writing the Quality Constitution (File 1: QUALITY.md)
+# 品質憲章の作成 (ファイル 1: QUALITY.md)
 
-The quality constitution defines what "quality" means for this specific project and makes the bar explicit, persistent, and inherited by every AI session.
+品質規定は、この特定のプロジェクトにとって「品質」が何を意味するかを定義し、その基準を明示的かつ永続的にし、すべての AI セッションに継承させます。
 
-## Template
+＃＃ テンプレート```マークダウン
+# 品質憲法: [プロジェクト名]
 
-```markdown
-# Quality Constitution: [Project Name]
+## 目的
 
-## Purpose
+[品質を 3 つの原則に基づいて説明する 2 ～ 3 段落:]
 
-[2–3 paragraphs grounding quality in three principles:]
+- **デミング** (「品質は組み込まれているが、検査されていない」) — 品質はコンテキスト ファイルに組み込まれています
+  そして高品質のプレイブックにより、すべての AI セッションが同じバーを継承します。
+- **Juran** (「使用に対する適合性」) — このプロジェクト専用の適合性を定義します。 「テストに合格」ではない
+  しかし、実際の現実世界の要件です。例: 「存続する正しい出力を生成します
+  間違った結果を黙って生成することなく、入力スキーマが変更されます。」
+- **Crosby** (「品質は無料」) — 高品質のハンドブックを事前に構築するコストは、
+  導入後にデバッグの問題が見つかった。
 
-- **Deming** ("quality is built in, not inspected in") — Quality is built into context files
-  and the quality playbook so every AI session inherits the same bar.
-- **Juran** ("fitness for use") — Define fitness specifically for this project. Not "tests pass"
-  but the actual real-world requirement. Example: "generates correct output that survives
-  input schema changes without silently producing wrong results."
-- **Crosby** ("quality is free") — Building a quality playbook upfront costs less than
-  debugging problems found after deployment.
+## 対象範囲のターゲット
 
-## Coverage Targets
+|サブシステム |ターゲット |なぜ |
+|----------|----------|-----|
+| [最も壊れやすいモジュール] | 90 ～ 95% | [実際のエッジケースまたは過去のバグ] |
+| [コアロジックモジュール] | 85 ～ 90% | 【具体的なリスク】 |
+| [I/O または統合層] | 80% | [説明] |
+| [設定/ユーティリティ] | 75 ～ 80% | [説明] |
 
-| Subsystem | Target | Why |
-|-----------|--------|-----|
-| [Most fragile module] | 90–95% | [Real edge case or past bug] |
-| [Core logic module] | 85–90% | [Concrete risk] |
-| [I/O or integration layer] | 80% | [Explain] |
-| [Configuration/utilities] | 75–80% | [Explain] |
+根拠欄は必須です。特定のリスクや過去の失敗に言及する必要があります。
+サブシステムに高いカバレッジが必要な理由を具体的な例で説明できない場合は、次のようにします。
+ターゲットは任意です。
 
-The rationale column is essential. It must reference specific risks or past failures.
-If you can't explain why a subsystem needs high coverage with a concrete example,
-the target is arbitrary.
+## カバレッジシアターの防止
 
-## Coverage Theater Prevention
+[このプロジェクトの偽テストを構成するものを定義します。]
 
-[Define what constitutes a fake test for this project.]
+ほとんどのプロジェクトに適用される一般的な例:
+- 関数をアサートすると、内容を確認せずに *何か* が返されました
+- 実際のデータの特徴を持たない合成データを使用したテスト
+- インポートが成功したことをアサートします
+- モックをアサートすると、モックが返すように構成されていたものが返されます。
+- 関数を呼び出し、例外がスローされなかったことのみをアサートする
 
-Generic examples that apply to most projects:
-- Asserting a function returned *something* without checking what
-- Testing with synthetic data that lacks the quirks of real data
-- Asserting an import succeeded
-- Asserting mock returns what the mock was configured to return
-- Calling a function and only asserting no exception was thrown
+[調査中に学んだことに基づいて、プロジェクト固有の例を追加します。
+データ パイプラインの場合: 「値をチェックせずに出力レコードをカウントする」。
+Web アプリの場合: 「応答本文をチェックせずに HTTP 200 をチェックする」。
+コンパイラの場合: 「出力をチェックすると、動作をチェックせずにコンパイルされます。」]
 
-[Add project-specific examples based on what you learned during exploration.
-For a data pipeline: "counting output records without checking their values."
-For a web app: "checking HTTP 200 without checking the response body."
-For a compiler: "checking output compiles without checking behavior."]
+## フィットネスから目的へのシナリオ
 
-## Fitness-to-Purpose Scenarios
+[5 ～ 10 のシナリオ。すべてのシナリオには、要件ソースにリンクする `[Req: tier — source]` タグが含まれている必要があります。以下のテンプレートを使用してください:]
 
-[5–10 scenarios. Every scenario must include a `[Req: tier — source]` tag linking it to its requirement source. Use the template below:]
+### シナリオ N: [記憶に残る名前]
 
-### Scenario N: [Memorable Name]
+**要件タグ:** [要件: 正式 — 仕様 §X] *(または `user-confirmed` / `inferred` — 層の定義については SKILL.md フェーズ 1、ステップ 1 を参照してください)*
 
-**Requirement tag:** [Req: formal — Spec §X] *(or `user-confirmed` / `inferred` — see SKILL.md Phase 1, Step 1 for tier definitions)*
+**何が起こったのか:** [アーキテクチャ上の脆弱性、エッジケース、または設計上の決定。
+実際のコードを参照してください — 関数名、ファイル名、行番号。 「このアーキテクチャでは次の障害モードが許可されます。」としてフレーム化します。]
 
-**What happened:** [The architectural vulnerability, edge case, or design decision.
-Reference actual code — function names, file names, line numbers. Frame as "this architecture permits the following failure mode."]
+**要件:** [この失敗を防ぐためにコードが行うべきこと。
+AI が検証できるほど具体的にしてください。]
 
-**The requirement:** [What the code must do to prevent this failure.
-Be specific enough that an AI can verify it.]
-
-**How to verify:** [Concrete test or query that would fail if this regressed.
-Include exact commands, test names, or assertions.]
+**確認方法:** [これが回帰した場合に失敗する具体的なテストまたはクエリ。
+正確なコマンド、テスト名、またはアサーションを含めてください。]
 
 ---
 
-[Repeat for each scenario]
+[シナリオごとに繰り返します]
 
-## AI Session Quality Discipline
+## AI セッションの品質規律1. 作業を始める前に QUALITY.md を読んでください。
+2. タスクを完了としてマークする前に、完全なテスト スイートを実行します。
+3. 新しい機能のテストを追加します (ハッピー パスだけでなく、エッジ ケースも含みます)。
+4. 新しい障害モードが発見された場合は、このファイルを更新します。
+5. セッションを終了する前に、品質準拠チェックリストを出力します。
+6. 目的に合致するシナリオを決して削除しないでください。新しいもののみを追加します。
 
-1. Read QUALITY.md before starting work.
-2. Run the full test suite before marking any task complete.
-3. Add tests for new functionality (not just happy path — include edge cases).
-4. Update this file if new failure modes are discovered.
-5. Output a Quality Compliance Checklist before ending a session.
-6. Never remove a fitness-to-purpose scenario. Only add new ones.
+## 人間の門
 
-## The Human Gate
+[人間の判断が必要なものを列挙してください:]
+- 「適切に見える」出力 (ドメインの知識が必要)
+- UX と応答性
+- 文書の正確性
+- 認証変更のセキュリティレビュー
+- 下位互換性の決定
+「」## シナリオの由来
 
-[List things that require human judgment:]
-- Output that "looks right" (requires domain knowledge)
-- UX and responsiveness
-- Documentation accuracy
-- Security review of auth changes
-- Backward compatibility decisions
-```
+シナリオは 2 つのソース (**コード探索** と **ドメイン知識**) から得られ、最良のシナリオは両方を組み合わせたものです。
 
-## Where Scenarios Come From
+### ソース 1: 防御的なコード パターン (コードの探索)
 
-Scenarios come from two sources — **code exploration** and **domain knowledge** — and the best scenarios combine both.
+すべての防御パターンは、過去の失敗または既知のリスクの証拠です。
 
-### Source 1: Defensive Code Patterns (Code Exploration)
+1. **防御コード** — `if value is None: return` ガードはすべてシナリオです。なぜそれが必要だったのでしょうか?
+2. **正規化関数** — 生の入力が問題を引き起こすため、入力をクリーンアップするすべての関数が存在します。
+3. **ハードコーディングされる可能性のある構成** — 値がハードコーディングされずに構成から読み取られた場合、誰かがその値が変化することを学習しました。
+4. **Git の非難 / コミット メッセージ** — 「X が欠落している場合のクラッシュを修正」 → シナリオ: X が欠落している可能性がある
+5. **「理由」を説明するコメント** — 「シーケンシャル インデックスではなくハッシュ(id) を使用します。なぜなら...」 → その制約の下での正確性に関するシナリオ
 
-Every defensive pattern is evidence of a past failure or known risk:
+### ソース 2: 何が問題になるのか (ドメインの知識)
 
-1. **Defensive code** — Every `if value is None: return` guard is a scenario. Why was it needed?
-2. **Normalization functions** — Every function that cleans input exists because raw input caused problems
-3. **Configuration that could be hardcoded** — If a value is read from config instead of hardcoded, someone learned the value varies
-4. **Git blame / commit messages** — "Fix crash when X is missing" → Scenario: X can be missing
-5. **Comments explaining "why"** — "We use hash(id) not sequential index because..." → Scenario about correctness under that constraint
+コードがすでに防御しているものに限定しないでください。同様のシステムに関する知識を活用して、コードで**処理すべき**現実的な障害シナリオを生成します。すべての主要なサブシステムについて、次のように尋ねます。
 
-### Source 2: What Could Go Wrong (Domain Knowledge)
+- 「このプロセスが操作中に強制終了された場合はどうなりますか?」 (ステートマシン、ファイルI/O、バッチ処理)
+- 「外部入力が微妙に間違っている場合はどうなりますか?」 (検証パイプライン、API 統合)
+- 「これを 10 倍のスケールで実行するとどうなりますか?」 (バッチ処理、データベース、キュー)
+- 「2 つの操作が重なった場合はどうなりますか?」 (同時実行性、ファイルロック、共有状態)
+- 「正しく見える出力が実際には間違っているものは何ですか?」 (ランダム性、統計演算、型強制)
 
-Don't limit yourself to what the code already defends against. Use your knowledge of similar systems to generate realistic failure scenarios that the code **should** handle. For every major subsystem, ask:
+これらは仮説ではなく、このタイプのすべてのシステムで起こることです。それらを **アーキテクチャ脆弱性分析** として記述します: 「`save_state()` にはアトミックな名前変更パターンがないため、10,000 レコードのバッチ中に書き込み中にクラッシュすると破損した状態ファイルが残ります。次の実行では JSONDecodeError が発生し、手動介入なしでは再開できません。大規模 (64 バッチで 9,240 レコード) になると、このパターンでは 1,693 以上のレコードが何もフラグを立てずにサイレントに失われる危険があります。行方不明です。」具体的な数字と具体的な結果によって、シナリオは信頼できるものとなり、交渉の余地はなくなります。 AI セッションで「記録が失われる可能性がある」と判断されれば、基準を否定する議論が行われるでしょう。定量化された影響を伴う特定の障害モードを読み取る AI セッションはそうではありません。
 
-- "What happens if this process is killed mid-operation?" (state machines, file I/O, batch processing)
-- "What happens if external input is subtly wrong?" (validation pipelines, API integrations)
-- "What happens if this runs at 10x scale?" (batch processing, databases, queues)
-- "What happens if two operations overlap?" (concurrency, file locks, shared state)
-- "What produces correct-looking output that is actually wrong?" (randomness, statistical operations, type coercion)
+### 物語の声
 
-These are not hypothetical — they are things that happen to every system of this type. Write them as **architectural vulnerability analyses**: "Because `save_state()` lacks an atomic rename pattern, a mid-write crash during a 10,000-record batch will leave a corrupted state file — the next run gets JSONDecodeError and cannot resume without manual intervention. At scale (9,240 records across 64 batches), this pattern risks silent loss of 1,693+ records with nothing to flag them as missing." Concrete numbers and specific consequences make scenarios authoritative and non-negotiable. An AI session reading "records can be lost" will argue the standard down. An AI session reading a specific failure mode with quantified impact will not.
+各シナリオの「何が起こったのか」は、抽象的な仕様ではなく、アーキテクチャの脆弱性分析のように読まれなければなりません。含める:
 
-### The Narrative Voice
+- **特定の数量** — 「一部のレコード」ではなく「64 バッチにわたる 308 レコード」
+- **カスケードの結果** — 「後続のすべてのパイプライン ステップをカスケードするため、308 レコードではなく 4,300 レコードの再処理が必要になります」
+- **検出の難易度** — 「欠落しているものとしてフラグを立てるものが何もない」または「統計的検証のみが検出できる」
+- **コード内の根本原因** — 「連続する整数は関連するランダム ストリームを生成するため、`random.seed(index)` は相関シーケンスを作成します。」ナラティブな声は、標準を交渉の余地のないものにするという重要な目的を果たします。抽象的な要件 (「記録は失われてはいけない」) は合理化を招きます。定量化された影響を持つ特定の障害モード (「バッチ中のクラッシュにより、検出メカニズムが存在せずに 1,693 レコードが静かに失われる」) は影響を受けません。これらを「このアーキテクチャでは次の障害が発生する」という枠組みにまとめます。これは、過去の出来事として捏造されたものではなく、実際のコードに基づいています。
 
-Each scenario's "What happened" must read like an architectural vulnerability analysis, not an abstract specification. Include:
+### 両方のソースを組み合わせる
 
-- **Specific quantities** — "308 records across 64 batches" not "some records"
-- **Cascade consequences** — "cascading through all subsequent pipeline steps, requiring reprocessing of 4,300 records instead of 308"
-- **Detection difficulty** — "nothing would flag them as missing" or "only statistical verification would catch it"
-- **Root cause in code** — "`random.seed(index)` creates correlated sequences because sequential integers produce related random streams"
+最も強力なシナリオは、コードに見られる防御パターンと、それが重要である理由に関するドメインの知識を組み合わせたものです。
 
-The narrative voice serves a critical purpose: it makes standards non-negotiable. Abstract requirements ("records should not be lost") invite rationalization. Specific failure modes with quantified impact ("a mid-batch crash silently loses 1,693 records with no detection mechanism") do not. Frame these as "this architecture permits the following failure" — grounded in the actual code, not fabricated as past incidents.
+1. 防御コードを見つけます: `save_state()` は一時ファイルに書き込み、名前を変更します。
+2. これによってどのような障害が防止されるかを尋ねます。書き込み中のクラッシュにより、破損した状態ファイルが残されます。
+3. 脆弱性分析としてシナリオを作成します。「アトミックな名前変更パターンを使用しないと、書き込み中のクラッシュにより、state.json が 50% 完了したままになります。次の実行では JSONDecodeError が発生し、手動介入なしでは再開できません。」
+4. これをコードに組み込みます: 「persistence.py 行 ~340 を読み取ります: 一時ファイル + 名前変更パターンを確認します」
 
-### Combining Both Sources
+### 「なぜ」要件
 
-The strongest scenarios combine a defensive pattern found in code with domain knowledge about why it matters:
+すべてのカバレッジ目標、すべての品質ゲート、すべての基準には、特定のシナリオまたはリスクを参照する「理由」が必要です。根拠がなければ、将来の AI セッションでは速度が最適化され、標準を下回る議論が行われるでしょう。
 
-1. Find the defensive code: `save_state()` writes to a temp file then renames
-2. Ask what failure this prevents: mid-write crash leaves corrupted state file
-3. Write the scenario as a vulnerability analysis: "Without the atomic rename pattern, a crash mid-write leaves state.json 50% complete. The next run gets JSONDecodeError and cannot resume without manual intervention."
-4. Ground it in code: "Read persistence.py line ~340: verify temp file + rename pattern"
+悪い: 「コア ロジック: 100% カバレッジ」
+良い: 「コア ロジック: 100% — `random.seed(index)` が作成した相関シーケンスにより、50/50 ではなく 77.5% のバイアスが生成されたためです。ここでの微妙なバグは、もっともらしいが間違った出力を生成します。統計的検証のみがそれらを捕捉します。」
 
-### The "Why" Requirement
+「理由」は文書化ではなく、浸食に対する保護です。
 
-Every coverage target, every quality gate, every standard must have a "why" that references a specific scenario or risk. Without rationale, a future AI session will optimize for speed and argue the standard down.
+## シナリオ数の調整
 
-Bad: "Core logic: 100% coverage"
-Good: "Core logic: 100% — because `random.seed(index)` created correlated sequences that produced 77.5% bias instead of 50/50. Subtle bugs here produce plausible-but-wrong output. Only statistical verification catches them."
+コア モジュール (最も複雑または脆弱であると特定されたモジュール) ごとに 2 つ以上のシナリオを目指します。中規模のプロジェクトの場合、これにより通常 8 ～ 10 のシナリオが生成されます。小規模なプロジェクトの場合は少なくても問題ありません。複雑なものについてはさらに詳しく説明します。見つかったシナリオが非常に少ない場合は、通常、プロジェクトが単純であるというよりも、探索が浅かったことを意味します。戻って関数本体をより注意深く読んでください。品質は数よりも重要です。アーキテクチャの脆弱性を正確に捉えた 1 つのシナリオは、「入力が間違っている場合はどうなるか」という一般的な 3 つのシナリオよりも価値があります。
 
-The "why" is not documentation — it is protection against erosion.
+## 終了する前に自己批判する
 
-## Calibrating Scenario Count
+すべてのシナリオを作成したら、それぞれを確認して次のことを質問します。
 
-Aim for 2+ scenarios per core module (the modules identified as most complex or fragile). For a medium-sized project, this typically yields 8–10 scenarios. Fewer is fine for small projects; more for complex ones. If you're finding very few scenarios, it usually means the exploration was shallow rather than the project being simple — go back and read function bodies more carefully. Quality matters more than count: one scenario that precisely captures an architectural vulnerability is worth more than three generic "what if the input is bad" scenarios.
+1. **「AI セッションでこの標準を否定することはできますか?」** もしそうである場合、その「理由」は十分に具体的ではありません。数値、結果、検出の難易度を追加します。
+2. **「『何が起こったのか』は脆弱性分析のように読めますか?それとも抽象的な仕様のように読めますか?」** 仕様のように見える場合は、具体的な量、連鎖的な結果、および実際のコードに基づいて書き直してください。
+3. **「私が見ていないシナリオはありますか?」** 別の AI モデルがどのようなフラグを立てるかを考えてください。アーキテクチャ モデルはデータ フローの問題を捕捉します。エッジケースモデルは境界条件を捉えます。あなたは何に対して盲目なのですか？
 
-## Self-Critique Before Finishing
-
-After drafting all scenarios, review each one and ask:
-
-1. **"Would an AI session argue this standard down?"** If yes, the "why" isn't concrete enough. Add numbers, consequences, and detection difficulty.
-2. **"Does the 'What happened' read like a vulnerability analysis or an abstract spec?"** If it reads like a spec, rewrite it with specific quantities, cascading consequences, and grounding in actual code.
-3. **"Is there a scenario I'm not seeing?"** Think about what a different AI model would flag. Architecture models catch data flow problems. Edge-case models catch boundary conditions. What are you blind to?
-
-## Critical Rule
-
-Each scenario's "How to verify" section must map to at least one automated test in the functional test file. If a scenario can't be automated, note why (it may require the Human Gate) — but most scenarios should be testable.
+## 重要なルール各シナリオの「検証方法」セクションは、機能テスト ファイル内の少なくとも 1 つの自動テストにマップする必要があります。シナリオを自動化できない場合は、その理由をメモしてください (ヒューマン ゲートが必要になる場合があります)。ただし、ほとんどのシナリオはテスト可能です。

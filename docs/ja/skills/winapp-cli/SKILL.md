@@ -2,81 +2,76 @@
 name: winapp-cli
 description: 'Windows App Development CLI (winapp) for building, packaging, and deploying Windows applications. Use when asked to initialize Windows app projects, create MSIX packages, generate AppxManifest.xml, manage development certificates, add package identity for debugging, sign packages, publish to the Microsoft Store, create external catalogs, or access Windows SDK build tools. Supports .NET (csproj), C++, Electron, Rust, Tauri, and cross-platform frameworks targeting Windows.'
 ---
+# Windows アプリ開発 CLI
 
-# Windows App Development CLI
+Windows アプリ開発 CLI (`winapp`) は、Windows SDK、MSIX パッケージの管理、アプリ ID、マニフェスト、証明書の生成、アプリ フレームワークでのビルド ツールの使用を行うためのコマンド ライン インターフェイスです。これは、クロスプラットフォーム開発と Windows ネイティブ機能の間のギャップを埋めます。
 
-The Windows App Development CLI (`winapp`) is a command-line interface for managing Windows SDKs, MSIX packaging, generating app identity, manifests, certificates, and using build tools with any app framework. It bridges the gap between cross-platform development and Windows-native capabilities.
+## このスキルを使用する場合
 
-## When to Use This Skill
+このスキルは、次の場合に使用します。
 
-Use this skill when you need to:
+- SDK セットアップ、マニフェスト、証明書を使用して Windows アプリ プロジェクトを初期化する
+- アプリケーション ディレクトリから MSIX パッケージを作成する
+- AppxManifest.xml ファイルの生成または管理
+- 署名用の開発証明書を作成してインストールする
+- Windows APIをデバッグするためのパッケージIDを追加
+- MSIX パッケージまたは実行可能ファイルに署名する
+- 任意のフレームワークから Windows SDK ビルド ツールにアクセス
+- クロスプラットフォーム フレームワーク (Electron、Rust、Tauri、Qt) を使用して Windows アプリを構築する
+- Windows アプリ展開用の CI/CD パイプラインをセットアップする
+- パッケージ ID を必要とする Windows API へのアクセス (通知、Windows AI、シェル統合)
+- `winapp store` 経由でアプリを Microsoft Store に公開します
+- 資産管理用の外部カタログを作成する
+- NuGet 経由で Windows App SDK を使用して .NET (csproj) プロジェクトをセットアップする
 
-- Initialize a Windows app project with SDK setup, manifests, and certificates
-- Create MSIX packages from application directories
-- Generate or manage AppxManifest.xml files
-- Create and install development certificates for signing
-- Add package identity for debugging Windows APIs
-- Sign MSIX packages or executables
-- Access Windows SDK build tools from any framework
-- Build Windows apps using cross-platform frameworks (Electron, Rust, Tauri, Qt)
-- Set up CI/CD pipelines for Windows app deployment
-- Access Windows APIs that require package identity (notifications, Windows AI, shell integration)
-- Publish apps to the Microsoft Store via `winapp store`
-- Create external catalogs for asset management
-- Set up .NET (csproj) projects with Windows App SDK via NuGet
+## 前提条件
 
-## Prerequisites
-
-- Windows 10 or later
-- winapp CLI installed via one of these methods:
+- Windows 10以降
+- winapp CLI は次のいずれかの方法でインストールされます。
   - **WinGet**: `winget install Microsoft.WinAppCli --source winget`
-  - **NPM** (for Electron): `npm install @microsoft/winappcli --save-dev`
-  - **GitHub Actions/Azure DevOps**: Use [setup-WinAppCli](https://github.com/microsoft/setup-WinAppCli) action
-  - **Manual**: Download from [GitHub Releases](https://github.com/microsoft/WinAppCli/releases/latest)
+  - **NPM** (電子用): `npm install @microsoft/winappcli --save-dev`
+  - **GitHub Actions/Azure DevOps**: [setup-WinAppCli](https://github.com/microsoft/setup-WinAppCli) アクションを使用します。
+  - **マニュアル**: [GitHub Releases](https://github.com/microsoft/WinAppCli/releases/latest) からダウンロードします。
 
-## Core Capabilities
+## コア機能
 
-### 1. Project Initialization (`winapp init`)
+### 1. プロジェクトの初期化 (`winapp init`)
 
-Initialize a directory with required assets (manifest, certificates, libraries) for building a modern Windows app. Supports SDK installation modes: `stable`, `preview`, `experimental`, or `none`.
+最新の Windows アプリを構築するために必要なアセット (マニフェスト、証明書、ライブラリ) を含むディレクトリを初期化します。サポートされる SDK インストール モード: `stable`、`preview`、`experimental`、または `none`。
 
-### 2. MSIX Packaging (`winapp pack`)
+### 2. MSIX パッケージ化 (`winapp pack`)
 
-Create MSIX packages from prepared directories with optional signing, certificate generation, and self-contained deployment bundling.
+オプションの署名、証明書の生成、自己完結型の展開バンドルを使用して、準備されたディレクトリから MSIX パッケージを作成します。
 
-### 3. Package Identity for Debugging (`winapp create-debug-identity`)
+### 3. デバッグ用のパッケージ ID (`winapp create-debug-identity`)
 
-Add temporary package identity to executables for debugging Windows APIs that require identity (notifications, Windows AI, shell integration) without full packaging.
+完全なパッケージ化を行わずに ID (通知、Windows AI、シェル統合) を必要とする Windows API をデバッグするために、一時的なパッケージ ID を実行可能ファイルに追加します。
 
-### 4. Manifest Management (`winapp manifest`)
+### 4. マニフェスト管理 (`winapp manifest`)AppxManifest.xml ファイルを生成し、ソース画像から画像アセットを更新して、必要なサイズとアスペクト比をすべて自動的に作成します。柔軟なアプリ ID 定義のために、AppxManifest で動的コンテンツと修飾名のためのマニフェスト プレースホルダーをサポートします。
 
-Generate AppxManifest.xml files and update image assets from source images, automatically creating all required sizes and aspect ratios. Supports manifest placeholders for dynamic content and qualified names in AppxManifest for flexible app identity definitions.
+### 5. 証明書管理 (`winapp cert`)
 
-### 5. Certificate Management (`winapp cert`)
+開発証明書を生成し、パッケージに署名するためにローカル マシン ストアにインストールします。
 
-Generate development certificates and install them to the local machine store for signing packages.
+### 6. パッケージの署名 (`winapp sign`)
 
-### 6. Package Signing (`winapp sign`)
+オプションのタイムスタンプ サーバー サポートを使用して、MSIX パッケージと実行可能ファイルに PFX 証明書で署名します。
 
-Sign MSIX packages and executables with PFX certificates, with optional timestamp server support.
+### 7. SDK ビルド ツールへのアクセス (`winapp tool`)
 
-### 7. SDK Build Tools Access (`winapp tool`)
+適切に構成されたパスを使用して、任意のフレームワークまたはビルド システムから Windows SDK ビルド ツールを実行します。
 
-Run Windows SDK build tools with properly configured paths from any framework or build system.
+### 8. Microsoft ストアの統合 (`winapp store`)
 
-### 8. Microsoft Store Integration (`winapp store`)
+winapp から Microsoft Store Developer CLI コマンドを直接実行し、CLI を離れることなくストアの送信、パッケージの検証、ワークフローの公開を可能にします。
 
-Run Microsoft Store Developer CLI commands directly from winapp, enabling store submission, package validation, and publishing workflows without leaving the CLI.
+### 9. 外部カタログ作成 (`winapp create-external-catalog`)
 
-### 9. External Catalog Creation (`winapp create-external-catalog`)
+外部カタログを作成して開発者の資産管理を合理化し、カタログ データをメイン パッケージから分離します。
 
-Create external catalogs to streamline asset management for developers, separating catalog data from the main package.
+## 使用例
 
-## Usage Examples
-
-### Example 1: Initialize and Package a Windows App
-
-```bash
+### 例 1: Windows アプリの初期化とパッケージ化```bash
 # Initialize workspace with defaults
 winapp init
 # Note: init no longer auto-generates a certificate (v0.2.0+). Generate one explicitly:
@@ -87,21 +82,13 @@ winapp cert generate
 
 # Create signed MSIX package
 winapp pack ./build-output --generate-cert --output MyApp.msix
-```
-
-### Example 2: Debug with Package Identity
-
-```bash
+```### 例 2: パッケージ ID を使用したデバッグ```bash
 # Add debug identity to executable for testing Windows APIs
 winapp create-debug-identity ./bin/MyApp.exe
 
 # Run your app - it now has package identity
 ./bin/MyApp.exe
-```
-
-### Example 3: CI/CD Pipeline Setup
-
-```yaml
+```### 例 3: CI/CD パイプラインのセットアップ```yaml
 # GitHub Actions example
 - name: Setup winapp CLI
   uses: microsoft/setup-WinAppCli@v1
@@ -110,11 +97,7 @@ winapp create-debug-identity ./bin/MyApp.exe
   run: |
     winapp init --no-prompt
     winapp pack ./build-output --output MyApp.msix
-```
-
-### Example 4: Electron App Integration
-
-```bash
+```### 例 4: Electron アプリの統合```bash
 # Install via npm
 npm install @microsoft/winappcli --save-dev
 
@@ -124,21 +107,17 @@ npx winapp node add-electron-debug-identity
 
 # Package for distribution
 npx winapp pack ./out --output MyElectronApp.msix
-```
+```## ガイドライン
 
-## Guidelines
+1. **最初に `winapp init` を実行します** - SDK セットアップとマニフェストが構成されていることを確認するために、他のコマンドを使用する前に必ずプロジェクトを初期化してください。注: v0.2.0 以降、`winapp init` は開発証明書を自動的に生成しなくなりました。開発証明書で署名する必要がある場合は、`winapp cert generate` を明示的に実行します。
+2. **マニフェストの変更後に `create-debug-identity` を再実行します** - AppxManifest.xml が変更されるたびに、パッケージ ID を再作成する必要があります。
+3. **CI/CD には `--no-prompt` を使用** - デフォルト値を使用することで、自動パイプラインでの対話型プロンプトを防止します。
+4. **共有プロジェクトには `winapp restore` を使用します** - `winapp.yaml` で定義された正確な環境状態をマシン間で再作成します。
+5. **単一の画像からアセットを生成** - 1 つのロゴを持つ `winapp manifest update-assets` を使用して、必要なアイコン サイズをすべて生成します。
 
-1. **Run `winapp init` first** - Always initialize your project before using other commands to ensure SDK setup and manifest are configured. Note: as of v0.2.0, `winapp init` no longer generates a development certificate automatically. Run `winapp cert generate` explicitly when you need to sign with a dev certificate.
-2. **Re-run `create-debug-identity` after manifest changes** - Package identity must be recreated whenever AppxManifest.xml is modified.
-3. **Use `--no-prompt` for CI/CD** - Prevents interactive prompts in automated pipelines by using default values.
-4. **Use `winapp restore` for shared projects** - Recreates the exact environment state defined in `winapp.yaml` across machines.
-5. **Generate assets from a single image** - Use `winapp manifest update-assets` with one logo to generate all required icon sizes.
+## 一般的なパターン
 
-## Common Patterns
-
-### Pattern: Initialize New Project
-
-```bash
+### パターン: 新しいプロジェクトを初期化する```bash
 cd my-project
 winapp init
 # Creates: AppxManifest.xml, SDK configuration, winapp.yaml
@@ -146,72 +125,58 @@ winapp init
 
 # Generate a dev signing certificate explicitly (no longer done by init)
 winapp cert generate
-```
-
-### Pattern: Package with Existing Certificate
-
-```bash
+```### パターン: 既存の証明書を含むパッケージ```bash
 winapp pack ./build-output --cert ./mycert.pfx --cert-password secret --output MyApp.msix
-```
-
-### Pattern: Self-Contained Deployment
-
-```bash
+```### パターン: 自己完結型の展開```bash
 # Bundle Windows App SDK runtime with the package
 winapp pack ./my-app --self-contained --generate-cert
-```
-
-### Pattern: Update Package Versions
-
-```bash
+```### パターン: パッケージのバージョンを更新する```bash
 # Update to latest stable SDKs
 winapp update
 
 # Or update to preview SDKs
 winapp update --setup-sdks preview
-```
+```## 制限事項
 
-## Limitations
+- Windows 10以降が必要（WindowsのみのCLI）
+- パッケージ ID のデバッグでは、マニフェストの変更後に `create-debug-identity` を再実行する必要があります
+- 自己完結型の展開では、Windows App SDK ランタイムをバンドルすることでパッケージ サイズが増加します
+- 開発証明書はテスト専用です。本番環境には信頼できる証明書が必要です
+- 一部の Windows API では、マニフェストで特定の機能を宣言する必要があります。
+- `winapp init` は証明書を自動生成しなくなりました (v0.2.0 以降)。 `winapp cert generate` を明示的に実行する
+- .NET (csproj) プロジェクトは `winapp.yaml` をスキップします。 SDKパッケージはプロジェクトファイル内で直接設定されます
+- winapp CLI はパッケージに NuGet グローバル キャッシュを使用します (`%userprofile%/.winapp/packages` ではありません)。
+- winapp CLI はパブリック プレビュー段階にあり、変更される可能性があります
 
-- Windows 10 or later required (Windows-only CLI)
-- Package identity debugging requires re-running `create-debug-identity` after any manifest changes
-- Self-contained deployment increases package size by bundling the Windows App SDK runtime
-- Development certificates are for testing only; production requires trusted certificates
-- Some Windows APIs require specific capability declarations in the manifest
-- `winapp init` no longer auto-generates a certificate (v0.2.0+); run `winapp cert generate` explicitly
-- .NET (csproj) projects skip `winapp.yaml`; SDK packages are configured in the project file directly
-- winapp CLI uses the NuGet global cache for packages (not `%userprofile%/.winapp/packages`)
-- winapp CLI is in public preview and subject to change
+## パッケージ ID によって有効になる Windows API
 
-## Windows APIs Enabled by Package Identity
+パッケージ ID により、強力な Windows API へのアクセスが可能になります。
 
-Package identity unlocks access to powerful Windows APIs:
-
-| API Category | Examples |
+| API カテゴリ |例 |
 | ------------ | -------- |
-| **Notifications** | Interactive native notifications, notification management |
-| **Windows AI** | On-device LLM, text/image AI APIs (Phi Silica, Windows ML) |
-| **Shell Integration** | Explorer, Taskbar, Share sheet integration |
-| **Protocol Handlers** | Custom URI schemes (`yourapp://`) |
-| **Device Access** | Camera, microphone, location (with consent) |
-| **Background Tasks** | Run when app is closed |
-| **File Associations** | Open file types with your app |
+| **お知らせ** |インタラクティブなネイティブ通知、通知管理 |
+| **Windows AI** |オンデバイス LLM、テキスト/画像 AI API (Phi Silica、Windows ML) |
+| **シェルの統合** |エクスプローラー、タスクバー、共有シートの統合 |
+| **プロトコル ハンドラー** |カスタム URI スキーム (`yourapp://`) |
+| **デバイスアクセス** |カメラ、マイク、位置情報 (同意あり) |
+| **バックグラウンド タスク** |アプリが閉じたときに実行 |
+| **ファイルの関連付け** |アプリでファイルの種類を開く |
 
-## Troubleshooting
+## トラブルシューティング
 
-| Issue | Solution |
+|問題 |ソリューション |
 | ----- | -------- |
-| Certificate not trusted | Run `winapp cert install <cert-path>` to install to local machine store |
-| Package identity not working | Run `winapp create-debug-identity` after any manifest changes |
-| SDK not found | Run `winapp restore` or `winapp update` to ensure SDKs are installed |
-| Signing fails | Verify certificate password and ensure cert is not expired |
+|証明書が信頼されていません | `winapp cert install <cert-path>` を実行してローカル マシン ストアにインストールします。
+|パッケージ ID が機能しない |マニフェストを変更した後は `winapp create-debug-identity` を実行します。
+| SDK が見つかりません | `winapp restore` または `winapp update` を実行して、SDK がインストールされていることを確認します。
+|署名が失敗する |証明書のパスワードを検証し、証明書の有効期限が切れていないことを確認します。
 
-## References
+## 参考文献
 
-- [GitHub Repository](https://github.com/microsoft/WinAppCli)
-- [Full CLI Documentation](https://github.com/microsoft/WinAppCli/blob/main/docs/usage.md)
-- [.NET Project Guide](https://github.com/microsoft/WinAppCli/blob/main/docs/guides/dotnet.md)
-- [Sample Applications](https://github.com/microsoft/WinAppCli/tree/main/samples)
-- [Windows App SDK](https://learn.microsoft.com/windows/apps/windows-app-sdk/)
-- [MSIX Packaging Overview](https://learn.microsoft.com/windows/msix/overview)
-- [Package Identity Overview](https://learn.microsoft.com/windows/apps/desktop/modernize/package-identity-overview)
+- [GitHub リポジトリ](https://github.com/microsoft/WinAppCli)
+- [完全な CLI ドキュメント](https://github.com/microsoft/WinAppCli/blob/main/docs/usage.md)
+- [.NET プロジェクト ガイド](https://github.com/microsoft/WinAppCli/blob/main/docs/guides/dotnet.md)
+- [サンプル アプリケーション](https://github.com/microsoft/WinAppCli/tree/main/samples)
+- [Windows アプリ SDK](https://learn.microsoft.com/windows/apps/windows-app-sdk/)
+- [MSIX パッケージングの概要](https://learn.microsoft.com/windows/msix/overview)
+- [パッケージ ID の概要](https://learn.microsoft.com/windows/apps/desktop/modernize/package-identity-overview)

@@ -1,32 +1,30 @@
-# Architecture & Patterns Reference
+# アーキテクチャとパターンのリファレンス
 
-Web application architectures, design patterns, and architectural concepts.
+Web アプリケーションのアーキテクチャ、デザイン パターン、アーキテクチャの概念。
 
-## Application Architectures
+## アプリケーション アーキテクチャ
 
-### Single Page Application (SPA)
+### シングルページアプリケーション (SPA)
 
-Web app that loads single HTML page and dynamically updates content.
+単一の HTML ページを読み込み、コンテンツを動的に更新する Web アプリ。
 
-**Characteristics**:
-- Client-side routing
-- Heavy JavaScript usage
-- Fast navigation after initial load
-- Complex state management
+**特徴**:
+- クライアント側ルーティング
+- JavaScript の多用
+- 初期ロード後の高速ナビゲーション
+- 複雑な状態管理
 
-**Pros**:
-- Smooth user experience
-- Reduced server load
-- Mobile app-like feel
+**長所**:
+- スムーズなユーザーエクスペリエンス
+- サーバー負荷の軽減
+- モバイルアプリのような操作感
 
-**Cons**:
-- Larger initial download
-- SEO challenges (mitigated with SSR)
-- Complex state management
+**短所**:
+- 初期ダウンロードが大きくなる
+- SEO の課題 (SSR で軽減)
+- 複雑な状態管理
 
-**Examples**: React, Vue, Angular apps
-
-```javascript
+**例**: React、Vue、Angular アプリ```javascript
 // React Router example
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
@@ -41,47 +39,40 @@ function App() {
     </BrowserRouter>
   );
 }
-```
+```### マルチページ アプリケーション (MPA)
 
-### Multi-Page Application (MPA)
+複数の HTML ページを含む従来の Web アプリ。
 
-Traditional web app with multiple HTML pages.
+**特徴**:
+- サーバーは各ページをレンダリングします
+- ナビゲーションでページ全体をリロードします
+- よりシンプルなアーキテクチャ
 
-**Characteristics**:
-- Server renders each page
-- Full page reload on navigation
-- Simpler architecture
+**長所**:
+- すぐに使える優れた SEO
+- 構築がより簡単
+- コンテンツの多いサイトに適しています
 
-**Pros**:
-- Better SEO out of the box
-- Simpler to build
-- Good for content-heavy sites
+**短所**:
+- ナビゲーションが遅くなる
+- より多くのサーバーリクエスト
 
-**Cons**:
-- Slower navigation
-- More server requests
+### プログレッシブ ウェブ アプリ (PWA)
 
-### Progressive Web App (PWA)
+ネイティブ アプリ機能を備えた Web アプリ。
 
-Web app with native app capabilities.
-
-**Features**:
-- Installable
-- Offline support (Service Workers)
-- Push notifications
-- App-like experience
-
-```javascript
+**特徴**:
+- インストール可能
+- オフラインサポート (サービスワーカー)
+- プッシュ通知
+- アプリのような体験```javascript
 // Service Worker registration
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
     .then(reg => console.log('SW registered', reg))
     .catch(err => console.error('SW error', err));
 }
-```
-
-**manifest.json**:
-```json
+```**manifest.json**:```json
 {
   "name": "My PWA",
   "short_name": "PWA",
@@ -97,24 +88,20 @@ if ('serviceWorker' in navigator) {
     }
   ]
 }
-```
+```### サーバーサイド レンダリング (SSR)
 
-### Server-Side Rendering (SSR)
+サーバー上でページをレンダリングし、HTML をクライアントに送信します。
 
-Render pages on server, send HTML to client.
+**長所**:
+- SEOの向上
+- 最初のコンテンツフルペイントの高速化
+- JavaScriptなしで動作します
 
-**Pros**:
-- Better SEO
-- Faster first contentful paint
-- Works without JavaScript
+**短所**:
+- サーバー負荷が高くなる
+- より複雑なセットアップ
 
-**Cons**:
-- Higher server load
-- More complex setup
-
-**Frameworks**: Next.js, Nuxt.js, SvelteKit
-
-```javascript
+**フレームワーク**: Next.js、Nuxt.js、SvelteKit```javascript
 // Next.js SSR
 export async function getServerSideProps() {
   const data = await fetchData();
@@ -124,22 +111,18 @@ export async function getServerSideProps() {
 function Page({ data }) {
   return <div>{data.title}</div>;
 }
-```
+```### 静的サイト生成 (SSG)
 
-### Static Site Generation (SSG)
+ビルド時にページを事前レンダリングします。
 
-Pre-render pages at build time.
+**長所**:
+- 非常に速い
+- サーバーコストが低い
+- 優れたSEO
 
-**Pros**:
-- Extremely fast
-- Low server cost
-- Great SEO
+**最適な用途**: ブログ、ドキュメント、マーケティング サイト
 
-**Best for**: Blogs, documentation, marketing sites
-
-**Tools**: Next.js, Gatsby, Hugo, Jekyll, Eleventy
-
-```javascript
+**ツール**: Next.js、Gatsby、Hugo、Jekyll、イレブンティ```javascript
 // Next.js SSG
 export async function getStaticProps() {
   const data = await fetchData();
@@ -150,13 +133,9 @@ export async function getStaticPaths() {
   const paths = await fetchPaths();
   return { paths, fallback: false };
 }
-```
+```### インクリメンタル静的再生 (ISR)
 
-### Incremental Static Regeneration (ISR)
-
-Update static content after build.
-
-```javascript
+ビルド後に静的コンテンツを更新します。```javascript
 // Next.js ISR
 export async function getStaticProps() {
   const data = await fetchData();
@@ -165,86 +144,74 @@ export async function getStaticProps() {
     revalidate: 60 // Revalidate every 60 seconds
   };
 }
-```
+```### ジャムスタック
 
-### JAMstack
+JavaScript、API、マークアップ アーキテクチャ。
 
-JavaScript, APIs, Markup architecture.
+**原則**:
+- 事前にレンダリングされた静的ファイル
+- 動的機能用の API
+- Gitベースのワークフロー
+- CDN展開
 
-**Principles**:
-- Pre-rendered static files
-- APIs for dynamic functionality
-- Git-based workflows
-- CDN deployment
+**利点**:
+- 高速なパフォーマンス
+- 高いセキュリティ
+- スケーラビリティ
+- 開発者の経験
 
-**Benefits**:
-- Fast performance
-- High security
-- Scalability
-- Developer experience
+## レンダリングパターン
 
-## Rendering Patterns
+### クライアントサイド レンダリング (CSR)
 
-### Client-Side Rendering (CSR)
-
-JavaScript renders content in browser.
-
-```html
+JavaScript はブラウザーでコンテンツをレンダリングします。```html
 <div id="root"></div>
 <script>
   // React renders app here
   ReactDOM.render(<App />, document.getElementById('root'));
 </script>
-```
+```### 水分補給
 
-### Hydration
-
-Attach JavaScript to server-rendered HTML.
-
-```javascript
+サーバーでレンダリングされた HTML に JavaScript を添付します。```javascript
 // React hydration
 ReactDOM.hydrate(<App />, document.getElementById('root'));
-```
+```### 部分的な水分補給
 
-### Partial Hydration
+インタラクティブなコンポーネントのみをハイドレートします。
 
-Hydrate only interactive components.
+**ツール**: Astro、Qwik
 
-**Tools**: Astro, Qwik
+### 諸島の建築
 
-### Islands Architecture
+静的 HTML 内の独立した対話型コンポーネント。
 
-Independent interactive components in static HTML.
+**コンセプト**: 最小限のJavaScriptを出荷し、インタラクティブ性の「島」のみをハイドレートします。
 
-**Concept**: Ship minimal JavaScript, hydrate only "islands" of interactivity
+**フレームワーク**: Astro、イレブンティ ウィズ アイランド
 
-**Frameworks**: Astro, Eleventy with Islands
+## デザインパターン
 
-## Design Patterns
+### MVC (モデル-ビュー-コントローラー)
 
-### MVC (Model-View-Controller)
+データ、プレゼンテーション、ロジックを分離します。
 
-Separate data, presentation, and logic.
+- **モデル**: データとビジネス ロジック
+- **表示**: UI プレゼンテーション
+- **コントローラー**: 入力を処理し、モデル/ビューを更新します
 
-- **Model**: Data and business logic
-- **View**: UI presentation
-- **Controller**: Handle input, update model/view
+### MVVM (モデル-ビュー-ビューモデル)
 
-### MVVM (Model-View-ViewModel)
+データバインディングを備えた MVC に似ています。
 
-Similar to MVC with data binding.
+- **モデル**: データ
+- **表示**: UI
+- **ViewModel**: ロジックと状態を表示します。
 
-- **Model**: Data
-- **View**: UI
-- **ViewModel**: View logic and state
+**使用場所**: Vue.js、Angular、Knockout
 
-**Used in**: Vue.js, Angular, Knockout
+### コンポーネントベースのアーキテクチャ
 
-### Component-Based Architecture
-
-Build UI from reusable components.
-
-```javascript
+再利用可能なコンポーネントから UI を構築します。```javascript
 // React component
 function Button({ onClick, children }) {
   return (
@@ -256,42 +223,34 @@ function Button({ onClick, children }) {
 
 // Usage
 <Button onClick={handleClick}>Click me</Button>
-```
+```### マイクロフロントエンド
 
-### Micro Frontends
+フロントエンドをより小さな独立したアプリに分割します。
 
-Split frontend into smaller, independent apps.
+**アプローチ**:
+- ビルド時の統合
+- ランタイム統合 (iframe、Web コンポーネント)
+- エッジ側には以下が含まれます
 
-**Approaches**:
-- Build-time integration
-- Run-time integration (iframes, Web Components)
-- Edge-side includes
+## 状態管理
 
-## State Management
+### 地方州
 
-### Local State
-
-Component-level state.
-
-```javascript
+コンポーネントレベルの状態。```javascript
 // React useState
 function Counter() {
   const [count, setCount] = useState(0);
   return <button onClick={() => setCount(count + 1)}>{count}</button>;
 }
-```
+```### 世界の状態
 
-### Global State
+アプリケーション全体の状態。
 
-Application-wide state.
-
-**Solutions**:
-- **Redux**: Predictable state container
-- **MobX**: Observable state
-- **Zustand**: Minimal state management
-- **Recoil**: Atomic state management
-
-```javascript
+**解決策**:
+- **Redux**: 予測可能な状態コンテナー
+- **MobX**: 監視可能な状態
+- **Zustand**: 最小限の状態管理
+- **反動**: アトミック状態管理```javascript
 // Redux example
 import { createSlice, configureStore } from '@reduxjs/toolkit';
 
@@ -306,13 +265,9 @@ const counterSlice = createSlice({
 const store = configureStore({
   reducer: { counter: counterSlice.reducer }
 });
-```
+```### コンテキスト API
 
-### Context API
-
-Share state without prop drilling.
-
-```javascript
+プロペラの穴あけなしで状態を共有します。```javascript
 // React Context
 const ThemeContext = React.createContext('light');
 
@@ -328,28 +283,20 @@ function Toolbar() {
   const theme = useContext(ThemeContext);
   return <div className={theme}>...</div>;
 }
-```
+```## API アーキテクチャ パターン
 
-## API Architecture Patterns
+### REST (表現状態転送)
 
-### REST (Representational State Transfer)
-
-Resource-based API design.
-
-```javascript
+リソースベースの API 設計。```javascript
 // RESTful API
 GET    /api/users      // List users
 GET    /api/users/1    // Get user
 POST   /api/users      // Create user
 PUT    /api/users/1    // Update user
 DELETE /api/users/1    // Delete user
-```
+```### グラフQL
 
-### GraphQL
-
-Query language for APIs.
-
-```graphql
+API のクエリ言語。```graphql
 # Query
 query {
   user(id: "1") {
@@ -391,13 +338,9 @@ function User({ id }) {
   if (loading) return <p>Loading...</p>;
   return <p>{data.user.name}</p>;
 }
-```
+```### tRPC
 
-### tRPC
-
-End-to-end typesafe APIs.
-
-```typescript
+エンドツーエンドのタイプセーフ API。```typescript
 // Server
 const appRouter = router({
   getUser: publicProcedure
@@ -409,92 +352,84 @@ const appRouter = router({
 
 // Client (fully typed!)
 const user = await trpc.getUser.query('1');
-```
+```## マイクロサービス アーキテクチャ
 
-## Microservices Architecture
+アプリケーションを小さな独立したサービスに分割します。
 
-Split application into small, independent services.
+**特徴**:
+- 独立した展開
+- サービス固有のデータベース
+- API通信
+- 分散型ガバナンス
 
-**Characteristics**:
-- Independent deployment
-- Service-specific databases
-- API communication
-- Decentralized governance
+**利点**:
+- スケーラビリティ
+- テクノロジーの柔軟性
+- 障害の切り分け
 
-**Benefits**:
-- Scalability
-- Technology flexibility
-- Fault isolation
+**課題**:
+- 複雑さ
+- ネットワーク遅延
+- データの一貫性
 
-**Challenges**:
-- Complexity
-- Network latency
-- Data consistency
+## モノリシック アーキテクチャ
 
-## Monolithic Architecture
+単一の統合アプリケーション。
 
-Single, unified application.
+**長所**:
+- よりシンプルな開発
+- デバッグが容易になりました
+- 単一の展開
 
-**Pros**:
-- Simpler development
-- Easier debugging
-- Single deployment
+**短所**:
+- スケーリングの課題
+- テクノロジーのロックイン
+- 密結合
 
-**Cons**:
-- Scaling challenges
-- Technology lock-in
-- Tight coupling
+## サーバーレス アーキテクチャ
 
-## Serverless Architecture
+サーバーを管理せずにコードを実行します。
 
-Run code without managing servers.
-
-**Platforms**: AWS Lambda, Vercel Functions, Netlify Functions, Cloudflare Workers
-
-```javascript
+**プラットフォーム**: AWS Lambda、Vercel Functions、Netlify Functions、Cloudflare Workers```javascript
 // Vercel serverless function
 export default function handler(req, res) {
   res.status(200).json({ message: 'Hello from serverless!' });
 }
-```
+```**利点**:
+- 自動スケーリング
+- 使用ごとに支払い
+- サーバー管理なし
 
-**Benefits**:
-- Auto-scaling
-- Pay per use
-- No server management
+**使用例**:
+- API
+- バックグラウンドジョブ
+- Webhook
+- 画像処理
 
-**Use Cases**:
-- APIs
-- Background jobs
-- Webhooks
-- Image processing
+## アーキテクチャのベスト プラクティス
 
-## Architectural Best Practices
+### 懸念事項の分離
 
-### Separation of Concerns
+さまざまな側面を分けておいてください。
+- プレゼンテーション層
+- ビジネスロジック層
+- データアクセス層
 
-Keep different aspects separate:
-- Presentation layer
-- Business logic layer
-- Data access layer
+### DRY (同じことを繰り返さないでください)
 
-### DRY (Don't Repeat Yourself)
+コードの重複を避けてください。
 
-Avoid code duplication.
+### 確固たる原則
 
-### SOLID Principles
+- **単一の責任
+- **O**ペン/クローズ
+- **L**イスコフの交代
+- **I**インターフェースの分離
+- **D**依存関係の反転
 
-- **S**ingle Responsibility
-- **O**pen/Closed
-- **L**iskov Substitution
-- **I**nterface Segregation
-- **D**ependency Inversion
+### 継承よりも構成
 
-### Composition over Inheritance
-
-Prefer composing objects over class hierarchies.
-
-```javascript
+クラス階層よりもオブジェクトを構成することを好みます。```javascript
 // Composition
 function withLogging(Component) {
   return function LoggedComponent(props) {
@@ -504,15 +439,11 @@ function withLogging(Component) {
 }
 
 const LoggedButton = withLogging(Button);
-```
+```## モジュールシステム
 
-## Module Systems
+### ES モジュール (ESM)
 
-### ES Modules (ESM)
-
-Modern JavaScript modules.
-
-```javascript
+最新の JavaScript モジュール。```javascript
 // export
 export const name = 'John';
 export function greet() {}
@@ -522,28 +453,20 @@ export default App;
 import App from './App.js';
 import { name, greet } from './utils.js';
 import * as utils from './utils.js';
-```
+```### CommonJS
 
-### CommonJS
-
-Node.js module system.
-
-```javascript
+Node.js モジュール システム。```javascript
 // export
 module.exports = { name: 'John' };
 exports.greet = function() {};
 
 // import
 const { name } = require('./utils');
-```
+```## ビルドの最適化
 
-## Build Optimization
+### コード分割
 
-### Code Splitting
-
-Split code into smaller chunks.
-
-```javascript
+コードをより小さなチャンクに分割します。```javascript
 // React lazy loading
 const OtherComponent = React.lazy(() => import('./OtherComponent'));
 
@@ -554,72 +477,66 @@ function App() {
     </Suspense>
   );
 }
-```
+```### 木の揺れ
 
-### Tree Shaking
-
-Remove unused code.
-
-```javascript
+未使用のコードを削除します。```javascript
 // Only imports 'map', not entire lodash
 import { map } from 'lodash-es';
-```
+```### バンドルの分割
 
-### Bundle Splitting
+- **ベンダー バンドル**: サードパーティの依存関係
+- **アプリバンドル**: アプリケーションコード
+- **ルート バンドル**: ルートごとのコード
 
-- **Vendor bundle**: Third-party dependencies
-- **App bundle**: Application code
-- **Route bundles**: Per-route code
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Abstraction
+**対象となる重要な用語**:
+- 抽象化
 - API
-- Application
-- Architecture
-- Asynchronous
-- Binding
-- Block (CSS, JS)
-- Call stack
-- Class
-- Client-side
-- Control flow
-- Delta
-- Design pattern
-- Event
-- Fetch
-- First-class Function
-- Function
-- Garbage collection
-- Grid
-- Hoisting
-- Hydration
-- Idempotent
-- Instance
-- Lazy load
-- Main thread
-- MVC
+- アプリケーション
+- 建築
+- 非同期
+- バインディング
+- ブロック（CSS、JS）
+- コールスタック
+- クラス
+- クライアント側
+- 制御フロー
+- デルタ
+- デザインパターン
+- イベント
+- フェッチ
+- 第一級関数
+- 機能
+- ガベージコレクション
+- グリッド
+- 吊り上げ
+- 水分補給
+- べき等
+- インスタンス
+- 遅延ロード
+- メインスレッド
+-MVC
 
-- Polyfill
-- Progressive Enhancement
-- Progressive web apps
-- Property
-- Prototype
-- Prototype-based programming
-- REST
-- Reflow
-- Round Trip Time (RTT)
-- SPA
-- Semantics
-- Server
-- Synthetic monitoring
-- Thread
-- Type
+- ポリフィル
+- 段階的な強化
+- プログレッシブウェブアプリ
+- プロパティ
+- プロトタイプ
+- プロトタイプベースのプログラミング
+- 休憩
+- リフロー
+- 往復時間 (RTT)
+- スパ
+- セマンティクス
+- サーバー
+- 総合モニタリング
+- スレッド
+- タイプ
 
-## Additional Resources
+## 追加のリソース
 
-- [Patterns.dev](https://www.patterns.dev/)
+- [パターン.dev](https://www.patterns.dev/)
 - [React Patterns](https://reactpatterns.com/)
 - [JAMstack](https://jamstack.org/)
-- [Micro Frontends](https://micro-frontends.org/)
+- [マイクロフロントエンド](https://micro-frontends.org/)

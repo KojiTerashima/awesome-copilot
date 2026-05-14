@@ -1,103 +1,90 @@
-# Star Schema Design for Power BI
+# Power BI のスター スキーマ設計
 
-## Overview
+## 概要
 
-Star schema is the optimal design pattern for Power BI semantic models. It organizes data into:
-- **Dimension tables**: Enable filtering and grouping (the "one" side)
-- **Fact tables**: Enable summarization (the "many" side)
+スター スキーマは、Power BI セマンティック モデルに最適な設計パターンです。データを次のように整理します。
+- **ディメンション テーブル**: フィルタリングとグループ化を有効にします (「一方」側)
+- **ファクト テーブル**: 要約を有効にする (「多」側)
 
-## Table Classification
+## テーブルの分類
 
-### Dimension Tables
-- Contain descriptive attributes for filtering/slicing
-- Have unique key columns (one row per entity)
-- Examples: Customer, Product, Date, Geography, Employee
-- Naming convention: Singular noun (`Customer`, `Product`)
+### 寸法表
+- フィルタリング/スライス用の説明的な属性が含まれています
+- 一意のキー列がある (エンティティごとに 1 行)
+- 例: 顧客、製品、日付、地理、従業員
+- 命名規則: 単数名詞 (`Customer`、`Product`)
 
-### Fact Tables  
-- Contain measurable, quantitative data
-- Have foreign keys to dimensions
-- Store data at consistent grain (one row per transaction/event)
-- Examples: Sales, Orders, Inventory, WebVisits
-- Naming convention: Business process noun (`Sales`, `Orders`)
+### ファクトテーブル  
+- 測定可能な定量的なデータが含まれています
+- ディメンションへの外部キーを持つ
+- 一貫した粒度でデータを保存します (トランザクション/イベントごとに 1 行)
+- 例: 販売、注文、在庫、Web 訪問
+・命名規則：業務プロセス名詞（`Sales`、`Orders`）
 
-## Design Principles
+## 設計原則
 
-### 1. Separate Dimensions from Facts
-```
-BAD:  Single denormalized "Sales" table with customer details
-GOOD: "Sales" fact table + "Customer" dimension table
-```
+### 1. 事実と次元を分離する「」
+悪い例: 顧客の詳細を含む単一の非正規化された「売上」テーブル
+GOOD: 「販売」ファクト テーブル + 「顧客」ディメンション テーブル
+「」### 2. 一貫した粒子
+ファクト テーブルのすべての行は同じものを表します。
+- 注文明細レベル (最も一般的)
+- 毎日の集計
+- 毎月の概要
 
-### 2. Consistent Grain
-Every row in a fact table represents the same thing:
-- Order line level (most common)
-- Daily aggregation
-- Monthly summary
+一つのテーブルで穀物を決して混ぜないでください。
 
-Never mix grains in one table.
-
-### 3. Surrogate Keys
-Add surrogate keys when source lacks unique identifiers:
-```m
-// Power Query: Add index column
-= Table.AddIndexColumn(Source, "CustomerKey", 1, 1)
-```
-
-### 4. Date Dimension
-Always create a dedicated date table:
-- Mark as date table in Power BI
-- Include fiscal periods if needed
-- Add relative date columns (IsCurrentMonth, IsPreviousYear)
-
-```dax
-Date = 
+### 3. 代理キー
+ソースに一意の識別子がない場合は、代理キーを追加します。``m
+// Power Query: インデックス列を追加します
+= Table.AddIndexColumn(ソース, "CustomerKey", 1, 1)
+「」### 4. 日付ディメンション
+常に専用の日付テーブルを作成します。
+- Power BI で日付テーブルとしてマークする
+- 必要に応じて会計期間を含めます
+- 相対日付列 (IsCurrentMonth、IsPrevious Year) を追加します。「ダックス」
+日付 = 
 ADDCOLUMNS(
     CALENDAR(DATE(2020,1,1), DATE(2030,12,31)),
-    "Year", YEAR([Date]),
-    "Month", FORMAT([Date], "MMMM"),
-    "MonthNum", MONTH([Date]),
-    "Quarter", "Q" & FORMAT([Date], "Q"),
-    "WeekDay", FORMAT([Date], "dddd")
-)
-```
+    "年", YEAR([日付]),
+    "月", FORMAT([日付], "MMMM"),
+    "月番号", MONTH([日付]),
+    "四半期", "Q" & FORMAT([日付], "Q"),
+    "WeekDay", FORMAT([日付], "dddd")
+）
+「」## 特殊な寸法タイプ
 
-## Special Dimension Types
+### ロールプレイングの次元
+同じディメンションが複数回使用される (例: OrderDate、ShipDate の日付):
+- オプション 1: テーブルを複製する (OrderDate、ShipDate テーブル)
+- オプション 2: DAX で USERELATIONSHIP との非アクティブな関係を使用する
 
-### Role-Playing Dimensions
-Same dimension used multiple times (e.g., Date for OrderDate, ShipDate):
-- Option 1: Duplicate the table (OrderDate, ShipDate tables)
-- Option 2: Use inactive relationships with USERELATIONSHIP in DAX
+### ゆっくりと変化する次元 (タイプ 2)
+バージョン列を使用して履歴の変更を追跡します。
+- StartDate、EndDate 列
+- IsCurrent フラグ
+- データウェアハウスでの前処理が必要
 
-### Slowly Changing Dimensions (Type 2)
-Track historical changes with version columns:
-- StartDate, EndDate columns
-- IsCurrent flag
-- Requires pre-processing in data warehouse
+### ジャンク品の寸法
+カーディナリティの低いフラグを 1 つのテーブルに結合します。「」
+OrderFlags ディメンション: IsRush、Is Gift、IsOnline
+「」### 次元の縮退
+トランザクション識別子 (OrderNumber、InvoiceID) をファクト テーブルに保持します。
 
-### Junk Dimensions
-Combine low-cardinality flags into one table:
-```
-OrderFlags dimension: IsRush, IsGift, IsOnline
-```
+## 避けるべきアンチパターン
 
-### Degenerate Dimensions
-Keep transaction identifiers (OrderNumber, InvoiceID) in fact table.
+|アンチパターン |問題 |ソリューション |
+|--------------|----------|----------|
+|幅の広い非正規化テーブル |パフォーマンスが悪く、メンテナンスが難しい |スター スキーマに分割する |
+|スノーフレーク (正規化された明るさ) |余分な結合はパフォーマンスに悪影響を及ぼします。寸法を平坦化する |
+|ブリッジなしの多対多 |あいまいな結果 |橋/ジャンクションテーブルを追加 |
+|混合穀物の事実 |不正な集計 |穀物ごとに別の表を作成 |
 
-## Anti-Patterns to Avoid
+## 検証チェックリスト
 
-| Anti-Pattern | Problem | Solution |
-|--------------|---------|----------|
-| Wide denormalized tables | Poor performance, hard to maintain | Split into star schema |
-| Snowflake (normalized dims) | Extra joins hurt performance | Flatten dimensions |
-| Many-to-many without bridge | Ambiguous results | Add bridge/junction table |
-| Mixed grain facts | Incorrect aggregations | Separate tables per grain |
-
-## Validation Checklist
-
-- [ ] Each table is clearly dimension or fact
-- [ ] Fact tables have foreign keys to all related dimensions
-- [ ] Dimensions have unique key columns
-- [ ] Date table exists and is marked
-- [ ] No circular relationship paths
-- [ ] Consistent naming conventions
+- [ ] 各表は明らかに次元または事実です
+- [ ] ファクト テーブルには、関連するすべてのディメンションへの外部キーがあります
+- [ ] ディメンションには一意のキー列があります
+- [ ] 日付テーブルが存在し、マークされています
+- [ ] 循環関係パスはありません
+- [ ] 一貫した命名規則

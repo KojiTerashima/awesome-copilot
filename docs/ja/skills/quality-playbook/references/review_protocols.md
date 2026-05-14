@@ -1,376 +1,343 @@
-# Review Protocols (Files 3 and 4)
+# プロトコルの確認 (ファイル 3 および 4)
 
-## File 3: Code Review Protocol (`RUN_CODE_REVIEW.md`)
+## ファイル 3: コード レビュー プロトコル (`RUN_CODE_REVIEW.md`)
 
-### Template
+### テンプレート```マークダウン
+# コードレビュープロトコル: [プロジェクト名]
 
-```markdown
-# Code Review Protocol: [Project Name]
+## ブートストラップ (最初にお読みください)
 
-## Bootstrap (Read First)
+確認する前に、以下のファイルを読んでコンテキストを確認してください。
+1. `quality/QUALITY.md` — 高品質な構成と目的への適合性シナリオ
+2. [主なアーキテクチャドキュメント]
+3. [主要な設計上の決定事項に関するドキュメント]
+4. [その他の重要なコンテキスト]
 
-Before reviewing, read these files for context:
-1. `quality/QUALITY.md` — Quality constitution and fitness-to-purpose scenarios
-2. [Main architectural doc]
-3. [Key design decisions doc]
-4. [Any other essential context]
+## 何を確認するか
 
-## What to Check
+### 重点領域 1: [サブシステム/リスク領域名]
 
-### Focus Area 1: [Subsystem/Risk Area Name]
+**場所:** [特定のファイルと関数]
+**内容:** [具体的に探すべきこと]
+**理由:** [これが間違っている場合は何が問題になりますか]
 
-**Where:** [Specific files and functions]
-**What:** [Specific things to look for]
-**Why:** [What goes wrong if this is incorrect]
+### 重点領域 2: [サブシステム/リスク領域名]
 
-### Focus Area 2: [Subsystem/Risk Area Name]
+[探索からアーキテクチャとリスク領域にマッピングされた 4 ～ 6 の重点領域について繰り返します]
 
-[Repeat for 4–6 focus areas, mapped to architecture and risk areas from exploration]
+## ガードレール
 
-## Guardrails
+- **行番号は必須です。** 特定の行を引用できない場合は、所見を含めないでください。
+- **シグネチャだけでなく、関数の本体を読んでください。** 関数がその名前に基づいて正しく動作すると仮定しないでください。
+- **何かがバグなのか意図的なものなのか**が不明な場合は、バグではなく質問としてフラグを立ててください。
+- **欠落していると主張する前に grep してください。** 機能が欠落していると思われる場合は、コードベースを検索してください。別のファイルで見つかった場合、それは位置の欠陥であり、欠落している機能ではありません。
+- **スタイルの変更、リファクタリング、改善を提案しないでください。** 間違っているもの、または失敗の原因となる可能性のあるものにのみフラグを立ててください。
 
-- **Line numbers are mandatory.** If you cannot cite a specific line, do not include the finding.
-- **Read function bodies, not just signatures.** Don't assume a function works correctly based on its name.
-- **If unsure whether something is a bug or intentional**, flag it as a QUESTION rather than a BUG.
-- **Grep before claiming missing.** If you think a feature is absent, search the codebase. If found in a different file, that's a location defect, not a missing feature.
-- **Do NOT suggest style changes, refactors, or improvements.** Only flag things that are incorrect or could cause failures.
+## 出力フォーマット
 
-## Output Format
+結果を `quality/code_reviews/YYYY-MM-DD-reviewer.md` に保存
 
-Save findings to `quality/code_reviews/YYYY-MM-DD-reviewer.md`
+レビューされた各ファイルについて:
 
-For each file reviewed:
+### ファイル名.ext
+- **NNN 行:** [バグ / 質問 / 不完全] 説明。予想と実際の比較。なぜそれが重要なのか。
 
-### filename.ext
-- **Line NNN:** [BUG / QUESTION / INCOMPLETE] Description. Expected vs. actual. Why it matters.
+### 概要
+- 重大度別の合計検出結果
+- 検出結果のないファイル
+- 総合評価: 出荷 / 最初に修正 / 議論が必要
+「」### フェーズ 2: 確認されたバグの回帰テスト
 
-### Summary
-- Total findings by severity
-- Files with no findings
-- Overall assessment: SHIP IT / FIX FIRST / NEEDS DISCUSSION
-```
+コード レビューで結果が得られたら、各バグの検出結果を再現する回帰テストを作成します。これにより、レビューが「ここに潜在的なバグがあります」から「ここにテストが失敗した証明されたバグがあります」に変わります。
 
-### Phase 2: Regression Tests for Confirmed Bugs
+**これが重要な理由:** 再現者のいないコード レビューの結果は意見です。テストが失敗したという結果は事実です。複数のコードベース (Go、Rust、Python) にわたって、コード レビューの結果に基づいて作成された回帰テストにより、データ競合、テナント間のデータ漏洩、ステート マシン違反、サイレント コンテキスト損失などのバグが高率で確認されています。回帰テストは、バグを修正するための受け入れ基準としても機能します。テストに合格すると、バグは修正されます。
 
-After the code review produces findings, write regression tests that reproduce each BUG finding. This transforms the review from "here are potential bugs" into "here are proven bugs with failing tests."
+**回帰テストを生成する方法:**
 
-**Why this matters:** A code review finding without a reproducer is an opinion. A finding with a failing test is a fact. Across multiple codebases (Go, Rust, Python), regression tests written from code review findings have confirmed bugs at a high rate — including data races, cross-tenant data leaks, state machine violations, and silent context loss. The regression tests also serve as the acceptance criteria for fixing the bugs: when the test passes, the bug is fixed.
+1. **発見されたバグごとに**、次のテストを作成します。
+   - 検出結果から正確なコード パスと行番号をターゲットにします。
+   - 現在の実装では失敗し、バグが存在することが確認されます
+   - モッキング/モンキーパッチを使用して外部サービスから隔離します
+   - トレーサビリティのためにテスト文書文字列に所見の説明を含めます
 
-**How to generate regression tests:**
-
-1. **For each BUG finding**, write a test that:
-   - Targets the exact code path and line numbers from the finding
-   - Fails on the current implementation, confirming the bug exists
-   - Uses mocking/monkeypatching to isolate from external services
-   - Includes the finding description in the test docstring for traceability
-
-2. **Name the test file** `quality/test_regression.*` using the project's language:
+2. **テスト ファイルに名前を付けます** プロジェクトの言語を使用して `quality/test_regression.*` を指定します。
    - Python: `quality/test_regression.py`
-   - Go: `quality/regression_test.go` (or in the relevant package's test directory)
-   - Rust: `quality/regression_tests.rs` or a `tests/regression_*.rs` file in the relevant crate
+   - Go: `quality/regression_test.go` (または関連するパッケージのテスト ディレクトリ内)
+   - Rust: 関連するクレート内の `quality/regression_tests.rs` または `tests/regression_*.rs` ファイル
    - Java: `quality/RegressionTest.java`
    - TypeScript: `quality/regression.test.ts`
 
-3. **Each test should document its origin:**
-   ```
-   # Python example
+3. **各テストはその起源を文書化する必要があります:**「」
+   # Python の例
    def test_webhook_signature_raises_on_malformed_input():
-       """[BUG from 2026-03-26-reviewer.md, line 47]
-       Webhook signature verification raises instead of returning False
-       on malformed signatures, risking 500 instead of clean 401."""
+       """[2026-03-26-reviewer.md、47 行目のバグ]
+       Webhook の署名検証で False が返されずにエラーが発生する
+       不正な署名の場合、クリーンな 401 ではなく 500 のリスクがあります。"""
 
-   // Go example
+   // 例に行く
    func TestRestart_DataRace_DirectFieldAccess(t *testing.T) {
-       // BUG from 2026-03-26-claude.md, line 3707
-       // Restart() writes mutex-protected fields without acquiring the lock
+       // 2026-03-26-claude.md、行 3707 のバグ
+       // Restart() はロックを取得せずに、ミューテックスで保護されたフィールドを書き込みます
    }
-   ```
+   「」4. **テストを実行し、結果を確認表としてレポートします**。「」
+   |発見 |テスト |結果 |確認済み？ |
+   |----------|------|----------|-----------|
+   | Webhook シグネチャが不正な入力で発生する | test_webhook_signature_... |失敗 (予想通り) |はい — バグが確認されました |
+   |キューに入れられたメッセージは処理前に削除されました |テストメッセージキュー_... |失敗 (予想通り) |はい — バグが確認されました |
+   |スレッドアクティブチェックがフェイルオープンします | test_is_thread_active_... |合格 (予期せぬ) |いいえ — 調査が必要です |
+   「」5. **テストが予期せず合格した場合**、調査結果が誤検知であったか、テストが正しいコード パスを実行していないかのいずれかです。確認されたバグとしてではなく、調査が必要として報告してください。
 
-4. **Run the tests and report results** as a confirmation table:
-   ```
-   | Finding | Test | Result | Confirmed? |
-   |---------|------|--------|------------|
-   | Webhook signature raises on malformed input | test_webhook_signature_... | FAILED (expected) | YES — bug confirmed |
-   | Queued messages deleted before processing | test_message_queue_... | FAILED (expected) | YES — bug confirmed |
-   | Thread active check fails open | test_is_thread_active_... | PASSED (unexpected) | NO — needs investigation |
-   ```
+**言語固有のヒント:**
 
-5. **If a test passes unexpectedly**, investigate — either the finding was a false positive, or the test doesn't exercise the right code path. Report as NEEDS INVESTIGATION, not as a confirmed bug.
+- **実行:** `go test -race` を使用して、データ競合の結果を確認します。レース探知機は決定的なものです。これが作動すれば、レースは本物です。
+- **Rust:** `#[should_panic]` を使用するか、特定のエラー条件でアサートします。アトミック性のバグについては、挿入された失敗後のクリーンアップ状態でアサートします。
+- **Python:** `monkeypatch` または `unittest.mock.patch` を使用して、外部依存関係を分離します。例外パスのバグには `pytest.raises` を使用します。
+- **Java:** Mockito などを使用して依存関係を分離します。例外パスのバグには `assertThrows` を使用します。
 
-**Language-specific tips:**
+**回帰テストの出力**をコード レビューと一緒に保存します。レビューが `quality/code_reviews/2026-03-26-reviewer.md` にある場合、回帰テストは `quality/test_regression.*` に保存され、確認結果はレビュー ファイルに付録として保存されるか、`quality/results/` に保存されます。
 
-- **Go:** Use `go test -race` to confirm data race findings. The race detector is definitive — if it fires, the race is real.
-- **Rust:** Use `#[should_panic]` or assert on specific error conditions. For atomicity bugs, assert on cleanup state after injected failures.
-- **Python:** Use `monkeypatch` or `unittest.mock.patch` to isolate external dependencies. Use `pytest.raises` for exception-path bugs.
-- **Java:** Use Mockito or similar to isolate dependencies. Use `assertThrows` for exception-path bugs.
+### これらのガードレールが重要な理由
 
-**Save the regression test output** alongside the code review: if the review is at `quality/code_reviews/2026-03-26-reviewer.md`, the regression tests go in `quality/test_regression.*` and the confirmation results go in the review file as an addendum or in `quality/results/`.
+これら 4 つのガードレールは、曖昧で幻覚的な結果を減らすことにより、AI コード レビューの品質を向上させることがよくあります。
 
-### Why These Guardrails Matter
+1. **行番号** により、一般的な懸念事項を説明するだけでなく、モデルが実際に問題を特定するように強制されます。
+2. **本体の読み取り**により、名前に基づいて関数が動作すると想定するというよくある失敗を防ぐことができます
+3. **質問とバグ** により、人間の時間を無駄にする誤検知が減少します
+4. **欠落していると主張する前に Grep を実行** することで、最も一般的な AI レビューの幻覚 (別のファイルにあるのに存在しないと主張する) を防ぐことができます。
 
-These four guardrails often improve AI code review quality by reducing vague and hallucinated findings:
-
-1. **Line numbers** force the model to actually locate the issue, not just describe a general concern
-2. **Reading bodies** prevents the common failure of assuming a function works based on its name
-3. **QUESTION vs BUG** reduces false positives that waste human time
-4. **Grep before claiming missing** prevents the most common AI review hallucination: claiming something doesn't exist when it's in a different file
-
-The "no style changes" rule keeps reviews focused on correctness. Style suggestions dilute the signal and waste review time.
+「スタイルの変更なし」ルールにより、レビューは正確さに重点を置き続けます。スタイルの提案はシグナルを弱め、レビュー時間を無駄にします。
 
 ---
 
-## File 4: Integration Test Protocol (`RUN_INTEGRATION_TESTS.md`)
+## ファイル 4: 統合テスト プロトコル (`RUN_INTEGRATION_TESTS.md`)
 
-### Template
+### テンプレート```マークダウン
+# 結合テストプロトコル: [プロジェクト名]
 
-```markdown
-# Integration Test Protocol: [Project Name]
+## 作業ディレクトリ
 
-## Working Directory
+このプロトコルのすべてのコマンドは、**プロジェクト ルートからの相対パス** を使用します。このファイルの親 (プロジェクト ルート) を含むディレクトリからすべてを実行します。 `cd` を絶対パスまたは親ディレクトリに指定しないでください。コマンドが `cd /some/absolute/path` で始まる場合、それは誤りです。 `./scripts/`、`./pipelines/`、`./quality/` などを使用します。
 
-All commands in this protocol use **relative paths from the project root.** Run everything from the directory containing this file's parent (the project root). Do not `cd` to an absolute path or a parent directory — if a command starts with `cd /some/absolute/path`, it's wrong. Use `./scripts/`, `./pipelines/`, `./quality/`, etc.
+## 安全上の制約
 
-## Safety Constraints
+[このプロトコルが昇格されたアクセス許可で実行される場合:]
+- ソースコードを変更しないでください
+- ファイルは削除しないでください
+- テスト結果ディレクトリにのみファイルを作成します
+- 何かが失敗した場合は、それを記録して次に進みます。修正しないでください。
 
-[If this protocol runs with elevated permissions:]
-- DO NOT modify source code
-- DO NOT delete files
-- ONLY create files in the test results directory
-- If something fails, record it and move on — DO NOT fix it
+## 飛行前チェック
 
-## Pre-Flight Check
+統合テストを実行する前に、次のことを確認してください。
+- [ ] [依存関係がインストールされています — 特定のコマンド]
+- [ ] [利用可能な API キー / 外部サービス — 特定のチェック]
+- [ ] [テスト フィクスチャが存在します — 特定のパス]
+- [ ] [クリーンな状態 - 必要に応じて特定のクリーンアップ]
 
-Before running integration tests, verify:
-- [ ] [Dependencies installed — specific command]
-- [ ] [API keys / external services available — specific checks]
-- [ ] [Test fixtures exist — specific paths]
-- [ ] [Clean state — specific cleanup if needed]
+## テスト マトリックス
 
-## Test Matrix
+|チェック |方法 |合格基準 |
+|------|--------|---------------|
+| 【ハッピーパスの流れ】 | [特定のコマンドまたはテスト] | [具体的な期待結果] |
+| [バリアント A エンドツーエンド] | [コマンド] | [期待される結果] |
+| [バリアント B エンドツーエンド] | [コマンド] | [期待される結果] |
+| [出力の正確性] | 【具体的な主張】 | [期待されるプロパティ] |
+| [コンポーネント境界A→B] | [コマンド] | [期待される結果] |
 
-| Check | Method | Pass Criteria |
-|-------|--------|---------------|
-| [Happy path flow] | [Specific command or test] | [Specific expected result] |
-| [Variant A end-to-end] | [Command] | [Expected result] |
-| [Variant B end-to-end] | [Command] | [Expected result] |
-| [Output correctness] | [Specific assertion] | [Expected property] |
-| [Component boundary A→B] | [Command] | [Expected result] |
+### 統合チェックの設計原則
 
-### Design Principles for Integration Checks
+- **ハッピー パス** — 主要なフローは入力から出力まで機能しますか?
+- **バリアント間の一貫性** — 各バリアントは正しい出力を生成しますか?
+- **出力の正確性** — 「出力が存在する」だけをチェックするのではなく、特定のプロパティを確認してください
+- **コンポーネントの境界** — モジュール A の出力はモジュール B に正しく供給されていますか?
 
-- **Happy path** — Does the primary flow work from input to output?
-- **Cross-variant consistency** — Does each variant produce correct output?
-- **Output correctness** — Don't just check "output exists" — verify specific properties
-- **Component boundaries** — Does Module A's output correctly feed Module B?
+## 自動化された統合テスト
 
-## Automated Integration Tests
+可能であれば、チェックを自動テストとしてエンコードします。
 
-Where possible, encode checks as automated tests:
+「」バッシュ
+[テストランナー] [統合テストファイル] --verbose「」
 
-```bash
-[test runner] [integration test file] --verbose
-```
+## 手動検証手順
 
-## Manual Verification Steps
+[外部システム、人間の判断、または手動検査を必要とするチェック]
 
-[Any checks requiring external systems, human judgment, or manual inspection]
+## 実行 UX (このプロトコルを実行する際の提示方法)
 
-## Execution UX (How to Present When Running This Protocol)
+AI エージェントがこのプロトコルを実行するときは、ユーザーが生の出力を読まなくても理解できるように、3 つのフェーズで通信する必要があります。
 
-When an AI agent runs this protocol, it should communicate in three phases so the user can follow along without reading raw output:
+### フェーズ 1: 計画
 
-### Phase 1: The Plan
+何かを実行する前に、これから何が起こるかをユーザーに示します。
 
-Before running anything, show the user what's about to happen:
+「」## 統合テスト計画
 
-```
-## Integration Test Plan
+**プリフライト:** 依存関係、API キー、環境の確認
+**実行するテスト:**
 
-**Pre-flight:** Checking dependencies, API keys, and environment
-**Tests to run:**
-
-| # | Test | What It Checks | Est. Time |
-|---|------|---------------|-----------|
-| 1 | [Test name] | [One-line description] | ~30s |
-| 2 | [Test name] | [One-line description] | ~2m |
+| # |テスト |チェック内容 | EST（東部基準時。時間 |
+|---|------|------|----------|
+| 1 | [テスト名] | [一行説明] | ～30代 |
+| 2 | [テスト名] | [一行説明] | ～2m |
 | ... | | | |
 
-**Total:** N tests, estimated M minutes
-```
+**合計:** N 個のテスト、推定 M 分「」
 
-This gives the user a chance to say "skip test 4" or "actually, don't run the live API tests" before anything starts.
+これにより、ユーザーは、何かを開始する前に、「テスト 4 をスキップ」または「実際には、ライブ API テストを実行しないでください」と言う機会が与えられます。
 
-### Phase 2: Progress
+### フェーズ 2: 進捗状況
 
-As each test runs, report a one-line status update. Keep it compact — the user wants a heartbeat, not a log dump:
+各テストが実行されるたびに、1 行のステータス更新を報告します。コンパクトに保ちます。ユーザーはログ ダンプではなくハートビートを必要とします。
 
-```
-✓ Test 1: Expression evaluation — PASS (0.3s)
-✓ Test 2: Schema validation — PASS (0.1s)
-⧗ Test 3: Live pipeline (Gemini, realtime)... running
-```
+「」✓ テスト 1: 式の評価 — 合格 (0.3 秒)
+✓ テスト 2: スキーマ検証 — 合格 (0.1 秒)
+⧗ テスト 3: ライブ パイプライン (Gemini、リアルタイム)... 実行中「」
 
-Use `✓` for pass, `✗` for fail, `⧗` for in-progress. If a test fails, show one line of context (the error message or assertion that failed), not the full stack trace. The user can ask for details if they want them.
+成功の場合は `✓`、失敗の場合は `✗`、進行中の場合は `⧗` を使用します。テストが失敗した場合は、完全なスタック トレースではなく、1 行のコンテキスト (失敗したエラー メッセージまたはアサーション) を表示します。ユーザーは必要に応じて詳細を尋ねることができます。
 
-### Phase 3: Results
+### フェーズ 3: 結果
 
-After all tests complete, show a summary table and a recommendation:
+すべてのテストが完了したら、概要表と推奨事項を表示します。
 
-```
-## Results
+「」## 結果
 
-| # | Test | Result | Time | Notes |
-|---|------|--------|------|-------|
-| 1 | Expression evaluation | ✓ PASS | 0.3s | |
-| 2 | Schema validation | ✓ PASS | 0.1s | |
-| 3 | Live pipeline (Gemini) | ✗ FAIL | 45s | Rate limited after 8 units |
+| # |テスト |結果 |時間 |メモ |
+|---|------|--------|------|------|
+| 1 |式の評価 | ✓ パス | 0.3秒 | |
+| 2 |スキーマの検証 | ✓ パス | 0.1秒 | |
+| 3 |ライブパイプライン (Gemini) | ✗ 失敗 | 45秒 | 8ユニット以降はレート制限あり |
 | ... | | | | |
 
-**Passed:** 7/8 | **Failed:** 1/8
+**合格:** 7/8 | **失敗:** 1/8
 
-**Recommendation:** FIX FIRST — Rate limit handling needs investigation.
-```
+**推奨事項:** 最初に修正してください — レート制限の処理を調査する必要があります。「」
 
-Then save the detailed results to `quality/results/YYYY-MM-DD-integration.md`.
+次に、詳細な結果を `quality/results/YYYY-MM-DD-integration.md` に保存します。
 
-## Reporting (Saved to File)
+## レポート (ファイルに保存)
 
-Save results to `quality/results/YYYY-MM-DD-integration.md`
+結果を `quality/results/YYYY-MM-DD-integration.md` に保存
 
-### Summary Table
-| Check | Result | Notes |
-|-------|--------|-------|
-| ... | PASS/FAIL | ... |
+### 概要表
+|チェック |結果 |メモ |
+|------|--------|------|
+| ... |合否 | ... |
 
-### Detailed Findings
-[Specific failures, unexpected behavior, performance observations]
+### 詳細な調査結果
+[特定の障害、予期しない動作、パフォーマンスの観察]
 
-### Recommendation
-[SHIP IT / FIX FIRST / NEEDS INVESTIGATION]
-```
+### 推奨事項
+[出荷 / まずは修正 / 調査が必要]
+「」### 適切な統合チェックを作成するためのヒント
 
-### Tips for Writing Good Integration Checks
+- 各チェックは、単一の関数を呼び出すだけでなく、実際のエンドツーエンドのフローを実行する必要があります。
+- 合格基準は具体的で検証可能である必要があります。「正しく見える」ではなく、「出力にはプロパティ X を持つちょうど N 個のレコードが含まれる」
+- 関連する場合、予想されるタイミングを含めます (特にバッチ/パイプライン プロジェクトの場合)
+- プロジェクトに複数の実行モード (バッチとリアルタイム、異なるプロバイダー) がある場合は、それぞれの組み合わせをテストします。
 
-- Each check should exercise a real end-to-end flow, not just call a single function
-- Pass criteria must be specific and verifiable — not "looks right" but "output contains exactly N records with property X"
-- Include timing expectations where relevant (especially for batch/pipeline projects)
-- If the project has multiple execution modes (batch vs. realtime, different providers), test each combination
+### 外部サービスに対するライブ実行
 
-### Live Execution Against External Services
+統合テストでは、プロジェクトの実際の外部依存関係 (API、データベース、サービス、ファイル システム) を実行する必要があります。ローカル検証と構成解析のみをテストするプロトコルは、統合テスト プロトコルではありません。これは単体テスト スイートを偽装したものです。
 
-Integration tests must exercise the project's actual external dependencies — APIs, databases, services, file systems. A protocol that only tests local validation and config parsing is not an integration test protocol; it's a unit test suite in disguise.
+探索中に、以下を特定します。
+- **プロジェクトが呼び出す外部 API** — .env ファイル内の API キー、環境変数参照、プロバイダー/クライアントの抽象化、HTTP クライアント構成を探します。
+- **実行モード** - バッチとリアルタイム、同期と非同期、さまざまなプロバイダー バックエンド
+- **既存の統合テスト ランナー** - すでにエンドツーエンド フローを実行しているスクリプトまたはテスト ファイル
 
-During exploration, identify:
-- **External APIs the project calls** — Look for API keys in .env files, environment variable references, provider/client abstractions, HTTP client configurations
-- **Execution modes** — batch vs. realtime, sync vs. async, different provider backends
-- **Existing integration test runners** — Scripts or test files that already exercise end-to-end flows
+次に、**プロバイダー × パイプライン × モード** グリッドとしてテスト マトリックスを設計します。たとえば、プロジェクトがバッチ モードとリアルタイム モードで 3 つの API プロバイダーと 3 つのパイプラインをサポートしている場合、プロトコルは構成をローカルで検証するだけでなく、そのマトリックス全体で実際の実行を実行する必要があります。
 
-Then design the test matrix as a **provider × pipeline × mode** grid. For example, if the project supports 3 API providers and 3 pipelines with batch and realtime modes, the protocol should run real executions across that matrix — not just validate configs locally.
+**構造は並列処理のために実行されます。** グループは、プロバイダーごとに最大 1 つの実行が同時に実行されるように実行されます (レート制限を回避するため)。グループ内での同時実行にはバックグラウンド プロセスと `wait` を使用します。
 
-**Structure runs for parallelism.** Group runs so that at most one run per provider executes simultaneously (to avoid rate limits). Use background processes and `wait` for concurrent execution within groups.
+**パイプラインごとの品質チェックを定義します。** 各パイプラインは、異なる正確性基準で異なる出力を生成します。プロトコルは、「出力が存在する」だけではなく、チェックするフィールドと各パイプラインで許容される値を指定する必要があります。
 
-**Define per-pipeline quality checks.** Each pipeline produces different output with different correctness criteria. The protocol must specify what fields to check and what values are acceptable for each pipeline — not just "output exists."
+**実行後の検証チェックリストを含めます。** 実行ごとに、ログ ファイルが完了メッセージとともに存在すること、マニフェストが終了状態を示すこと、検証された出力ファイルが存在し、解析可能なデータが含まれていること、サンプル レコードに予期されるフィールドが入力されていること、および既存の自動品質チェック スクリプトがパスしていることを検証します。
 
-**Include a post-run verification checklist.** For each run, verify: log file exists with completion message, manifest shows terminal state, validated output files exist and contain parseable data, sample records have expected fields populated, and any existing automated quality check scripts pass.
+**プリフライトでは API キーを確認する必要があります。** キーが見つからない場合は、立ち止まって尋ねてください。ライブ テストを黙ってスキップしないでください。
 
-**Pre-flight must check API keys.** If keys are missing, stop and ask — don't skip the live tests silently.
+目標は、このプロトコルを実行することで、実際の条件下でシステム全体を実行し、ローカルのみのテストでは見逃される問題 (プロバイダー固有の応答形式の違い、タイムアウト動作、レート制限、実際の LLM 応答での出力の正確性) を検出することです。
 
-The goal is that running this protocol exercises the full system under real-world conditions, catching issues that local-only testing would miss: provider-specific response format differences, timeout behavior, rate limiting, and output correctness with real LLM responses.
+### 並列処理とレート制限の認識
 
-### Parallelism and Rate Limit Awareness
+逐次統合の実行は時間を無駄にします。次の制約に従って、独立した実行が同時に実行されるように実行をグループ化します。
 
-Sequential integration runs waste time. Group runs so that independent runs execute concurrently, with these constraints:
+- **レート制限を回避するため、**外部プロバイダーごとに同時に実行できるのは 1 つまで**
+- **グループ内での同時実行にはバックグラウンド プロセスと `wait`** を使用します
+- **セッションの開始時に共有タイムスタンプを生成**して、実行ディレクトリの命名に一貫性を持たせる3 つのパイプラインと 3 つのプロバイダー (9 回以上の実行) を持つプロジェクトのグループ化の例:「」
+グループ 1 (並列): Pipeline_A × Provider_1 |パイプライン_B × プロバイダ_2 |パイプライン_C × プロバイダー_3
+グループ 2 (並列): Pipeline_A × Provider_2 |パイプライン_B × プロバイダー_3 |パイプライン_C × プロバイダー_1
+グループ 3 (並列): Pipeline_A × Provider_3 |パイプライン_B × プロバイダー_1 |パイプライン_C × プロバイダー_2
+「」このパターンでは、同時リクエストで同じプロバイダーにアクセスすることがなく、スループットが最大化されます。グループ化をプロジェクトの実際のパイプラインとプロバイダーの数に適応させます。
 
-- **At most one run per external provider simultaneously** to avoid rate limits
-- **Use background processes and `wait`** for concurrent execution within groups
-- **Generate a shared timestamp** at the start of the session for consistent run directory naming
+生成されたプロトコルには、バックグラウンド実行用の `&` とグループ間の `wait` を含む実際の bash コマンドを含めます。並列処理を説明するだけでなく、スクリプトを作成します。
 
-Example grouping for a project with 3 pipelines and 3 providers (9+ runs):
+### コードから品質ゲートを導出する
 
-```
-Group 1 (parallel): Pipeline_A × Provider_1 | Pipeline_B × Provider_2 | Pipeline_C × Provider_3
-Group 2 (parallel): Pipeline_A × Provider_2 | Pipeline_B × Provider_3 | Pipeline_C × Provider_1
-Group 3 (parallel): Pipeline_A × Provider_3 | Pipeline_B × Provider_1 | Pipeline_C × Provider_2
-```
+一般的な合否基準 (「すべてのユニットが検証済み」) では、ドメイン固有の正確性の問題が見逃されます。コード自体からパイプライン固有の品質チェックを取得します。
 
-This pattern maximizes throughput while never hitting the same provider with concurrent requests. Adapt the grouping to the project's actual pipeline and provider count.
+1. **検証ルールを読みます。** プロジェクトが出力 (スキーマ検証、アサーション関数、ビジネス ルール チェック) を検証する場合、それらのルールは「正しい」とはどのようなものかを定義します。それらを品質ゲートに変換します。「フィールド X は、すべての出力レコードの条件 Y を満たす必要があります。」
 
-In the generated protocol, include the actual bash commands with `&` for background execution and `wait` between groups. Don't just describe parallelism — script it.
+2. **スキーマの列挙型を読み取ります。** スキーマで列挙型フィールド (例: `outcome: ["fell_in_water", "reached_ship"]`) が定義されている場合、品質ゲートは次のようになります。「すべての出力はこのセットの値を使用する必要があり、分布は非縮退 (100% 1 つの値ではない) である必要があります。」
 
-### Deriving Quality Gates from Code
+3. **生成ロジックを読み取ります。** プロジェクトがテスト データ (項目ファイル、シード データ、置換戦略) を生成する場合、どのようなバリアントが表示されるべきかを理解します。 3 つの性格タイプがある場合、品質ゲートは次のようになります。「3 つのタイプすべてが十分なサンプル サイズで出力に現れる必要があります。」
 
-Generic pass/fail criteria ("all units validated") miss domain-specific correctness issues. Derive pipeline-specific quality checks from the code itself:
+4. **既存の品質チェックを読み取ります。** 出力品質を既に検証しているスクリプトまたは関数を検索します (例: `integration_checks.py`、実行後に呼び出される検証関数)。プロトコルから直接参照または呼び出します。
 
-1. **Read validation rules.** If the project validates output (schema validators, assertion functions, business rule checks), those rules define what "correct" looks like. Turn them into quality gates: "field X must satisfy condition Y for all output records."
+プロジェクト内のパイプラインごとに、統合プロトコルには、上記の探索から得られた期待値を含む 2 ～ 4 つの特定のチェックをリストした専用の「品質チェック」セクションが必要です。 「出力が存在する」などの一般的なチェックは使用しないでください。すべてのチェックは、特定のフィールドと許容可能な値の範囲を参照する必要があります。
 
-2. **Read schema enums.** If schemas define enum fields (e.g., `outcome: ["fell_in_water", "reached_ship"]`), the quality gate is: "all outputs must use values from this set, and the distribution should be non-degenerate (not 100% one value)."
+### フィールド参照テーブル (品質ゲートを作成する前に必要)
 
-3. **Read generation logic.** If the project generates test data (items files, seed data, permutation strategies), understand what variants should appear. If there are 3 personality types, the quality gate is: "all 3 types must appear in output with sufficient sample size."
+**これが存在する理由:** AI モデルは、スキーマを読み取った場合でも、自信を持って間違ったフィールド名を書き込みます。これは、モデルが探索中にスキーマを読み取り、その後プロトコル時間 (または数千のトークン) をメモリから書き込むために発生します。メモリ ドリフト: `document_id` が `doc_id` に、`sentiment_score` が `sentiment` に、`float 0-1` が `int 0-100` になります。プロトコルは権威あるように見えますが、フィールド名は幻覚のようです。実際のデータに対して品質ゲートを実行すると失敗し、ユーザーは生成されたプレイブック全体に対する信頼を失います。
 
-4. **Read existing quality checks.** Search for scripts or functions that already verify output quality (e.g., `integration_checks.py`, validation functions called after runs). Reference or call them directly from the protocol.
+**この修正は手順的なものであり、指示的なものではありません。** 「後でクロスチェックする」と自分に言い聞かせるだけではなく、最初に参照テーブルを作成し、それからコピーして品質ゲートを作成します。
 
-For each pipeline in the project, the integration protocol should have a dedicated "Quality Checks" section listing 2–4 specific checks with expected values derived from the exploration above. Do not use generic checks like "output exists" — every check must reference a specific field and acceptable value range.
+出力フィールド名を参照するクオリティ ゲートを作成する前に、各スキーマ ファイルを再読み込みして **フィールド参照テーブル** を構築します。「」
+## フィールド参照テーブル (メモリではなくスキーマから構築)
 
-### The Field Reference Table (Required Before Writing Quality Gates)
+### パイプライン: WeatherForecast
+スキーマ: パイプライン/WeatherForecast/schemas/analyze.json
+|フィールド |タイプ |制約 |
+|------|------|---------------|
+|地域名 |文字列 | — |
+|温度 |番号 |最小: -50、最大: 60 |
+|状態 |文字列 | enum: ["晴れ"、"曇り"、"雨"、"雪"] |
 
-**Why this exists:** AI models confidently write wrong field names even when they've read the schemas. This happens because the model reads the schema during exploration, then writes the protocol hours (or thousands of tokens) later from memory. Memory drifts: `document_id` becomes `doc_id`, `sentiment_score` becomes `sentiment`, `float 0-1` becomes `int 0-100`. The protocol looks authoritative but the field names are hallucinated. When someone runs the quality gates against real data, they fail — and the user loses trust in the entire generated playbook.
-
-**The fix is procedural, not instructional.** Don't just tell yourself to "cross-check later" — build the reference table FIRST, then write quality gates by copying from it.
-
-Before writing any quality gate that references output field names, build a **Field Reference Table** by re-reading each schema file:
-
-```
-## Field Reference Table (built from schemas, not memory)
-
-### Pipeline: WeatherForecast
-Schema: pipelines/WeatherForecast/schemas/analyze.json
-| Field | Type | Constraints |
-|-------|------|-------------|
-| region_name | string | — |
-| temperature | number | min: -50, max: 60 |
-| condition | string | enum: ["sunny", "cloudy", "rain", "snow"] |
-
-### Pipeline: SentimentAnalysis
-Schema: pipelines/SentimentAnalysis/schemas/evaluate.json
-| Field | Type | Constraints |
-|-------|------|-------------|
-| document_id | string | — |
-| sentiment_score | number | min: -1.0, max: 1.0 |
-| classification | string | enum: ["positive", "negative", "neutral"] |
+### パイプライン: センチメント分析
+スキーマ: パイプライン/センチメント分析/スキーマ/評価.json
+|フィールド |タイプ |制約 |
+|------|------|---------------|
+|ドキュメントID |文字列 | — |
+|感情スコア |番号 |最小: -1.0、最大: 1.0 |
+|分類 |文字列 | enum: [「ポジティブ」、「ネガティブ」、「ニュートラル」] |
 ...
-```
+「」**プロセス:**
+1. **テーブルの各行を書き込む前に、すぐに各スキーマ ファイルを再読み取りします。** メモリから行を書き込まないでください。読み取られるファイルとテーブルの行は隣接している必要があります。つまり、ファイルを読み取り、行を書き込み、次のファイルを読み取り、次の行を書き込みます。会話の前半ですべてのスキーマを読んだとしても、それは意味がありません。フィールド名の記憶は何千ものトークンを超えて漂っているため、ここでもう一度スキーマを読む必要があります。
+2. **ファイルの内容からフィールド名を 1 文字ずつコピーします。** 再入力しないでください。 `document_id` は `doc_id` ではありません。 `sentiment_score` は `sentiment` ではありません。 `classification` は `category` ではありません。わずかな違いでも品質の関門を突破します。
+3. **重要だと思われるフィールドだけでなく、スキーマのすべてのフィールドを含めます。** スキーマに 8 つの必須フィールドがある場合、テーブルには 8 行が含まれます。スキーマに含まれるフィールドよりも少ない行を書き込んだ場合、フィールドはスキップされます。
+4. 完成したテーブルからフィールド名をコピーして、品質ゲートを作成します。
+5. 書いた後、フィールドを数えます。品質ゲートがテーブルにないフィールドに言及している場合、それは幻覚です。取り外してください。
 
-**The process:**
-1. **Re-read each schema file IMMEDIATELY before writing each table row.** Do not write any row from memory. The file read and the table row must be adjacent — read the file, write the row, read the next file, write the next row. If you read all schemas earlier in the conversation, that doesn't count — you must read them AGAIN here because your memory of field names drifts over thousands of tokens.
-2. **Copy field names character-for-character from the file contents.** Do not retype them. `document_id` is not `doc_id`. `sentiment_score` is not `sentiment`. `classification` is not `category`. Even small differences break quality gates.
-3. **Include ALL fields from the schema, not just the ones you think are important.** If the schema has 8 required fields, the table has 8 rows. If you wrote fewer rows than the schema has fields, you skipped fields.
-4. Write quality gates by copying field names from the completed table.
-5. After writing, count fields: if the quality gates mention a field that isn't in the table, you hallucinated it. Remove it.
+このテーブルは中間成果物であり、将来のプロトコル ユーザーがフィールドの精度を検証できるように、プロトコル自体に (参照セクションとして) 含めます。重要なのは、フィールドを「すでに知っている」という理由でスキップするのではなく、スキーマ読み取りの証拠を生成する具体的なステップとして作成することです。
 
-This table is an intermediate artifact — include it in the protocol itself (as a reference section) so future protocol users can verify field accuracy. The point is to create it as a concrete step that produces evidence of schema reading, not skip it because you "already know" the fields.
+### 校正スケール
 
-### Calibrating Scale
+統合テスト実行ごとのユニット/レコード/反復の数が重要です。
 
-The number of units/records/iterations per integration test run matters:
+- **少なすぎる (1 ～ 3):** 高速かつ安価ですが、同時実行性のバグが見逃され、分散チェックが失敗し (2 つのレコードで「25 ～ 75% の比率」を検証できない)、ファンアウト/拡張ロジックが現実的な規模でテストされていません。
+- **多すぎる (100 以上):** テスト プロトコルとしては高価で時間がかかります。生産には適していますが、品質検証には適していません。
+- **適切な範囲:** システムを有意義に実行するには十分です。ガイドライン:
+  - プロジェクトにチャンク/バッチ ロジックがある場合は、少なくとも 2 つのチャンクにまたがるカウントを使用します (たとえば、chunk_size=10 の場合、15 ～ 30 ユニットを使用します)。
+  - プロジェクトに配分チェックがある場合は、カテゴリー数の少なくとも 5 ～ 10 倍を使用します (例: 3 つの成果タイプ → 少なくとも 15 単位)
+  - プロジェクトにファンアウト/拡張がある場合は、無視できない数の子を生成する数を使用します。
 
-- **Too few (1–3):** Fast and cheap, but misses concurrency bugs, distribution checks fail (can't verify "25–75% ratio" with 2 records), and fan-out/expansion logic untested at realistic scale.
-- **Too many (100+):** Expensive and slow for a test protocol. Appropriate for production but not for quality verification.
-- **Right range:** Enough to exercise the system meaningfully. Guidelines:
-  - If the project has chunking/batching logic, use a count that spans at least 2 chunks (e.g., if chunk_size=10, use 15–30 units)
-  - If the project has distribution checks, use at least 5–10× the number of categories (e.g., 3 outcome types → at least 15 units)
-  - If the project has fan-out/expansion, use a count that produces a non-trivial number of children
+調整するプロジェクト内で `chunk_size`、`batch_size`、または同様の構成を探します。疑わしい場合は、通常、統合テストには 10 ～ 30 レコードが適切な範囲であり、API 予算を消費せずに実際の問題を把握するには十分です。
 
-Look for `chunk_size`, `batch_size`, or similar configuration in the project to calibrate. When in doubt, 10–30 records is usually the right range for integration testing — enough to catch real issues without burning API budget.
+### 実行後の検証の深さ
 
-### Post-Run Verification Depth
+実行がエラーなしで完了しても、まだ間違っている可能性があります。統合テストの実行ごとに、複数のレベルで検証します。1. **プロセスレベル:** プロセスは正常に終了しましたか?終了コードだけでなく、完了メッセージについてもログ ファイルを確認してください。
+2. **状態レベル:** 実行は終了状態ですか?実行マニフェスト/ステータス ファイルが「完了」であることを確認します (「実行中」または「送信済み」のままではない)。
+3. **データ レベル:** 出力データは存在し、正しく解析されますか?実際の出力ファイルを読み取り、有効な JSON/CSV などが含まれていることを確認します。
+4. **コンテンツ レベル:** 出力レコードには、適切な値が入力された予期されるフィールドがありますか? 2 ～ 3 個のサンプル レコードを読み取り、主要なフィールドを確認します。
+5. **品質レベル:** パイプライン固有の品質ゲートは通過しますか?既存の品質チェック スクリプトを実行します。
+6. **UI レベル (該当する場合):** プロジェクトにダッシュボード/TUI/UI がある場合は、そこに実行が正しく表示されることを確認します。
 
-A run that completes without errors may still be wrong. For each integration test run, verify at multiple levels:
-
-1. **Process-level:** Did the process exit cleanly? Check log files for completion messages, not just exit codes.
-2. **State-level:** Is the run in a terminal state? Check the run manifest/status file for "complete" (not stuck in "running" or "submitted").
-3. **Data-level:** Does output data exist and parse correctly? Read actual output files, verify they contain valid JSON/CSV/etc.
-4. **Content-level:** Do output records have the expected fields populated with reasonable values? Read 2–3 sample records and check key fields.
-5. **Quality-level:** Do the pipeline-specific quality gates pass? Run any existing quality check scripts.
-6. **UI-level (if applicable):** If the project has a dashboard/TUI/UI, verify the run appears correctly there.
-
-Include all applicable levels in the generated protocol's post-run checklist. The common failure is stopping at level 2 (process completed) without checking levels 3–5.
+生成されたプロトコルの実行後チェックリストに、該当するすべてのレベルを含めます。よくある失敗は、レベル 3 ～ 5 を確認せずにレベル 2 (プロセスが完了) で停止することです。

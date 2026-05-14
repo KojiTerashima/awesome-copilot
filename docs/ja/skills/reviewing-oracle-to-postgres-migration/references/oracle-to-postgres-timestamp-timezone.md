@@ -1,82 +1,74 @@
-# Oracle to PostgreSQL: CURRENT_TIMESTAMP and NOW() Timezone Handling
+# Oracle から PostgreSQL: CURRENT_TIMESTAMP および NOW() タイムゾーンの処理
 
-## Contents
+## 内容
 
-- Problem
-- Behavior Comparison
-- PostgreSQL Timezone Precedence
-- Common Error Symptoms
-- Migration Actions — Npgsql config, DateTime normalization, stored procedures, session timezone, application code
-- Integration Test Patterns
-- Checklist
+- 問題
+- 動作の比較
+- PostgreSQL のタイムゾーンの優先順位
+- 一般的なエラーの症状
+- 移行アクション — Npgsql 設定、DateTime 正規化、ストアド プロシージャ、セッション タイムゾーン、アプリケーション コード
+- 統合テストパターン
+- チェックリスト
 
-## Problem
+## 問題
 
-Oracle's `CURRENT_TIMESTAMP` returns a value in the **session timezone** and stores it in the column's declared precision. When .NET reads this value back via ODP.NET, it is surfaced as a `DateTime` with `Kind=Local`, reflecting the OS timezone of the client.
+Oracle の `CURRENT_TIMESTAMP` は、**セッション タイムゾーン**の値を返し、それを列の宣言された精度に格納します。 .NET が ODP.NET 経由でこの値を読み取ると、クライアントの OS タイムゾーンを反映して、`Kind=Local` を含む `DateTime` として表示されます。
 
-PostgreSQL's `CURRENT_TIMESTAMP` and `NOW()` both return a `timestamptz` (timestamp with time zone) anchored to **UTC**, regardless of the session timezone setting. How Npgsql surfaces this value depends on the driver version and configuration:
+PostgreSQL の `CURRENT_TIMESTAMP` と `NOW()` はどちらも、セッションのタイムゾーン設定に関係なく、**UTC** に固定された `timestamptz` (タイムゾーン付きのタイムスタンプ) を返します。 Npgsql がこの値を表示する方法は、ドライバーのバージョンと構成によって異なります。
 
-- **Npgsql < 6 / legacy mode (`EnableLegacyTimestampBehavior = true`):** `timestamptz` columns are returned as `DateTime` with `Kind=Unspecified`. This is the source of silent timezone bugs when migrating from Oracle.
-- **Npgsql 6+ with legacy mode disabled (the new default):** `timestamptz` columns are returned as `DateTime` with `Kind=Utc`, and writing a `Kind=Unspecified` value throws an exception at insertion time.
+- **Npgsql < 6 / レガシー モード (`EnableLegacyTimestampBehavior = true`):** `timestamptz` 列は、`Kind=Unspecified` を含む `DateTime` として返されます。これは、Oracle から移行する際のサイレント タイムゾーンのバグの原因です。
+- **レガシー モードが無効になっている Npgsql 6 以降 (新しいデフォルト):** `timestamptz` 列は `Kind=Utc` を含む `DateTime` として返され、`Kind=Unspecified` 値を書き込むと挿入時に例外がスローされます。
 
-Projects that have not yet upgraded to Npgsql 6+, or that explicitly opt back into legacy mode, remain vulnerable to the `Kind=Unspecified` issue. This mismatch — and the ease of accidentally re-enabling legacy mode — causes silent data corruption, incorrect comparisons, and off-by-N-hours bugs that are extremely difficult to trace.
+まだ Npgsql 6 以降にアップグレードしていないプロジェクト、または明示的にレガシー モードに戻っているプロジェクトは、`Kind=Unspecified` 問題に対して依然として脆弱です。この不一致と、誤ってレガシー モードを再度有効にしてしまう可能性が高いため、サイレント データ破損、誤った比較、追跡が非常に困難な N 時間単位のバグが発生します。
 
 ---
 
-## Behavior Comparison
+## 動作の比較
 
-| Aspect | Oracle | PostgreSQL |
+|側面 |オラクル |ポストグレSQL |
 |---|---|---|
-| `CURRENT_TIMESTAMP` type | `TIMESTAMP WITH LOCAL TIME ZONE` | `timestamptz` (UTC-normalised) |
-| Client `DateTime.Kind` via driver | `Local` | `Unspecified` (Npgsql < 6 / legacy mode); `Utc` (Npgsql 6+ default) |
-| Session timezone influence | Yes — affects stored/returned value | Affects *display* only; UTC stored internally |
-| NOW() equivalent | `SYSDATE` / `CURRENT_TIMESTAMP` | `NOW()` = `CURRENT_TIMESTAMP` (both return `timestamptz`) |
-| Implicit conversion on comparison | Oracle applies session TZ offset | PostgreSQL compares UTC; session TZ is display-only |
+| `CURRENT_TIMESTAMP` タイプ | `TIMESTAMP WITH LOCAL TIME ZONE` | `timestamptz` (UTC 正規化) |
+|クライアント `DateTime.Kind` ドライバー経由 | `Local` | `Unspecified` (Npgsql < 6 / レガシー モード); `Utc` (Npgsql 6 以降のデフォルト) |
+|セッションのタイムゾーンの影響 |はい - 格納/戻り値に影響します | *表示*のみに影響します。 UTC が内部に保存される |
+| NOW() と同等 | `SYSDATE` / `CURRENT_TIMESTAMP` | `NOW()` = `CURRENT_TIMESTAMP` (両方とも `timestamptz` を返します) |
+|比較時の暗黙的な変換 | Oracle はセッション TZ オフセットを適用します。 PostgreSQL は UTC を比較します。セッション TZ は表示専用です |
 
 ---
 
-## PostgreSQL Timezone Precedence
+## PostgreSQL のタイムゾーンの優先順位
 
-PostgreSQL resolves the effective session timezone using the following hierarchy (highest priority wins):
+PostgreSQL は、次の階層を使用して有効なセッション タイムゾーンを解決します (最も高い優先順位が優先されます)。
 
-| Level | How it is set |
+|レベル |設定方法 |
 |---|---|
-| **Session** | `SET TimeZone = 'UTC'` sent at connection open |
-| **Role** | `ALTER ROLE app_user SET TimeZone = 'UTC'` |
-| **Database** | `ALTER DATABASE mydb SET TimeZone = 'UTC'` |
-| **Server** | `postgresql.conf` → `TimeZone = 'America/New_York'` |
-
-The session timezone does **not** affect the stored UTC value of a `timestamptz` column — it only controls how `SHOW timezone` and `::text` casts format a value for display. Application code that relies on `DateTime.Kind` or compares timestamps without an explicit timezone can produce incorrect results if the server's default timezone is not UTC.
+| **セッション** | `SET TimeZone = 'UTC'` 接続オープン時に送信 |
+| **役割** | `ALTER ROLE app_user SET TimeZone = 'UTC'` |
+| **データベース** | `ALTER DATABASE mydb SET TimeZone = 'UTC'` |
+| **サーバー** | `postgresql.conf` → `TimeZone = 'America/New_York'` |セッション タイムゾーンは、`timestamptz` 列の保存された UTC 値には**影響しません**。`SHOW timezone` および `::text` が表示用に値をキャストする方法を制御するだけです。 `DateTime.Kind` に依存するアプリケーション コードや、明示的なタイムゾーンを指定せずにタイムスタンプを比較するアプリケーション コードは、サーバーのデフォルトのタイムゾーンが UTC でない場合、誤った結果を生成する可能性があります。
 
 ---
 
-## Common Error Symptoms
+## 一般的なエラーの症状
 
-- Timestamps read from PostgreSQL have `Kind=Unspecified`; comparisons with `DateTime.UtcNow` or `DateTime.Now` produce incorrect results.
-- Date-range queries return too few or too many rows because the WHERE clause comparison is evaluated in a timezone that differs from the stored UTC value.
-- Integration tests pass on a developer machine (UTC OS timezone) but fail in CI or production (non-UTC timezone).
-- Stored procedure output parameters carrying timestamps arrive with a session-offset applied by the server but are then compared to UTC values in the application.
+- PostgreSQL から読み取られたタイムスタンプには `Kind=Unspecified` が付いています。 `DateTime.UtcNow` または `DateTime.Now` との比較では、間違った結果が生成されます。
+- WHERE 句の比較が、保存されている UTC 値とは異なるタイムゾーンで評価されるため、日付範囲クエリで返される行が少なすぎるか多すぎます。
+- 統合テストは開発者マシン (UTC OS タイムゾーン) では成功しますが、CI または運用環境 (非 UTC タイムゾーン) では失敗します。
+- タイムスタンプを含むストアド プロシージャの出力パラメータは、サーバーによって適用されたセッション オフセットとともに到着しますが、その後アプリケーションの UTC 値と比較されます。
 
 ---
 
-## Migration Actions
+## 移行アクション
 
-### 1. Configure Npgsql for UTC via Connection String or AppContext
+### 1. 接続文字列または AppContext を使用して Npgsql を UTC 用に構成する
 
-Npgsql 6+ ships with `EnableLegacyTimestampBehavior` set to `false` by default, which causes `timestamptz` values to be returned as `DateTime` with `Kind=Utc`. Explicitly setting the switch at startup is still recommended to guard against accidental opt-in to legacy mode (e.g., via a config file or a transitive dependency) and to make the intent visible to future maintainers:
-
-```csharp
+Npgsql 6 以降では、`EnableLegacyTimestampBehavior` がデフォルトで `false` に設定された状態で出荷されます。そのため、`timestamptz` 値は `Kind=Utc` を含む `DateTime` として返されます。誤ってレガシー モードにオプトインすることを防止し (構成ファイルや推移的な依存関係などを介して)、将来のメンテナにその意図が見えるようにするために、起動時にスイッチを明示的に設定することを引き続き推奨します。```csharp
 // Program.cs / Startup.cs — apply once at application start
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
-```
+```このスイッチを無効にすると、`Kind=Unspecified` を含む `DateTime` を `timestamptz` 列に書き込もうとすると Npgsql がスローされ、タイムゾーンのバグがクエリ時に静かに発生するのではなく、挿入時に検出可能になります。
 
-With this switch disabled, Npgsql throws if you try to write a `DateTime` with `Kind=Unspecified` to a `timestamptz` column, making timezone bugs loud and detectable at insertion time rather than silently at query time.
+### 2. 永続化の前に DateTime 値を正規化する
 
-### 2. Normalise DateTime Values Before Persistence
-
-Replace any `DateTime.Now` with `DateTime.UtcNow` throughout the migrated codebase. For values that originate from external input (e.g., user-provided dates deserialized from JSON), ensure they are converted to UTC before being saved:
-
-```csharp
+移行されたコードベース全体で `DateTime.Now` を `DateTime.UtcNow` に置き換えます。外部入力に由来する値 (JSON から逆シリアル化されたユーザー指定の日付など) の場合は、保存する前に UTC に変換されていることを確認してください。```csharp
 // Before (Oracle-era code — relied on session/OS timezone)
 var timestamp = DateTime.Now;
 
@@ -87,13 +79,9 @@ var timestamp = DateTime.UtcNow;
 var utcTimestamp = dateTimeInput.Kind == DateTimeKind.Utc
     ? dateTimeInput
     : dateTimeInput.ToUniversalTime();
-```
+```### 3. CURRENT_TIMESTAMP / NOW() を使用してストアド プロシージャを修正する
 
-### 3. Fix Stored Procedures Using CURRENT_TIMESTAMP / NOW()
-
-Stored procedures that assign `CURRENT_TIMESTAMP` or `NOW()` to a `timestamp without time zone` (`timestamp`) column must be reviewed. Prefer `timestamptz` columns or cast explicitly:
-
-```sql
+`CURRENT_TIMESTAMP` または `NOW()` を `timestamp without time zone` (`timestamp`) 列に割り当てるストアド プロシージャを確認する必要があります。 `timestamptz` 列を優先するか、明示的にキャストします。```sql
 -- Ambiguous: server timezone influences interpretation
 INSERT INTO audit_log (created_at) VALUES (NOW()::timestamp);
 
@@ -102,13 +90,9 @@ INSERT INTO audit_log (created_at) VALUES (NOW() AT TIME ZONE 'UTC');
 
 -- Or: use timestamptz column type and let PostgreSQL store UTC natively
 INSERT INTO audit_log (created_at) VALUES (CURRENT_TIMESTAMP);
-```
+```### 4. 接続時にセッション タイムゾーンを強制的に開く (多層防御)
 
-### 4. Force Session Timezone on Connection Open (Defence-in-Depth)
-
-Regardless of role or database defaults, set the session timezone explicitly when opening a connection. This guarantees consistent behavior independent of server configuration:
-
-```csharp
+ロールやデータベースのデフォルトに関係なく、接続を開くときにセッションのタイムゾーンを明示的に設定します。これにより、サーバー構成に関係なく一貫した動作が保証されます。```csharp
 // Npgsql connection string approach
 var connString = "Host=localhost;Database=mydb;Username=app;Password=...;Timezone=UTC";
 
@@ -121,13 +105,9 @@ await using var conn = new NpgsqlConnection(connString);
 await conn.OpenAsync();
 await using var cmd = new NpgsqlCommand("SET TimeZone = 'UTC'", conn);
 await cmd.ExecuteNonQueryAsync();
-```
+```### 5. アプリケーション コード — DateTime.Kind=Unspecified を避ける
 
-### 5. Application Code — Avoid DateTime.Kind=Unspecified
-
-Audit all repository and data-access code that reads timestamp columns. Where Npgsql returns `Unspecified`, either configure the data source globally (option 1 above) or wrap the read:
-
-```csharp
+タイムスタンプ列を読み取るすべてのリポジトリおよびデータ アクセス コードを監査します。 Npgsql が `Unspecified` を返す場合、データ ソースをグローバルに設定するか (上記のオプション 1)、読み取りをラップします。```csharp
 // Safe reader helper — convert Unspecified to Utc at the boundary
 DateTime ReadUtcDateTime(NpgsqlDataReader reader, int ordinal)
 {
@@ -136,15 +116,11 @@ DateTime ReadUtcDateTime(NpgsqlDataReader reader, int ordinal)
         ? DateTime.SpecifyKind(dt, DateTimeKind.Utc)
         : dt.ToUniversalTime();
 }
-```
+```---
 
----
+## 統合テスト パターン
 
-## Integration Test Patterns
-
-### Test: Verify timestamps persist and return as UTC
-
-```csharp
+### テスト: タイムスタンプが保持され、UTC として返されることを確認します。```csharp
 [Fact]
 public async Task InsertedTimestamp_ShouldRoundTripAsUtc()
 {
@@ -158,11 +134,7 @@ public async Task InsertedTimestamp_ShouldRoundTripAsUtc()
     Assert.True(retrieved.CreatedAt >= before,
         "Persisted CreatedAt should not be earlier than the pre-insert UTC timestamp.");
 }
-```
-
-### Test: Verify timestamp comparisons across Oracle and PostgreSQL baselines
-
-```csharp
+```### テスト: Oracle ベースラインと PostgreSQL ベースライン間のタイムスタンプの比較を検証する```csharp
 [Fact]
 public async Task TimestampComparison_ShouldReturnSameRowsAsOracle()
 {
@@ -173,15 +145,13 @@ public async Task TimestampComparison_ShouldReturnSameRowsAsOracle()
 
     Assert.Equal(oracleResults.Count, postgresResults.Count);
 }
-```
+```---
 
----
+## チェックリスト
 
-## Checklist
-
-- [ ] `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false)` applied at application startup.
-- [ ] All `DateTime.Now` usages in data-access code replaced with `DateTime.UtcNow`.
-- [ ] Connection string or connection-open hook sets `Timezone=UTC` / `SET TimeZone = 'UTC'`.
-- [ ] Stored procedures that use `CURRENT_TIMESTAMP` or `NOW()` reviewed; `timestamp without time zone` columns explicitly cast or replaced with `timestamptz`.
-- [ ] Integration tests assert `DateTime.Kind == Utc` on retrieved timestamp values.
-- [ ] Tests cover date-range queries to confirm row counts match Oracle baseline.
+- [ ] `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false)` はアプリケーション起動時に適用されます。
+- [ ] データ アクセス コード内のすべての `DateTime.Now` の使用は `DateTime.UtcNow` に置き換えられます。
+- [ ] 接続文字列または接続オープン フックは `Timezone=UTC` / `SET TimeZone = 'UTC'` を設定します。
+- [ ] `CURRENT_TIMESTAMP` または `NOW()` を使用するストアド プロシージャをレビューしました。 `timestamp without time zone` 列は明示的にキャストまたは `timestamptz` に置き換えられます。
+- [ ] 統合テストは、取得したタイムスタンプ値に対して `DateTime.Kind == Utc` をアサートします。
+- [ ] テストは日付範囲クエリを対象として、行数が Oracle ベースラインと一致することを確認します。

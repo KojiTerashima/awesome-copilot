@@ -2,341 +2,317 @@
 name: penpot-uiux-design
 description: 'Comprehensive guide for creating professional UI/UX designs in Penpot using MCP tools. Use this skill when: (1) Creating new UI/UX designs for web, mobile, or desktop applications, (2) Building design systems with components and tokens, (3) Designing dashboards, forms, navigation, or landing pages, (4) Applying accessibility standards and best practices, (5) Following platform guidelines (iOS, Android, Material Design), (6) Reviewing or improving existing Penpot designs for usability. Triggers: "design a UI", "create interface", "build layout", "design dashboard", "create form", "design landing page", "make it accessible", "design system", "component library".'
 ---
+# Penpot UI/UX デザインガイド
 
-# Penpot UI/UX Design Guide
+`penpot/penpot-mcp` MCP サーバーと実証済みの UI/UX 原則を使用して、Penpot でプロフェッショナルなユーザー中心のデザインを作成します。
 
-Create professional, user-centered designs in Penpot using the `penpot/penpot-mcp` MCP server and proven UI/UX principles.
+## 利用可能な MCP ツール
 
-## Available MCP Tools
-
-| Tool | Purpose |
+|ツール |目的 |
 | ---- | ------- |
-| `mcp__penpot__execute_code` | Run JavaScript in Penpot plugin context to create/modify designs |
-| `mcp__penpot__export_shape` | Export shapes as PNG/SVG for visual inspection |
-| `mcp__penpot__import_image` | Import images (icons, photos, logos) into designs |
-| `mcp__penpot__penpot_api_info` | Retrieve Penpot API documentation |
+| `mcp__penpot__execute_code` | Penpot プラグイン コンテキストで JavaScript を実行してデザインを作成/変更する |
+| `mcp__penpot__export_shape` |形状を視覚検査用に PNG/SVG としてエクスポート |
+| `mcp__penpot__import_image` |画像 (アイコン、写真、ロゴ) をデザインにインポートする |
+| `mcp__penpot__penpot_api_info` | Penpot API ドキュメントを取得する |
 
-## MCP Server Setup
+## MCP サーバーのセットアップ
 
-The Penpot MCP tools require the `penpot/penpot-mcp` server running locally. For detailed installation and troubleshooting, see [setup-troubleshooting.md](references/setup-troubleshooting.md).
+Penpot MCP ツールには、`penpot/penpot-mcp` サーバーがローカルで実行されている必要があります。インストールとトラブルシューティングの詳細については、[setup-troubleshooting.md](references/setup-troubleshooting.md) を参照してください。
 
-### Before Setup: Check If Already Running
+### セットアップ前: すでに実行されているかどうかを確認してください
 
-**Always check if the MCP server is already available before attempting setup:**
+**セットアップを試行する前に、MCP サーバーが既に利用可能かどうかを必ず確認してください。**
 
-1. **Try calling a tool first**: Attempt `mcp__penpot__penpot_api_info` - if it succeeds, the server is running and connected. No setup needed.
+1. **最初にツールの呼び出しを試してください**: `mcp__penpot__penpot_api_info` を試みます - 成功した場合、サーバーは実行され、接続されています。セットアップは必要ありません。
 
-2. **If the tool fails**, ask the user:
-   > "The Penpot MCP server doesn't appear to be connected. Is the server already installed and running? If so, I can help troubleshoot. If not, I can guide you through the setup."
+2. **ツールが失敗した場合**、ユーザーに次のように尋ねます。
+   > 「Penpot MCP サーバーが接続されていないようです。サーバーはすでにインストールされ、実行されていますか? そうであれば、トラブルシューティングをお手伝いします。そうでない場合は、セットアップを案内します。」
 
-3. **Only proceed with setup instructions if the user confirms the server is not installed.**
+3. **サーバーがインストールされていないことをユーザーが確認した場合にのみ、セットアップ手順に進みます。**
 
-### Quick Start (Only If Not Installed)
-
-```bash
-# Clone and install
+### クイック スタート (インストールされていない場合のみ)「」バッシュ
+# クローンを作成してインストールする
 git clone https://github.com/penpot/penpot-mcp.git
-cd penpot-mcp
-npm install
+cd ペンポット-mcp
+npmインストール
 
-# Build and start servers
-npm run bootstrap
-```
+# サーバーを構築して起動する
+npm ブートストラップを実行する
+「」次にペンポットでは次のようになります。
+1. デザインファイルを開く
+2. **プラグイン** → **URL からプラグインをロード** に移動します
+3.「`http://localhost:4400/manifest.json`」と入力します。
+4. プラグイン UI で **「MCP サーバーに接続」** をクリックします
 
-Then in Penpot:
-1. Open a design file
-2. Go to **Plugins** → **Load plugin from URL**
-3. Enter: `http://localhost:4400/manifest.json`
-4. Click **"Connect to MCP server"** in the plugin UI
+### VS コードの構成
 
-### VS Code Configuration
-
-Add to `settings.json`:
-```json
+`settings.json` に追加:```json
 {
   "mcp": {
-    "servers": {
-      "penpot": {
+    「サーバー」: {
+      「ペンポット」: {
         "url": "http://localhost:4401/sse"
       }
     }
   }
 }
-```
+「」### トラブルシューティング (サーバーがインストールされているが動作しない場合)
 
-### Troubleshooting (If Server Is Installed But Not Working)
-
-| Issue | Solution |
+|問題 |ソリューション |
 | ----- | -------- |
-| Plugin won't connect | Check servers are running (`npm run start:all` in penpot-mcp dir) |
-| Browser blocks localhost | Allow local network access prompt, or disable Brave Shield, or try Firefox |
-| Tools not appearing in client | Restart VS Code/Claude completely after config changes |
-| Tool execution fails/times out | Ensure Penpot plugin UI is open and shows "Connected" |
-| "WebSocket connection failed" | Check firewall allows ports 4400, 4401, 4402 |
+|プラグインが接続できない |サーバーが実行中であることを確認します (penpot-mcp ディレクトリの `npm run start:all`)。
+|ブラウザがローカルホストをブロックする |ローカル ネットワーク アクセス プロンプトを許可するか、Brave Shield を無効にするか、Firefox | を試してください。
+|ツールがクライアントに表示されない |設定を変更した後、VS Code/Claude を完全に再起動します。
+|ツールの実行が失敗/タイムアウトになる | Penpot プラグイン UI が開いており、「接続済み」と表示されていることを確認します。
+| "WebSocket 接続に失敗しました" |ファイアウォールがポート 4400、4401、4402 を許可していることを確認します。
 
-## Quick Reference
+## クイックリファレンス
 
-| Task | Reference File |
+|タスク |参照ファイル |
 | ---- | -------------- |
-| MCP server installation & troubleshooting | [setup-troubleshooting.md](references/setup-troubleshooting.md) |
-| Component specs (buttons, forms, nav) | [component-patterns.md](references/component-patterns.md) |
-| Accessibility (contrast, touch targets) | [accessibility.md](references/accessibility.md) |
-| Screen sizes & platform specs | [platform-guidelines.md](references/platform-guidelines.md) |
+| MCP サーバーのインストールとトラブルシューティング | [セットアップ-トラブルシューティング.md](参考/セットアップ-トラブルシューティング.md) |
+|コンポーネントの仕様 (ボタン、フォーム、ナビゲーション) | [コンポーネントパターン.md](参照/コンポーネントパターン.md) |
+|アクセシビリティ (コントラスト、タッチ ターゲット) | [accessibility.md](references/accessibility.md) |
+|画面サイズとプラットフォームの仕様 | [プラットフォームガイドライン.md](references/プラットフォームガイドライン.md) |
 
-## Core Design Principles
+## 中心となる設計原則
 
-### The Golden Rules
+### 黄金律
 
-1. **Clarity over cleverness**: Every element must have a purpose
-2. **Consistency builds trust**: Reuse patterns, colors, and components
-3. **User goals first**: Design for tasks, not features
-4. **Accessibility is not optional**: Design for everyone
-5. **Test with real users**: Validate assumptions early
+1. **賢さよりも明快さ**: すべての要素には目的が必要です
+2. **一貫性により信頼が築かれます**: パターン、色、コンポーネントを再利用します
+3. **ユーザーの目標を第一に**: 機能ではなくタスクに合わせて設計する
+4. **アクセシビリティはオプションではありません**: 誰にでも適したデザイン
+5. **実際のユーザーによるテスト**: 仮説を早期に検証します
 
-### Visual Hierarchy (Priority Order)
+### ビジュアル階層 (優先順位)
 
-1. **Size**: Larger = more important
-2. **Color/Contrast**: High contrast draws attention
-3. **Position**: Top-left (LTR) gets seen first
-4. **Whitespace**: Isolation emphasizes importance
-5. **Typography weight**: Bold stands out
+1. **サイズ**: 大きいほど重要 = より重要
+2. **色/コントラスト**: 高いコントラストが注目を集める
+3. **位置**: 左上 (LTR) が最初に表示されます
+4. **空白**: 分離することで重要性が強調されます
+5. **タイポグラフィのウェイト**: 太字が目立ちます
 
-## Design Workflow
+## デザインワークフロー
 
-1. **Check for design system first**: Ask user if they have existing tokens/specs, or discover from current Penpot file
-2. **Understand the page**: Call `mcp__penpot__execute_code` with `penpotUtils.shapeStructure()` to see hierarchy
-3. **Find elements**: Use `penpotUtils.findShapes()` to locate elements by type or name
-4. **Create/modify**: Use `penpot.createBoard()`, `penpot.createRectangle()`, `penpot.createText()` etc.
-5. **Apply layout**: Use `addFlexLayout()` for responsive containers
-6. **Validate**: Call `mcp__penpot__export_shape` to visually check your work
+1. **最初にデザイン システムを確認します**: ユーザーに既存のトークン/仕様があるかどうかを尋ねるか、現在の Penpot ファイルから検出します。
+2. **ページを理解する**: `mcp__penpot__execute_code` を `penpotUtils.shapeStructure()` とともに呼び出して、階層を確認します。
+3. **要素の検索**: `penpotUtils.findShapes()` を使用して、タイプまたは名前で要素を検索します
+4. **作成/変更**: `penpot.createBoard()`、`penpot.createRectangle()`、`penpot.createText()` などを使用します。
+5. **レイアウトを適用**: 応答性の高いコンテナには `addFlexLayout()` を使用します
+6. **検証**: `mcp__penpot__export_shape` を呼び出して、作業内容を視覚的に確認します。
 
-## Design System Handling
+## 設計システムの処理
 
-**Before creating designs, determine if the user has an existing design system:**
+**デザインを作成する前に、ユーザーが既存のデザイン システムを持っているかどうかを確認してください。**
 
-1. **Ask the user**: "Do you have a design system or brand guidelines to follow?"
-2. **Discover from Penpot**: Check for existing components, colors, and patterns
+1. **ユーザーに尋ねます**: 「従うべきデザイン システムまたはブランド ガイドラインはありますか?」
+2. **ペンポットから発見**: 既存のコンポーネント、色、パターンを確認します。```JavaScript
+// 現在のファイル内の既存のデザイン パターンを検出します
+const allShapes =penpotUtils.findShapes(() => true,penpot.root);
 
-```javascript
-// Discover existing design patterns in current file
-const allShapes = penpotUtils.findShapes(() => true, penpot.root);
-
-// Find existing colors in use
-const colors = new Set();
+// 使用されている既存の色を検索します
+const color = 新しい Set();
 allShapes.forEach(s => {
-  if (s.fills) s.fills.forEach(f => colors.add(f.fillColor));
+  if (s.fills) s.fills.forEach(f => Colors.add(f.fillColor));
 });
 
-// Find existing text styles (font sizes, weights)
+// 既存のテキスト スタイル (フォント サイズ、太さ) を検索します。
 const textStyles = allShapes
-  .filter(s => s.type === 'text')
+  .filter(s => s.type === 'テキスト')
   .map(s => ({ fontSize: s.fontSize, fontWeight: s.fontWeight }));
 
-// Find existing components
-const components = penpot.library.local.components;
+// 既存のコンポーネントを検索します
+const コンポーネント = ペンポット.ライブラリ.ローカル.コンポーネント;
 
-return { colors: [...colors], textStyles, componentCount: components.length };
-```
+return {colors: [...colors]、textStyles、componentCount:components.length };
+「」**ユーザーがデザイン システムを持っている場合:**
 
-**If user HAS a design system:**
+- 指定された色、間隔、タイポグラフィを使用する
+- 既存のコンポーネント パターンと一致する
+- 命名規則に従ってください
 
-- Use their specified colors, spacing, typography
-- Match their existing component patterns
-- Follow their naming conventions
+**ユーザーがデザイン システムを持っていない場合:**
 
-**If user has NO design system:**
+- 以下のデフォルトのトークンを開始点として使用します。
+- 一貫したパターンの確立を支援することを申し出る
+- [component-patterns.md](references/component-patterns.md) の参照仕様
 
-- Use the default tokens below as a starting point
-- Offer to help establish consistent patterns
-- Reference specs in [component-patterns.md](references/component-patterns.md)
+## Key Penpot API の落とし穴
 
-## Key Penpot API Gotchas
+- `width`/`height` は読み取り専用です → `shape.resize(w, h)` を使用してください
+- `parentX`/`parentY` は読み取り専用です → `penpotUtils.setParentXY(shape, x, y)` を使用してください
+- Z オーダーには `insertChild(index, shape)` を使用します (`appendChild` ではありません)
+- `dir="column"` または `dir="row"` では、フレックスの子配列の順序が逆になります
+- `text.resize()` の後、`growType` を `"auto-width"` または `"auto-height"` にリセットします。
 
-- `width`/`height` are READ-ONLY → use `shape.resize(w, h)`
-- `parentX`/`parentY` are READ-ONLY → use `penpotUtils.setParentXY(shape, x, y)`
-- Use `insertChild(index, shape)` for z-ordering (not `appendChild`)
-- Flex children array order is REVERSED for `dir="column"` or `dir="row"`
-- After `text.resize()`, reset `growType` to `"auto-width"` or `"auto-height"`
+## 新しいボードの位置付け
 
-## Positioning New Boards
-
-**Always check existing boards before creating new ones** to avoid overlap:
-
-```javascript
-// Find all existing boards and calculate next position
-const boards = penpotUtils.findShapes(s => s.type === 'board', penpot.root);
-let nextX = 0;
-const gap = 100; // Space between boards
+**重複を避けるために、新しいボードを作成する前に必ず既存のボードを確認してください**:```JavaScript
+// 既存のボードをすべて検索し、次の位置を計算します
+const ボード =penpotUtils.findShapes(s => s.type === 'ボード', ペンポット.ルート);
+nextX = 0 とします。
+定数ギャップ = 100; // 基板間のスペース
 
 if (boards.length > 0) {
-  // Find rightmost board edge
-  boards.forEach(b => {
+  // ボードの右端の端を検索します
+  ボード.forEach(b => {
     const rightEdge = b.x + b.width;
-    if (rightEdge + gap > nextX) {
-      nextX = rightEdge + gap;
+    if (rightEdge + ギャップ > nextX) {
+      nextX = 右エッジ + ギャップ;
     }
   });
 }
 
-// Create new board at calculated position
-const newBoard = penpot.createBoard();
+// 計算された位置に新しいボードを作成します
+const newBoard = ペンポット.createBoard();
 newBoard.x = nextX;
 newBoard.y = 0;
 newBoard.resize(375, 812);
-```
+「」**基板間隔のガイドライン:**
 
-**Board spacing guidelines:**
+- 関連する画面間に 100 ピクセルのギャップを使用します (同じフロー)
+- 異なるセクション/フロー間に 200 ピクセル以上のギャップを使用します
+- ボードを垂直方向（同じ方向）に揃えて視覚的に整理します
+- 関連する画面をユーザー フロー順に水平方向にグループ化します
 
-- Use 100px gap between related screens (same flow)
-- Use 200px+ gap between different sections/flows
-- Align boards vertically (same y) for visual organization
-- Group related screens horizontally in user flow order
+## デフォルトのデザイントークン
 
-## Default Design Tokens
+**これらのデフォルトは、ユーザーがデザイン システムを持っていない場合にのみ使用してください。利用可能な場合は常にユーザーのトークンを優先します。**
 
-**Use these defaults only when user has no design system. Always prefer user's tokens if available.**
+### 間隔スケール (8px ベース)
 
-### Spacing Scale (8px base)
-
-| Token | Value | Usage |
+|トークン |値 |使い方 |
 | ----- | ----- | ----- |
-| `spacing-xs` | 4px | Tight inline elements |
-| `spacing-sm` | 8px | Related elements |
-| `spacing-md` | 16px | Default padding |
-| `spacing-lg` | 24px | Section spacing |
-| `spacing-xl` | 32px | Major sections |
-| `spacing-2xl` | 48px | Page-level spacing |
+| `spacing-xs` | 4ピクセル |タイトなインライン要素 |
+| `spacing-sm` | 8ピクセル |関連要素 |
+| `spacing-md` | 16ピクセル |デフォルトのパディング |
+| `spacing-lg` | 24ピクセル |セクション間隔 |
+| `spacing-xl` | 32ピクセル |主要セクション |
+| `spacing-2xl` | 48ピクセル |ページレベルの間隔 |
 
-### Typography Scale
+### タイポグラフィスケール
 
-| Level | Size | Weight | Usage |
+|レベル |サイズ |重量 |使い方 |
 | ----- | ---- | ------ | ----- |
-| Display | 48-64px | Bold | Hero headlines |
-| H1 | 32-40px | Bold | Page titles |
-| H2 | 24-28px | Semibold | Section headers |
-| H3 | 20-22px | Semibold | Subsections |
-| Body | 16px | Regular | Main content |
-| Small | 14px | Regular | Secondary text |
-| Caption | 12px | Regular | Labels, hints |
+|ディスプレイ | 48-64ピクセル |太字 |ヒーローの見出し |
+| H1 | 32-40ピクセル |太字 |ページタイトル |
+| H2 | 24～28ピクセル |半太字 |セクションヘッダー |
+| H3 | 20～22ピクセル |半太字 |サブセクション |
+|本文 | 16ピクセル |レギュラー |主な内容 |
+|小 | 14ピクセル |レギュラー |二次テキスト |
+|キャプション | 12ピクセル |レギュラー |ラベル、ヒント |
 
-### Color Usage
+### 色の使用
 
-| Purpose | Recommendation |
+|目的 |推薦 |
 | ------- | -------------- |
-| Primary | Main brand color, CTAs |
-| Secondary | Supporting actions |
-| Success | #22C55E range (confirmations) |
-| Warning | #F59E0B range (caution) |
-| Error | #EF4444 range (errors) |
-| Neutral | Gray scale for text/borders |
+|プライマリー |メインブランドカラー、CTA |
+|二次 |支援活動 |
+|成功 | #22C55E範囲（確認） |
+|警告 | #F59E0B範囲(注意) |
+|エラー | #EF4444 範囲 (エラー) |
+|ニュートラル |テキスト/境界線のグレースケール |
 
-## Common Layouts
+## 一般的なレイアウト
 
-### Mobile Screen (375×812)
+### モバイル画面 (375×812)```テキスト
+┌───────────────────┐
+│ ステータスバー (44px) │
+━━━━━━━━━━━━━━┤
+│ ヘッダー/ナビゲーション (56px) │
+━━━━━━━━━━━━━━┤
+│ │
+│ コンテンツエリア │
+│ (スクロール可能) │
+│ パディング: 水平 16px │
+│ │
+━━━━━━━━━━━━━━┤
+│ 下部ナビゲーション/CTA (84px) │
+━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────┐
-│ Status Bar (44px)           │
-├─────────────────────────────┤
-│ Header/Nav (56px)           │
-├─────────────────────────────┤
-│                             │
-│ Content Area                │
-│ (Scrollable)                │
-│ Padding: 16px horizontal    │
-│                             │
-├─────────────────────────────┤
-│ Bottom Nav/CTA (84px)       │
-└─────────────────────────────┘
+「」### デスクトップ ダッシュボード (1440×900)```テキスト
+┌──────┬─────────────┐
+│ │ ヘッダー (64px) │
+│ 側面 │───────────────────
+│ バー │ ページタイトル + アクション │
+│ │───────────────────
+│ 240 │ コンテンツグリッド │
+│ px │ ┌────┐ ┌────┐ ┌────┐ ┌────┐ │
+│ │ │カード │ │カード │ │カード │ │カード │ │
+│ │ ━━━━┘ ━━━━┘ ━━━━┘ ━━━━┘ │
+│ │ │
+━─────┴───────────────┘
 
-```
+「」## コンポーネントのチェックリスト
 
-### Desktop Dashboard (1440×900)
+### ボタン
 
-```text
-┌──────┬──────────────────────────────────┐
-│      │ Header (64px)                    │
-│ Side │──────────────────────────────────│
-│ bar  │ Page Title + Actions             │
-│      │──────────────────────────────────│
-│ 240  │ Content Grid                     │
-│ px   │ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ │
-│      │ │Card │ │Card │ │Card │ │Card │ │
-│      │ └─────┘ └─────┘ └─────┘ └─────┘ │
-│      │                                  │
-└──────┴──────────────────────────────────┘
+- [ ] 明確なアクション指向のラベル (2 ～ 3 単語)
+- [ ] 最小タッチターゲット: 44×44px
+- [ ] 表示状態: デフォルト、ホバー、アクティブ、無効、読み込み中
+- [ ] 十分なコントラスト (背景に対して 3:1)
+- [ ] アプリ全体で一貫した境界線の半径
 
-```
+### フォーム
 
-## Component Checklist
+- [ ] 入力の上のラベル (単なるプレースホルダーではありません)
+- [ ] 必須フィールドのインジケーター
+- [ ] フィールドの横にあるエラー メッセージ
+- [ ] 論理タブオーダー
+- [ ] 入力タイプは内容と一致します (電子メール、電話番号など)
 
-### Buttons
+### ナビゲーション
 
-- [ ] Clear, action-oriented label (2-3 words)
-- [ ] Minimum touch target: 44×44px
-- [ ] Visual states: default, hover, active, disabled, loading
-- [ ] Sufficient contrast (3:1 against background)
-- [ ] Consistent border radius across app
+- [ ] 現在地を明確に表示
+- [ ] 画面全体で一貫した位置
+- [ ] 最大 7±2 個の最上位項目
+- [ ] モバイルでタッチフレンドリー (48px ターゲット)
 
-### Forms
+## アクセシビリティのクイック チェック
 
-- [ ] Labels above inputs (not just placeholders)
-- [ ] Required field indicators
-- [ ] Error messages adjacent to fields
-- [ ] Logical tab order
-- [ ] Input types match content (email, tel, etc.)
+1. **色のコントラスト**: テキスト 4.5:1、大きなテキスト 3:1
+2. **タッチターゲット**: 最小44×44ピクセル
+3. **フォーカス状態**: キーボード フォーカス インジケーターが表示されます。
+4. **代替テキスト**: 画像の意味のある説明
+5. **階層**: 適切な見出しレベル (H1→H2→H3)
+6. **色の独立性**: 色のみに依存しないでください。
 
-### Navigation
+## 設計レビューのチェックリスト
 
-- [ ] Current location clearly indicated
-- [ ] Consistent position across screens
-- [ ] Maximum 7±2 top-level items
-- [ ] Touch-friendly on mobile (48px targets)
+デザインを完成させる前に:
 
-## Accessibility Quick Checks
+- [ ] 視覚的な階層が明確です
+- [ ] 一貫した間隔と配置
+- [ ] タイポグラフィが読み取れる (本文テキスト 16px 以上)
+- [ ] カラーコントラストが WCAG AA を満たす
+- [ ] インタラクティブな要素が明らかです
+- [ ] モバイル対応のタッチ ターゲット
+- [ ] ロード/空/エラー状態を考慮
+- [ ] デザインシステムと一致
 
-1. **Color contrast**: Text 4.5:1, Large text 3:1
-2. **Touch targets**: Minimum 44×44px
-3. **Focus states**: Visible keyboard focus indicators
-4. **Alt text**: Meaningful descriptions for images
-5. **Hierarchy**: Proper heading levels (H1→H2→H3)
-6. **Color independence**: Never rely solely on color
+## 設計の検証
 
-## Design Review Checklist
+`mcp__penpot__execute_code` を使用して、次の検証アプローチを使用します。
 
-Before finalizing any design:
-
-- [ ] Visual hierarchy is clear
-- [ ] Consistent spacing and alignment
-- [ ] Typography is readable (16px+ body text)
-- [ ] Color contrast meets WCAG AA
-- [ ] Interactive elements are obvious
-- [ ] Mobile-friendly touch targets
-- [ ] Loading/empty/error states considered
-- [ ] Consistent with design system
-
-## Validating Designs
-
-Use these validation approaches with `mcp__penpot__execute_code`:
-
-| Check | Method |
+|チェック |方法 |
 | ----- | ------ |
-| Elements outside bounds | `penpotUtils.analyzeDescendants()` with `isContainedIn()` |
-| Text too small (<12px) | `penpotUtils.findShapes()` filtering by `fontSize` |
-| Missing contrast | Call `mcp__penpot__export_shape` and visually inspect |
-| Hierarchy structure | `penpotUtils.shapeStructure()` to review nesting |
+|境界外の要素 | `penpotUtils.analyzeDescendants()` と `isContainedIn()` |
+|テキストが小さすぎます (<12px) | `penpotUtils.findShapes()` `fontSize` によるフィルタリング |
+|コントラストが欠けている | `mcp__penpot__export_shape` を呼び出して視覚的に検査します。
+|階層構造 | `penpotUtils.shapeStructure()` ネストを確認する |
 
-### Export CSS
+### CSS のエクスポート
 
-Use `penpot.generateStyle(selection, { type: 'css', includeChildren: true })` via `mcp__penpot__execute_code` to extract CSS from designs.
+デザインから CSS を抽出するには、`mcp__penpot__execute_code` 経由で `penpot.generateStyle(selection, { type: 'css', includeChildren: true })` を使用します。
 
-## Tips for Great Designs
+## 優れたデザインのためのヒント
 
-1. **Start with content**: Real content reveals layout needs
-2. **Design mobile-first**: Constraints breed creativity
-3. **Use a grid**: 8px base grid keeps things aligned
-4. **Limit colors**: 1 primary + 1 secondary + neutrals
-5. **Limit fonts**: 1-2 typefaces maximum
-6. **Embrace whitespace**: Breathing room improves comprehension
-7. **Be consistent**: Same action = same appearance everywhere
-8. **Provide feedback**: Every action needs a response
+1. **コンテンツから始める**: 実際のコンテンツからレイアウトのニーズが明らかになります
+2. **モバイルファーストのデザイン**: 制約が創造性を生み出す
+3. **グリッドを使用**: 8 ピクセルのベース グリッドで位置を揃えます
+4. **制限色**: 1 つのプライマリ + 1 つのセカンダリ + ニュートラル
+5. **フォントの制限**: 最大 1 ～ 2 書体
+6. **空白を受け入れる**: 一息つくことで理解力が向上します
+7. **一貫性を保つ**: 同じアクション = どこでも同じ外観
+8. **フィードバックを提供します**: すべてのアクションには応答が必要です

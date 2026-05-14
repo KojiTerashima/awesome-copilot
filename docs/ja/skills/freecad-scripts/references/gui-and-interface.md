@@ -1,33 +1,31 @@
-# FreeCAD GUI and Interface
+# FreeCAD GUI とインターフェイス
 
-Reference guide for building FreeCAD user interfaces: PySide/Qt dialogs, task panels, Gui Commands, Coin3D scenegraph via Pivy.
+FreeCAD ユーザー インターフェイスを構築するためのリファレンス ガイド: PySide/Qt ダイアログ、タスク パネル、Gui コマンド、Pivy 経由の Coin3D シーングラフ。
 
-## Official Wiki References
+## 公式 Wiki リファレンス
 
-- [Creating interface tools](https://wiki.freecad.org/Manual:Creating_interface_tools)
-- [Gui Command](https://wiki.freecad.org/Gui_Command)
-- [Define a command](https://wiki.freecad.org/Command)
+- [インターフェイス ツールの作成](https://wiki.freecad.org/Manual:Creating_interface_tools)
+- [Gui コマンド](https://wiki.freecad.org/Gui_Command)
+- [コマンドを定義](https://wiki.freecad.org/Command)
 - [PySide](https://wiki.freecad.org/PySide)
-- [PySide beginner examples](https://wiki.freecad.org/PySide_Beginner_Examples)
-- [PySide intermediate examples](https://wiki.freecad.org/PySide_Intermediate_Examples)
-- [PySide advanced examples](https://wiki.freecad.org/PySide_Advanced_Examples)
-- [PySide usage snippets](https://wiki.freecad.org/PySide_usage_snippets)
-- [Interface creation](https://wiki.freecad.org/Interface_creation)
-- [Dialog creation](https://wiki.freecad.org/Dialog_creation)
-- [Dialog creation with various widgets](https://wiki.freecad.org/Dialog_creation_with_various_widgets)
-- [Dialog creation reading and writing files](https://wiki.freecad.org/Dialog_creation_reading_and_writing_files)
-- [Dialog creation setting colors](https://wiki.freecad.org/Dialog_creation_setting_colors)
-- [Dialog creation image and animated GIF](https://wiki.freecad.org/Dialog_creation_image_and_animated_GIF)
-- [Qt Example](https://wiki.freecad.org/Qt_Example)
-- [3D view](https://wiki.freecad.org/3D_view)
-- [The Coin scenegraph](https://wiki.freecad.org/Scenegraph)
+- [PySide 初心者向けサンプル](https://wiki.freecad.org/PySide_Beginner_Examples)
+- [PySide 中間サンプル](https://wiki.freecad.org/PySide_Intermediate_Examples)
+- [PySide の高度な例](https://wiki.freecad.org/PySide_Advanced_Examples)
+- [PySide の使用法スニペット](https://wiki.freecad.org/PySide_usage_snippets)
+- [インターフェースの作成](https://wiki.freecad.org/Interface_creation)
+- [ダイアログ作成](https://wiki.freecad.org/Dialog_creation)
+- [さまざまなウィジェットを使用したダイアログの作成](https://wiki.freecad.org/Dialog_creation_with_various_widgets)
+- [ダイアログ作成ファイルの読み取りおよび書き込み](https://wiki.freecad.org/Dialog_creation_reading_and_writing_files)
+- [ダイアログ作成設定の色](https://wiki.freecad.org/Dialog_creation_setting_colors)
+- [ダイアログ作成画像とアニメーションGIF](https://wiki.freecad.org/Dialog_creation_image_and_animated_GIF)
+- [Qt サンプル](https://wiki.freecad.org/Qt_Example)
+- [3D ビュー](https://wiki.freecad.org/3D_view)
+- [コインのシーングラフ](https://wiki.freecad.org/Scenegraph)
 - [Pivy](https://wiki.freecad.org/Pivy)
 
-## Gui Command
+## Gui コマンド
 
-The standard way to add toolbar buttons and menu items in FreeCAD:
-
-```python
+FreeCAD でツールバー ボタンとメニュー項目を追加する標準的な方法:```python
 import FreeCAD
 import FreeCADGui
 
@@ -56,13 +54,9 @@ class MyCommand:
 
 # Register the command (name must be unique)
 FreeCADGui.addCommand("My_Command", MyCommand())
-```
+```## タスクパネル (サイドバー統合)
 
-## Task Panel (Sidebar Integration)
-
-Task panels appear in FreeCAD's left sidebar — the preferred way to build interactive tools:
-
-```python
+タスク パネルは FreeCAD の左側のサイドバーに表示されます。これは、対話型ツールを構築するための推奨される方法です。```python
 import FreeCAD
 import FreeCADGui
 from PySide2 import QtWidgets, QtCore
@@ -147,11 +141,7 @@ class MyTaskPanel:
 
 # Show:
 # FreeCADGui.Control.showDialog(MyTaskPanel())
-```
-
-### Task Panel with Multiple Widgets (Multi-Form)
-
-```python
+```### 複数のウィジェットを含むタスク パネル (マルチフォーム)```python
 class MultiFormPanel:
     def __init__(self):
         self.form = [self._buildPage1(), self._buildPage2()]
@@ -167,11 +157,7 @@ class MultiFormPanel:
         w.setWindowTitle("Page 2")
         # ... add widgets ...
         return w
-```
-
-## Standalone PySide Dialogs
-
-```python
+```## スタンドアロンの PySide ダイアログ```python
 import FreeCAD
 import FreeCADGui
 from PySide2 import QtWidgets, QtCore, QtGui
@@ -206,11 +192,7 @@ class MyDialog(QtWidgets.QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
-```
-
-### Loading a .ui File
-
-```python
+```### .ui ファイルのロード```python
 import os
 from PySide2 import QtWidgets, QtUiTools, QtCore
 
@@ -230,11 +212,7 @@ class UiTaskPanel:
         self.form = loadUiFile(ui_path)
         # Access widgets by objectName set in Qt Designer
         self.form.myButton.clicked.connect(self._onButton)
-```
-
-### File Dialogs
-
-```python
+```### ファイルダイアログ```python
 # Open file
 path, _ = QtWidgets.QFileDialog.getOpenFileName(
     FreeCADGui.getMainWindow(),
@@ -256,11 +234,7 @@ path = QtWidgets.QFileDialog.getExistingDirectory(
     FreeCADGui.getMainWindow(),
     "Select Directory"
 )
-```
-
-### Message Boxes
-
-```python
+```### メッセージボックス```python
 QtWidgets.QMessageBox.information(None, "Info", "Operation completed.")
 QtWidgets.QMessageBox.warning(None, "Warning", "Something may be wrong.")
 QtWidgets.QMessageBox.critical(None, "Error", "An error occurred.")
@@ -271,21 +245,13 @@ result = QtWidgets.QMessageBox.question(
 )
 if result == QtWidgets.QMessageBox.Yes:
     pass  # proceed
-```
-
-### Input Dialogs
-
-```python
+```### 入力ダイアログ```python
 text, ok = QtWidgets.QInputDialog.getText(None, "Input", "Enter name:")
 value, ok = QtWidgets.QInputDialog.getDouble(None, "Input", "Value:", 10.0, 0, 1000, 2)
 choice, ok = QtWidgets.QInputDialog.getItem(None, "Choose", "Select:", ["A","B","C"], 0, False)
-```
+```## Coin3D / Pivy シーングラフ
 
-## Coin3D / Pivy Scenegraph
-
-FreeCAD's 3D view uses Coin3D (Open Inventor). Pivy provides Python bindings.
-
-```python
+FreeCAD の 3D ビューは Coin3D (Open Inventor) を使用します。 Pivy は Python バインディングを提供します。```python
 from pivy import coin
 import FreeCADGui
 
@@ -364,11 +330,7 @@ sg.addChild(text_sep)
 # --- Cleanup ---
 sg.removeChild(sep)
 sg.removeChild(line_sep)
-```
-
-## View Manipulation
-
-```python
+```## ビューの操作```python
 view = FreeCADGui.ActiveDocument.ActiveView
 
 # Camera operations

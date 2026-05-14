@@ -2,27 +2,26 @@
 name: playwright-automation-fill-in-form
 description: 'Automate filling in a form using Playwright MCP'
 ---
+# Playwright MCP を使用してフォームへの入力を自動化する
 
-# Automating Filling in a Form with Playwright MCP
+あなたの目標は、Playwright MCP を使用してフォームに入力するプロセスを自動化することです。
 
-Your goal is to automate the process of filling in a form using Playwright MCP.
+## 具体的な手順
 
-## Specific Instructions
+https://forms.microsoft.com/url-of-my-form に移動します
 
-Navigate to https://forms.microsoft.com/url-of-my-form
+### フォームに次の詳細を入力します。
 
-### Fill in the form with the following details:
+1. ショー: 劇作家のライブ
 
-1. Show: playwright live
+2. 日付: 7 月 15 日
 
-2. Date: 15 July
+3. 時間: 午前 1:00
 
-3. Time: 1:00 AM
+4. トピック: Playwright Live - Playwright MCP の最新アップデート + ライブデモ
 
-4. Topic: Playwright Live - Latest updates on Playwright MCP + Live Demo
+5. 画像をアップロードします: /Users/myuserName/Downloads/my-image.png
 
-5. Upload image: /Users/myuserName/Downloads/my-image.png
+フォームは送信しないでください。 
 
-DO NOT SUBMIT THE FORM. 
-
-Ask for a review of the form before submitting it.
+フォームを送信する前にレビューを依頼してください。

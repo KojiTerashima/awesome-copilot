@@ -1,339 +1,287 @@
-# UI Component Patterns Reference
+# UI コンポーネント パターンのリファレンス
 
-## Buttons
+## ボタン
 
-### Button Types
+### ボタンの種類
 
-| Type | Purpose | Visual Treatment |
+|タイプ |目的 |視覚治療 |
 | ---- | ------- | ---------------- |
-| Primary | Main action on page | Solid fill, brand color |
-| Secondary | Supporting actions | Outline or muted fill |
-| Tertiary | Low-emphasis actions | Text-only, underline optional |
-| Destructive | Delete/remove actions | Red color, confirmation required |
-| Ghost | Minimal UI, icon buttons | Transparent, subtle hover |
+|プライマリー |ページ上の主なアクション |ソリッドフィル、ブランドカラー |
+|二次 |支援活動 |アウトラインまたはミュートされた塗りつぶし |
+|三次 |強調度の低いアクション |テキストのみ、下線はオプション |
+|破壊的 |削除/削除アクション |赤色、要確認 |
+|ゴースト |最小限の UI、アイコン ボタン |透明で微妙なホバー |
 
-### Button States
+### ボタンの状態```テキスト
+デフォルト → 休止状態、明らかにインタラクティブ
+ホバー → カーソルを上に置く (デスクトップ): 10% 暗くなり、微妙な影が付きます
+アクティブ→押下中：20%暗くなり、若干縮小
+フォーカス → キーボードが選択されました: 輪郭リングが表示されます
+無効→使用不可: 不透明度 50%、カーソル: 使用不可
+ロード → 処理: スピナーはラベルを置き換えるか、ラベルに付随します
 
-```text
-Default    → Resting state, clearly interactive
-Hover      → Cursor over (desktop): darken 10%, subtle shadow
-Active     → Being pressed: darken 20%, slight scale down
-Focus      → Keyboard selected: visible outline ring
-Disabled   → Not available: 50% opacity, cursor: not-allowed
-Loading    → Processing: spinner replaces or accompanies label
+「」### ボタン仕様
 
-```
+- **最小サイズ:** 44×44px (タッチターゲット)
+- **パディング:** 水平 12 ～ 16 ピクセル、垂直 8 ～ 12 ピクセル
+- **境界線の半径:** 4～8px (アプリ全体で一貫)
+- **フォントの太さ:** 中太字または半太字 (600-700)
+- **テキスト:** 文例、最大 2 ～ 4 単語
 
-### Button Specifications
+### ボタンラベルのパターン```テキスト
+✓ 変更を保存 ✗ 送信
+✓ カートに追加 ✗ ここをクリックしてください
+✓ アカウントの作成 ✗ OK
+✓ PDF をダウンロード ✗ 進む
+✓ 無料トライアルを開始 ✗ 続行
 
-- **Minimum size:** 44×44px (touch target)
-- **Padding:** 12-16px horizontal, 8-12px vertical
-- **Border radius:** 4-8px (consistent across app)
-- **Font weight:** Medium or Semibold (600-700)
-- **Text:** Sentence case, 2-4 words max
+「」---
 
-### Button Label Patterns
+## フォーム
 
-```text
-✓ Save Changes        ✗ Submit
-✓ Add to Cart         ✗ Click Here
-✓ Create Account      ✗ OK
-✓ Download PDF        ✗ Go
-✓ Start Free Trial    ✗ Continue
+### フォームレイアウトのガイドライン
 
-```
+- **単一列が推奨:** 認知的負荷を軽減します
+- **ラベルを上揃え:** 最速の完了時間
+- **論理グループ化:** 関連フィールドをまとめて
+- **スマートなデフォルト:** 可能な場合は事前入力
 
----
+### 入力フィールドの構造```テキスト
+┌─ ラベル (必須) ────────────┐
+│ │
+│ ┌─────────────────────┐ │
+│ │ プレースホルダテキスト... │ │
+│ ━━━━━━━━━━━━━━━━┘ │
+│ ヘルパーテキストまたはエラーメッセージ │
+━━━━━━━━━━━━━━━━━┘
 
-## Forms
+「」### 入力状態
 
-### Form Layout Guidelines
-
-- **Single column preferred:** Reduces cognitive load
-- **Top-aligned labels:** Fastest completion times
-- **Logical grouping:** Related fields together
-- **Smart defaults:** Pre-fill when possible
-
-### Input Field Anatomy
-
-```text
-┌─ Label (required) ─────────────────────────┐
-│                                            │
-│  ┌────────────────────────────────────┐   │
-│  │ Placeholder text...                 │   │
-│  └────────────────────────────────────┘   │
-│  Helper text or error message              │
-└────────────────────────────────────────────┘
-
-```
-
-### Input States
-
-| State | Border | Background | Additional |
+|状態 |境界線 |背景 |追加 |
 | ----- | ------ | ---------- | ---------- |
-| Default | Gray (#D1D5DB) | White | - |
-| Focus | Primary color | White | Shadow/glow |
-| Filled | Gray | White | Checkmark optional |
-| Error | Red (#EF4444) | Light red tint | Error icon + message |
-| Disabled | Light gray | Gray (#F3F4F6) | 50% opacity text |
+|デフォルト |グレー (#D1D5DB) |ホワイト | - |
+|フォーカス |原色 |ホワイト |シャドウ/グロー |
+|満たされた |グレー |ホワイト |チェックマークはオプション |
+|エラー |レッド (#EF4444) |明るい赤み |エラーアイコン + メッセージ |
+|無効 |ライトグレー |グレー (#F3F4F6) | 50% の不透明度のテキスト |
 
-### Validation Timing
+### 検証のタイミング
 
-- **On blur:** Validate when user leaves field
-- **On change (after error):** Clear error as user types correct input
-- **On submit:** Final validation before processing
-- **Never on focus:** Don't show errors before user types
+- **ぼかし時:** ユーザーがフィールドを離れるときを検証します
+- **変更時 (エラー後):** ユーザーが正しい入力を入力するとエラーがクリアされます
+- **送信時:** 処理前の最終検証
+- **決してフォーカスしない:** ユーザーが入力する前にエラーを表示しない
 
-### Error Message Guidelines
+### エラー メッセージのガイドライン```テキスト
+✓ 「メールアドレスは必須です」
+✓ 「パスワードは8文字以上である必要があります」
+✓ 「有効な電話番号を入力してください (例: 555-123-4567)」
 
-```text
-✓ "Email address is required"
-✓ "Password must be at least 8 characters"
-✓ "Please enter a valid phone number (e.g., 555-123-4567)"
+✗ 「入力が無効です」
+✗ 「エラー」
+✗ 「このフィールドは必須です」 (一般的)
 
-✗ "Invalid input"
-✗ "Error"
-✗ "This field is required" (generic)
+「」### フォームのベストプラクティス
 
-```
-
-### Form Best Practices
-
-- Mark optional fields, not required (fewer asterisks)
-- Show password requirements before errors occur
-- Use input masks for formatted data (phone, date)
-- Preserve data on errors (don't clear the form)
-- Provide clear success confirmation
+- オプションのフィールドをマークします。必須ではありません (アスタリスクの数を減らします)。
+- エラーが発生する前にパスワード要件を表示する
+- 書式設定されたデータ (電話番号、日付) に定型入力を使用する
+- エラー時のデータを保存します (フォームをクリアしないでください)
+- 明確な成功確認を提供する
 
 ---
 
-## Navigation
+## ナビゲーション
 
-### Navigation Patterns
+### ナビゲーション パターン
 
-#### Top Navigation Bar
+#### トップ ナビゲーション バー```テキスト
+┌─────────────────────────┐
+│ ロゴ ナビ項目 ナビ項目 ナビ項目 [検索] [ユーザー] │
+━━━━━━━━━━━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────────────────────────┐
-│ Logo    Nav Item  Nav Item  Nav Item    [Search] [User] │
-└─────────────────────────────────────────────────────┘
+「」- **最適な用途:** マーケティング サイト、シンプルなアプリ
+- **最大アイテム数:** 5 ～ 7 個のトップレベル リンク
+- **モバイル:** ハンバーガー メニューに折りたたむ
 
-```
+#### サイドバーのナビゲーション```テキスト
+┌───┬────────────┐
+│ ロゴ │ コンテンツエリア │
+━━━━┤ │
+│ ナビ1 │ │
+│ ナビ２ │ │
+│ ナビ３ │ │
+│ │ │
+│ ────── │ │
+│ ナビ４ │ │
+│ ナビ5 │ │
+━━━━━━━━━━━━━━━━━━━━━━┘
 
-- **Best for:** Marketing sites, simple apps
-- **Max items:** 5-7 top-level links
-- **Mobile:** Collapse to hamburger menu
+「」- **最適な用途:** ダッシュボード、複雑なアプリ
+- **幅:** 展開時 200 ～ 280 ピクセル、折りたたみ時 64 ピクセル
+- **モバイル:** オーバーレイ ドロワー
 
-#### Sidebar Navigation
+#### 下部ナビゲーション (モバイル)```テキスト
+┌─────────────────────┐
+│ コンテンツエリア │
+│ │
+━━━━━━━━━━━━━━━━━━━┤
+│ 🏠 🔍 ➕ 💬 👤 │
+│ ホーム 検索 チャットプロフィールの追加 │
+━━━━━━━━━━━━━━┘
 
-```text
-┌────────┬────────────────────────────────┐
-│ Logo   │ Content Area                   │
-├────────┤                                │
-│ Nav 1  │                                │
-│ Nav 2  │                                │
-│ Nav 3  │                                │
-│        │                                │
-│ ────── │                                │
-│ Nav 4  │                                │
-│ Nav 5  │                                │
-└────────┴────────────────────────────────┘
+「」- **最大アイテム数:** 3 ～ 5 つの目的地
+- **最適な用途:** 主要なアプリ セクション
+- **常に表示:** 永続的なナビゲーション
 
-```
+#### ブレッドクラム```テキスト
+ホーム > 製品 > エレクトロニクス > ヘッドフォン
 
-- **Best for:** Dashboards, complex apps
-- **Width:** 200-280px expanded, 64px collapsed
-- **Mobile:** Overlay drawer
+「」- **用途:** 深い階層 (3 レベル以上)
+- **現在のページ:** クリックできません。スタイルが異なります
+- **区切り文字:** > または / 山形アイコン
 
-#### Bottom Navigation (Mobile)
+### タブのナビゲーション```テキスト
+┌─────┬─────┬─────┬─────┐
+│ タブ 1 │ タブ 2 │ タブ 3 │ タブ 4 │
+━─────┴─────┴─────┴─────┘
+│ │
+│ タブコンテンツエリア │
+│ │
+━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────────┐
-│           Content Area              │
-│                                     │
-├─────────────────────────────────────┤
-│  🏠    🔍    ➕    💬    👤        │
-│ Home  Search Add  Chat  Profile     │
-└─────────────────────────────────────┘
-
-```
-
-- **Max items:** 3-5 destinations
-- **Best for:** Primary app sections
-- **Always visible:** Persistent navigation
-
-#### Breadcrumbs
-
-```text
-Home > Products > Electronics > Headphones
-
-```
-
-- **Use for:** Deep hierarchies (3+ levels)
-- **Current page:** Not clickable, different style
-- **Separator:** > or / or chevron icon
-
-### Tab Navigation
-
-```text
-┌─────────┬─────────┬─────────┬─────────┐
-│ Tab 1   │ Tab 2   │ Tab 3   │ Tab 4   │
-└─────────┴─────────┴─────────┴─────────┘
-│                                       │
-│        Tab Content Area               │
-│                                       │
-└───────────────────────────────────────┘
-
-```
-
-- **Max tabs:** 3-5 for clarity
-- **Active indicator:** Underline or background
-- **Use for:** Related content within same page
+「」- **最大タブ数:** わかりやすくするために 3 ～ 5 個
+- **アクティブなインジケーター:** 下線または背景
+- **用途:** 同じページ内の関連コンテンツ
 
 ---
 
-## Cards
+## カード
 
-### Card Anatomy
+### カードの構造```テキスト
+┌───────────────────┐
+│ ░░░░░░░ 画像/メディア ░░░░░░░░░░ │
+------------------------------------------------------------------------------------┤
+│ カテゴリラベル │
+│ カードタイトル │
+│ 可能性のある説明テキスト │
+│ 複数行にまたがる... │
+│ │
+│ [アクションボタン] [セカンダリ] │
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────┐
-│ ░░░░░░░ Image/Media ░░░░░░░░░░ │
-├─────────────────────────────────┤
-│ Category Label                  │
-│ Card Title                      │
-│ Description text that may       │
-│ span multiple lines...          │
-│                                 │
-│ [Action Button]  [Secondary]    │
-└─────────────────────────────────┘
+「」### カードのガイドライン
 
-```
-
-### Card Guidelines
-
-- **Consistent sizing:** Use grid, equal heights
-- **Content hierarchy:** Image → Title → Description → Actions
-- **Padding:** 16-24px internal spacing
-- **Border radius:** 8-12px (matching buttons)
-- **Shadow:** Subtle elevation (0 2px 4px rgba(0,0,0,0.1))
+- **一貫したサイズ設定:** グリッドを使用し、高さを揃えます。
+- **コンテンツ階層:** 画像 → タイトル → 説明 → アクション
+- **パディング:** 16 ～ 24 ピクセルの内部スペース
+- **境界線の半径:** 8～12px (一致するボタン)
+- **シャドウ:** 微妙な標高 (0 2px 4px rgba(0,0,0,0.1))
 
 ---
 
-## Modals and Dialogs
+## モーダルとダイアログ
 
-### Modal Structure
+### モーダル構造```テキスト
+┌─────────────────────┐
+│ モーダルタイトル [×] │
+━━━━━━━━━━━━━━━━━━━┤
+│ │
+│ モーダルコンテンツがここに入ります。            │
+│ 1 つのタスクに集中してください。        │
+│ │
+━━━━━━━━━━━━━━━━━━━┤
+│ [キャンセル] [確認] │
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────────┐
-│ Modal Title                    [×]  │
-├─────────────────────────────────────┤
-│                                     │
-│ Modal content goes here.            │
-│ Keep it focused on one task.        │
-│                                     │
-├─────────────────────────────────────┤
-│           [Cancel]  [Confirm]       │
-└─────────────────────────────────────┘
+「」### モーダルガイドライン
 
-```
-
-### Modal Guidelines
-
-- **Size:** 400-600px width (desktop), full-width minus margins (mobile)
-- **Overlay:** Semi-transparent dark background (rgba(0,0,0,0.5))
-- **Close options:** X button, overlay click, Escape key
-- **Focus trap:** Keep keyboard focus within modal
-- **Primary action:** Right-aligned, visually prominent
+- **サイズ:** 幅 400 ～ 600 ピクセル (デスクトップ)、全幅からマージンを除いたサイズ (モバイル)
+- **オーバーレイ:** 半透明の暗い背景 (rgba(0,0,0,0.5))
+- **閉じるオプション:** X ボタン、オーバーレイ クリック、Esc キー
+- **フォーカス トラップ:** キーボード フォーカスをモーダル内に維持します
+- **プライマリ アクション:** 右揃え、視覚的に目立つ
 
 ---
 
-## Dashboards
+## ダッシュボード
 
-### Dashboard Layout Principles
+### ダッシュボードのレイアウトの原則
 
-1. **Most important metrics at top:** KPIs, summary cards
-2. **Progressive detail:** Overview → Drill-down capability
-3. **Consistent card sizes:** Use grid system
-4. **Minimal chartjunk:** Only data-serving visuals
-5. **Actionable insights:** Highlight anomalies
+1. **最も重要な指標が上部にあります:** KPI、概要カード
+2. **段階的な詳細:** 概要 → ドリルダウン機能
+3. **一貫したカード サイズ:** グリッド システムを使用する
+4. **最小限のチャートジャンク:** データ提供ビジュアルのみ
+5. **実用的な洞察:** 異常を強調表示する
 
-### Data Visualization Selection
+### データ視覚化の選択
 
-| Data Type | Chart Type |
+|データ型 |グラフの種類 |
 | --------- | ---------- |
-| Comparison across categories | Bar chart |
-| Trend over time | Line chart |
-| Part of whole | Pie (≤5 slices) or Donut |
-| Distribution | Histogram |
-| Correlation | Scatter plot |
-| Geographic | Map |
-| Single metric | Big number + sparkline |
+|カテゴリ間の比較 |棒グラフ |
+|時間の経過に伴う傾向 |折れ線グラフ |
+|全体の一部 |パイ (5 スライス以下) またはドーナツ |
+|配布 |ヒストグラム |
+|相関関係 |散布図 |
+|地理 |地図 |
+|単一のメトリック |大きな数字 + スパークライン |
 
-### Dashboard Best Practices
+### ダッシュボードのベスト プラクティス
 
-- **Limit to 5-9 widgets** per view
-- **Align to grid:** Consistent gutters and sizing
-- **Filter controls:** Top or sidebar, always visible
-- **Date range selector:** Common need, make prominent
-- **Export options:** PDF, CSV for data tables
-- **Responsive:** Stack cards on smaller screens
-
----
-
-## Empty States
-
-### Empty State Components
-
-```text
-┌─────────────────────────────────────┐
-│                                     │
-│         [Illustration/Icon]         │
-│                                     │
-│      No projects yet                │
-│                                     │
-│   Create your first project to      │
-│   start organizing your work.       │
-│                                     │
-│       [Create Project]              │
-│                                     │
-└─────────────────────────────────────┘
-
-```
-
-### Empty State Guidelines
-
-- **Friendly illustration:** Not just "No data"
-- **Explain value:** Why create something?
-- **Clear CTA:** Primary action to fix empty state
-- **Keep it brief:** 1-2 sentences max
+- **1 ビューあたり 5 ～ 9 個のウィジェットに制限**
+- **グリッドに合わせる:** 一貫した溝とサイズ設定
+- **フィルター コントロール:** トップまたはサイドバー、常に表示されます
+- **日付範囲セレクター:** 一般的なニーズ、目立つようにする
+- **エクスポート オプション:** データ テーブルの PDF、CSV
+- **レスポンシブ:** 小さな画面にカードを重ねて表示
 
 ---
 
-## Loading States
+## 空の状態
 
-### Loading Patterns
+### 空の状態コンポーネント```テキスト
+┌─────────────────────┐
+│ │
+│【イラスト・アイコン】│
+│ │
+│ まだプロジェクトはありません │
+│ │
+│ 最初のプロジェクトを作成して、 │
+│仕事の整理を始めましょう。       │
+│ │
+│ [プロジェクトの作成] │
+│ │
+━━━━━━━━━━━━━━┘
 
-| Duration | Pattern |
+「」### 空の状態のガイドライン
+
+- **わかりやすい図:** 「データがない」だけではありません
+- **価値の説明:** なぜ何かを作成するのか?
+- **CTA をクリア:** 空の状態を修正するための主なアクション
+- **簡潔にしてください:** 最大 1 ～ 2 文
+
+---
+
+## ロード状態
+
+### パターンのロード
+
+|期間 |パターン |
 | -------- | ------- |
-| <1 second | No indicator (feels instant) |
-| 1-3 seconds | Spinner or progress indicator |
-| 3-10 seconds | Skeleton screens + progress |
-| >10 seconds | Progress bar + explanation |
+| <1 秒 |インジケーターなし (瞬時に感じます) |
+| 1～3秒 |スピナーまたは進行状況インジケータ |
+| 3～10秒 |スケルトン画面 + 進行状況 |
+| >10秒 |プログレスバー + 説明 |
 
-### Skeleton Screen
+### スケルトン画面```テキスト
+┌─────────────────────┐
+│ ░░░░░░░░░░░░ ░░░░░░░░░░ │
+━━━━━━━━━━━━━━━━━━━┤
+│ ░░░░░░░░░░░░░░░░░░░░░░░░░ │
+│ ░░░░░░░░░░░░░░░░░░░ │
+│ ░░░░░░░░░░░░░░░░░░░░░░░ │
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────────┐
-│ ░░░░░░░░░░░░ ░░░░░░░░░░           │
-├─────────────────────────────────────┤
-│ ░░░░░░░░░░░░░░░░░░░░░░░░░         │
-│ ░░░░░░░░░░░░░░░░░░░               │
-│ ░░░░░░░░░░░░░░░░░░░░░░░           │
-└─────────────────────────────────────┘
-
-```
-
-- Match layout of loaded content
-- Use subtle animation (shimmer/pulse)
-- Show actual content structure
+「」- 読み込まれたコンテンツのレイアウトに一致する
+- 微妙なアニメーション (シマー/パルス) を使用します。
+- 実際のコンテンツ構造を表示

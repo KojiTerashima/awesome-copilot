@@ -1,25 +1,23 @@
-# FreeCAD Parametric Objects
+# FreeCAD パラメトリック オブジェクト
 
-Reference guide for creating FeaturePython objects, scripted objects, properties, view providers, and serialization.
+FeaturePython オブジェクト、スクリプト化されたオブジェクト、プロパティ、ビュー プロバイダー、およびシリアル化を作成するためのリファレンス ガイド。
 
-## Official Wiki References
+## 公式 Wiki リファレンス
 
-- [Creating parametric objects](https://wiki.freecad.org/Manual:Creating_parametric_objects)
-- [Create a FeaturePython object part I](https://wiki.freecad.org/Create_a_FeaturePython_object_part_I)
-- [Create a FeaturePython object part II](https://wiki.freecad.org/Create_a_FeaturePython_object_part_II)
-- [Scripted objects](https://wiki.freecad.org/Scripted_objects)
-- [Scripted objects saving attributes](https://wiki.freecad.org/Scripted_objects_saving_attributes)
-- [Scripted objects migration](https://wiki.freecad.org/Scripted_objects_migration)
-- [Scripted objects with attachment](https://wiki.freecad.org/Scripted_objects_with_attachment)
-- [Viewprovider](https://wiki.freecad.org/Viewprovider)
-- [Custom icon in tree view](https://wiki.freecad.org/Custom_icon_in_tree_view)
-- [Properties](https://wiki.freecad.org/Property)
-- [PropertyLink: InList and OutList](https://wiki.freecad.org/PropertyLink:_InList_and_OutList)
-- [FeaturePython methods](https://wiki.freecad.org/FeaturePython_methods)
+- [パラメトリック オブジェクトの作成](https://wiki.freecad.org/Manual:Creating_parametric_objects)
+- [FeaturePython オブジェクトの作成パート I](https://wiki.freecad.org/Create_a_FeaturePython_object_part_I)
+- [FeaturePython オブジェクトの作成パート II](https://wiki.freecad.org/Create_a_FeaturePython_object_part_II)
+- [スクリプト化されたオブジェクト](https://wiki.freecad.org/Scripted_objects)
+- [スクリプト化されたオブジェクトの属性保存](https://wiki.freecad.org/Scripted_objects_ Saving_attributes)
+- [スクリプト化されたオブジェクトの移行](https://wiki.freecad.org/Scripted_objects_migration)
+- [アタッチメント付きのスクリプト化されたオブジェクト](https://wiki.freecad.org/Scripted_objects_with_attachment)
+- [ビュープロバイダ](https://wiki.freecad.org/Viewprovider)
+- [ツリービューのカスタムアイコン](https://wiki.freecad.org/Custom_icon_in_tree_view)
+- [プロパティ](https://wiki.freecad.org/Property)
+- [PropertyLink: InList と OutList](https://wiki.freecad.org/PropertyLink:_InList_and_OutList)
+- [FeaturePython メソッド](https://wiki.freecad.org/FeaturePython_methods)
 
-## FeaturePython Object — Complete Template
-
-```python
+## FeaturePython オブジェクト — 完全なテンプレート```python
 import FreeCAD
 import Part
 
@@ -71,11 +69,7 @@ class MyParametricObject:
         """Deserialize the proxy (for loading .FCStd)."""
         if state:
             self.Type = state.get("Type", "MyParametricObject")
-```
-
-## ViewProvider — Complete Template
-
-```python
+```## ViewProvider — 完全なテンプレート```python
 import FreeCADGui
 from pivy import coin
 
@@ -140,11 +134,7 @@ class ViewProviderMyObject:
 
     def __setstate__(self, state):
         return None
-```
-
-## Creating the Object
-
-```python
+```## オブジェクトの作成```python
 def makeMyObject(name="MyObject"):
     """Factory function to create the parametric object."""
     doc = FreeCAD.ActiveDocument
@@ -165,100 +155,92 @@ obj = makeMyObject("ChamferedBlock")
 obj.Length = 20.0
 obj.Chamfered = True
 FreeCAD.ActiveDocument.recompute()
-```
+```## 完全なプロパティ タイプ リファレンス
 
-## Complete Property Type Reference
+### 数値プロパティ
 
-### Numeric Properties
-
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyInteger` | `int` | Standard integer |
-| `App::PropertyFloat` | `float` | Standard float |
-| `App::PropertyLength` | `float` | Length with units (mm) |
-| `App::PropertyDistance` | `float` | Distance (can be negative) |
-| `App::PropertyAngle` | `float` | Angle in degrees |
-| `App::PropertyArea` | `float` | Area with units |
-| `App::PropertyVolume` | `float` | Volume with units |
-| `App::PropertySpeed` | `float` | Speed with units |
-| `App::PropertyAcceleration` | `float` | Acceleration |
-| `App::PropertyForce` | `float` | Force |
-| `App::PropertyPressure` | `float` | Pressure |
-| `App::PropertyPercent` | `int` | 0-100 integer |
-| `App::PropertyQuantity` | `Quantity` | Generic unit-aware value |
-| `App::PropertyIntegerConstraint` | `(val,min,max,step)` | Bounded integer |
-| `App::PropertyFloatConstraint` | `(val,min,max,step)` | Bounded float |
+| `App::PropertyInteger` | `int` |標準整数 |
+| `App::PropertyFloat` | `float` |標準フロート |
+| `App::PropertyLength` | `float` |長さの単位 (mm) |
+| `App::PropertyDistance` | `float` |距離 (負の値も可能) |
+| `App::PropertyAngle` | `float` |角度 (度) |
+| `App::PropertyArea` | `float` |ユニットのあるエリア |
+| `App::PropertyVolume` | `float` |単位付きの体積 |
+| `App::PropertySpeed` | `float` |単位付き速度 |
+| `App::PropertyAcceleration` | `float` |加速 |
+| `App::PropertyForce` | `float` |力 |
+| `App::PropertyPressure` | `float` |圧力 |
+| `App::PropertyPercent` | `int` | 0 ～ 100 の整数 |
+| `App::PropertyQuantity` | `Quantity` |一般的な単位を意識した値 |
+| `App::PropertyIntegerConstraint` | `(val,min,max,step)` |有界整数 |
+| `App::PropertyFloatConstraint` | `(val,min,max,step)` |有界浮動小数点 |
 
-### String/Path Properties
+### 文字列/パスのプロパティ
 
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyString` | `str` | Text string |
-| `App::PropertyFont` | `str` | Font name |
-| `App::PropertyFile` | `str` | File path |
-| `App::PropertyFileIncluded` | `str` | Embedded file |
-| `App::PropertyPath` | `str` | Directory path |
+| `App::PropertyString` | `str` |テキスト文字列 |
+| `App::PropertyFont` | `str` |フォント名 |
+| `App::PropertyFile` | `str` |ファイルパス |
+| `App::PropertyFileIncluded` | `str` |埋め込みファイル |
+| `App::PropertyPath` | `str` |ディレクトリパス |
 
-### Boolean and Enumeration
+### ブール値と列挙型
 
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyBool` | `bool` | True/False |
-| `App::PropertyEnumeration` | `list`/`str` | Dropdown; set list then value |
-
-```python
+| `App::PropertyBool` | `bool` |真/偽 |
+| `App::PropertyEnumeration` | `list`/`str` |落ちる;リストを設定してから値を設定する |```python
 # Enumeration usage
 obj.addProperty("App::PropertyEnumeration", "Style", "Options", "Style choice")
 obj.Style = ["Solid", "Wireframe", "Points"]  # set choices FIRST
 obj.Style = "Solid"                              # then set value
-```
+```### 幾何学的特性
 
-### Geometric Properties
-
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyVector` | `FreeCAD.Vector` | 3D vector |
-| `App::PropertyVectorList` | `[Vector,...]` | List of vectors |
-| `App::PropertyPlacement` | `Placement` | Position + rotation |
-| `App::PropertyMatrix` | `Matrix` | 4x4 matrix |
-| `App::PropertyVectorDistance` | `Vector` | Vector with units |
-| `App::PropertyPosition` | `Vector` | Position with units |
-| `App::PropertyDirection` | `Vector` | Direction vector |
+| `App::PropertyVector` | `FreeCAD.Vector` | 3D ベクトル |
+| `App::PropertyVectorList` | `[Vector,...]` |ベクトルのリスト |
+| `App::PropertyPlacement` | `Placement` |位置 + 回転 |
+| `App::PropertyMatrix` | `Matrix` | 4x4 マトリックス |
+| `App::PropertyVectorDistance` | `Vector` |単位を持つベクトル |
+| `App::PropertyPosition` | `Vector` |単位付きの位置 |
+| `App::PropertyDirection` | `Vector` |方向ベクトル |
 
-### Link Properties
+### リンクのプロパティ
 
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyLink` | obj ref | Link to one object |
-| `App::PropertyLinkList` | `[obj,...]` | Link to multiple objects |
-| `App::PropertyLinkSub` | `(obj, [subs])` | Link with sub-elements |
-| `App::PropertyLinkSubList` | `[(obj,[subs]),...]` | Multiple link+subs |
-| `App::PropertyLinkChild` | obj ref | Claimed child link |
-| `App::PropertyLinkListChild` | `[obj,...]` | Multiple claimed children |
+| `App::PropertyLink` |オブジェクト参照 | 1 つのオブジェクトへのリンク |
+| `App::PropertyLinkList` | `[obj,...]` |複数のオブジェクトへのリンク |
+| `App::PropertyLinkSub` | `(obj, [subs])` |サブ要素とのリンク |
+| `App::PropertyLinkSubList` | `[(obj,[subs]),...]` |複数のリンク+サブ |
+| `App::PropertyLinkChild` |オブジェクト参照 |子リンクが要求されました |
+| `App::PropertyLinkListChild` | `[obj,...]` |複数の子供を主張 |
 
-### Shape and Material
+### 形状と材質
 
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `Part::PropertyPartShape` | `Part.Shape` | Full shape |
-| `App::PropertyColor` | `(r,g,b)` | Color (0.0-1.0) |
-| `App::PropertyColorList` | `[(r,g,b),...]` | Color per element |
-| `App::PropertyMaterial` | `Material` | Material definition |
+| `Part::PropertyPartShape` | `Part.Shape` |フルシェイプ |
+| `App::PropertyColor` | `(r,g,b)` |カラー (0.0-1.0) |
+| `App::PropertyColorList` | `[(r,g,b),...]` |要素ごとの色 |
+| `App::PropertyMaterial` | `Material` |材料の定義 |
 
-### Container Properties
+### コンテナのプロパティ
 
-| Type | Python | Notes |
+|タイプ |パイソン |メモ |
 |---|---|---|
-| `App::PropertyPythonObject` | any | Serializable Python object |
-| `App::PropertyIntegerList` | `[int,...]` | List of integers |
-| `App::PropertyFloatList` | `[float,...]` | List of floats |
-| `App::PropertyStringList` | `[str,...]` | List of strings |
-| `App::PropertyBoolList` | `[bool,...]` | List of booleans |
-| `App::PropertyMap` | `{str:str}` | String dictionary |
+| `App::PropertyPythonObject` |任意 |シリアル化可能な Python オブジェクト |
+| `App::PropertyIntegerList` | `[int,...]` |整数のリスト |
+| `App::PropertyFloatList` | `[float,...]` |フロートのリスト |
+| `App::PropertyStringList` | `[str,...]` |文字列のリスト |
+| `App::PropertyBoolList` | `[bool,...]` |ブール値のリスト |
+| `App::PropertyMap` | `{str:str}` |文字列辞書 |
 
-## Object Dependency Tracking
-
-```python
+## オブジェクトの依存関係の追跡```python
 # InList: objects that reference this object
 obj.InList          # [objects referencing obj]
 obj.InListRecursive # all ancestors
@@ -266,11 +248,7 @@ obj.InListRecursive # all ancestors
 # OutList: objects this object references
 obj.OutList         # [objects obj references]
 obj.OutListRecursive # all descendants
-```
-
-## Migration Between Versions
-
-```python
+```## バージョン間の移行```python
 class MyParametricObject:
     # ... existing code ...
 
@@ -287,11 +265,7 @@ class MyParametricObject:
                 obj.addProperty("App::PropertyFloat", "NewPropName", "Group", "Tip")
                 obj.NewPropName = obj.OldPropName
             obj.removeProperty("OldPropName")
-```
-
-## Attachment Support
-
-```python
+```## 添付ファイルのサポート```python
 import Part
 
 class MyAttachableObject:

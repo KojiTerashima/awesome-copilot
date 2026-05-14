@@ -1,31 +1,29 @@
-# FreeCAD Scripting Fundamentals
+# FreeCAD スクリプトの基礎
 
-Reference guide for FreeCAD Python scripting basics: the document model, the console, objects, selection, and the Python environment.
+FreeCAD Python スクリプトの基本に関するリファレンス ガイド: ドキュメント モデル、コンソール、オブジェクト、選択、Python 環境。
 
-## Official Wiki References
+## 公式 Wiki リファレンス
 
-- [A gentle introduction](https://wiki.freecad.org/Manual:A_gentle_introduction)
-- [Introduction to Python](https://wiki.freecad.org/Introduction_to_Python)
-- [Python scripting tutorial](https://wiki.freecad.org/Python_scripting_tutorial)
-- [FreeCAD Scripting Basics](https://wiki.freecad.org/FreeCAD_Scripting_Basics)
-- [Scripting and macros](https://wiki.freecad.org/Scripting_and_macros)
-- [Working with macros](https://wiki.freecad.org/Macros)
-- [Code snippets](https://wiki.freecad.org/Code_snippets)
-- [Debugging](https://wiki.freecad.org/Debugging)
-- [Profiling](https://wiki.freecad.org/Profiling)
-- [Python development environment](https://wiki.freecad.org/Python_Development_Environment)
-- [Extra python modules](https://wiki.freecad.org/Extra_python_modules)
-- [FreeCAD vector math library](https://wiki.freecad.org/FreeCAD_vector_math_library)
-- [Embedding FreeCAD](https://wiki.freecad.org/Embedding_FreeCAD)
-- [Embedding FreeCADGui](https://wiki.freecad.org/Embedding_FreeCADGui)
-- [Macro at startup](https://wiki.freecad.org/Macro_at_Startup)
-- [How to install macros](https://wiki.freecad.org/How_to_install_macros)
-- [IPython notebook integration](https://wiki.freecad.org/IPython_notebook_integration)
-- [Quantity](https://wiki.freecad.org/Quantity)
+- [優しい紹介](https://wiki.freecad.org/Manual:A_gentle_introduction)
+- [Python 入門](https://wiki.freecad.org/ Introduction_to_Python)
+- [Python スクリプト チュートリアル](https://wiki.freecad.org/Python_scripting_tutorial)
+- [FreeCAD スクリプトの基礎](https://wiki.freecad.org/FreeCAD_Scripting_Basics)
+- [スクリプトとマクロ](https://wiki.freecad.org/Scripting_and_macros)
+- [マクロの操作](https://wiki.freecad.org/Macros)
+- [コード スニペット](https://wiki.freecad.org/Code_snippets)
+- [デバッグ](https://wiki.freecad.org/Debugging)
+- [プロファイリング](https://wiki.freecad.org/Profiling)
+- [Python 開発環境](https://wiki.freecad.org/Python_Development_Environment)
+- [追加の Python モジュール](https://wiki.freecad.org/Extra_python_modules)
+- [FreeCAD ベクトル数学ライブラリ](https://wiki.freecad.org/FreeCAD_vector_math_library)
+- [FreeCADの埋め込み](https://wiki.freecad.org/Embedding_FreeCAD)
+- [FreeCADGuiの埋め込み](https://wiki.freecad.org/Embedding_FreeCADGui)
+- [起動時のマクロ](https://wiki.freecad.org/Macro_at_Startup)
+- [マクロのインストール方法](https://wiki.freecad.org/How_to_install_macros)
+- [IPython ノートブックの統合](https://wiki.freecad.org/IPython_notebook_integration)
+- [数量](https://wiki.freecad.org/数量)
 
-## The FreeCAD Module Hierarchy
-
-```
+## FreeCAD モジュール階層```
 FreeCAD (App)          — Core application, documents, objects, properties
 ├── FreeCAD.Vector     — 3D vector
 ├── FreeCAD.Rotation   — Quaternion rotation
@@ -40,11 +38,7 @@ FreeCADGui (Gui)       — GUI module (only when GUI is active)
 ├── Control            — Task panel management
 ├── ActiveDocument     — GUI document wrapper
 └── getMainWindow()    — Qt main window
-```
-
-## Document Operations
-
-```python
+```## ドキュメントの操作```python
 import FreeCAD
 
 # Document lifecycle
@@ -72,11 +66,7 @@ names = doc.findObjects("Part::Feature")  # by type
 doc.recompute()                     # recompute all
 doc.recompute([obj1, obj2])         # recompute specific objects
 obj.touch()                         # mark as needing recompute
-```
-
-## Selection API
-
-```python
+```## 選択 API```python
 import FreeCADGui
 
 # Get selection
@@ -112,11 +102,7 @@ class MySelectionObserver:
 obs = MySelectionObserver()
 FreeCADGui.Selection.addObserver(obs)
 # Later: FreeCADGui.Selection.removeObserver(obs)
-```
-
-## Console and Logging
-
-```python
+```## コンソールとロギング```python
 FreeCAD.Console.PrintMessage("Normal message\n")   # blue/default
 FreeCAD.Console.PrintWarning("Warning\n")           # orange
 FreeCAD.Console.PrintError("Error\n")               # red
@@ -129,11 +115,7 @@ class MyLogger:
     def receive(self, msg):
         # process msg
         pass
-```
-
-## Units and Quantities
-
-```python
+```## 単位と数量```python
 from FreeCAD import Units
 
 # Create quantities
@@ -149,11 +131,7 @@ value_m = q.getValueAs("m")
 
 # Available unit schemes: mm/kg/s (FreeCAD default), SI, Imperial, etc.
 # Common units: mm, m, in, ft, deg, rad, kg, g, lb, s, min, hr
-```
-
-## Property System
-
-```python
+```## プロパティ システム```python
 # Add properties to any DocumentObject
 obj.addProperty("App::PropertyFloat", "MyProp", "GroupName", "Tooltip")
 obj.MyProp = 42.0

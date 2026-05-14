@@ -1,13 +1,11 @@
-# Skeleton: 3-findings.md
+# スケルトン: 3-findings.md
 
-> **⛔ Copy the template content below VERBATIM (excluding the outer code fence). Replace `[FILL]` placeholders. ALL 10 attribute rows are MANDATORY per finding. Organize by TIER, not by severity.**
-> **⛔ DO NOT abbreviate attribute names. Use EXACT names: `SDL Bugbar Severity` (not `Severity`), `Exploitation Prerequisites` (not `Prerequisites`), `Exploitability Tier` (not `Tier`), `Remediation Effort` (not `Effort`), `CVSS 4.0` (not `CVSS Score`).**
-> **⛔ DO NOT use bold inline headers (`**Description:**`). Use `#### Description` markdown h4 headings.**
-> **⛔ Tier section headings MUST be: `## Tier 1 — Direct Exposure (No Prerequisites)`, NOT `## Tier 1 Findings`.**
+> **⛔ テンプレートの内容を VERBATIM の下にコピーします (外側のコード フェンスを除く)。 `[FILL]` プレースホルダーを置き換えます。検出結果ごとに 10 個の属性行すべてが必須です。重大度ではなく、TIER ごとに整理します。**
+> **⛔ 属性名を省略しないでください。正確な名前を使用してください: `SDL Bugbar Severity` (`Severity` ではない)、`Exploitation Prerequisites` (`Prerequisites` ではない)、`Exploitability Tier` (`Tier` ではない)、`Remediation Effort` (`Effort` ではない)、`CVSS 4.0` (`CVSS Score` ではない)。**
+> **⛔ 太字のインライン ヘッダー (`**Description:**`) は使用しないでください。 `#### Description` マークダウン h4 見出しを使用します。**
+> **⛔ 階層セクションの見出しは次のようにする必要があります: `## Tier 1 Findings` ではなく、`## Tier 1 — Direct Exposure (No Prerequisites)`。**
 
----
-
-```markdown
+---```markdown
 # Security Findings
 
 ---
@@ -158,11 +156,7 @@
 [CONDITIONAL-EMPTY: If no Tier 3 findings, include this line instead of the REPEAT block]
 *No Tier 3 findings identified for this repository.*
 [END-CONDITIONAL-EMPTY]
-```
-
-At the END of `3-findings.md`, append the Threat Coverage Verification table:
-
-```markdown
+````3-findings.md` の最後に、脅威カバレッジ検証テーブルを追加します。```markdown
 ---
 
 ## Threat Coverage Verification
@@ -183,15 +177,13 @@ At the END of `3-findings.md`, append the Threat Coverage Verification table:
   4. Column headers are EXACTLY: `Threat ID | Finding ID | Status` (NOT `Threat | Finding | Status`)
   5. Every threat from 2-stride-analysis.md appears in this table (no missing threats)
   If ANY check fails → FIX NOW. -->
-```
-
-**Fixed rules baked into this skeleton:**
-- Finding ID: `FIND-` prefix (never `F-`, `F01`, `Finding`)
-- Attribute names: `SDL Bugbar Severity`, `Exploitation Prerequisites`, `Exploitability Tier`, `Remediation Effort` (exact — not abbreviated)
-- CVSS: starts with `CVSS:4.0/` (never bare vector)
-- CWE: hyperlinked (never plain text)
-- OWASP: `:2025` suffix (never `:2021`)
-- Related Threats: individual hyperlinks (never plain text)
-- Sub-sections: `#### Description`, `#### Evidence`, `#### Remediation`, `#### Verification`
-- Organized by TIER — no `## Critical Findings` or `## Mitigated` sections
-- Exactly 3 tier sections (all mandatory, even if empty with "*No Tier N findings identified.*")
+```**このスケルトンに組み込まれた修正ルール:**
+- 検索 ID: `FIND-` プレフィックス (`F-`、`F01`、`Finding` は使用しないでください)
+- 属性名: `SDL Bugbar Severity`、`Exploitation Prerequisites`、`Exploitability Tier`、`Remediation Effort` (省略形ではなく正確)
+- CVSS: `CVSS:4.0/` で始まります (ベアベクトルではありません)
+- CWE: ハイパーリンク (決してプレーンテキストではありません)
+- OWASP: `:2025` サフィックス (`:2021` は使用しないでください)
+- 関連する脅威: 個々のハイパーリンク (決してプレーンテキストではない)
+- サブセクション: `#### Description`、`#### Evidence`、`#### Remediation`、`#### Verification`
+- TIER によって編成 — `## Critical Findings` セクションや `## Mitigated` セクションはありません
+- 正確に 3 段階のセクション (「*段階 N の所見は確認されません。*」と空の場合でも、すべて必須)

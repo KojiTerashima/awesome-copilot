@@ -1,215 +1,189 @@
-# Performance Optimization for Power BI Models
+# Power BI モデルのパフォーマンスの最適化
 
-## Data Reduction Techniques
+## データ削減テクニック
 
-### 1. Remove Unnecessary Columns
-- Only import columns needed for reporting
-- Remove audit columns (CreatedBy, ModifiedDate) unless required
-- Remove duplicate/redundant columns
+### 1. 不要な列を削除する
+- レポートに必要な列のみをインポートします
+- 必要な場合を除き、監査列 (CreatedBy、ModifiedDate) を削除します。
+- 重複/冗長列を削除する「」
+column_operations(オペレーション: "リスト", フィルター: { tableNames: ["Sales"] })
+// 不要な列を確認して削除します
+「」### 2. 不要な行を削除する
+- 過去のデータを関連する期間にフィルタリングします
+- 不要な場合はキャンセル/無効な取引を除外します
+- Power Query でフィルターを適用します (DAX ではありません)
 
-```
-column_operations(operation: "List", filter: { tableNames: ["Sales"] })
-// Review and remove unneeded columns
-```
+### 3. カーディナリティを減らす
+カーディナリティが高い (一意の値が多い) と、次のような影響があります。
+- モデルのサイズ
+- リフレッシュタイム
+- クエリのパフォーマンス
 
-### 2. Remove Unnecessary Rows
-- Filter historical data to relevant period
-- Exclude cancelled/void transactions if not needed
-- Apply filters in Power Query (not in DAX)
+**解決策:**
+|列の種類 |削減テクニック |
+|---------------|----------|
+|日時 |日付と時刻の列に分割 |
+|小数精度 |必要な精度に丸める |
+|パターン付きのテキスト |共通のプレフィックス/サフィックスを抽出する |
+|高精度ID |サロゲート整数キーを使用する |
 
-### 3. Reduce Cardinality
-High cardinality (many unique values) impacts:
-- Model size
-- Refresh time
-- Query performance
+### 4. データ型を最適化する
+|から |へ |メリット |
+|------|-----|-----------|
+|日時 |日付 (時間が必要ない場合) | 8バイトから4バイト |
+| 10 進数 |固定 10 進数 |圧縮の向上 |
+|数字を含むテキスト |整数 |はるかに優れた圧縮 |
+|長いテキスト |短いテキスト |ストレージの削減 |
 
-**Solutions:**
-| Column Type | Reduction Technique |
-|-------------|---------------------|
-| DateTime | Split into Date and Time columns |
-| Decimal precision | Round to needed precision |
-| Text with patterns | Extract common prefix/suffix |
-| High-precision IDs | Use surrogate integer keys |
+### 5. グループ化して要約する
+詳細が必要ない場合はデータを事前に集計します。
+- トランザクションではなく毎日
+- 毎日ではなく毎月
+- DirectQuery の集計テーブルを検討する
 
-### 4. Optimize Data Types
-| From | To | Benefit |
-|------|-----|---------|
-| DateTime | Date (if time not needed) | 8 bytes to 4 bytes |
-| Decimal | Fixed Decimal | Better compression |
-| Text with numbers | Whole Number | Much better compression |
-| Long text | Shorter text | Reduces storage |
+## 列の最適化
 
-### 5. Group and Summarize
-Pre-aggregate data when detail not needed:
-- Daily instead of transactional
-- Monthly instead of daily
-- Consider aggregation tables for DirectQuery
+### 計算列よりも Power Query 列を優先する
+|アプローチ |いつ使用するか |
+|----------|---------------|
+|パワークエリ (M) |ソースで計算可能、静的な値 |
+|計算列 (DAX) |モデルの関係、動的ロジックが必要 |
 
-## Column Optimization
+Power Query の列:
+- 読み込みが速くなりました
+- より適切に圧縮する
+- メモリの使用量を減らします
 
-### Prefer Power Query Columns Over Calculated Columns
-| Approach | When to Use |
-|----------|-------------|
-| Power Query (M) | Can be computed at source, static values |
-| Calculated Column (DAX) | Needs model relationships, dynamic logic |
+### リレーションシップキーの計算列を避ける
+リレーションシップ内の DAX 計算列:
+- インデックスは使用できません
+- DirectQuery 用の複雑な SQL を生成する
+- パフォーマンスに重大な悪影響を与える
 
-Power Query columns:
-- Load faster
-- Compress better
-- Use less memory
-
-### Avoid Calculated Columns on Relationship Keys
-DAX calculated columns in relationships:
-- Cannot use indexes
-- Generate complex SQL for DirectQuery
-- Hurt performance significantly
-
-**Use COMBINEVALUES for multi-column relationships:**
-```dax
-// If you must use calculated column for composite key
-CompositeKey = COMBINEVALUES(",", [Country], [City])
-```
-
-### Set Appropriate Summarization
-Prevent accidental aggregation of non-additive columns:
-```
-column_operations(
-  operation: "Update",
-  definitions: [{
-    tableName: "Product",
-    name: "UnitPrice",
-    summarizeBy: "None"
+**複数列のリレーションシップには COMBINEVALUES を使用します:**「ダックス」
+// 複合キーに計算列を使用する必要がある場合
+CompositeKey = COMBINEVALUES(",", [国], [都市])
+「」### 適切な要約を設定する
+非加算列の偶発的な集計を防止します。「」
+列操作(
+  操作: "更新"、
+  定義: [{
+    テーブル名: "製品",
+    名前: "単価",
+    要約作成者: 「なし」
   }]
-)
-```
+）
+「」## 関係の最適化
 
-## Relationship Optimization
+### 1. 双方向の関係を最小限に抑える
+それぞれの双方向関係:
+- クエリが複雑になる
+- 曖昧なパスを作成できる
+- パフォーマンスが低下する
 
-### 1. Minimize Bidirectional Relationships
-Each bidirectional relationship:
-- Increases query complexity
-- Can create ambiguous paths
-- Reduces performance
+### 2. 可能な限り多対多を避ける
+多対多の関係:
+- より複雑なクエリを生成する
+- より多くのメモリが必要です
+- 予期しない結果が生じる可能性があります
 
-### 2. Avoid Many-to-Many When Possible
-Many-to-many relationships:
-- Generate more complex queries
-- Require more memory
-- Can produce unexpected results
+### 3. リレーションシップのカーディナリティを減らす
+リレーションシップ列のカーディナリティを低く保ちます。
+- テキスト上で整数キーを使用する
+- より粒度の高い関係を検討する
 
-### 3. Reduce Relationship Cardinality
-Keep relationship columns low cardinality:
-- Use integer keys over text
-- Consider higher-grain relationships
+## DAX の最適化
 
-## DAX Optimization
+### 1. 変数を使用する「ダックス」
+// 良い - 1 回計算して 2 回使用する
+売上の伸び = 
+VAR CurrentSales = [総売上高]
+VAR PriorSales = [前年の売上高]
+利益率(現在の売上高 - 以前の売上高、以前の売上高)
 
-### 1. Use Variables
-```dax
-// GOOD - Calculate once, use twice
-Sales Growth = 
-VAR CurrentSales = [Total Sales]
-VAR PriorSales = [PY Sales]
-RETURN DIVIDE(CurrentSales - PriorSales, PriorSales)
+// BAD - [総売上高] と [PY 売上高] を再計算します
+売上の伸び = 
+DIVIDE([総売上高] - [前年売上高], [前年売上高])
+「」### 2. テーブル全体に対する FILTER を避ける「ダックス」
+// BAD - テーブル全体を反復処理します
+売上高価値 = 
+CALCULATE([売上合計], FILTER(売上, 売上[金額] > 1000))
 
-// BAD - Recalculates [Total Sales] and [PY Sales]
-Sales Growth = 
-DIVIDE([Total Sales] - [PY Sales], [PY Sales])
-```
+// 良い - 列参照を使用します
+売上高価値 = 
+CALCULATE([総売上高], 売上[金額] > 1000)
+「」### 3. KEEPFILTERS を適切に使用する「ダックス」
+// 既存のフィルターを尊重します
+フィルターを使用した売上 = 
+CALCULATE([総売上高], KEEPFILTERS(製品[カテゴリ] = "バイク"))
+「」### 4. 除算演算子よりも DIVIDE を優先します「ダックス」
+// GOOD - ゼロ除算を処理します
+マージン % = DIVIDE([利益], [売上])
 
-### 2. Avoid FILTER with Entire Tables
-```dax
-// BAD - Iterates entire table
-Sales High Value = 
-CALCULATE([Total Sales], FILTER(Sales, Sales[Amount] > 1000))
+// BAD - ゼロのエラー
+マージン% = [利益] / [売上]
+「」## DirectQuery の最適化
 
-// GOOD - Uses column reference
-Sales High Value = 
-CALCULATE([Total Sales], Sales[Amount] > 1000)
-```
+### 1. 列とテーブルを最小限に抑える
+DirectQuery モデル:
+- すべてのビジュアルのクエリソース
+- パフォーマンスはソースに依存します
+- 取得するデータを最小限に抑える
 
-### 3. Use KEEPFILTERS Appropriately
-```dax
-// Respects existing filters
-Sales with Filter = 
-CALCULATE([Total Sales], KEEPFILTERS(Product[Category] = "Bikes"))
-```
+### 2. 複雑な Power Query 変換を避ける
+- 変換はサブクエリになります
+- ネイティブクエリの方が高速です
+- 可能な場合はソースで実体化します
 
-### 4. Prefer DIVIDE Over Division Operator
-```dax
-// GOOD - Handles divide by zero
-Margin % = DIVIDE([Profit], [Sales])
+### 3. 最初は対策をシンプルにする
+複雑な DAX は複雑な SQL を生成します。
+- 基本的な集計から始める
+- 徐々に複雑さを加えていきます
+- クエリのパフォーマンスを監視する
 
-// BAD - Errors on zero
-Margin % = [Profit] / [Sales]
-```
+### 4. 自動日付/時刻を無効にする
+DirectQuery モデルの場合、自動日付/時刻を無効にします。
+- 非表示の計算テーブルを作成します
+- モデルの複雑さが増加します
+- 代わりに明示的な日付テーブルを使用してください
 
-## DirectQuery Optimization
+## 集計
 
-### 1. Minimize Columns and Tables
-DirectQuery models:
-- Query source for every visual
-- Performance depends on source
-- Minimize data retrieved
-
-### 2. Avoid Complex Power Query Transformations
-- Transforms become subqueries
-- Native queries are faster
-- Materialize at source when possible
-
-### 3. Keep Measures Simple Initially
-Complex DAX generates complex SQL:
-- Start with basic aggregations
-- Add complexity gradually
-- Monitor query performance
-
-### 4. Disable Auto Date/Time
-For DirectQuery models, disable auto date/time:
-- Creates hidden calculated tables
-- Increases model complexity
-- Use explicit date table instead
-
-## Aggregations
-
-### User-Defined Aggregations
-Pre-aggregate fact tables for:
-- Very large models (billions of rows)
-- Hybrid DirectQuery/Import
-- Common query patterns
-
-```
-table_operations(
-  operation: "Create",
-  definitions: [{
-    name: "SalesAgg",
-    mode: "Import",
-    mExpression: "..."
+### ユーザー定義の集計
+以下のファクト テーブルを事前に集計します。
+- 非常に大規模なモデル (数十億行)
+- ハイブリッド DirectQuery/インポート
+- 一般的なクエリ パターン「」
+テーブル操作(
+  操作: "作成"、
+  定義: [{
+    名前: "SalesAgg"、
+    モード: "インポート"、
+    m式：「...」
   }]
-)
-```
+）
+「」## パフォーマンステスト
 
-## Performance Testing
+### パフォーマンス アナライザーを使用する
+1.Power BI Desktop で有効にする
+2. 録音を開始します
+3. ビジュアルを操作する
+4. DAX クエリ時間を確認する
 
-### Use Performance Analyzer
-1. Enable in Power BI Desktop
-2. Start recording
-3. Interact with visuals
-4. Review DAX query times
+### DAX Studio で監視する
+外部ツール:
+- クエリのタイミング
+- サーバーのタイミング
+- クエリプラン
 
-### Monitor with DAX Studio
-External tool for:
-- Query timing
-- Server timings
-- Query plans
+## 検証チェックリスト
 
-## Validation Checklist
-
-- [ ] Unnecessary columns removed
-- [ ] Appropriate data types used
-- [ ] High-cardinality columns addressed
-- [ ] Bidirectional relationships minimized
-- [ ] DAX uses variables for repeated expressions
-- [ ] No FILTER on entire tables
-- [ ] DIVIDE used instead of division operator
-- [ ] Auto date/time disabled for DirectQuery
-- [ ] Performance tested with representative data
+- [ ] 不要な列を削除
+- [ ] 適切なデータ型が使用されています
+- [ ] 高カーディナリティ列のアドレス指定
+- [ ] 双方向関係を最小化
+- [ ] DAX は繰り返しの式に変数を使用します
+- [ ] テーブル全体に FILTER がありません
+- [ ] DIVIDE が除算演算子の代わりに使用される
+- [ ] DirectQuery の自動日付/時刻が無効になっています
+- [ ] 代表的なデータを使用してパフォーマンスをテストしました

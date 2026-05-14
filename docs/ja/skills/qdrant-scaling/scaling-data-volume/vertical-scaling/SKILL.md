@@ -2,68 +2,65 @@
 name: qdrant-vertical-scaling
 description: "Guides Qdrant vertical scaling decisions. Use when someone asks 'how to scale up a node', 'need more RAM', 'upgrade node size', 'vertical scaling', 'resize cluster', 'scale up vs scale out', or when memory/CPU is insufficient on current nodes. Also use when someone wants to avoid the complexity of horizontal scaling."
 ---
+# Qdrant を垂直方向にスケーリングする必要がある場合の対処方法
 
-# What to Do When Qdrant Needs to Scale Vertically
+垂直スケーリングとは、ノードを追加するのではなく、既存のノードの CPU、RAM、またはディスクを増やすことを意味します。これは、水平スケーリングを検討する前に推奨される最初のステップです。垂直スケーリングはより単純で、分散システムの複雑さを回避し、元に戻すことができます。
 
-Vertical scaling means increasing CPU, RAM, or disk on existing nodes rather than adding more nodes. This is the recommended first step before considering horizontal scaling. Vertical scaling is simpler, avoids distributed system complexity, and is reversible.
+- Qdrant Cloud の垂直スケーリングは、[Qdrant Cloud Console](https://cloud.qdrant.io/) を通じて行われます。
+- セルフホスト型展開の場合、基盤となる VM またはコンテナー リソースのサイズを変更します。
 
-- Vertical scaling for Qdrant Cloud is done through the [Qdrant Cloud Console](https://cloud.qdrant.io/)
-- For self-hosted deployments, resize the underlying VM or container resources
+## 垂直方向に拡大縮小する場合
 
-## When to Scale Vertically
+次の場合に使用します: 現在のノードのリソース (RAM、CPU、ディスク) が不十分ですが、ワークロードはまだ分散する必要がありません。
 
-Use when: current node resources (RAM, CPU, disk) are insufficient, but the workload doesn't yet require distribution.
-
-- RAM usage approaching 80% of available memory (OS page cache eviction starts, severe performance degradation)
-- CPU saturation during query serving or indexing
-- Disk space running low for on-disk vectors and payloads
-- A single node can handle up to ~100M vectors depending on dimensions and quantization
-- For non-production workloads, which are tolerant to single-point-of-failure and don't require high availability
-
-
-## How to Scale Vertically in Qdrant Cloud
-
-Vertical scaling is managed through the Qdrant Cloud Console.
-
-- Log into [Qdrant Cloud Console](https://cloud.qdrant.io/) or use [CLI tool](https://github.com/qdrant/qcloud-cli)
-- Select the cluster to resize
-- Choose a larger node configuration (more RAM, CPU, or both)
-- The upgrade process involves a rolling restart with no downtime if replication is configured
-- Ensure `replication_factor: 2` or higher before resizing to maintain availability during the rolling restart
-
-**Important:** Scaling up is straightforward. Scaling down requires care -- if the working set no longer fits in RAM after downsizing, performance will degrade severely due to cache eviction. Always load test before scaling down.
+- RAM 使用量が利用可能なメモリの 80% に近づいている (OS ページ キャッシュの削除が開始され、パフォーマンスが大幅に低下します)
+- クエリの処理中またはインデックス作成中の CPU の飽和
+- ディスク上のベクターとペイロードのためのディスク容量が不足しています
+- 単一ノードは、次元と量子化に応じて最大 1 億個のベクトルを処理できます
+- 単一障害点に耐性があり、高可用性を必要としない非実稼働ワークロードの場合
 
 
-## RAM Sizing Guidelines
+## Qdrant Cloud で垂直方向にスケーリングする方法
 
-RAM is the most critical resource for Qdrant performance. Use these guidelines to right-size.
+垂直スケーリングは、Qdrant Cloud コンソールを通じて管理されます。
 
-- Exact estimation of RAM usage is difficult; use this simple approximate formula: `num_vectors * dimensions * 4 bytes * 1.5` for full-precision vectors in RAM
-- With scalar quantization: divide by 4 (INT8 reduces each float32 to 1 byte) [Quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
-- With binary quantization: divide by 32 [Binary quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/?s=binary-quantization)
-- Add overhead for HNSW index (~20-30% of vector data), payload indexes, and WAL
-- Reserve 20% headroom for optimizer operations and OS cache
-- Monitor actual usage via Grafana/Prometheus before and after resizing [Monitoring](../../../qdrant-monitoring/SKILL.md)
+- [Qdrant Cloud Console](https://cloud.qdrant.io/)にログインするか、[CLIツール](https://github.com/qdrant/qcloud-cli)を使用します。
+- サイズ変更するクラスターを選択します
+- より大きなノード構成を選択します (より多くの RAM、CPU、またはその両方)
+- レプリケーションが構成されている場合、アップグレード プロセスにはダウンタイムなしのローリング再起動が含まれます。
+- ローリング再起動中の可用性を維持するには、サイズを変更する前に `replication_factor: 2` 以上であることを確認してください。
 
-
-## When Vertical Scaling Is No Longer Enough
-
-Recognize these signals that it's time to go horizontal:
-
-- Data volume exceeds what a single node can hold even with quantization and mmap
-- IOPS are saturated (more nodes = more independent disk I/O)
-- Need fault tolerance (requires replication across nodes)
-- Need tenant isolation via dedicated shards
-- Single-node CPU is maxed and query latency is unacceptable
-- Next vertical scaling step is the largest available node size. You might need to be able to temporarily scale up to the larger node size to do batch operations or recovery. If you are already at the largest node size, you won't be able to do that.
-
-When you hit these limits, see [Horizontal Scaling](../horizontal-scaling/SKILL.md) for guidance on sharding and node planning.
+**重要:** スケールアップは簡単です。スケールダウンには注意が必要です。ダウンサイズ後にワーキング セットが RAM に収まらなくなると、キャッシュの削除によりパフォーマンスが大幅に低下します。スケールダウンする前に必ずロードテストを行ってください。
 
 
-## What NOT to Do
+## RAM サイジングのガイドライン
 
-- Do not scale down RAM without load testing first (cache eviction = severe latency degradation that can last days)
-- Do not ignore the 80% RAM threshold (performance cliff, not gradual degradation)
-- Do not skip replication before resizing in Cloud (rolling restart without replicas = downtime)
-- Do not jump to horizontal scaling before exhausting vertical options (adds permanent operational complexity)
-- Do not assume more CPU always helps (IOPS-bound workloads won't improve with more cores)
+RAM は Qdrant のパフォーマンスにとって最も重要なリソースです。適切なサイズに設定するには、次のガイドラインを使用してください。
+
+- RAM 使用量を正確に見積もることは困難です。 RAM 内の完全精度ベクトルには、次の簡単な近似式を使用します: `num_vectors * dimensions * 4 bytes * 1.5`
+- スカラー量子化の場合: 4 で割ります (INT8 は各 float32 を 1 バイトに削減します) [量子化](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+- バイナリ量子化の場合: 32 で割る [バイナリ量子化](https://search.qdrant.tech/md/documentation/manage-data/quantization/?s=binary-quantization)
+- HNSW インデックス (ベクトル データの約 20 ～ 30%)、ペイロード インデックス、および WAL のオーバーヘッドを追加します。
+- オプティマイザー操作と OS キャッシュ用に 20% のヘッドルームを確保
+- サイズ変更前後の実際の使用状況を Grafana/Prometheus 経由で監視 [監視](../../../qdrant-monitoring/SKILL.md)
+
+
+## 垂直方向のスケーリングだけでは不十分な場合
+
+水平方向に進む時期が来たことを示す次の信号を認識してください。- 量子化や mmap を使用しても、データ量が単一ノードで保持できる量を超えます
+- IOPS が飽和している (ノードが増える = 独立したディスク I/O が増える)
+- フォールト トレランスが必要 (ノード間のレプリケーションが必要)
+- 専用シャードによるテナントの分離が必要
+- 単一ノードの CPU が最大値に達しており、クエリの遅延が許容できない
+- 次の垂直方向のスケーリング ステップは、利用可能な最大のノード サイズです。バッチ操作やリカバリを実行するには、一時的により大きなノード サイズにスケールアップできることが必要になる場合があります。すでに最大のノード サイズに達している場合は、それを行うことはできません。
+
+これらの制限に達した場合は、シャーディングとノード計画に関するガイダンスについて、[水平スケーリング](../horizo​​ntal-scaling/SKILL.md) を参照してください。
+
+
+## してはいけないこと
+
+- 最初に負荷テストを行わずに RAM をスケールダウンしないでください (キャッシュの削除 = 数日続く可能性がある深刻なレイテンシの低下)
+- 80% RAM しきい値を無視しないでください (徐々に低下するのではなく、パフォーマンスの限界)
+- クラウドでサイズを変更する前にレプリケーションをスキップしないでください (レプリカなしのローリングリスタート = ダウンタイム)
+- 垂直方向のオプションを使い果たす前に水平方向のスケーリングにジャンプしないでください (操作が永続的に複雑になります)。
+- CPU を増やすと常に効果があるとは考えないでください (IOPS に依存するワークロードは、コアを増やしても改善されません)

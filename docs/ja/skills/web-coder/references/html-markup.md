@@ -1,78 +1,74 @@
-# HTML & Markup Reference
+# HTML とマークアップのリファレンス
 
-Comprehensive reference for HTML5, markup languages, and document structure.
+HTML5、マークアップ言語、ドキュメント構造に関する包括的なリファレンス。
 
-## Core Concepts
+## コアコンセプト
 
-### HTML (HyperText Markup Language)
-The standard markup language for creating web pages and web applications.
+### HTML (ハイパーテキスト マークアップ言語)
+Web ページおよび Web アプリケーションを作成するための標準マークアップ言語。
 
-**Related Terms**: HTML5, XHTML, Markup, Semantic HTML
+**関連用語**: HTML5、XHTML、マークアップ、セマンティック HTML
 
-### Elements
-Building blocks of HTML documents. Each element has opening/closing tags (except void elements).
+### 要素
+HTML ドキュメントの構成要素。各要素には開始タグと終了タグがあります (void 要素を除く)。
 
-**Common Elements**:
-- `<div>` - Generic container
-- `<span>` - Inline container
-- `<article>` - Self-contained content
-- `<section>` - Thematic grouping
-- `<nav>` - Navigation links
-- `<header>` - Introductory content
-- `<footer>` - Footer content
-- `<main>` - Main content
-- `<aside>` - Complementary content
+**共通要素**:
+- `<div>` - 汎用コンテナ
+- `<span>` - インラインコンテナ
+- `<article>` - 自己完結型コンテンツ
+- `<section>` - テーマ別のグループ化
+- `<nav>` - ナビゲーション リンク
+- `<header>` - 紹介コンテンツ
+- `<footer>` - フッターの内容
+- `<main>` - 主な内容
+- `<aside>` - 補足的な内容
 
-### Attributes
-Properties that provide additional information about HTML elements.
+### 属性
+HTML 要素に関する追加情報を提供するプロパティ。
 
-**Common Attributes**:
-- `id` - Unique identifier
-- `class` - CSS class name(s)
-- `src` - Source URL for images/scripts
-- `href` - Hyperlink reference
-- `alt` - Alternative text
-- `title` - Advisory title
-- `data-*` - Custom data attributes
-- `aria-*` - Accessibility attributes
+**共通の属性**:
+- `id` - 一意の識別子
+- `class` - CSS クラス名
+- `src` - 画像/スクリプトのソース URL
+- `href` - ハイパーリンクのリファレンス
+- `alt` - 代替テキスト
+- `title` - アドバイザリーのタイトル
+- `data-*` - カスタム データ属性
+- `aria-*` - アクセシビリティ属性
 
-### Void Elements
-Elements that cannot have content and don't have closing tags.
+### 空白の要素
+コンテンツを含めることができず、終了タグを持たない要素。
 
-**Examples**: `<img>`, `<br>`, `<hr>`, `<input>`, `<meta>`, `<link>`
+**例**: `<img>`、`<br>`、`<hr>`、`<input>`、`<meta>`、`<link>`
 
-## Semantic HTML
+## セマンティック HTML
 
-### What is Semantic HTML?
-HTML that clearly describes its meaning to both the browser and the developer.
+### セマンティック HTML とは何ですか?
+ブラウザーと開発者の両方に対してその意味を明確に説明する HTML。
 
-**Benefits**:
-- Improved accessibility
-- Better SEO
-- Easier maintenance
-- Built-in meaning and structure
+**利点**:
+- アクセシビリティの向上
+- SEOの向上
+- メンテナンスが容易
+- 組み込まれた意味と構造
 
-### Semantic Elements
+### 意味要素
 
-| Element | Purpose | When to Use |
-|---------|---------|-------------|
-| `<article>` | Self-contained composition | Blog posts, news articles |
-| `<section>` | Thematic grouping of content | Chapters, tabbed content |
-| `<nav>` | Navigation links | Main menu, breadcrumbs |
-| `<aside>` | Tangential content | Sidebars, related links |
-| `<header>` | Introductory content | Page/section headers |
-| `<footer>` | Footer content | Copyright, contact info |
-| `<main>` | Main content | Primary page content |
-| `<figure>` | Self-contained content | Images with captions |
-| `<figcaption>` | Caption for figure | Image descriptions |
-| `<time>` | Date/time | Publishing dates |
-| `<mark>` | Highlighted text | Search results |
-| `<details>` | Expandable details | Accordions, FAQs |
-| `<summary>` | Summary for details | Accordion headers |
-
-### Example: Semantic Document Structure
-
-```html
+|要素 |目的 |いつ使用するか |
+|----------|----------|---------------|
+| `<article>` |自己完結型の構成 |ブログ投稿、ニュース記事 |
+| `<section>` |コンテンツのテーマごとのグループ化 |章、タブ付きコンテンツ |
+| `<nav>` |ナビゲーションリンク |メインメニュー、パンくずリスト |
+| `<aside>` |接線コンテンツ |サイドバー、関連リンク |
+| `<header>` |紹介コンテンツ |ページ/セクションのヘッダー |
+| `<footer>` |フッターの内容 |著作権、連絡先情報 |
+| `<main>` |主な内容 |主要なページのコンテンツ |
+| `<figure>` |自己完結型コンテンツ |キャプション付きの画像 |
+| `<figcaption>` |図のキャプション |画像の説明 |
+| `<time>` |日付/時刻 |出版日 |
+| `<mark>` |強調表示されたテキスト |検索結果 |
+| `<details>` |拡張可能な詳細 |アコーディオン、よくある質問 |
+| `<summary>` |詳細については概要 |アコーディオンヘッダー |### 例: 意味論的な文書構造```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,30 +112,22 @@ HTML that clearly describes its meaning to both the browser and the developer.
   </footer>
 </body>
 </html>
-```
+```## 文書構造
 
-## Document Structure
-
-### Doctype
-Declares the document type and HTML version.
-
-```html
+### ドキュメントタイプ
+ドキュメントの種類と HTML のバージョンを宣言します。```html
 <!DOCTYPE html>
-```
+```### ヘッドセクション
+ドキュメントに関するメタデータが含まれます。
 
-### Head Section
-Contains metadata about the document.
+**共通要素**:
+- `<meta>` - メタデータ (文字セット、ビューポート、説明)
+- `<title>` - ページタイトル (ブラウザタブに表示)
+- `<link>` - 外部リソース (スタイルシート、アイコン)
+- `<script>` - JavaScript ファイル
+- `<style>` - インラインCSS
 
-**Common Elements**:
-- `<meta>` - Metadata (charset, viewport, description)
-- `<title>` - Page title (shown in browser tab)
-- `<link>` - External resources (stylesheets, icons)
-- `<script>` - JavaScript files
-- `<style>` - Inline CSS
-
-### Metadata Examples
-
-```html
+### メタデータの例```html
 <head>
   <!-- Character encoding -->
   <meta charset="UTF-8">
@@ -167,13 +155,9 @@ Contains metadata about the document.
   <link rel="preload" href="critical.css" as="style">
   <link rel="preconnect" href="https://api.example.com">
 </head>
-```
+```## フォームと入力
 
-## Forms and Input
-
-### Form Elements
-
-```html
+### フォーム要素```html
 <form action="/submit" method="POST">
   <!-- Text input -->
   <label for="name">Name:</label>
@@ -221,45 +205,41 @@ Contains metadata about the document.
   <!-- Submit button -->
   <button type="submit">Submit</button>
 </form>
-```
+```### 入力タイプ
 
-### Input Types
-
-| Type | Purpose | Example |
-|------|---------|---------|
-| `text` | Single-line text | `<input type="text">` |
-| `email` | Email address | `<input type="email">` |
-| `password` | Password field | `<input type="password">` |
-| `number` | Numeric input | `<input type="number" min="0" max="100">` |
-| `tel` | Telephone number | `<input type="tel">` |
+|タイプ |目的 |例 |
+|------|--------|----------|
+| `text` |単一行のテキスト | `<input type="text">` |
+| `email` |メールアドレス | `<input type="email">` |
+| `password` |パスワードフィールド | `<input type="password">` |
+| `number` |数値入力 | `<input type="number" min="0" max="100">` |
+| `tel` |電話番号 | `<input type="tel">` |
 | `url` | URL | `<input type="url">` |
-| `date` | Date picker | `<input type="date">` |
-| `time` | Time picker | `<input type="time">` |
-| `file` | File upload | `<input type="file" accept="image/*">` |
-| `checkbox` | Checkbox | `<input type="checkbox">` |
-| `radio` | Radio button | `<input type="radio">` |
-| `range` | Slider | `<input type="range" min="0" max="100">` |
-| `color` | Color picker | `<input type="color">` |
-| `search` | Search field | `<input type="search">` |
+| `date` |日付ピッカー | `<input type="date">` |
+| `time` |タイムピッカー | `<input type="time">` |
+| `file` |ファイルのアップロード | `<input type="file" accept="image/*">` |
+| `checkbox` |チェックボックス | `<input type="checkbox">` |
+| `radio` |ラジオボタン | `<input type="radio">` |
+| `range` |スライダー | `<input type="range" min="0" max="100">` |
+| `color` |カラーピッカー | `<input type="color">` |
+| `search` |検索フィールド | `<input type="search">` |
 
-## Related Markup Languages
+## 関連するマークアップ言語
 
-### XML (Extensible Markup Language)
-A markup language for encoding documents in a format that is both human-readable and machine-readable.
+### XML (拡張マークアップ言語)
+人間と機械の両方が読める形式でドキュメントをエンコードするためのマークアップ言語。
 
-**Key Differences from HTML**:
-- All tags must be properly closed
-- Tags are case-sensitive
-- Attributes must be quoted
-- Custom tag names allowed
+**HTML との主な違い**:
+- すべてのタグは正しく閉じられている必要があります
+- タグでは大文字と小文字が区別されます
+- 属性は引用符で囲む必要があります
+- カスタムタグ名が許可される
 
-### XHTML (Extensible HyperText Markup Language)
-HTML reformulated as XML. Stricter syntax rules than HTML.
+### XHTML (拡張可能なハイパーテキスト マークアップ言語)
+HTML を XML として再形式化したもの。 HTML よりも厳密な構文規則。
 
-### MathML (Mathematical Markup Language)
-Markup language for displaying mathematical notation on the web.
-
-```html
+### MathML (数学的マークアップ言語)
+Web 上で数学表記を表示するためのマークアップ言語。```html
 <math>
   <mrow>
     <msup>
@@ -270,118 +250,106 @@ Markup language for displaying mathematical notation on the web.
     <mn>1</mn>
   </mrow>
 </math>
-```
-
-### SVG (Scalable Vector Graphics)
-XML-based markup language for describing two-dimensional vector graphics.
-
-```html
+```### SVG (スケーラブル ベクター グラフィックス)
+2 次元ベクトル グラフィックスを記述するための XML ベースのマークアップ言語。```html
 <svg width="100" height="100">
   <circle cx="50" cy="50" r="40" fill="blue" />
 </svg>
-```
+```## 文字エンコーディングと参照
 
-## Character Encoding and References
+### 文字エンコーディング
+文字をバイトとして表現する方法を定義します。
 
-### Character Encoding
-Defines how characters are represented as bytes.
-
-**UTF-8**: Universal character encoding standard (recommended)
-
-```html
+**UTF-8**: ユニバーサル文字エンコーディング標準 (推奨)```html
 <meta charset="UTF-8">
-```
+```### キャラクターリファレンス
+HTML で特殊文字を表現する方法。
 
-### Character References
-Ways to represent special characters in HTML.
+**名前付きエンティティ**:
+- `&lt;` - 未満 (<)
+- `&gt;` - より大きい (>)
+- `&amp;` - アンパサンド (&)
+- `&quot;` - 引用符 (")
+- `&apos;` - アポストロフィ (')
+- `&nbsp;` - 非改行スペース
+- `&copy;` - 著作権 (©)
 
-**Named Entities**:
-- `&lt;` - Less than (<)
-- `&gt;` - Greater than (>)
-- `&amp;` - Ampersand (&)
-- `&quot;` - Quote (")
-- `&apos;` - Apostrophe (')
-- `&nbsp;` - Non-breaking space
-- `&copy;` - Copyright (©)
+**数値エンティティ**:
+- `&#60;` - 未満 (<)
+- `&#169;` - 著作権 (©)
+- `&#8364;` - ユーロ (€)
 
-**Numeric Entities**:
-- `&#60;` - Less than (<)
-- `&#169;` - Copyright (©)
-- `&#8364;` - Euro (€)
+## ブロック コンテンツとインライン コンテンツ
 
-## Block vs Inline Content
+### ブロックレベルのコンテンツ
+新しい行から始まる、レイアウト内に「ブロック」を作成する要素。
 
-### Block-Level Content
-Elements that create a "block" in the layout, starting on a new line.
+**例**: `<div>`、`<p>`、`<h1>`-`<h6>`、`<article>`、`<section>`、`<header>`、`<footer>`、`<nav>`、`<aside>`、`<ul>`、`<ol>`、 `<li>`
 
-**Examples**: `<div>`, `<p>`, `<h1>`-`<h6>`, `<article>`, `<section>`, `<header>`, `<footer>`, `<nav>`, `<aside>`, `<ul>`, `<ol>`, `<li>`
+### インラインレベルのコンテンツ
+新しい行で始まらず、必要な幅だけを占める要素。
 
-### Inline-Level Content
-Elements that don't start on a new line and only take up as much width as necessary.
+**例**: `<span>`、`<a>`、`<strong>`、`<em>`、`<img>`、`<code>`、`<abbr>`、`<cite>`
 
-**Examples**: `<span>`, `<a>`, `<strong>`, `<em>`, `<img>`, `<code>`, `<abbr>`, `<cite>`
+## ベストプラクティス
 
-## Best Practices
+### やるべきこと
+- ✅ セマンティック HTML 要素を使用する
+- ✅ 適切なドキュメント構造 (DOCTYPE、html、head、body) を含める
+- ✅ 文字エンコードをUTF-8に設定します
+- ✅ 画像には説明的な `alt` 属性を使用します
+- ✅ ラベルをフォーム入力に関連付けます
+- ✅ 見出し階層を適切に使用する (h1 → h2 → h3)
+- ✅ W3C バリデーターで HTML を検証
+- ✅ 必要に応じて適切な ARIA ロールを使用する
+- ✅ レスポンシブデザイン用のメタビューポートを含める
 
-### Do's
-- ✅ Use semantic HTML elements
-- ✅ Include proper document structure (DOCTYPE, html, head, body)
-- ✅ Set character encoding to UTF-8
-- ✅ Use descriptive `alt` attributes for images
-- ✅ Associate labels with form inputs
-- ✅ Use heading hierarchy properly (h1 → h2 → h3)
-- ✅ Validate HTML with W3C validator
-- ✅ Use proper ARIA roles when needed
-- ✅ Include meta viewport for responsive design
+### やってはいけないこと
+- ❌ 意味要素が存在する場合は `<div>` を使用します
+- ❌ 見出しレベルをスキップ (h1 → h3)
+- ❌ レイアウトにテーブルを使用する
+- ❌ タグの閉じ忘れ (void 要素を除く)
+- ❌ インライン スタイルを広範囲に使用する
+- ❌ 画像の `alt` 属性を省略します
+- ❌ ラベルなしでフォームを作成する
+- ❌ 非推奨の要素を使用する (`<font>`、`<center>`、`<blink>`)
 
-### Don'ts
-- ❌ Use `<div>` when a semantic element exists
-- ❌ Skip heading levels (h1 → h3)
-- ❌ Use tables for layout
-- ❌ Forget to close tags (except void elements)
-- ❌ Use inline styles extensively
-- ❌ Omit `alt` attribute on images
-- ❌ Create forms without labels
-- ❌ Use deprecated elements (`<font>`, `<center>`, `<blink>`)
+## MDN の用語集用語
 
-## Glossary Terms from MDN
-
-**Key Terms Covered**:
-- Abstraction
-- Accessibility tree
-- Accessible description
-- Accessible name
-- Attribute
-- Block-level content
-- Breadcrumb
-- Browsing context
-- Character
-- Character encoding
-- Character reference
-- Character set
-- Doctype
-- Document environment
-- Element
-- Entity
-- Head
+**対象となる重要な用語**:
+- 抽象化
+- アクセシビリティツリー
+- アクセシブルな説明
+- アクセシブルな名前
+- 属性
+- ブロックレベルのコンテンツ
+- パンくずリスト
+- コンテキストの閲覧
+- キャラクター
+- 文字コード
+- キャラクターリファレンス
+- キャラクターセット
+- ドキュメントタイプ
+- ドキュメント環境
+- 要素
+- エンティティ
+- 頭
 - HTML
 - HTML5
-- Hyperlink
-- Hypertext
-- Inline-level content
-- Markup
-- MathML
-- Metadata
-- Semantics
+- ハイパーリンク
+- ハイパーテキスト
+- インラインレベルのコンテンツ
+- マークアップ
+- 数学ML
+- メタデータ
+- セマンティクス
 - SVG
-- Tag
-- Void element
+- タグ
+- ボイド要素
 - XHTML
 - XML
 
-## Additional Resources
-
-- [MDN HTML Reference](https://developer.mozilla.org/en-US/docs/Web/HTML)
-- [W3C HTML Specification](https://html.spec.whatwg.org/)
-- [HTML5 Doctor](http://html5doctor.com/)
-- [W3C Markup Validation Service](https://validator.w3.org/)
+## 追加のリソース- [MDN HTML リファレンス](https://developer.mozilla.org/en-US/docs/Web/HTML)
+- [W3C HTML仕様](https://html.spec.whatwg.org/)
+- [HTML5 ドクター](http://html5doctor.com/)
+- [W3C マークアップ検証サービス](https://validator.w3.org/)

@@ -1,22 +1,16 @@
-# Oracle to PostgreSQL: Refcursor Handling in Client Applications
+# Oracle から PostgreSQL: クライアント アプリケーションでの Refcursor の処理
 
-## The Core Difference
+## 核心的な違い
 
-Oracle's driver automatically unwraps `SYS_REFCURSOR` output parameters, exposing the result set directly in the data reader. PostgreSQL's Npgsql driver instead returns a **cursor name** (e.g., `"<unnamed portal 1>"`). The client must issue a separate `FETCH ALL FROM "<cursor_name>"` command to retrieve actual rows.
+Oracle のドライバーは `SYS_REFCURSOR` 出力パラメーターを自動的にアンラップし、結果セットをデータ リーダーに直接公開します。 PostgreSQL の Npgsql ドライバーは、代わりに **カーソル名** (例: `"<unnamed portal 1>"`) を返します。実際の行を取得するには、クライアントは別の `FETCH ALL FROM "<cursor_name>"` コマンドを発行する必要があります。
 
-Failing to account for this causes:
-
-```
+これを考慮しないと、次のような原因が発生します。```
 System.IndexOutOfRangeException: Field not found in row: <column_name>
-```
+```リーダーには、カーソル名パラメータのみが含まれており、予期される結果列は含まれません。
 
-The reader contains only the cursor-name parameter — not the expected result columns.
+> **トランザクション要件:** PostgreSQL refcursor のスコープはトランザクションに限定されます。プロシージャ呼び出しと `FETCH` の両方を同じ明示的なトランザクション内で実行する必要があります。そうしないと、自動コミットでフェッチが完了する前にカーソルが閉じられる可能性があります。
 
-> **Transaction requirement:** PostgreSQL refcursors are scoped to a transaction. Both the procedure call and the `FETCH` must execute within the same explicit transaction, or the cursor may be closed before the fetch completes under autocommit.
-
-## Solution: Explicit Refcursor Unwrapping (C#)
-
-```csharp
+## 解決策: 明示的な Refcursor アンラップ (C#)```csharp
 public IEnumerable<User> GetUsers(int departmentId)
 {
     var users = new List<User>();
@@ -57,13 +51,9 @@ public IEnumerable<User> GetUsers(int departmentId)
     tx.Commit();
     return users;
 }
-```
+```## 再利用可能なヘルパー
 
-## Reusable Helper
-
-Returning a live `NpgsqlDataReader` from a helper leaves the underlying `NpgsqlCommand` undisposed and creates ambiguous ownership. Prefer materializing results inside the helper instead:
-
-```csharp
+ヘルパーからライブ `NpgsqlDataReader` を返すと、基礎となる `NpgsqlCommand` が破棄されず、所有権があいまいになります。代わりに、ヘルパー内で結果を具体化することを好みます。```csharp
 public static class PostgresHelpers
 {
     public static List<T> ExecuteRefcursorProcedure<T>(
@@ -121,28 +111,26 @@ var users = PostgresHelpers.ExecuteRefcursorProcedure(
     });
 
 tx.Commit();
-```
+```## Oracle と PostgreSQL の概要
 
-## Oracle vs. PostgreSQL Summary
+|側面 |オラクル (ODP.NET) | PostgreSQL (Npgsql) |
+|----------|------|----------|
+| **カーソルリターン** |データ リーダーで直接公開される結果セット |出力パラメータのカーソル名文字列 |
+| **データ アクセス** | `ExecuteReader()` はすぐに行を返します。 `ExecuteNonQuery()` → カーソル名を取得 → `FETCH ALL FROM` |
+| **トランザクション** |透明 | CALL と FETCH は同じトランザクションを共有する必要があります。
+| **複数のカーソル** |自動 |それぞれに個別の `FETCH` コマンドが必要です。
+| **リソースの有効期間** |ドライバー管理 |カーソルはフェッチされるかトランザクションが終了するまで開いています。
 
-| Aspect | Oracle (ODP.NET) | PostgreSQL (Npgsql) |
-|--------|------------------|---------------------|
-| **Cursor return** | Result set exposed directly in data reader | Cursor name string in output parameter |
-| **Data access** | `ExecuteReader()` returns rows immediately | `ExecuteNonQuery()` → get cursor name → `FETCH ALL FROM` |
-| **Transaction** | Transparent | CALL and FETCH must share the same transaction |
-| **Multiple cursors** | Automatic | Each requires a separate `FETCH` command |
-| **Resource lifetime** | Driver-managed | Cursor is open until fetched or transaction ends |
+## 移行チェックリスト
 
-## Migration Checklist
+- [ ] `SYS_REFCURSOR` (Oracle) / `refcursor` (PostgreSQL) を返すすべてのプロシージャを特定します
+- [ ] `ExecuteReader()`を`ExecuteNonQuery()`に置換 → カーソル名 → `FETCH ALL FROM`
+- [ ] 各呼び出しとフェッチのペアを明示的なトランザクションでラップします。
+- [ ] コマンドとリーダーが破棄されていることを確認します (ヘルパー内で結果を具体化することを推奨します)。
+- [ ] 単体テストと統合テストを更新します
 
-- [ ] Identify all procedures returning `SYS_REFCURSOR` (Oracle) / `refcursor` (PostgreSQL)
-- [ ] Replace `ExecuteReader()` with `ExecuteNonQuery()` → cursor name → `FETCH ALL FROM`
-- [ ] Wrap each call-and-fetch pair in an explicit transaction
-- [ ] Ensure commands and readers are disposed (prefer materializing results inside a helper)
-- [ ] Update unit and integration tests
+## 参考文献
 
-## References
-
-- [PostgreSQL Documentation: Cursors](https://www.postgresql.org/docs/current/plpgsql-cursors.html)
-- [PostgreSQL FETCH Command](https://www.postgresql.org/docs/current/sql-fetch.html)
-- [Npgsql Refcursor Support](https://github.com/npgsql/npgsql/issues/1887)
+- [PostgreSQL ドキュメント: カーソル](https://www.postgresql.org/docs/current/plpgsql-cursors.html)
+- [PostgreSQL FETCHコマンド](https://www.postgresql.org/docs/current/sql-fetch.html)
+- [Npgsql Refcursor サポート](https://github.com/npgsql/npgsql/issues/1887)

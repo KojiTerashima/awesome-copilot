@@ -1,58 +1,48 @@
-# Phoenix Tracing: Production Guide (Python)
+# Phoenix Tracing: 制作ガイド (Python)
 
-**CRITICAL: Configure batching, data masking, and span filtering for production deployment.**
+**重要: 本番展開用にバッチ処理、データ マスキング、およびスパン フィルタリングを構成します。**
 
-## Metadata
+## メタデータ
 
-| Attribute | Value |
-|-----------|-------|
-| Priority | Critical - production readiness |
-| Impact | Security, Performance |
-| Setup Time | 5-15 min |
+|属性 |値 |
+|----------|----------|
+|優先順位 |重要 - 本番環境の準備 |
+|影響 |セキュリティ、パフォーマンス |
+|セットアップ時間 | 5～15分 |
 
-## Batch Processing
+## バッチ処理
 
-**Enable batch processing for production efficiency.** Batching reduces network overhead by sending spans in groups rather than individually.
+**バッチ処理を有効にして生産効率を高めます。** バッチ処理では、スパンを個別に送信するのではなくグループで送信することで、ネットワークのオーバーヘッドを削減します。
 
-## Data Masking (PII Protection)
+## データマスキング (PII 保護)
 
-**Environment variables:**
-
-```bash
-export OPENINFERENCE_HIDE_INPUTS=true          # Hide input.value
-export OPENINFERENCE_HIDE_OUTPUTS=true         # Hide output.value
-export OPENINFERENCE_HIDE_INPUT_MESSAGES=true  # Hide LLM input messages
-export OPENINFERENCE_HIDE_OUTPUT_MESSAGES=true # Hide LLM output messages
-export OPENINFERENCE_HIDE_INPUT_IMAGES=true    # Hide image content
-export OPENINFERENCE_HIDE_INPUT_TEXT=true      # Hide embedding text
-export OPENINFERENCE_BASE64_IMAGE_MAX_LENGTH=10000  # Limit image size
-```
-
-**Python TraceConfig:**
-
-```python
-from phoenix.otel import register
-from openinference.instrumentation import TraceConfig
+**環境変数:**「」バッシュ
+import OPENINFERENCE_HIDE_INPUTS=true # input.value を非表示にする
+import OPENINFERENCE_HIDE_OUTPUTS=true # 出力値を非表示にする
+import OPENINFERENCE_HIDE_INPUT_MESSAGES=true # LLM 入力メッセージを非表示にする
+import OPENINFERENCE_HIDE_OUTPUT_MESSAGES=true # LLM 出力メッセージを非表示にする
+import OPENINFERENCE_HIDE_INPUT_IMAGES=true # 画像コンテンツを非表示にする
+import OPENINFERENCE_HIDE_INPUT_TEXT=true # 埋め込みテキストを非表示にする
+import OPENINFERENCE_BASE64_IMAGE_MAX_LENGTH=10000 # 画像サイズを制限する
+「」**Python TraceConfig:**「」パイソン
+phoenix.otelインポートレジスタから
+openinference.instrumentation から TraceConfig をインポート
 
 config = TraceConfig(
-    hide_inputs=True,
-    hide_outputs=True,
-    hide_input_messages=True
-)
-register(trace_config=config)
-```
-
-**Precedence:** Code > Environment variables > Defaults
+    Hide_inputs=True、
+    Hide_outputs=True、
+    Hide_input_messages=True
+）
+登録(trace_config=config)
+「」**優先順位:** コード > 環境変数 > デフォルト
 
 ---
 
-## Span Filtering
+## スパンフィルタリング
 
-**Suppress specific code blocks:**
+**特定のコード ブロックを抑制します:**「」パイソン
+phoenix.otelからインポートsuppress_tracing
 
-```python
-from phoenix.otel import suppress_tracing
-
-with suppress_tracing():
-    internal_logging()  # No spans generated
-```
+Suppress_tracing() を使用:
+    Internal_logging() # スパンは生成されません
+「」

@@ -2,75 +2,70 @@
 name: update-markdown-file-index
 description: 'Update a markdown file section with an index/table of files from a specified folder.'
 ---
+# Markdown ファイルのインデックスを更新する
 
-# Update Markdown File Index
+マークダウン ファイル `${file}` をフォルダー `${input:folder}` のファイルのインデックス/テーブルで更新します。
 
-Update markdown file `${file}` with an index/table of files from folder `${input:folder}`.
+## プロセス
 
-## Process
+1. **スキャン**: ターゲットのマークダウン ファイル `${file}` を読み取り、既存の構造を理解します。
+2. **検出**: 指定されたフォルダー `${input:folder}` にあるすべてのファイルをリストし、パターン `${input:pattern}` に一致します
+3. **分析**: 更新する既存のテーブル/インデックス セクションが存在するかどうかを特定するか、新しい構造を作成します。
+4. **構造**: ファイルの種類と既存のコンテンツに基づいて、適切なテーブル/リスト形式を生成します。
+5. **更新**: 既存のセクションを置き換えるか、ファイル インデックスを含む新しいセクションを追加します。
+6. **検証**: マークダウン構文が有効であり、フォーマットが一貫していることを確認します。
 
-1. **Scan**: Read the target markdown file `${file}` to understand existing structure
-2. **Discover**: List all files in the specified folder `${input:folder}` matching pattern `${input:pattern}`
-3. **Analyze**: Identify if an existing table/index section exists to update, or create new structure
-4. **Structure**: Generate appropriate table/list format based on file types and existing content
-5. **Update**: Replace existing section or add new section with file index
-6. **Validate**: Ensure markdown syntax is valid and formatting is consistent
+## ファイル分析
 
-## File Analysis
+検出されたファイルごとに、以下を抽出します。
 
-For each discovered file, extract:
+- **名前**: コンテキストに基づく拡張子付きまたは拡張子なしのファイル名
+- **タイプ**: ファイル拡張子とカテゴリ (例: `.md`、`.js`、`.py`)
+- **説明**: 最初の行のコメント、ヘッダー、または推定された目的
+- **サイズ**: 参考用のファイル サイズ (オプション)
+- **変更日**: 最終変更日 (オプション)
 
-- **Name**: Filename with or without extension based on context
-- **Type**: File extension and category (e.g., `.md`, `.js`, `.py`)
-- **Description**: First line comment, header, or inferred purpose
-- **Size**: File size for reference (optional)
-- **Modified**: Last modified date (optional)
+## テーブル構造のオプション
 
-## Table Structure Options
+ファイルの種類と既存のコンテンツに基づいて形式を選択します。
 
-Choose format based on file types and existing content:
-
-### Option 1: Simple List
-
-```markdown
+### オプション 1: 単純なリスト```markdown
 ## Files in ${folder}
 
 - [filename.ext](path/to/filename.ext) - Description
 - [filename2.ext](path/to/filename2.ext) - Description
-```
+```### オプション 2: 詳細な表
 
-### Option 2: Detailed Table
+|ファイル |タイプ |説明 |
+|------|------|---------------|
+| [ファイル名.ext](パス/への/ファイル名.ext) |拡張子 |説明 |
+| [ファイル名 2.ext](ファイル名 2.ext へのパス) |拡張子 |説明 |
 
-| File | Type | Description |
-|------|------|-------------|
-| [filename.ext](path/to/filename.ext) | Extension | Description |
-| [filename2.ext](path/to/filename2.ext) | Extension | Description |
+### オプション 3: 分類されたセクション
 
-### Option 3: Categorized Sections
+個別のセクションまたはサブテーブルを使用して、ファイルをタイプ/カテゴリ別にグループ化します。
 
-Group files by type/category with separate sections or sub-tables.
+## 戦略を更新する
 
-## Update Strategy
+- 🔄 **既存の更新**: テーブル/インデックス セクションが存在する場合、構造を維持しながらコンテンツを置き換えます
+- ➕ **新規追加**: 既存のセクションがない場合は、最適な形式を使用して新しいセクションを作成します
+- 📋 **保持**: 既存のマークダウン形式、見出しレベル、ドキュメント フローを維持します。
+- 🔗 **リンク**: リポジトリ内のファイル リンクには相対パスを使用します
 
-- 🔄 **Update existing**: If table/index section exists, replace content while preserving structure
-- ➕ **Add new**: If no existing section, create new section using best-fit format
-- 📋 **Preserve**: Maintain existing markdown formatting, heading levels, and document flow
-- 🔗 **Links**: Use relative paths for file links within the repository
+## セクションの識別
 
-## Section Identification
+次のパターンを持つ既存のセクションを探します。
 
-Look for existing sections with these patterns:
+- 見出しに含まれるもの: 「インデックス」、「ファイル」、「コンテンツ」、「ディレクトリ」、「リスト」
+- ファイル関連の列を含むテーブル
+- ファイルリンク付きのリスト
+- ファイルインデックスセクションをマークする HTML コメント
 
-- Headings containing: "index", "files", "contents", "directory", "list"
-- Tables with file-related columns
-- Lists with file links
-- HTML comments marking file index sections
+## 要件
 
-## Requirements
-
-- Preserve existing markdown structure and formatting
-- Use relative paths for file links
-- Include file descriptions when available
-- Sort files alphabetically by default
-- Handle special characters in filenames
-- Validate all generated markdown syntax
+- 既存のマークダウン構造と書式を保持する
+- ファイルリンクには相対パスを使用します
+- 可能な場合はファイルの説明を含めます
+- デフォルトでファイルをアルファベット順に並べ替えます
+- ファイル名の特殊文字を処理する
+- 生成されたすべてのマークダウン構文を検証する

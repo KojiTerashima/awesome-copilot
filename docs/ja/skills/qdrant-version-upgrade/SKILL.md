@@ -2,20 +2,18 @@
 name: qdrant-version-upgrade
 description: "Guidance on how to upgrade your Qdrant version without interrupting the availability of your application and ensuring data integrity."
 ---
+# Qdrant バージョンのアップグレード
 
+Qdrant では、バージョンの互換性について次の保証を行っています。
 
-# Qdrant Version Upgrade
+- Qdrant と SDK のメジャー バージョンとマイナー バージョンは一致することが期待されます。たとえば、Qdrant 1.17.x は SDK 1.17.x と互換性があります。
 
-Qdrant has the following guarantees about version compatibility:
+- Qdrant は、マイナー バージョン間の下位互換性についてテストされています。たとえば、Qdrant 1.17.x は SDK 1.16.x と互換性がある必要があります。 Qdrant サーバー 1.16.x も SDK 1.17.x と互換性があることが期待されていますが、これは 1.16.x で利用可能だった機能のサブセットのみです。
 
-- Major and minor versions of Qdrant and SDK are expected to match. For example, Qdrant 1.17.x is compatible with SDK 1.17.x.
+- 次のマイナー バージョンに移行する場合は、まず SDK を次のマイナー バージョンにアップグレードしてから、Qdrant サーバーをアップグレードすることをお勧めします。
 
-- Qdrant is tested for backward compatibility between minor versions. For example, Qdrant 1.17.x should be compatible with SDK 1.16.x. Qdrant server 1.16.x is also expected to be compatible with SDK 1.17.x, but only for the subset of features that were available in 1.16.x.
+- ストレージの互換性は 1 つのマイナー バージョンに対してのみ保証されます。たとえば、Qdrant 1.16.x で保存されたデータは Qdrant 1.17.x と互換性があることが期待されます。複数のマイナー バージョンを移行する必要がある場合は、一度に 1 つのマイナー バージョンずつ、段階的にアップグレードを実行する必要があります。たとえば、1.15.x から 1.17.x に移行するには、まず 1.16.x にアップグレードしてから、1.17.x にアップグレードする必要があります。注: Qdrant Cloud はこのプロセスを自動化するため、中間手順なしで 1.15.x から 1.17.x に直接アップグレードできます。
 
-- For migration to the next minor version, it is recommended to first upgrade the SDK to the next minor version and then upgrade the Qdrant server.
+- レプリケーション係数が 2 以上の Qdrant クラスターは、ローリング アップグレードを実行することで、ダウンタイムなしでアップグレードできます。これは、他のノードがリクエストを処理し続けている間、一度に 1 つのノードをアップグレードできることを意味します。これにより、アップグレード プロセス中にアプリケーションの可用性を維持できます。レプリケーション係数の詳細: [レプリケーション係数](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=replication-factor)
 
-- Storage compatibility is only guaranteed for one minor version. For example, data stored with Qdrant 1.16.x is expected to be compatible with Qdrant 1.17.x. If you need to migrate more than one minor version, it is required do the upgrade step by step, one minor version at a time. For example, to migrate from 1.15.x to 1.17.x, you need to first upgrade to 1.16.x and then to 1.17.x. Note: Qdrant Cloud automates this process, so you can directly upgrade from 1.15.x to 1.17.x without intermediate steps.
-
-- A Qdrant cluster with a replication factor of 2 or higher can be upgraded without downtime by performing a rolling upgrade. This means that you can upgrade one node at a time while the other nodes continue to serve requests. This allows you to maintain availability of your application during the upgrade process. More about replication factor: [Replication factor](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=replication-factor)
-
-For managing Qdrant version upgrades in Qdrant Cloud, you can use the [qcloud](https://github.com/qdrant/qcloud-cli) CLI tool.
+Qdrant Cloud で Qdrant バージョンのアップグレードを管理するには、[qcloud](https://github.com/qdrant/qcloud-cli) CLI ツールを使用できます。

@@ -1,69 +1,53 @@
-# Experiments: Datasets in TypeScript
+# 実験: TypeScript のデータセット
 
-Creating and managing evaluation datasets.
+評価データセットの作成と管理。
 
-## Creating Datasets
-
-```typescript
-import { createClient } from "@arizeai/phoenix-client";
-import { createDataset } from "@arizeai/phoenix-client/datasets";
+## データセットの作成```タイプスクリプト
+import { createClient } から "@arizeai/phoenix-client";
+import { createDataset } から "@arizeai/phoenix-client/datasets";
 
 const client = createClient();
 
 const { datasetId } = await createDataset({
-  client,
-  name: "qa-test-v1",
-  examples: [
+  クライアント、
+  名前: "qa-test-v1"、
+  例: [
     {
-      input: { question: "What is 2+2?" },
-      output: { answer: "4" },
-      metadata: { category: "math" },
-    },
-  ],
+      input: { 質問: 「2+2 とは何ですか?」 }、
+      出力: { 答え: "4" }、
+      メタデータ: { カテゴリ: "数学" },
+    }、
+  ]、
 });
-```
-
-## Example Structure
-
-```typescript
-interface DatasetExample {
-  input: Record<string, unknown>;    // Task input
-  output?: Record<string, unknown>;  // Expected output
-  metadata?: Record<string, unknown>; // Additional context
+「」## 構造例```タイプスクリプト
+インターフェース データセットの例 {
+  入力: レコード<文字列、不明>;    // タスクの入力
+  出力?: レコード<文字列、不明>;  // 期待される出力
+  メタデータ?: レコード<文字列、不明>; // 追加のコンテキスト
 }
-```
+「」## 本番環境のトレースから```タイプスクリプト
+import { getSpans } から "@arizeai/phoenix-client/spans";
 
-## From Production Traces
-
-```typescript
-import { getSpans } from "@arizeai/phoenix-client/spans";
-
-const { spans } = await getSpans({
-  project: { projectName: "my-app" },
-  parentId: null, // root spans only
-  limit: 100,
+const { スパン } = await getSpans({
+  プロジェクト: { プロジェクト名: "my-app" },
+  parentId: null, // ルート スパンのみ
+  制限: 100、
 });
 
-const examples = spans.map((span) => ({
-  input: { query: span.attributes?.["input.value"] },
-  output: { response: span.attributes?.["output.value"] },
-  metadata: { spanId: span.context.span_id },
+const 例 = spans.map((span) => ({
+  入力: {クエリ:span.attributes?.["input.value"] },
+  出力: {応答:span.attributes?.["output.value"] },
+  メタデータ: {spanId:span.context.span_id}、
 }));
 
-await createDataset({ client, name: "production-sample", examples });
-```
-
-## Retrieving Datasets
-
-```typescript
+await createDataset({ client, name: "production-sample", 例 });
+「」## データセットの取得```タイプスクリプト
 import { getDataset, listDatasets } from "@arizeai/phoenix-client/datasets";
 
 const dataset = await getDataset({ client, datasetId: "..." });
 const all = await listDatasets({ client });
-```
+「」## ベストプラクティス
 
-## Best Practices
-
-- **Versioning**: Create new datasets, don't modify existing
-- **Metadata**: Track source, category, provenance
-- **Type safety**: Use TypeScript interfaces for structure
+- **バージョン管理**: 新しいデータセットを作成します。既存のデータセットは変更しないでください。
+- **メタデータ**: ソース、カテゴリ、来歴を追跡します。
+- **タイプ セーフティ**: 構造に TypeScript インターフェイスを使用します

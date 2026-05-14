@@ -2,46 +2,43 @@
 name: write-coding-standards-from-file
 description: 'Write a coding standards document for a project using the coding styles from the file(s) and/or folder(s) passed as arguments in the prompt.'
 ---
+# ファイルからコーディング標準を書き込む
 
-# Write Coding Standards From File
+Use the existing syntax of the file(s) to establish the standards and style guides for the project.複数のファイルまたはフォルダーが渡された場合は、フォルダー内の各ファイルをループして、ファイルのデータを一時メモリまたはファイルに追加し、完了したら一時データを単一のインスタンスとして使用します。 as if it were the file name to base the standards and style guideline on.
 
-Use the existing syntax of the file(s) to establish the standards and style guides for the project. If more than one file or a folder is passed, loop through each file or files in the folder, appending the file's data to temporary memory or a file, then when complete use temporary data as a single instance; as if it were the file name to base the standards and style guideline on.
-
-## Rules and Configuration
+## ルールと構成
 
 Below is a set of quasi-configuration `boolean` and `string[]` variables. Conditions for handling `true`, or other values for each variable are under the level two heading `## Variable and Parameter Configuration Conditions`.
 
 Parameters for the prompt have a text definition. There is one required parameter **`${fileName}`**, and several optional parameters **`${folderName}`**, **`${instructions}`**, and any **`[configVariableAsParameter]`**.
 
-### Configuration Variables
+### 構成変数
 
 * addStandardsTest = false;
 * addToREADME = false;
 * addToREADMEInsertions = ["atBegin", "middle", "beforeEnd", "bestFitUsingContext"];
-  - Default to **beforeEnd**.
+  - デフォルトは **beforeEnd** です。
 * createNewFile = true;
 * fetchStyleURL = true;
-* findInconsistencies = true;
-* fixInconsistencies = true;
-* newFileName = ["CONTRIBUTING.md", "STYLE.md", "CODE_OF_CONDUCT.md", "CODING_STANDARDS.md", "DEVELOPING.md", "CONTRIBUTION_GUIDE.md", "GUIDELINES.md", "PROJECT_STANDARDS.md", "BEST_PRACTICES.md", "HACKING.md"];
+* findInconsistency = true;
+* fixInconsistency = true;
+* newFileName = ["CONTRIBUTING.md", "STYLE.md", "CODE_OF_CONDUCT.md", "CODING_STANDARDS.md", "DEVELOPING.md", "CONTRIBUTION_GUIDE.md", "GUIDELINES.md", "PROJECT_STANDARDS.md", "BEST_PRACTICES.md", "ハッキング.md"];
   - For each file in `${newFileName}`, if file does not exist, use that file name and `break`, else continue to next file name of `${newFileName}`.
-* outputSpecToPrompt = false;
-* useTemplate = "verbose"; // or "v"
-  - Possible values are `[["v", "verbose"], ["m", "minimal"], ["b", "best fit"], ["custom"]]`.
-  - Selects one of the two example templates at the bottom of prompt file under the level two heading `## Coding Standards Templates`, or use another composition that is a better fit.
-  - If **custom**, then apply per request.
+* 出力仕様ToPrompt = false;
+* useTemplate = "冗長"; // または「v」
+  - 可能な値は `[["v", "verbose"], ["m", "minimal"], ["b", "best fit"], ["custom"]]` です。
+  - プロンプト ファイルの下部、レベル 2 の見出し `## Coding Standards Templates` の下にある 2 つのサンプル テンプレートの 1 つを選択するか、より適切な別の構成を使用します。
+  - **カスタム**の場合は、リクエストごとに適用します。
 
-### Configuration Variables as Prompt Parameters
+### プロンプトパラメータとしての構成変数
 
-If any of the variable names are passed to prompt as-is, or as a similar but clearly related text value, then override the default variable value with the value passed to prompt.
+変数名がそのままプロンプトに渡される場合、または類似しているが明確に関連するテキスト値としてプロンプトに渡される場合は、デフォルトの変数値をプロンプトに渡される値でオーバーライドします。
 
-### Prompt Parameters
-
-* **fileName** = The name of the file that will be analyzed in terms of: indentation, variable naming, commenting, conditional procedures, functional procedures, and other syntax related data for the coding language of the file.
-* folderName = The name of the folder that will be used to extract data from multiple files into one aggregated dataset that will be analyzed in terms of: indentation, variable naming, commenting, conditional procedures, functional procedures, and other syntax related data for the coding language of the files.
-* instructions = Additional instructions, rules, and procedures that will be provided for unique cases.
-* [configVariableAsParameter] = If passed will override the default state of the configuration variable. Example:
-  - useTemplate = If passed will override the configuration `${useTemplate}` default. Values are `[["v", "verbose"], ["m", "minimal"], ["b", "best fit"]]`.
+### プロンプトパラメータ* **fileName** = インデント、変数の命名、コメント、条件付きプロシージャ、関数プロシージャ、およびファイルのコーディング言語のその他の構文関連データの観点から分析されるファイルの名前。
+*folderName = 複数のファイルからデータを 1 つの集約データセットに抽出するために使用されるフォルダーの名前。インデント、変数の命名、コメント、条件付きプロシージャ、関数プロシージャ、およびファイルのコーディング言語のその他の構文関連データの観点から分析されます。
+* 指示 = 特殊なケースに対して提供される追加の指示、ルール、および手順。
+* [configVariableAsParameter] = 渡された場合、構成変数のデフォルト状態がオーバーライドされます。例:
+  - useTemplate = 渡された場合、構成 `${useTemplate}` のデフォルトがオーバーライドされます。値は `[["v", "verbose"], ["m", "minimal"], ["b", "best fit"]]` です。
 
 #### Required and Optional Parameters
 
@@ -50,7 +47,7 @@ If any of the variable names are passed to prompt as-is, or as a similar but cle
 * instructions - *optional*
 * [configVariableAsParameter] - *optional*
 
-## Variable and Parameter Configuration Conditions
+## 変数とパラメータの設定条件
 
 ### `${fileName}.length > 1 || ${folderName} != undefined`
 
@@ -58,259 +55,233 @@ If any of the variable names are passed to prompt as-is, or as a similar but cle
 
 ### `${addToREADME} == true`
 
-* Insert the coding standards into the `README.md` instead of outputting to the prompt or creating a new file.
-* If true, toggle both `${createNewFile}` and `${outputSpecToPrompt}` to false.
+* プロンプトに出力したり、新しいファイルを作成したりする代わりに、コーディング標準を `README.md` に挿入します。
+* true の場合、`${createNewFile}` と `${outputSpecToPrompt}` の両方を false に切り替えます。
 
 ### `${addToREADMEInsertions} == "atBegin"`
 
-* If `${addToREADME}` is true, then insert the coding standards data at the **beginning** of the `README.md` file after the title.
+* `${addToREADME}` が true の場合、コーディング標準データを `README.md` ファイルの**先頭**、タイトルの後に挿入します。
 
 ### `${addToREADMEInsertions} == "middle"`
 
-* If `${addToREADME}` is true, then insert the coding standards data at the **middle** of the `README.md` file, changing the standards title heading to match that of the `README.md` composition.
+* `${addToREADME}` が true の場合、コーディング標準データを `README.md` ファイルの**中央**に挿入し、標準タイトルの見出しを `README.md` 構成のタイトルと一致するように変更します。
 
 ### `${addToREADMEInsertions} == "beforeEnd"`
 
-* If `${addToREADME}` is true, then insert the coding standards data at the **end** of the `README.md` file, inserting a new line after the last character, then inserting the data on a new line.
+* `${addToREADME}` が true の場合、`README.md` ファイルの **末尾** にコーディング標準データを挿入し、最後の文字の後に新しい行を挿入してから、データを新しい行に挿入します。
 
 ### `${addToREADMEInsertions} == "bestFitUsingContext"`
 
-* If `${addToREADME}` is true, then insert the coding standards data at the **best fitting line** of the `README.md` file in regards to the context of the `README.md` composition and flow of data.
+* `${addToREADME}` が true の場合、`README.md` の構成とデータの流れのコンテキストに関して、`README.md` ファイルの **最も適合する行**にコーディング標準データを挿入します。
 
 ### `${addStandardsTest} == true`
 
-* Once the coding standards file is complete, write a test file to ensure the file or files passed to it adhere to the coding standards.
+* コーディング標準ファイルが完成したら、テスト ファイルを作成して、渡されたファイルがコーディング標準に準拠していることを確認します。
 
 ### `${createNewFile} == true`
 
-* Create a new file using the value, or one of the possible values, from `${newFileName}`.
-* If true, toggle both `${outputSpecToPrompt}` and `${addToREADME}` to false.
+* `${newFileName}` の値、または可能な値の 1 つを使用して新しいファイルを作成します。
+* true の場合、`${outputSpecToPrompt}` と `${addToREADME}` の両方を false に切り替えます。### `${fetchStyleURL} == true`
 
-### `${fetchStyleURL} == true`
-
-* Additionally use the data fetched from the links nested under level three heading `### Fetch Links` as context for creating standards, specifications, and styling data for the new file, prompt, or `README.md`.
-* For each relevant item in `### Fetch Links`, run `#fetch ${item}`.
+* さらに、レベル 3 の見出し `### Fetch Links` の下にネストされたリンクから取得したデータを、新しいファイル、プロンプト、または `README.md` の標準、仕様、およびスタイル データを作成するためのコンテキストとして使用します。
+* `### Fetch Links` の関連項目ごとに、`#fetch ${item}` を実行します。
 
 ### `${findInconsistencies} == true`
 
-* Evaluate syntax related to indentations, line-breaks, comments, conditional and function nesting, quotation wrappers i.e. `'` or `"` for strings, etc., and categorize.
-* For each category, make a count, and if one item does not match the majority of the count, then commit to temporary memory.
-* Depending on the status of `${fixInconsistencies}`, either edit and fix the low count categories to match the majority, or output to prompt inconsistencies stored in temporary memory.
+* インデント、改行、コメント、条件および関数のネスト、引用符ラッパー (文字列の `'` または `"` など) に関連する構文を評価し、分類します。
+* カテゴリごとにカウントを作成し、1 つの項目がカウントの大部分と一致しない場合は、一時メモリにコミットします。
+* `${fixInconsistencies}` のステータスに応じて、少数のカテゴリを編集して大部分と一致するように修正するか、一時メモリに保存された不一致をプロンプトに出力します。
 
 ### `${fixInconsistencies} == true`
 
-* Edit and fix the low count categories of syntax data to match the majority of corresponding syntax data using inconsistencies stored in temporary memory.
+* 一時メモリに保存されている不一致を使用して、対応する構文データの大部分と一致するように構文データの少数のカテゴリを編集および修正します。
 
 ### `typeof ${newFileName} == "string"`
 
-* If specifically defined as a `string`, create a new file using the value from `${newFileName}`.
+* `string` として明示的に定義されている場合は、`${newFileName}` の値を使用して新しいファイルを作成します。
 
 ### `typeof ${newFileName} != "string"`
 
-* If **NOT** specifically defined as a `string`, but instead an `object` or an array, create a new file using a value from `${newFileName}` by applying this rule:
-  - For each file name in `${newFileName}`, if file does not exist, use that file name and `break`, else continue to the next.
+* **具体的に `string` として定義されていない**場合、代わりに `object` または配列として定義されている場合は、次のルールを適用して、`${newFileName}` の値を使用して新しいファイルを作成します。
+  - `${newFileName}` の各ファイル名について、ファイルが存在しない場合はそのファイル名と `break` を使用し、そうでない場合は次へ進みます。
 
 ### `${outputSpecToPrompt} == true`
 
-* Output the coding standards to the prompt instead of creating a file or adding to README.
-* If true, toggle both `${createNewFile}` and `${addToREADME}` to false.
+* ファイルを作成したり README に追加したりする代わりに、コーディング標準をプロンプトに出力します。
+* true の場合、`${createNewFile}` と `${addToREADME}` の両方を false に切り替えます。
 
 ### `${useTemplate} == "v" || ${useTemplate} == "verbose"`
 
-* Use data under the level three heading `### "v", "verbose"` as guiding template when composing the data for coding standards.
+* コーディング標準用のデータを作成するときは、レベル 3 の見出し `### "v", "verbose"` の下のデータをガイド テンプレートとして使用します。
 
 ### `${useTemplate} == "m" || ${useTemplate} == "minimal"`
 
-* Use data under the level three heading `### "m", "minimal"` as guiding template when composing the data for coding standards.
+* コーディング標準用のデータを作成するときは、レベル 3 の見出し `### "m", "minimal"` の下のデータをガイド テンプレートとして使用します。
 
 ### `${useTemplate} == "b" || ${useTemplate} == "best"`
 
-* Use either the data under the level three heading `### "v", "verbose"` or `### "m", "minimal"`, depending on the data extracted from `${fileName}`, and use the best fit as guiding template when composing the data for coding standards.
+* `${fileName}` から抽出されたデータに応じて、レベル 3 の見出し `### "v", "verbose"` または `### "m", "minimal"` のいずれかを使用し、コーディング標準用のデータを構成する際のガイド テンプレートとして最適なものを使用します。
 
 ### `${useTemplate} == "custom" || ${useTemplate} == "<ANY_NAME>"`
 
-* Use the custom prompt, instructions, template, or other data passed as guiding template when composing the data for coding standards.
+* コーディング標準用のデータを作成するときに、ガイド テンプレートとして渡されたカスタム プロンプト、指示、テンプレート、またはその他のデータを使用します。
 
-## **if** `${fetchStyleURL} == true`
+## **場合** `${fetchStyleURL} == true`
 
-Depending on the programming language, for each link in list below, run `#fetch (URL)`, if programming language is `${fileName} == [<Language> Style Guide]`.
+プログラミング言語に応じて、以下のリストの各リンクに対して `#fetch (URL)` を実行します (プログラミング言語が `${fileName} == [<Language> Style Guide]` の場合)。
 
-### Fetch Links
-
-- [C Style Guide](https://users.ece.cmu.edu/~eno/coding/CCodingStandard.html)
-- [C# Style Guide](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
-- [C++ Style Guide](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
-- [Go Style Guide](https://github.com/golang-standards/project-layout)
-- [Java Style Guide](https://coderanch.com/wiki/718799/Style)
-- [AngularJS App Style Guide](https://github.com/mgechev/angularjs-style-guide)
-- [jQuery Style Guide](https://contribute.jquery.org/style-guide/js/)
-- [JavaScript Style Guide](https://www.w3schools.com/js/js_conventions.asp)
-- [JSON Style Guide](https://google.github.io/styleguide/jsoncstyleguide.xml)
-- [Kotlin Style Guide](https://kotlinlang.org/docs/coding-conventions.html)
-- [Markdown Style Guide](https://cirosantilli.com/markdown-style-guide/)
-- [Perl Style Guide](https://perldoc.perl.org/perlstyle)
-- [PHP Style Guide](https://phptherightway.com/)
-- [Python Style Guide](https://peps.python.org/pep-0008/)
-- [Ruby Style Guide](https://rubystyle.guide/)
-- [Rust Style Guide](https://github.com/rust-lang/rust/tree/HEAD/src/doc/style-guide/src)
-- [Swift Style Guide](https://www.swift.org/documentation/api-design-guidelines/)
-- [TypeScript Style Guide](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html)
-- [Visual Basic Style Guide](https://en.wikibooks.org/wiki/Visual_Basic/Coding_Standards)
-- [Shell Script Style Guide](https://google.github.io/styleguide/shellguide.html)
-- [Git Usage Style Guide](https://github.com/agis/git-style-guide)
-- [PowerShell Style Guide](https://github.com/PoshCode/PowerShellPracticeAndStyle)
+### リンクを取得する- [C スタイル ガイド](https://users.ece.cmu.edu/~eno/coding/CCodingStandard.html)
+- [C# スタイル ガイド](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions)
+- [C++ スタイルガイド](https://isocpp.github.io/CppCoreガイドライン/CppCoreガイドライン)
+- [Go スタイルガイド](https://github.com/golang-standards/project-layout)
+- [Java スタイルガイド](https://coderanch.com/wiki/718799/Style)
+- [AngularJS アプリ スタイル ガイド](https://github.com/mgechev/angularjs-style-guide)
+- [jQuery スタイルガイド](https://contribute.jquery.org/style-guide/js/)
+- [JavaScript スタイル ガイド](https://www.w3schools.com/js/js_conventions.asp)
+- [JSON スタイルガイド](https://google.github.io/styleguide/jsoncstyleguide.xml)
+- [Kotlin スタイルガイド](https://kotlinlang.org/docs/coding-conventions.html)
+- [Markdown スタイルガイド](https://cirosantilli.com/markdown-style-guide/)
+- [Perl スタイルガイド](https://perldoc.perl.org/perlstyle)
+- [PHP スタイルガイド](https://phptherightway.com/)
+- [Python スタイルガイド](https://peps.python.org/pep-0008/)
+- [Rubyスタイルガイド](https://rubystyle.guide/)
+- [Rust スタイルガイド](https://github.com/rust-lang/rust/tree/HEAD/src/doc/style-guide/src)
+- [Swift スタイルガイド](https://www.swift.org/documentation/api-design-guidelines/)
+- [TypeScript スタイル ガイド](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html)
+- [Visual Basic スタイル ガイド](https://en.wikibooks.org/wiki/Visual_Basic/Coding_Standards)
+- [シェル スクリプト スタイル ガイド](https://google.github.io/styleguide/shellguide.html)
+- [Git 利用スタイルガイド](https://github.com/agis/git-style-guide)
+- [PowerShell スタイル ガイド](https://github.com/PoshCode/PowerShellPracticeAndStyle)
 - [CSS](https://cssguidelin.es/)
-- [Sass Style Guide](https://sass-guidelin.es/)
-- [HTML Style Guide](https://github.com/marcobiedermann/html-style-guide)
-- [Linux kernel Style Guide](https://www.kernel.org/doc/html/latest/process/coding-style.html)
-- [Node.js Style Guide](https://github.com/felixge/node-style-guide)
-- [SQL Style Guide](https://www.sqlstyle.guide/)
-- [Angular Style Guide](https://angular.dev/style-guide)
-- [Vue Style Guide](https://vuejs.org/style-guide/rules-strongly-recommended.html)
-- [Django Style Guide](https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/)
-- [SystemVerilog Style Guide](https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md)
+- [Sass スタイルガイド](https://sass-guidelin.es/)
+- [HTML スタイルガイド](https://github.com/marcobiedermann/html-style-guide)
+- [Linux カーネル スタイル ガイド](https://www.kernel.org/doc/html/latest/process/coding-style.html)
+- [Node.js スタイルガイド](https://github.com/felixge/node-style-guide)
+- [SQLスタイルガイド](https://www.sqlstyle.guide/)
+- [Angular スタイルガイド](https://angular.dev/style-guide)
+- [Vue スタイルガイド](https://vuejs.org/style-guide/rules-strongly-recommended.html)
+- [Django スタイル ガイド](https://docs.djangoproject.com/en/dev/internals/contributing/writing-code/coding-style/)
+- [SystemVerilog スタイルガイド](https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md)## コーディング標準テンプレート
 
-## Coding Standards Templates
+### `"m", "minimal"````text
+    ```値下げ
+    ## 1. はじめに
+    * **目的:** コーディング標準が確立されている理由を簡単に説明します (例: コードの品質、保守性、チームのコラボレーションを向上させるため)。
+    * **適用範囲:** この仕様が適用される言語、プロジェクト、またはモジュールを定義します。
 
-### `"m", "minimal"`
+    ## 2. 命名規則
+    * **変数:** `camelCase`
+    * **関数/メソッド:** `PascalCase` または `camelCase`。
+    * **クラス/構造体:** `PascalCase`。
+    * **定数:** `UPPER_SNAKE_CASE`。
 
-```text
-    ```markdown
-    ## 1. Introduction
-    *   **Purpose:** Briefly explain why the coding standards are being established (e.g., to improve code quality, maintainability, and team collaboration).
-    *   **Scope:** Define which languages, projects, or modules this specification applies to.
+    ## 3. 書式設定とスタイル
+    * **インデント:** インデント (またはタブ) ごとに 4 つのスペースを使用します。
+    * **行の長さ:** 行を最大 80 文字または 120 文字に制限します。
+    * **中括弧:** 「K&R」スタイル (同じ行に開始中括弧) または「Allman」スタイル (新しい行に開始中括弧) を使用します。
+    * **空白行:** コードの論理ブロックを区切るために使用する空白行の数を指定します。
 
-    ## 2. Naming Conventions
-    *   **Variables:** `camelCase`
-    *   **Functions/Methods:** `PascalCase` or `camelCase`.
-    *   **Classes/Structs:** `PascalCase`.
-    *   **Constants:** `UPPER_SNAKE_CASE`.
+    ## 4. コメントする
+    * **ドキュメント文字列/関数のコメント:** 関数の目的、パラメータ、戻り値を説明します。
+    * **インライン コメント:** 複雑なロジックまたは自明ではないロジックを説明します。
+    * **ファイル ヘッダー:** 作成者、日付、ファイルの説明など、ファイル ヘッダーに含める情報を指定します。
 
-    ## 3. Formatting and Style
-    *   **Indentation:** Use 4 spaces per indent (or tabs).
-    *   **Line Length:** Limit lines to a maximum of 80 or 120 characters.
-    *   **Braces:** Use the "K&R" style (opening brace on the same line) or the "Allman" style (opening brace on a new line).
-    *   **Blank Lines:** Specify how many blank lines to use for separating logical blocks of code.
+    ## 5. エラー処理
+    * **一般:** エラーを処理してログに記録する方法。
+    * **詳細:** どの例外タイプを使用するか、およびエラー メッセージにどのような情報を含めるか。
 
-    ## 4. Commenting
-    *   **Docstrings/Function Comments:** Describe the function's purpose, parameters, and return values.
-    *   **Inline Comments:** Explain complex or non-obvious logic.
-    *   **File Headers:** Specify what information should be included in a file header, such as author, date, and file description.
+    ## 6. ベストプラクティスとアンチパターン
+    * **一般:** 回避すべき一般的なアンチパターンをリストします (グローバル変数、マジックナンバーなど)。
+    * **言語固有:** プロジェクトのプログラミング言語に基づく具体的な推奨事項。
 
-    ## 5. Error Handling
-    *   **General:** How to handle and log errors.
-    *   **Specifics:** Which exception types to use, and what information to include in error messages.
+    ## 7. 例
+    * ルールの正しい適用を示す小さなコード例を提供します。
+    * 誤った実装の短いコード例とその修正方法を提供します。
 
-    ## 6. Best Practices and Anti-Patterns
-    *   **General:** List common anti-patterns to avoid (e.g., global variables, magic numbers).
-    *   **Language-specific:** Specific recommendations based on the project's programming language.
+    ## 8. 貢献と執行
+    * 標準がどのように適用されるかを説明します (コードレビューなど)。
+    * 標準文書自体に貢献するためのガイドを提供します。```
+```### `"v", verbose"````text
+    ```値下げ
 
-    ## 7. Examples
-    *   Provide a small code example demonstrating the correct application of the rules.
-    *   Provide a small code example of an incorrect implementation and how to fix it.
+    # スタイルガイド
 
-    ## 8. Contribution and Enforcement
-    *   Explain how the standards are to be enforced (e.g., via code reviews).
-    *   Provide a guide for contributing to the standards document itself.
-    ```
-```
+    この文書は、このプロジェクトで使用されるスタイルと規則を定義します。
+    特に明記されていない限り、すべての投稿はこれらのルールに従う必要があります。
 
-### `"v", verbose"`
+    ## 1. 一般的なコードスタイル
 
-```text
-    ```markdown
+    - 簡潔さよりも明確さを優先します。
+    - 関数とメソッドを小さく、焦点を絞ったものにします。
+    - ロジックの繰り返しを避けます。共有ヘルパー/ユーティリティを好みます。
+    - 未使用の変数、インポート、コード パス、およびファイルを削除します。
 
-    # Style Guide
+    ## 2. 命名規則
 
-    This document defines the style and conventions used in this project.
-    All contributions should follow these rules unless otherwise noted.
+    わかりやすい名前を使用してください。よく知られていない限り、略語は避けてください。
 
-    ## 1. General Code Style
+    |アイテム |大会 |例 |
+    |-----------------|---------------------|----------------------|
+    |変数 | `lower_snake_case` | `buffer_size` |
+    |機能 | `lower_snake_case()` | `read_file()` |
+    |定数 | `UPPER_SNAKE_CASE` | `MAX_RETRIES` |
+    |型/構造体 | `PascalCase` | `FileHeader` |
+    |ファイル名 | `lower_snake_case` | `file_reader.c` |
 
-    - Favor clarity over brevity.
-    - Keep functions and methods small and focused.
-    - Avoid repeating logic; prefer shared helpers/utilities.
-    - Remove unused variables, imports, code paths, and files.
+    ## 3. フォーマット規則
 
-    ## 2. Naming Conventions
+    - インデント: **スペース 4 つ**
+    - 行の長さ: **最大 100 文字**
+    - エンコーディング: **UTF-8**、BOM なし
+    - ファイルは改行で終了します
 
-    Use descriptive names. Avoid abbreviations unless well-known.
-
-    | Item            | Convention           | Example            |
-    |-----------------|----------------------|--------------------|
-    | Variables       | `lower_snake_case`   | `buffer_size`      |
-    | Functions       | `lower_snake_case()` | `read_file()`      |
-    | Constants       | `UPPER_SNAKE_CASE`   | `MAX_RETRIES`      |
-    | Types/Structs   | `PascalCase`         | `FileHeader`       |
-    | File Names      | `lower_snake_case`   | `file_reader.c`    |
-
-    ## 3. Formatting Rules
-
-    - Indentation: **4 spaces**
-    - Line length: **max 100 characters**
-    - Encoding: **UTF-8**, no BOM
-    - End files with a newline
-
-    ### Braces (example in C, adjust for your language)
-
-        ```c
+    ### 中括弧 (C の例。言語に合わせて調整してください)```c
         if (condition) {
             do_something();
         } else {
             do_something_else();
         }
-        ```
+        ```### 間隔
 
-    ### Spacing
+    - キーワードの後にスペース 1 つ: `if(x)` ではなく、`if (x)`
+    - トップレベル関数の間に 1 つの空白行
 
-    - One space after keywords: `if (x)`, not `if(x)`
-    - One blank line between top-level functions
+    ## 4. コメントとドキュメント
 
-    ## 4. Comments & Documentation
+    - 意図が不明瞭でない限り、「何を」ではなく「なぜ」を説明します。
+    - コードの変更に応じてコメントを最新の状態に保ちます。
+    - パブリック関数には、目的とパラメータの短い説明を含める必要があります。
 
-    - Explain *why*, not *what*, unless intent is unclear.
-    - Keep comments up-to-date as code changes.
-    - Public functions should include a short description of purpose and parameters.
-
-    Recommended tags:
-
-        ```text
+    推奨タグ:```text
         TODO: follow-up work
         FIXME: known incorrect behavior
         NOTE: non-obvious design decision
-        ```
+        ```## 5. エラー処理
 
-    ## 5. Error Handling
+    - エラー状態を明示的に処理します。
+    - サイレント障害を回避します。エラーを返すか、適切にログに記録します。
+    - 失敗時に戻る前にリソース (ファイル、メモリ、ハンドル) をクリーンアップします。
 
-    - Handle error conditions explicitly.
-    - Avoid silent failures; either return errors or log them appropriately.
-    - Clean up resources (files, memory, handles) before returning on failure.
+    ## 6. 実践のコミットとレビュー
 
-    ## 6. Commit & Review Practices
-
-    ### Commits
-    - One logical change per commit.
-    - Write clear commit messages:
-
-        ```text
+    ### コミット
+    - コミットごとに 1 つの論理変更。
+    - 明確なコミット メッセージを書き込みます。```text
         Short summary (max ~50 chars)
         Optional longer explanation of context and rationale.
-        ```
+        ```### レビュー
+    - プルリクエストは適度に小さくしてください。
+    - レビューの議論では敬意を払い、建設的になってください。
+    - 要求された変更に対処するか、同意しない場合は説明します。
 
-    ### Reviews
-    - Keep pull requests reasonably small.
-    - Be respectful and constructive in review discussions.
-    - Address requested changes or explain if you disagree.
+    ## 7. テスト
 
-    ## 7. Tests
+    - 新しい機能のテストを作成します。
+    - テストは決定的である必要があります (シードなしのランダム性はありません)。
+    - 複雑なテストの抽象化よりも、読みやすいテスト ケースを優先します。
 
-    - Write tests for new functionality.
-    - Tests should be deterministic (no randomness without seeding).
-    - Prefer readable test cases over complex test abstraction.
+    ## 8. このガイドの変更
 
-    ## 8. Changes to This Guide
-
-    Style evolves.
-    Propose improvements by opening an issue or sending a patch updating this document.
-    ```
+    スタイルは進化します。
+    問題を報告するか、このドキュメントを更新するパッチを送信して、改善を提案してください。```
 ```

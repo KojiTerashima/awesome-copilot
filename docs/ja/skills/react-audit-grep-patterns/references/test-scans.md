@@ -1,94 +1,76 @@
-# Test File Scans - Both Auditors
+# テスト ファイル スキャン - 両方の監査人
 
-Scans specifically for test file issues. Run during both R18 and R19 audits.
+特にテスト ファイルの問題をスキャンします。 R18 監査と R19 監査の両方で実行します。
 
 ---
 
-## Setup Files
-
-```bash
-# Find test setup files
+## セットアップ ファイル「」バッシュ
+# テストセットアップファイルを検索する
 find src/ -name "setupTests*" -o -name "jest.setup*" 2>/dev/null
-find . -name "jest.config.js" -o -name "jest.config.ts" 2>/dev/null | grep -v "node_modules"
+見つけてください。 -name "jest.config.js" -o -name "jest.config.ts" 2>/dev/null | grep -v "ノードモジュール"
 
-# Check setup file for legacy patterns
+# セットアップ ファイルでレガシー パターンを確認する
 grep -n "ReactDOM\|react-dom/test-utils\|Enzyme\|configure\|Adapter" \
   src/setupTests.js 2>/dev/null
-```
+「」---
 
----
-
-## Import Scans
-
-```bash
-# All react-dom/test-utils imports in tests
+## スキャンのインポート「」バッシュ
+# テスト内のすべてのreact-dom/test-utilsインポート
 grep -rn "from 'react-dom/test-utils'\|require.*react-dom/test-utils" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# Enzyme imports
-grep -rn "from 'enzyme'\|require.*enzyme" \
+# 酵素のインポート
+grep -rn "from '酵素'\|require.*enzyme" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# react-test-renderer
+# 反応テストレンダラー
 grep -rn "from 'react-test-renderer'" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# Old act location
+# 旧幕の場所
 grep -rn "act.*from 'react-dom'" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
-```
+「」---
 
----
-
-## Render Pattern Scans
-
-```bash
-# ReactDOM.render in tests (should use RTL render)
+## レンダリング パターン スキャン「」バッシュ
+# テストでの ReactDOM.render (RTL レンダリングを使用する必要があります)
 grep -rn "ReactDOM\.render\s*(" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# Enzyme shallow/mount
-grep -rn "shallow(\|mount(" \
+# 酵素シャロー/マウント
+grep -rn "浅い(\|マウント(" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# Custom render helpers
+# カスタムレンダリングヘルパー
 find src/ -name "test-utils.js" -o -name "renderWithProviders*" \
   -o -name "customRender*" -o -name "render-helpers*" 2>/dev/null
-```
+「」---
 
----
-
-## Assertion Scans
-
-```bash
-# Call count assertions (StrictMode sensitive)
+## アサーション スキャン「」バッシュ
+# コール数アサーション (StrictMode に依存)
 grep -rn "toHaveBeenCalledTimes" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# console.error assertions (React error logging changed in R19)
-grep -rn "console\.error" \
+# console.error アサーション (R19 で変更された React エラー ログ)
+grep -rn "コンソール\.エラー" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# Intermediate state assertions (batching sensitive)
+# 中間状態アサーション (バッチ処理に依存)
 grep -rn "fireEvent\|userEvent" \
   src/ --include="*.test.*" --include="*.spec.*" -A 1 \
   | grep "expect\|getBy\|queryBy" | head -20 2>/dev/null
-```
+「」---
 
----
-
-## Async Scans
-
-```bash
-# act() usage
+## 非同期スキャン「」バッシュ
+# act() の使用法
 grep -rn "\bact(" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
 
-# waitFor usage (good - check these are properly async)
+# waitFor の使用法 (良い - これらが適切に非同期であることを確認してください)
 grep -rn "waitFor\|findBy" \
-  src/ --include="*.test.*" --include="*.spec.*" | wc -l
+  src/ --include="*.test.*" --include="*.spec.*" |トイレ -l
 
-# setTimeout in tests (may be batching-sensitive)
+# テストでの setTimeout (バッチ処理に依存する可能性があります)
 grep -rn "setTimeout\|setInterval" \
   src/ --include="*.test.*" --include="*.spec.*" 2>/dev/null
-```
+「」

@@ -1,28 +1,25 @@
 ---
 title: React 19 Suspense for Data Fetching Pattern Reference
 ---
+# React 19 Suspense のデータ取得パターンのリファレンス
 
-# React 19 Suspense for Data Fetching Pattern Reference
+**データ取得**のための React 19 の新しい Suspense 統合は、`useEffect + state` を使用せずに、データが利用可能になるまでコンポーネントを一時停止 (レンダリングの一時停止) できるようにするプレビュー機能です。
 
-React 19's new Suspense integration for **data fetching** is a preview feature that allows components to suspend (pause rendering) until data is available, without `useEffect + state`.
-
-**Important:** This is a **preview**  it requires specific setup and is not yet stable for production, but you should know the pattern for React 19 migration planning.
-
----
-
-## What Changed in React 19?
-
-React 18 Suspense only supported **code splitting** (lazy components). React 19 extends it to **data fetching** if certain conditions are met:
-
-- **Lib usage**  the data fetching library must implement Suspense (e.g., React Query 5+, SWR, Remix loaders)
-- **Or your own promise tracking**  wrap promises in a way React can track their suspension
-- **No more "no hook after suspense"**  you can use Suspense directly in components with `use()`
+**重要:** これは**プレビュー**であり、特定の設定が必要であり、本番環境ではまだ安定していませんが、React 19 の移行計画のパターンを知っておく必要があります。
 
 ---
 
-## React 18 Suspense (Code Splitting Only)
+## React 19 で何が変わったのでしょうか?
 
-```jsx
+React 18 Suspense は **コード分割** (遅延コンポーネント) のみをサポートしていました。 React 19 では、特定の条件が満たされた場合にこれを **データフェッチ** に拡張します。
+
+- **ライブラリの使用法** データ取得ライブラリは Suspense を実装する必要があります (React Query 5+、SWR、Remix ローダーなど)
+- **または独自のプロミス追跡** React が一時停止を追跡できる方法で Promise をラップします
+- **「サスペンスの後にフックがない」** ことがなくなり、`use()` を使用してコンポーネント内で直接サスペンスを使用できるようになりました。
+
+---
+
+## React 18 サスペンス (コード分割のみ)```jsx
 // React 18  Suspense for lazy imports only:
 const LazyComponent = React.lazy(() => import('./Component'));
 
@@ -33,11 +30,7 @@ function App() {
     </Suspense>
   );
 }
-```
-
-Trying to suspend for data in React 18 required hacks or libraries:
-
-```jsx
+```React 18 でデータを一時停止しようとすると、ハックまたはライブラリが必要になりました。```jsx
 // React 18 hack  not recommended:
 const dataPromise = fetchData();
 const resource = {
@@ -50,15 +43,11 @@ function Component() {
   const data = resource.read(); // Throws promise → Suspense catches it
   return <div>{data}</div>;
 }
-```
+```---
 
----
+## データ取得のための React 19 サスペンド (プレビュー)
 
-## React 19 Suspense for Data Fetching (Preview)
-
-React 19 provides **first-class support** for Suspense with promises via the `use()` hook:
-
-```jsx
+React 19 は、`use()` フックを介した Promise によるサスペンスの **ファーストクラス サポート** を提供します。```jsx
 // React 19  Suspense for data fetching:
 function UserProfile({ userId }) {
   const user = use(fetchUser(userId)); // Suspends if promise pending
@@ -72,19 +61,15 @@ function App() {
     </Suspense>
   );
 }
-```
+```**React 18 との主な違い:**
 
-**Key differences from React 18:**
-
-- `use()` unwraps the promise, component suspends automatically
-- No need for `useEffect + state` trick
-- Cleaner code, less boilerplate
+- `use()` は Promise をアンラップし、コンポーネントは自動的に一時停止します
+- `useEffect + state` トリックは必要ありません
+- よりクリーンなコード、定型句の削減
 
 ---
 
-## Pattern 1: Simple Promise Suspense
-
-```jsx
+## パターン 1: シンプルな約束のサスペンス```jsx
 // Raw promise (not recommended in production):
 function DataComponent() {
   const data = use(fetch('/api/data').then(r => r.json()));
@@ -98,15 +83,11 @@ function App() {
     </Suspense>
   );
 }
-```
-
-**Problem:** Promise is recreated every render. Solution: wrap in `useMemo`.
+```**問題:** Promise はレンダリングごとに再作成されます。解決策: `useMemo` で囲みます。
 
 ---
 
-## Pattern 2: Memoized Promise (Better)
-
-```jsx
+## パターン 2: メモ化された約束 (より良い)```jsx
 function DataComponent({ id }) {
   // Only create promise once per id:
   const dataPromise = useMemo(() => 
@@ -128,15 +109,11 @@ function App() {
     </Suspense>
   );
 }
-```
+```---
 
----
+## パターン 3: ライブラリの統合 (React Query)
 
-## Pattern 3: Library Integration (React Query)
-
-Modern data libraries support Suspense directly. React Query 5+ example:
-
-```jsx
+最新のデータ ライブラリはサスペンスを直接サポートしています。 React Query 5+ の例:```jsx
 // React Query 5+ with Suspense:
 import { useSuspenseQuery } from '@tanstack/react-query';
 
@@ -157,17 +134,13 @@ function App() {
     </Suspense>
   );
 }
-```
-
-**Advantage:** Library handles caching, retries, and cache invalidation.
+```**利点:** ライブラリはキャッシュ、再試行、キャッシュの無効化を処理します。
 
 ---
 
-## Pattern 4: Error Boundary Integration
+## パターン 4: エラー境界の統合
 
-Combine Suspense with Error Boundary to handle both loading and errors:
-
-```jsx
+Suspense と Error Boundary を組み合わせて、読み込みとエラーの両方を処理します。```jsx
 function UserProfile({ userId }) {
   const user = use(fetchUser(userId)); // Suspends while loading
   return <div>{user.name}</div>;
@@ -195,15 +168,11 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
-```
+```---
 
----
+## 入れ子になったサスペンス境界
 
-## Nested Suspense Boundaries
-
-Use multiple Suspense boundaries to show partial UI while waiting for different data:
-
-```jsx
+複数のサスペンス境界を使用して、別のデータを待機している間に部分的な UI を表示します。```jsx
 function App({ userId }) {
   return (
     <div>
@@ -227,21 +196,17 @@ function UserPosts({ userId }) {
   const posts = use(fetchUserPosts(userId));
   return <ul>{posts.map(p => <li key={p.id}>{p.title}</li>)}</ul>;
 }
-```
+```今:
 
-Now:
-
-- User profile shows spinner while loading
-- Posts show spinner independently
-- Both can render as they complete
+- ユーザープロフィールには読み込み中にスピナーが表示されます
+- 投稿ではスピナーが独立して表示されます
+- どちらも完了時にレンダリングできます
 
 ---
 
-## Sequential vs Parallel Suspense
+## シーケンシャル サスペンスとパラレル サスペンス
 
-### Sequential (wait for first before fetching second)
-
-```jsx
+### シーケンシャル (最初を待ってから 2 番目をフェッチする)```jsx
 function App({ userId }) {
   const user = use(fetchUser(userId)); // Must complete first
   
@@ -256,11 +221,7 @@ function UserPosts({ userId }) {
   const posts = use(fetchUserPosts(userId));
   return <ul>{posts.map(p => <li>{p.title}</li>)}</ul>;
 }
-```
-
-### Parallel (fetch both at once)
-
-```jsx
+```### 並列 (両方を一度にフェッチ)```jsx
 function App({ userId }) {
   return (
     <div>
@@ -274,29 +235,25 @@ function App({ userId }) {
     </div>
   );
 }
-```
+```---
 
----
+## React 18 → React 19 への移行戦略
 
-## Migration Strategy for React 18 → React 19
+### フェーズ 1 変更は必要ありません
 
-### Phase 1  No changes required
+サスペンスはまだオプションであり、データ取得に関しては実験的です。既存の `useEffect + state` パターンはすべて引き続き機能します。
 
-Suspense is still optional and experimental for data fetching. All existing `useEffect + state` patterns continue to work.
+### フェーズ 2 安定するまで待ちます
 
-### Phase 2  Wait for stability
+実稼働環境でサスペンス データの取得を採用する前に、次のことを行ってください。
 
-Before adopting Suspense data fetching in production:
+- React 19 が出荷されるまで待ちます (プレビューではありません)
+- データ ライブラリがサスペンスをサポートしていることを確認します
+- アプリが React 19 コアで安定した後に移行を計画する
 
-- Wait for React 19 to ship (not preview)
-- Verify your data library supports Suspense
-- Plan migration after app stabilizes on React 19 core
+### フェーズ 3 サスペンスへのリファクタリング (オプション、プレビュー後)
 
-### Phase 3  Refactor to Suspense (optional, post-preview)
-
-Once stable, profile candidates:
-
-```bash
+安定したら、候補者のプロフィールを作成します。```bash
 grep -rn "useEffect.*fetch\|useEffect.*axios\|useEffect.*graphql" src/ --include="*.js" --include="*.jsx"
 ```
 
@@ -323,13 +280,11 @@ function UserProfile({ userId }) {
 <Suspense fallback={<Spinner />}>
   <UserProfile userId={123} />
 </Suspense>
-```
+```---
 
----
+## 重要な警告
 
-## Important Warnings
-
-1. **Still Preview**  Suspense for data is marked experimental, behavior may change
-2. **Performance**  promises are recreated on every render without memoization; use `useMemo`
-3. **Cache**  `use()` doesn't cache; use React Query or similar for production apps
-4. **SSR**  Suspense SSR support is limited; check Next.js version requirements
+1. **まだプレビュー** データのサスペンスは実験的なものであるため、動作が変更される可能性があります
+2. **パフォーマンス** の約束は、メモ化せずにレンダリングごとに再作成されます。 `useMemo`を使用してください
+3. **キャッシュ** `use()` はキャッシュしません。本番アプリには React Query などを使用してください
+4. **SSR** サスペンス SSR のサポートは制限されています。 Next.js のバージョン要件を確認する

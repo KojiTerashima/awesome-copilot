@@ -1,375 +1,297 @@
-# Versioning Strategy — PEP 440, SemVer, and Decision Engine
+# バージョン管理戦略 — PEP 440、SemVer、および意思決定エンジン
 
-## Table of Contents
-1. [PEP 440 — The Standard](#1-pep-440--the-standard)
-2. [Semantic Versioning (SemVer)](#2-semantic-versioning-semver)
-3. [Pre-release Identifiers](#3-pre-release-identifiers)
-4. [Versioning Decision Engine](#4-versioning-decision-engine)
-5. [Dynamic Versioning — setuptools_scm (Recommended)](#5-dynamic-versioning--setuptools_scm-recommended)
-6. [Hatchling with hatch-vcs Plugin](#6-hatchling-with-hatch-vcs-plugin)
-7. [Static Versioning — flit](#7-static-versioning--flit)
-8. [Static Versioning — hatchling manual](#8-static-versioning--hatchling-manual)
-9. [DO NOT Hardcode Version (except flit)](#9-do-not-hardcode-version-except-flit)
-10. [Dependency Version Specifiers](#10-dependency-version-specifiers)
-11. [PyPA Release Commands](#11-pypa-release-commands)
-
----
-
-## 1. PEP 440 — The Standard
-
-All Python package versions must comply with [PEP 440](https://peps.python.org/pep-0440/).
-Non-compliant versions (e.g., `1.0-beta`, `2023.1.1.dev`) will be rejected by PyPI.
-
-```
-Canonical form:  N[.N]+[{a|b|rc}N][.postN][.devN]
-
-1.0.0            Stable release
-1.0.0a1          Alpha pre-release
-1.0.0b2          Beta pre-release
-1.0.0rc1         Release candidate
-1.0.0.post1      Post-release (packaging fix; same codebase)
-1.0.0.dev1       Development snapshot — DO NOT upload to PyPI
-2.0.0            Major release (breaking changes)
-```
-
-### Epoch prefix (rare)
-
-```
-1!1.0.0          Epoch 1; used when you need to skip ahead of an old scheme
-```
-
-Use epochs only as a last resort to fix a broken version sequence.
+## 目次
+1. [PEP 440 — スタンダード](#1-pep-440--スタンダード)
+2. [セマンティック バージョニング (SemVer)](#2-semantic-versioning-semver)
+3. [プレリリース識別子](#3-プレリリース識別子)
+4. [バージョン管理決定エンジン](#4-バージョン管理決定エンジン)
+5. [動的バージョニング — setuptools_scm (推奨)](#5-dynamic-versioning--setuptools_scm-recommended)
+6. [hatchling-vcs プラグインを使用した孵化](#6-hatchling-with-hatch-vcs-plugin)
+7. [静的バージョン管理 — flit](#7-static-versioning--flit)
+8. [静的バージョン管理 — 孵化マニュアル](#8-static-versioning--hatchling-manual)
+9. [バージョンをハードコードしないでください (フリットを除く)](#9-ハードコードしないバージョン-フリット以外)
+10. [依存関係バージョン指定子](#10-依存関係バージョン指定子)
+11. [PyPA リリース コマンド](#11-pypa-release-commands)
 
 ---
 
-## 2. Semantic Versioning (SemVer)
+## 1. PEP 440 — 標準
 
-SemVer maps cleanly onto PEP 440. Always use `MAJOR.MINOR.PATCH`:
+すべての Python パッケージのバージョンは [PEP 440](https://peps.python.org/pep-0440/) に準拠する必要があります。
+準拠していないバージョン (`1.0-beta`、`2023.1.1.dev` など) は PyPI によって拒否されます。「」
+正規形式: N[.N]+[{a|b|rc}N][.postN][.devN]
 
-```
-MAJOR  Increment when you make incompatible API changes (rename, remove, break)
-MINOR  Increment when you add functionality backward-compatibly (new features)
-PATCH  Increment when you make backward-compatible bug fixes
+1.0.0 安定版リリース
+1.0.0a1 アルファ プレリリース
+1.0.0b2 ベータ版プレリリース
+1.0.0rc1 リリース候補
+1.0.0.post1 リリース後 (パッケージ修正、同じコードベース)
+1.0.0.dev1 開発スナップショット — PyPI にはアップロードしないでください
+2.0.0 メジャー リリース (重大な変更)
+「」### エポックプレフィックス (まれ)「」
+1!1.0.0 エポック 1;古いスキームの前をスキップする必要がある場合に使用されます
+「」エポックは、壊れたバージョン シーケンスを修正する最後の手段としてのみ使用してください。
 
-Examples:
-  1.0.0 → 1.0.1   Bug fix, no API change
-  1.0.0 → 1.1.0   New method added; existing API intact
-  1.0.0 → 2.0.0   Public method renamed or removed
-```
+---
 
-### What counts as a breaking change?
+## 2. セマンティック バージョニング (SemVer)
 
-| Change | Breaking? |
+SemVer は PEP 440 にきれいにマップされます。常に `MAJOR.MINOR.PATCH` を使用します。「」
+互換性のない API 変更 (名前変更、削除、中断) を行った場合のメジャー増分
+下位互換性のある機能 (新機能) を追加する場合の MINOR の増分
+下位互換性のあるバグ修正を行う場合の PATCH インクリメント
+
+例:
+  1.0.0 → 1.0.1 バグ修正、API 変更なし
+  1.0.0 → 1.1.0 新しいメソッドが追加されました。既存の API はそのまま
+  1.0.0 → 2.0.0 パブリック メソッドの名前が変更または削除されました
+「」### 何が重大な変更とみなされるのでしょうか?
+
+|変更 |壊れる？ |
 |---|---|
-| Rename a public function | YES — `MAJOR` |
-| Remove a parameter | YES — `MAJOR` |
-| Add a required parameter | YES — `MAJOR` |
-| Add an optional parameter with a default | NO — `MINOR` |
-| Add a new function/class | NO — `MINOR` |
-| Fix a bug | NO — `PATCH` |
-| Update a dependency lower bound | NO (usually) — `PATCH` |
-| Update a dependency upper bound (breaking) | YES — `MAJOR` |
+|パブリック関数の名前を変更する |はい — `MAJOR` |
+|パラメータを削除する |はい — `MAJOR` |
+|必須パラメータを追加します |はい — `MAJOR` |
+|デフォルトの | を使用してオプションのパラメータを追加します。いいえ — `MINOR` |
+|新しい関数/クラスを追加する |いいえ — `MINOR` |
+|バグを修正する |いいえ — `PATCH` |
+|依存関係の下限を更新する |いいえ (通常) — `PATCH` |
+|依存関係の上限を更新する (破壊) |はい — `MAJOR` |
 
 ---
 
-## 3. Pre-release Identifiers
+## 3. プレリリース識別子
 
-Use pre-release versions to get user feedback before a stable release.
-Pre-releases are **not** installed by default by pip (`pip install pkg` skips them).
-Users must opt-in: `pip install "pkg==2.0.0a1"` or `pip install --pre pkg`.
+安定版リリース前にユーザーからのフィードバックを得るには、プレリリース バージョンを使用します。
+プレリリースは、pip によってデフォルトでは**インストールされません** (`pip install pkg` はスキップします)。
+ユーザーはオプトインする必要があります: `pip install "pkg==2.0.0a1"` または `pip install --pre pkg`。「」
+1.0.0a1 Alpha-1: 非常に初期のもの。バグを予期してください。 APIは変更される可能性があります
+1.0.0b1 Beta-1: 機能は完全です。 API の安定化。より幅広いフィードバックを求める
+1.0.0rc1 リリース候補: コードは凍結されています。安定する前の最終テスト
+1.0.0 安定版: 実稼働の準備ができています
+「」### インクリメントルール「」
+開始: 1.0.0a1
+その他のアルファ版: 1.0.0a2、1.0.0a3
+ベータ版への移行: 1.0.0b1 (カウンターのリセット)
+RC に移動: 1.0.0rc1
+安定版: 1.0.0
+「」---
 
-```
-1.0.0a1    Alpha-1: very early; expect bugs; API may change
-1.0.0b1    Beta-1:  feature-complete; API stabilising; seek broader feedback
-1.0.0rc1   Release candidate: code-frozen; final testing before stable
-1.0.0      Stable: ready for production
-```
+## 4. バージョン管理決定エンジン
 
-### Increment rule
-
-```
-Start:       1.0.0a1
-More alphas: 1.0.0a2, 1.0.0a3
-Move to beta: 1.0.0b1  (reset counter)
-Move to RC:  1.0.0rc1
-Stable:      1.0.0
-```
-
----
-
-## 4. Versioning Decision Engine
-
-Use this decision tree to pick the right versioning strategy before writing any code.
-
-```
-Is the project using git and tagging releases with version tags?
-├── YES → setuptools + setuptools_scm  (DEFAULT — best for most projects)
-│         Git tag v1.0.0 becomes the installed version automatically.
-│         Zero manual version bumping.
+コードを記述する前に、このデシジョン ツリーを使用して適切なバージョン管理戦略を選択します。「」
+プロジェクトは git を使用し、リリースにバージョン タグを付けていますか?
+§── YES → setuptools + setuptools_scm (デフォルト — ほとんどのプロジェクトに最適)
+│ Git tag v1.0.0 が自動的にインストールされるバージョンになります。
+│ 手動バージョンのバンピングはゼロ。
 │
-└── NO — Is the project a simple, single-module library with infrequent releases?
-          ├── YES → flit
-          │         Set __version__ = "1.0.0" in __init__.py.
-          │         Update manually before each release.
+└── いいえ — このプロジェクトは、リリース頻度が低い、単純な単一モジュールのライブラリですか?
+          §── YES → フリット
+          │ __init__.py で __version__ = "1.0.0" を設定します。
+          │ 各リリースの前に手動で更新します。
           │
-          └── NO — Does the team want an integrated build + dep management tool?
-                    ├── YES → poetry
-                    │         Manage version in [tool.poetry] version field.
+          └── いいえ — チームは統合されたビルド + 開発管理ツールを望んでいますか?
+                    §── YES → 詩
+                    │ [tool.poetry] バージョンフィールドでバージョンを管理します。
                     │
-                    └── NO → hatchling (modern, fast, pure-Python)
-                              Use hatch-vcs plugin for dynamic versioning
-                              or set version manually in [project].
+                    └── いいえ → 孵化したばかりの子 (現代的、高速、純粋な Python)
+                              動的バージョニングにhatch-vcsプラグインを使用する
+                              または、[プロジェクト] でバージョンを手動で設定します。
 
-Does the package have C/Cython/Fortran extensions?
-└── YES (always) → setuptools (only backend with native extension support)
-```
+パッケージには C/Cython/Fortran 拡張機能が含まれていますか?
+└── YES (常に) → setuptools (ネイティブ拡張機能をサポートするバックエンドのみ)
+「」### 概要表
 
-### Summary Table
-
-| Backend | Version source | Best for |
+|バックエンド |バージョンソース |こんな方に最適 |
 |---|---|---|
-| `setuptools` + `setuptools_scm` | Git tags — fully automatic | DEFAULT for new projects |
-| `hatchling` + `hatch-vcs` | Git tags — automatic via plugin | hatchling users |
-| `flit` | `__version__` in `__init__.py` | Very simple, minimal config |
-| `poetry` | `[tool.poetry] version` field | Integrated dep + build management |
-| `hatchling` manual | `[project] version` field | One-off static versioning |
+| `setuptools` + `setuptools_scm` | Git タグ — 全自動 |新しいプロジェクトのデフォルト |
+| `hatchling` + `hatch-vcs` | Git タグ — プラグイン経由で自動 |孵化したばかりのユーザー |
+| `flit` | `__version__` の `__init__.py` |非常にシンプルで最小限の構成 |
+| `poetry` | `[tool.poetry] version` フィールド |統合された開発 + ビルド管理 |
+| `hatchling` マニュアル | `[project] version` フィールド | 1 回限りの静的バージョン管理 |
 
 ---
 
-## 5. Dynamic Versioning — setuptools_scm (Recommended)
+## 5. 動的バージョニング — setuptools_scm (推奨)
 
-`setuptools_scm` reads the current git tag and computes the version at build time.
-No separate `__version__` update step — just tag and push.
+`setuptools_scm` は、現在の git タグを読み取り、ビルド時にバージョンを計算します。
+`__version__` を個別に更新する手順はなく、タグを付けてプッシュするだけです。
 
-### `pyproject.toml` configuration
-
-```toml
-[build-system]
-requires      = ["setuptools>=70", "setuptools_scm>=8"]
+### `pyproject.toml` 設定```トムル
+[ビルドシステム]
+Required = ["setuptools>=70", "setuptools_scm>=8"]
 build-backend = "setuptools.backends.legacy:build"
 
-[project]
-name    = "your-package"
-dynamic = ["version"]
+[プロジェクト]
+名前 = "あなたのパッケージ"
+動的 = ["バージョン"]
 
 [tool.setuptools_scm]
-version_scheme = "post-release"
-local_scheme   = "no-local-version"   # Prevents +g<hash> from breaking PyPI
-```
-
-### `__init__.py` — correct version access
-
-```python
+version_scheme = "リリース後"
+local_scheme = "no-local-version" # +g<hash> が PyPI を破壊しないようにします
+「」### `__init__.py` — 正しいバージョン アクセス「」パイソン
 # your_package/__init__.py
-from importlib.metadata import version, PackageNotFoundError
+importlib.metadata インポート バージョンから、PackageNotFoundError
 
-try:
-    __version__ = version("your-package")
-except PackageNotFoundError:
-    # Package is not installed (running from a source checkout without pip install -e .)
+試してみてください:
+    __version__ = version("あなたのパッケージ")
+PackageNotFoundError を除く:
+    # パッケージはインストールされていません ( pip install -e を使用せずにソース チェックアウトから実行されます)。
     __version__ = "0.0.0.dev0"
 
-__all__ = ["__version__"]
-```
+__all__ = ["__バージョン__"]
+「」### バージョンの計算方法「」
+git タグ v1.0.0 → インストール済みバージョン = "1.0.0"
+v1.0.0 以降の 3 コミット →installed_version = "1.0.0.post3+g<hash>" (開発のみ)
+git タグ v1.1.0 → インストール済みバージョン = "1.1.0"
+「」`local_scheme = "no-local-version"` を使用すると、PyPI の `+g<hash>` サフィックスが削除されます
+ローカルに表示されたままアップロードします。
 
-### How the version is computed
+### 重要な CI 要件```ヤムル
+- 使用:actions/checkout@v4
+  と:
+    fetch- Depth: 0 # 必須 — これがないと git にはタグ履歴がありません
+                      # setuptools_scm はサイレントに 0.0.0+d<date> にフォールバックします
+「」パッケージをインストールまたはビルドする **すべて** CI ジョブには `fetch-depth: 0` が必要です。
 
-```
-git tag v1.0.0            →  installed_version = "1.0.0"
-3 commits after v1.0.0    →  installed_version = "1.0.0.post3+g<hash>"  (dev only)
-git tag v1.1.0            →  installed_version = "1.1.0"
-```
-
-With `local_scheme = "no-local-version"`, the `+g<hash>` suffix is stripped for PyPI
-uploads while still being visible locally.
-
-### Critical CI requirement
-
-```yaml
-- uses: actions/checkout@v4
-  with:
-    fetch-depth: 0    # REQUIRED — without this, git has no tag history
-                      # setuptools_scm falls back to 0.0.0+d<date> silently
-```
-
-**Every** CI job that installs or builds the package must have `fetch-depth: 0`.
-
-### Debugging version issues
-
-```bash
-# Check what version setuptools_scm would produce right now:
+### バージョンの問題のデバッグ「」バッシュ
+# setuptools_scm が現在生成するバージョンを確認します。
 python -m setuptools_scm
 
-# If you see 0.0.0+d... it means:
-# 1. No tags reachable from HEAD, OR
-# 2. fetch-depth: 0 was not set in CI
-```
+# 0.0.0+d... が表示された場合、それは次のことを意味します:
+# 1. HEAD または OR から到達可能なタグがありません
+# 2. fetch- Depth: 0 が CI に設定されていませんでした
+「」---
 
----
+## 6. hatch-vcs プラグインによる孵化
 
-## 6. Hatchling with hatch-vcs Plugin
-
-An alternative to setuptools_scm for teams already using hatchling.
-
-```toml
-[build-system]
-requires      = ["hatchling", "hatch-vcs"]
+すでに孵化したばかりの子を使用しているチーム向けの setuptools_scm の代替手段。```トムル
+[ビルドシステム]
+Required = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
-[project]
-name    = "your-package"
-dynamic = ["version"]
+[プロジェクト]
+名前 = "あなたのパッケージ"
+動的 = ["バージョン"]
 
-[tool.hatch.version]
-source = "vcs"
+[ツール.ハッチング.バージョン]
+ソース = "VC"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/your_package/_version.py"
-```
-
-Access the version the same way as setuptools_scm:
-
-```python
-from importlib.metadata import version, PackageNotFoundError
-try:
-    __version__ = version("your-package")
-except PackageNotFoundError:
+バージョンファイル = "src/your_package/_version.py"
+「」setuptools_scm と同じ方法でバージョンにアクセスします。「」パイソン
+importlib.metadata インポート バージョンから、PackageNotFoundError
+試してみてください:
+    __version__ = version("あなたのパッケージ")
+PackageNotFoundError を除く:
     __version__ = "0.0.0.dev0"
-```
+「」---
 
----
+## 7. 静的バージョン管理 — flit
 
-## 7. Static Versioning — flit
+flit は、手動によるバージョン バンピングが許容される単純な単一モジュール パッケージにのみ使用してください。
 
-Use flit only for simple, single-module packages where manual version bumping is acceptable.
+### `pyproject.toml````トムル
+[ビルドシステム]
+必要 = ["flit_core>=3.9"]
+ビルドバックエンド = "flit_core.buildapi"
 
-### `pyproject.toml`
+[プロジェクト]
+名前 = "あなたのパッケージ"
+動的 = ["バージョン", "説明"]
+「」### `__init__.py`「」パイソン
+"""あなたのパッケージ — 焦点を絞った単一目的のユーティリティ。"""
+__version__ = "1.2.0" # フリットはこれを読み取ります。各リリースの前に手動で更新する
+「」**flit 例外:** これは、`__version__` のハードコーディングが正しい唯一のケースです。
+flit は、`__init__.py` をインポートし、`__version__` を読み取ることでバージョンを検出します。
 
-```toml
-[build-system]
-requires      = ["flit_core>=3.9"]
-build-backend = "flit_core.buildapi"
-
-[project]
-name    = "your-package"
-dynamic = ["version", "description"]
-```
-
-### `__init__.py`
-
-```python
-"""your-package — a focused, single-purpose utility."""
-__version__ = "1.2.0"   # flit reads this; update manually before each release
-```
-
-**flit exception:** this is the ONLY case where hardcoding `__version__` is correct.
-flit discovers the version by importing `__init__.py` and reading `__version__`.
-
-### Release flow for flit
-
-```bash
-# 1. Bump __version__ in __init__.py
-# 2. Update CHANGELOG.md
-# 3. Commit
+### フリットのリリースフロー「」バッシュ
+# 1. __init__.py で __version__ をバンプする
+# 2. CHANGELOG.mdを更新する
+#3. コミットする
 git add src/your_package/__init__.py CHANGELOG.md
-git commit -m "chore: release v1.2.0"
-# 4. Tag (flit can also publish directly)
-git tag v1.2.0
-git push origin v1.2.0
-# 5. Build and publish
-flit publish
-# OR
-python -m build && twine upload dist/*
-```
+git commit -m "雑用: リリース v1.2.0"
+# 4. タグ (flit は直接公開することもできます)
+git タグ v1.2.0
+git プッシュ オリジン v1.2.0
+#5. ビルドして公開する
+フリットパブリッシュ
+# または
+python -m ビルド && ツインアップロード dist/*
+「」---
 
----
-
-## 8. Static Versioning — hatchling manual
-
-```toml
-[build-system]
-requires      = ["hatchling"]
+## 8. 静的バージョン管理 — 孵化マニュアル```トムル
+[ビルドシステム]
+必要 = ["孵化したばかりの子"]
 build-backend = "hatchling.build"
 
-[project]
-name    = "your-package"
-version = "1.0.0"   # Manual; update before each release
-```
-
-Update `version` in `pyproject.toml` before every release. No `__version__` required
-(access via `importlib.metadata.version()` as usual).
+[プロジェクト]
+名前 = "あなたのパッケージ"
+バージョン = "1.0.0" # マニュアル;各リリースの前に更新する
+「」リリースするたびに `pyproject.toml` 内の `version` を更新します。 `__version__`は必要ありません
+(通常通り `importlib.metadata.version()` 経由でアクセスします)。
 
 ---
 
-## 9. DO NOT Hardcode Version (except flit)
+## 9. バージョンをハードコードしないでください (flit を除く)
 
-Hardcoding `__version__` in `__init__.py` when **not** using flit creates a dual source of
-truth that diverges over time.
+flit を使用しない ** 場合に `__init__.py` で `__version__` をハードコーディングすると、
+時間の経過とともに乖離していく真実。「」パイソン
+# BAD — setuptools_scm、孵化したばかりの子、または詩を使用する場合:
+__version__ = "1.0.0" # 古くなります。インストールされているパッケージのバージョンと異なる
 
-```python
-# BAD — when using setuptools_scm, hatchling, or poetry:
-__version__ = "1.0.0"    # gets stale; diverges from the installed package version
-
-# GOOD — works for all backends except flit:
-from importlib.metadata import version, PackageNotFoundError
-try:
-    __version__ = version("your-package")
-except PackageNotFoundError:
+# GOOD — flit を除くすべてのバックエンドで動作します。
+importlib.metadata インポート バージョンから、PackageNotFoundError
+試してみてください:
+    __version__ = version("あなたのパッケージ")
+PackageNotFoundError を除く:
     __version__ = "0.0.0.dev0"
-```
+「」---
 
----
+## 10. 依存関係のバージョン指定子
 
-## 10. Dependency Version Specifiers
+ユーザーの環境を汚染しないように、適切な指定子のスタイルを選択してください。```トムル
+# [プロジェクト] の依存関係 — ライブラリのベスト プラクティス:
 
-Pick the right specifier style to avoid poisoning your users' environments.
+"httpx>=0.24" # 最小値のみ - 推奨;ユーザーが自由にアップグレードできるようにする
+"httpx>=0.24,<2.0" # 既知の重大な変更が次のメジャーに存在する場合のみ上限
+"requests>=2.28,<3.0" # 既知のメジャー バージョンのブレークには許容されます
 
-```toml
-# [project] dependencies — library best practices:
+# アプリケーション / CLI (ピン留めは問題ありません):
+"httpx==0.27.2" # 再現可能なデプロイのために正確なバージョンをロックします
 
-"httpx>=0.24"            # Minimum only — PREFERRED; lets users upgrade freely
-"httpx>=0.24,<2.0"       # Upper bound only when a known breaking change exists in next major
-"requests>=2.28,<3.0"    # Acceptable for well-known major-version breaks
+# 決して図書館には入れないでください:
+# "httpx~=0.24.0" # きつすぎます。マイナーアップグレードをブロックします
+# "httpx==0.27.*" # 無効な PEP 440
+# "httpx" # 制約なし。将来の破損に対して壊れやすい
+「」---
 
-# Application / CLI (pinning is fine):
-"httpx==0.27.2"          # Lock exact version for reproducible deploys
+## 11. PyPA リリースコマンド
 
-# NEVER in a library:
-# "httpx~=0.24.0"        # Too tight; blocks minor upgrades
-# "httpx==0.27.*"        # Not valid PEP 440
-# "httpx"                # No constraint; fragile against future breakage
-```
+コードからユーザーのインストールまでの正規のシーケンス。「」バッシュ
+# ステップ 1: リリースにタグを付ける (構成されている場合は、CI public.yml が自動的にトリガーされます)
+git tag -a v1.2.3 -m "v1.2.3 をリリース"
+git プッシュ オリジン v1.2.3
 
----
+# ステップ 2 (手動フォールバックのみ): ローカルでビルドする
+Python -m ビルド
+# 生成するもの:
+# dist/your_package-1.2.3.tar.gz (sdist)
+# dist/your_package-1.2.3-py3-none-any.whl (ホイール)
 
-## 11. PyPA Release Commands
+# ステップ 3: 検証する
+麻ひものチェック距離/*
 
-The canonical sequence from code to user install.
-
-```bash
-# Step 1: Tag the release (triggers CI publish.yml automatically if configured)
-git tag -a v1.2.3 -m "Release v1.2.3"
-git push origin v1.2.3
-
-# Step 2 (manual fallback only): Build locally
-python -m build
-# Produces:
-#   dist/your_package-1.2.3.tar.gz   (sdist)
-#   dist/your_package-1.2.3-py3-none-any.whl  (wheel)
-
-# Step 3: Validate
-twine check dist/*
-
-# Step 4: Test on TestPyPI first (first release or major change)
-twine upload --repository testpypi dist/*
+# ステップ 4: 最初に TestPyPI でテストする (最初のリリースまたは大きな変更)
+ひもアップロード --repository testpypi dist/*
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ your-package==1.2.3
 
-# Step 5: Publish to production PyPI
-twine upload dist/*
-# OR via GitHub Actions (recommended):
-# push the tag → publish.yml runs → pypa/gh-action-pypi-publish handles upload via OIDC
+# ステップ 5: 本番環境の PyPI に公開する
+麻紐アップロード dist/*
+# または GitHub アクション経由 (推奨):
+# タグをプッシュ → public.yml が実行 → pypa/gh-action-pypi-publish が OIDC 経由でアップロードを処理します
 
-# Step 6: Verify
+# ステップ 6: 確認する
 pip install your-package==1.2.3
-python -c "import your_package; print(your_package.__version__)"
-```
+python -c "your_packageをインポート; print(your_package.__version__)"
+「」

@@ -1,15 +1,14 @@
-# Development Tools Reference
+# 開発ツールのリファレンス
 
-Tools and workflows for web development.
+Web 開発のためのツールとワークフロー。
 
-## Version Control
+## バージョン管理
 
 ### Git
 
-Distributed version control system.
+分散バージョン管理システム。
 
-**Basic Commands**:
-```bash
+**基本的なコマンド**:```bash
 # Initialize repository
 git init
 
@@ -44,29 +43,25 @@ git merge feature-name
 # View history
 git log
 git log --oneline --graph
-```
-
-**Best Practices**:
-- Commit often with meaningful messages
-- Use branches for features
-- Pull before push
-- Review changes before committing
-- Use .gitignore for generated files
+```**ベストプラクティス**:
+- 意味のあるメッセージを頻繁にコミットする
+- 機能にブランチを使用する
+- 押す前に引く
+- コミットする前に変更を確認する
+- 生成されたファイルには .gitignore を使用します
 
 ### GitHub/GitLab/Bitbucket
 
-Git hosting platforms with collaboration features:
-- Pull requests / Merge requests
-- Code review
-- Issue tracking
-- CI/CD integration
-- Project management
+コラボレーション機能を備えた Git ホスティング プラットフォーム:
+- プルリクエスト / マージリクエスト
+- コードレビュー
+- 問題の追跡
+- CI/CDの統合
+- プロジェクト管理
 
-## Package Managers
+## パッケージマネージャー
 
-### npm (Node Package Manager)
-
-```bash
+### npm (ノード パッケージ マネージャー)```bash
 # Initialize project
 npm init
 npm init -y # Skip prompts
@@ -88,10 +83,7 @@ npm start
 # Audit security
 npm audit
 npm audit fix
-```
-
-**package.json**:
-```json
+```**package.json**:```json
 {
   "name": "my-project",
   "version": "1.0.0",
@@ -107,34 +99,24 @@ npm audit fix
     "webpack": "^5.75.0"
   }
 }
-```
+```### 糸
 
-### Yarn
-
-Faster alternative to npm:
-```bash
+npm のより高速な代替手段:```bash
 yarn add package-name
 yarn remove package-name
 yarn upgrade
 yarn build
-```
+```### pnpm
 
-### pnpm
-
-Efficient package manager (disk space saving):
-```bash
+効率的なパッケージマネージャー (ディスクスペースの節約):```bash
 pnpm install
 pnpm add package-name
 pnpm remove package-name
-```
+```## ビルドツール
 
-## Build Tools
+### ウェブパック
 
-### Webpack
-
-Module bundler:
-
-```javascript
+モジュールバンドラー:```javascript
 // webpack.config.js
 module.exports = {
   entry: './src/index.js',
@@ -161,13 +143,9 @@ module.exports = {
     })
   ]
 };
-```
+```### ヴァイテ
 
-### Vite
-
-Fast modern build tool:
-
-```bash
+高速で最新のビルド ツール:```bash
 # Create project
 npm create vite@latest my-app
 
@@ -176,21 +154,14 @@ npm run dev
 
 # Build
 npm run build
-```
+```### 小包
 
-### Parcel
-
-Zero-config bundler:
-```bash
+ゼロ構成バンドラー:```bash
 parcel index.html
 parcel build index.html
-```
+```## タスク ランナー
 
-## Task Runners
-
-### npm Scripts
-
-```json
+### npm スクリプト```json
 {
   "scripts": {
     "dev": "webpack serve --mode development",
@@ -200,15 +171,11 @@ parcel build index.html
     "format": "prettier --write src/"
   }
 }
-```
+```## テストフレームワーク
 
-## Testing Frameworks
+### 冗談
 
-### Jest
-
-JavaScript testing framework:
-
-```javascript
+JavaScript テスト フレームワーク:```javascript
 // sum.test.js
 const sum = require('./sum');
 
@@ -221,12 +188,9 @@ describe('sum function', () => {
     expect(sum(-1, -2)).toBe(-3);
   });
 });
-```
+```### ヴィテスト
 
-### Vitest
-
-Vite-powered testing (Jest-compatible):
-```javascript
+Vite を利用したテスト (Jest 互換):```javascript
 import { describe, test, expect } from 'vitest';
 
 describe('math', () => {
@@ -234,27 +198,20 @@ describe('math', () => {
     expect(1 + 1).toBe(2);
   });
 });
-```
+```### 劇作家
 
-### Playwright
-
-End-to-end testing:
-```javascript
+エンドツーエンドのテスト:```javascript
 import { test, expect } from '@playwright/test';
 
 test('homepage has title', async ({ page }) => {
   await page.goto('https://example.com');
   await expect(page).toHaveTitle(/Example/);
 });
-```
-
-## Linters & Formatters
+```## リンターとフォーマッタ
 
 ### ESLint
 
-JavaScript linter:
-
-```javascript
+JavaScript リンター:```javascript
 // .eslintrc.js
 module.exports = {
   extends: ['eslint:recommended'],
@@ -263,13 +220,9 @@ module.exports = {
     'no-unused-vars': 'error'
   }
 };
-```
+```### より美しく
 
-### Prettier
-
-Code formatter:
-
-```json
+コードフォーマッタ:```json
 // .prettierrc
 {
   "singleQuote": true,
@@ -277,12 +230,9 @@ Code formatter:
   "tabWidth": 2,
   "trailingComma": "es5"
 }
-```
+```### スタイルリント
 
-### Stylelint
-
-CSS linter:
-```json
+CSS リンター:```json
 {
   "extends": "stylelint-config-standard",
   "rules": {
@@ -290,43 +240,39 @@ CSS linter:
     "color-hex-length": "short"
   }
 }
-```
+```## IDE とエディター
 
-## IDEs and Editors
+### Visual Studio コード
 
-### Visual Studio Code
+**主な機能**:
+- インテリセンス
+- デバッグ
+- Gitの統合
+- 拡張機能マーケットプレイス
+- 端末の統合
 
-**Key Features**:
-- IntelliSense
-- Debugging
-- Git integration
-- Extensions marketplace
-- Terminal integration
-
-**Popular Extensions**:
+**人気の拡張機能**:
 - ESLint
-- Prettier
-- Live Server
+- より美しく
+- ライブサーバー
 - GitLens
-- Path Intellisense
+- パスインテリセンス
 
-### WebStorm
+### ウェブストーム
 
-Full-featured IDE for web development by JetBrains.
+JetBrains による Web 開発用のフル機能の IDE。
 
-### Sublime Text
+### 崇高なテキスト
 
-Lightweight, fast text editor.
+軽量で高速なテキストエディター。
 
 ### Vim/Neovim
 
-Terminal-based editor (steep learning curve).
+ターミナルベースのエディター (学習曲線が急です)。
 
 ## TypeScript
 
-Typed superset of JavaScript:
-
-```typescript
+JavaScript の型付きスーパーセット:```typescript
 // types.ts
 interface User {
   id: number;
@@ -356,13 +302,9 @@ function identity<T>(arg: T): T {
     "forceConsistentCasingInFileNames": true
   }
 }
-```
+```## 継続的インテグレーション (CI/CD)
 
-## Continuous Integration (CI/CD)
-
-### GitHub Actions
-
-```yaml
+### GitHub アクション```yaml
 # .github/workflows/test.yml
 name: Test
 on: [push, pull_request]
@@ -376,92 +318,76 @@ jobs:
           node-version: '18'
       - run: npm ci
       - run: npm test
-```
+```### その他の CI/CD プラットフォーム
 
-### Other CI/CD Platforms
-
-- **GitLab CI**
+- **GitLab 内**
 - **CircleCI**
-- **Travis CI**
-- **Jenkins**
+- **トラビスはこちら**
+- **ジェンキンス**
 
-## Debugging
+## デバッグ
 
-### Browser DevTools
-
-```javascript
+### ブラウザ開発ツール```javascript
 // Debugging statements
 debugger; // Pause execution
 console.log('value:', value);
 console.error('error:', error);
 console.trace(); // Stack trace
-```
-
-### Node.js Debugging
-
-```bash
+```### Node.js のデバッグ```bash
 # Built-in debugger
 node inspect app.js
 
 # Chrome DevTools
 node --inspect app.js
 node --inspect-brk app.js # Break on start
-```
+```## パフォーマンスプロファイリング
 
-## Performance Profiling
+### Chrome DevTools のパフォーマンス
 
-### Chrome DevTools Performance
+- CPUアクティビティを記録する
+- フレームチャートの分析
+- ボトルネックを特定する
 
-- Record CPU activity
-- Analyze flame charts
-- Identify bottlenecks
-
-### Lighthouse
-
-```bash
+### 灯台```bash
 # CLI
 npm install -g lighthouse
 lighthouse https://example.com
 
 # DevTools
 Open Chrome DevTools > Lighthouse tab
-```
+```## モニタリング
 
-## Monitoring
+### エラー追跡
 
-### Error Tracking
+- **セントリー**: エラー監視
+- **ロールバー**: リアルタイムのエラー追跡
+- **バグ**: エラー監視
 
-- **Sentry**: Error monitoring
-- **Rollbar**: Real-time error tracking
-- **Bugsnag**: Error monitoring
+### 分析
 
-### Analytics
+- **Google アナリティクス**
+- **もっともらしい**: プライバシーに配慮
+- **Piwik**: 自己ホスト型
 
-- **Google Analytics**
-- **Plausible**: Privacy-friendly
-- **Matomo**: Self-hosted
+### RUM (リアルユーザーモニタリング)
 
-### RUM (Real User Monitoring)
+- **スピードカーブ**
+- **ニューレリック**
+- **データドッグ**
 
-- **SpeedCurve**
-- **New Relic**
-- **Datadog**
+## 開発者のワークフロー
 
-## Developer Workflow
+### 一般的なワークフロー
 
-### Typical Workflow
+1. **セットアップ**: リポジトリのクローンを作成し、依存関係をインストールします
+2. **開発**: コードを記述し、開発サーバーを実行します。
+3. **テスト**: 単体テスト/統合テストを実行します。
+4. **Lint/フォーマット**: コードの品質をチェックする
+5. **コミット**: Git のコミットとプッシュ
+6. **CI/CD**: 自動化されたテストと展開
+7. **デプロイ**: 本番環境へのプッシュ
 
-1. **Setup**: Clone repo, install dependencies
-2. **Develop**: Write code, run dev server
-3. **Test**: Run unit/integration tests
-4. **Lint/Format**: Check code quality
-5. **Commit**: Git commit and push
-6. **CI/CD**: Automated tests and deployment
-7. **Deploy**: Push to production
-
-### Environment Variables
-
-```bash
+### 環境変数```bash
 # .env
 DATABASE_URL=postgres://localhost/db
 API_KEY=secret-key-here
@@ -471,32 +397,30 @@ NODE_ENV=development
 ```javascript
 // Access in Node.js
 const dbUrl = process.env.DATABASE_URL;
-```
+```## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Bun
-- Continuous integration
-- Deno
-- Developer tools
-- Fork
-- Fuzz testing
+**対象となる重要な用語**:
+- バン
+- 継続的インテグレーション
+- デノ
+- 開発者ツール
+- フォーク
+- ファズテスト
 - Git
 - IDE
 - Node.js
-- Repo
+- レポ
 - Rsync
 - SCM
 - SDK
-- Smoke test
+- 煙テスト
 - SVN
 - TypeScript
 
-## Additional Resources
+## 追加のリソース
 
-- [Git Documentation](https://git-scm.com/doc)
-- [npm Documentation](https://docs.npmjs.com/)
-- [Webpack Guides](https://webpack.js.org/guides/)
-- [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [Git ドキュメント](https://git-scm.com/doc)
+- [npmドキュメント](https://docs.npmjs.com/)
+- [Webpack ガイド](https://webpack.js.org/guides/)
+- [Jest ドキュメント](https://jestjs.io/docs/getting-started)
+- [TypeScript ハンドブック](https://www.typescriptlang.org/docs/handbook/intro.html)

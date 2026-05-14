@@ -1,14 +1,12 @@
-# FlowStudio MCP — Connection References
+# FlowStudio MCP — 接続リファレンス
 
-Connection references wire a flow's connector actions to real authenticated
-connections in the Power Platform. They are required whenever you call
-`update_live_flow` with a definition that uses connector actions.
+接続参照は、フローのコネクタ アクションを実際に認証されたものに結び付けます。
+Power Platform での接続。電話をかけるときは必ず必要です
+`update_live_flow` とコネクタ アクションを使用する定義。
 
 ---
 
-## Structure in a Flow Definition
-
-```json
+## フロー定義内の構造```json
 {
   "properties": {
     "definition": { ... },
@@ -26,36 +24,28 @@ connections in the Power Platform. They are required whenever you call
     }
   }
 }
-```
-
-Keys are **logical reference names** (e.g. `shared_sharepointonline`).
-These match the `connectionName` field inside each action's `host` block.
+```キーは **論理参照名** (例: `shared_sharepointonline`) です。
+これらは、各アクションの `host` ブロック内の `connectionName` フィールドと一致します。
 
 ---
 
-## Finding Connection GUIDs
+## 接続 GUID の検索
 
-Call `get_live_flow` on **any existing flow** that uses the same connection
-and copy the `connectionReferences` block. The GUID after the connector prefix is
-the connection instance owned by the authenticating user.
-
-```python
+同じ接続を使用する**既存のフロー**で `get_live_flow` を呼び出します
+`connectionReferences` ブロックをコピーします。コネクタ接頭辞の後の GUID は次のとおりです。
+認証ユーザーが所有する接続インスタンス。```python
 flow = mcp("get_live_flow", environmentName=ENV, flowName=EXISTING_FLOW_ID)
 conn_refs = flow["properties"]["connectionReferences"]
 # conn_refs["shared_sharepointonline"]["connectionName"]
 # → "shared-sharepointonl-62599557c-1f33-4aec-b4c0-a6e4afcae3be"
-```
-
-> ⚠️ Connection references are **user-scoped**. If a connection is owned
-> by another account, `update_live_flow` will return 403
-> `ConnectionAuthorizationFailed`. You must use a connection belonging to
-> the account whose token is in the `x-api-key` header.
+```> ⚠️ 接続参照は **ユーザースコープ** です。接続が所有されている場合
+> 別のアカウントの場合、`update_live_flow` は 403 を返します
+> @@コード1@@。に属する接続を使用する必要があります
+> `x-api-key` ヘッダーにトークンが含まれているアカウント。
 
 ---
 
-## Passing `connectionReferences` to `update_live_flow`
-
-```python
+## `connectionReferences` を `update_live_flow` に渡す```python
 result = mcp("update_live_flow",
     environmentName=ENV,
     flowName=FLOW_ID,
@@ -67,37 +57,33 @@ result = mcp("update_live_flow",
         }
     }
 )
-```
-
-Only include connections that the definition actually uses.
+```定義で実際に使用される接続のみを含めます。
 
 ---
 
-## Common Connector API IDs
+## 共通コネクタ API ID
 
-| Service | API ID |
+|サービス | API ID |
 |---|---|
-| SharePoint Online | `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` |
-| Office 365 Outlook | `/providers/Microsoft.PowerApps/apis/shared_office365` |
-| Microsoft Teams | `/providers/Microsoft.PowerApps/apis/shared_teams` |
-| OneDrive for Business | `/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness` |
+| SharePointオンライン | `/providers/Microsoft.PowerApps/apis/shared_sharepointonline` |
+| Office 365 の見通し | `/providers/Microsoft.PowerApps/apis/shared_office365` |
+|マイクロソフトチーム | `/providers/Microsoft.PowerApps/apis/shared_teams` |
+|ビジネス向け OneDrive | `/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness` |
 | Azure AD | `/providers/Microsoft.PowerApps/apis/shared_azuread` |
-| HTTP with Azure AD | `/providers/Microsoft.PowerApps/apis/shared_webcontents` |
-| SQL Server | `/providers/Microsoft.PowerApps/apis/shared_sql` |
-| Dataverse | `/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps` |
-| Azure Blob Storage | `/providers/Microsoft.PowerApps/apis/shared_azureblob` |
-| Approvals | `/providers/Microsoft.PowerApps/apis/shared_approvals` |
-| Office 365 Users | `/providers/Microsoft.PowerApps/apis/shared_office365users` |
-| Flow Management | `/providers/Microsoft.PowerApps/apis/shared_flowmanagement` |
+| Azure AD を使用した HTTP | `/providers/Microsoft.PowerApps/apis/shared_webcontents` |
+| SQLサーバー | `/providers/Microsoft.PowerApps/apis/shared_sql` |
+|データバース | `/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps` |
+| Azure Blob ストレージ | `/providers/Microsoft.PowerApps/apis/shared_azureblob` |
+|承認 | `/providers/Microsoft.PowerApps/apis/shared_approvals` |
+| Office 365 ユーザー | `/providers/Microsoft.PowerApps/apis/shared_office365users` |
+|フロー管理 | `/providers/Microsoft.PowerApps/apis/shared_flowmanagement` |
 
 ---
 
-## Teams Adaptive Card Dual-Connection Requirement
+## Teams アダプティブ カードのデュアル接続要件
 
-Flows that send adaptive cards **and** post follow-up messages require two
-separate Teams connections:
-
-```json
+アダプティブ カードを送信するフロー ** およびポスト フォローアップ メッセージ** には 2 つが必要です
+個別の Teams 接続:```json
 "connectionReferences": {
   "shared_teams": {
     "connectionName": "shared-teams-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -108,8 +94,6 @@ separate Teams connections:
     "id": "/providers/Microsoft.PowerApps/apis/shared_teams"
   }
 }
-```
-
-Both can point to the **same underlying Teams account** but must be registered
-as two distinct connection references. The webhook (`OpenApiConnectionWebhook`)
-uses `shared_teams` and subsequent message actions use `shared_teams_1`.
+```どちらも **同じ基礎となる Teams アカウント**を指すことができますが、登録する必要があります
+2 つの異なる接続参照として。 Webhook (`OpenApiConnectionWebhook`)
+`shared_teams` を使用し、後続のメッセージ アクションは `shared_teams_1` を使用します。

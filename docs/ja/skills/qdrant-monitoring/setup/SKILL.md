@@ -2,60 +2,59 @@
 name: qdrant-monitoring-setup
 description: "Guides Qdrant monitoring setup including Prometheus scraping, health probes, Hybrid Cloud metrics, alerting, and log centralization. Use when someone asks 'how to set up monitoring', 'Prometheus config', 'Grafana dashboard', 'health check endpoints', 'how to scrape Hybrid Cloud', 'what alerts to set', 'how to centralize logs', or 'audit logging'."
 ---
+# Qdrant モニタリングを設定する方法
 
-# How to Set Up Qdrant Monitoring
-
-Get Prometheus scraping working first, then health probes, then alerting. Do not skip monitoring setup before going to production.
-
-
-## Prometheus Metrics
-
-Use when: setting up metric collection for the first time or adding a new deployment.
-
-- Node metrics at `/metrics` endpoint [Monitoring docs](https://search.qdrant.tech/md/documentation/operations/monitoring/)
-- Cluster metrics at `/sys_metrics` (Qdrant Cloud only)
-- Prefix customization via `service.metrics_prefix` config or `QDRANT__SERVICE__METRICS_PREFIX` env var
-- Example self-hosted setup with Prometheus + Grafana [prometheus-monitoring repo](https://github.com/qdrant/prometheus-monitoring)
+最初に Prometheus スクレイピングを動作させ、次に正常性プローブを動作させ、次にアラートを発生させます。本番環境に移行する前に、監視のセットアップをスキップしないでください。
 
 
-## Hybrid Cloud Scraping
+## プロメテウスのメトリクス
 
-Use when: running Qdrant Hybrid Cloud and need cluster-level visibility.
+初めてメトリック収集をセットアップする場合、または新しいデプロイメントを追加する場合に使用します。
 
-Do not just scrape Qdrant nodes. In Hybrid Cloud, you manage the Kubernetes data plane. You must also scrape the cluster-exporter and operator pods for full cluster visibility and operator state.
-
-- Hybrid Cloud Prometheus setup tutorial [Hybrid Cloud Prometheus](https://search.qdrant.tech/md/documentation/tutorials-and-examples/hybrid-cloud-prometheus/)
-- Official Grafana dashboards [Grafana dashboard repo](https://github.com/qdrant/qdrant-cloud-grafana-dashboard)
-
-
-## Liveness and Readiness Probes
-
-Use when: configuring Kubernetes health checks.
-
-- Use `/healthz`, `/livez`, `/readyz` for basic status, liveness, and readiness [Kubernetes health endpoints](https://search.qdrant.tech/md/documentation/operations/monitoring/?s=kubernetes-health-endpoints)
+- `/metrics` エンドポイントのノード メトリック [モニタリング ドキュメント](https://search.qdrant.tech/md/documentation/operations/monitoring/)
+- `/sys_metrics` のクラスター メトリック (Qdrant クラウドのみ)
+- `service.metrics_prefix` config または `QDRANT__SERVICE__METRICS_PREFIX` 環境変数によるプレフィックスのカスタマイズ
+- Prometheus + Grafana を使用したセルフホスト型セットアップの例 [prometheus-monitoring リポジトリ](https://github.com/qdrant/prometheus-monitoring)
 
 
-## Alerting
+## ハイブリッド クラウド スクレイピング
 
-Use when: setting up alerts for production or Hybrid Cloud deployments.
+次の場合に使用します: Qdrant Hybrid Cloud を実行しており、クラスターレベルの可視性が必要です。
 
-- Hybrid Cloud provides ~11 pre-configured Prometheus alerts out of the box [Cloud cluster monitoring](https://search.qdrant.tech/md/documentation/cloud/cluster-monitoring/)
-- Use AlertmanagerConfig to route alerts to Slack, PagerDuty, or other targets based on labels
-- At minimum, alert on: optimizer errors, node not ready, replication factor below target, disk usage >80%
+Qdrant ノードを単にスクレイピングしないでください。ハイブリッド クラウドでは、Kubernetes データ プレーンを管理します。クラスターの完全な可視性とオペレーターの状態を得るには、クラスター エクスポーターとオペレーター ポッドをスクレイピングする必要もあります。
 
-
-## Log Centralization and Audit Logging
-
-Use when: enterprise compliance requires centralized logs or audit trails.
-
-- Enable JSON log format for structured analysis: set `logger.format` to `json` in config [Configuration](https://search.qdrant.tech/md/documentation/operations/configuration/)
-- Use FluentD/OpenSearch for log aggregation
-- Audit logs (v1.17+) write to local filesystem (`/qdrant/storage/audit/`), not stdout. Mount a Persistent Volume and deploy a sidecar container to tail these files to stdout so DaemonSets can pick them up. [Audit logging](https://search.qdrant.tech/md/documentation/operations/security/?s=audit-logging)
+- ハイブリッド クラウド Prometheus セットアップ チュートリアル [ハイブリッド クラウド Prometheus](https://search.qdrant.tech/md/documentation/tutorials-and-examples/hybrid-cloud-prometheus/)
+- 公式 Grafana ダッシュボード [Grafana ダッシュボード リポジトリ](https://github.com/qdrant/qdrant-cloud-grafana-dashboard)
 
 
-## What NOT to Do
+## Liveness プローブと Readiness プローブ
 
-- Scrape `/sys_metrics` on self-hosted (only available on Qdrant Cloud)
-- Scrape only Qdrant nodes in Hybrid Cloud (miss cluster-exporter and operator metrics)
-- Skip monitoring setup before going to production (you will regret it)
-- Alert on page cache memory usage (it's supposed to fill available RAM, normal OS behavior)
+次の場合に使用します: Kubernetes ヘルスチェックを構成する場合。
+
+- 基本ステータス、稼働状況、準備状況には `/healthz`、`/livez`、`/readyz` を使用します [Kubernetes 健全性エンドポイント](https://search.qdrant.tech/md/documentation/operations/monitoring/?s=kubernetes-health-endpoints)
+
+
+## アラート中
+
+次の場合に使用します: 運用環境またはハイブリッド クラウド展開のアラートを設定する場合。
+
+- ハイブリッド クラウドは、すぐに使用できる最大 11 個の事前構成された Prometheus アラートを提供します [クラウド クラスターのモニタリング](https://search.qdrant.tech/md/documentation/cloud/cluster-monitoring/)
+- AlertmanagerConfig を使用して、ラベルに基づいて Slack、PagerDuty、またはその他のターゲットにアラートをルーティングします
+- 少なくとも、オプティマイザ エラー、ノードの準備ができていない、レプリケーション係数が目標を下回っている、ディスク使用率 > 80% について警告します。
+
+
+## ログの一元化と監査ログ
+
+次の場合に使用します: エンタープライズ コンプライアンスで一元化されたログまたは監査証跡が必要です。
+
+- 構造化分析の JSON ログ形式を有効にする: config [Configuration](https://search.qdrant.tech/md/documentation/operations/configuration/) で `logger.format` を `json` に設定します。
+- ログ集約には FluentD/OpenSearch を使用します
+- 監査ログ (v1.17 以降) は、stdout ではなく、ローカル ファイルシステム (`/qdrant/storage/audit/`) に書き込みます。永続ボリュームをマウントし、サイドカー コンテナをデプロイしてこれらのファイルを stdout に追跡し、DaemonSet がそれらを取得できるようにします。 [監査ログ](https://search.qdrant.tech/md/documentation/operations/security/?s=audit-logging)
+
+
+## してはいけないこと
+
+- セルフホストで `/sys_metrics` をスクレイピング (Qdrant クラウドでのみ利用可能)
+- ハイブリッド クラウド内の Qdrant ノードのみをスクレイピング (クラスター エクスポーターとオペレーターのメトリクスを欠落)
+- 本番環境に入る前に監視設定をスキップします (後悔することになります)
+- ページ キャッシュ メモリの使用状況に関するアラート (利用可能な RAM がいっぱいになるため、通常の OS の動作が想定されます)

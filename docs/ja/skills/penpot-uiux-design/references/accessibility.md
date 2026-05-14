@@ -1,329 +1,287 @@
-# Accessibility Guidelines Reference (WCAG)
+# アクセシビリティ ガイドライン リファレンス (WCAG)
 
-## Quick Compliance Checklist
+## クイックコンプライアンスチェックリスト
 
-### Level AA Requirements (Minimum Standard)
+### レベル AA 要件 (最低基準)
 
-- [ ] Color contrast 4.5:1 for normal text
-- [ ] Color contrast 3:1 for large text (18px+ or 14px bold)
-- [ ] Touch targets minimum 44×44px
-- [ ] All functionality available via keyboard
-- [ ] Visible focus indicators
-- [ ] No content flashes more than 3 times/second
-- [ ] Page has descriptive title
-- [ ] Link purpose clear from text
-- [ ] Form inputs have labels
-- [ ] Error messages are descriptive
+- [ ] 通常のテキストのカラー コントラスト 4.5:1
+- [ ] 大きなテキストの場合はカラー コントラスト 3:1 (18 ピクセル以上または 14 ピクセルの太字)
+- [ ] タッチターゲットは最小 44×44px
+- [ ] すべての機能がキーボードから利用可能
+- [ ] 目に見えるフォーカスインジケーター
+- [ ] 3 回/秒を超えて点滅するコンテンツはありません
+- [ ] ページには説明的なタイトルが付いています
+- [ ] リンクの目的がテキストから明確に
+- [ ] フォーム入力にはラベルが付いています
+- [ ] エラー メッセージは説明的です
 
 ---
 
-## Color and Contrast
+## 色とコントラスト
 
-### Contrast Ratios
+### コントラスト比
 
-| Element | Minimum Ratio | Enhanced (AAA) |
+|要素 |最小比率 |強化された (AAA) |
 | ------- | ------------- | -------------- |
-| Body text | 4.5:1 | 7:1 |
-| Large text (18px+) | 3:1 | 4.5:1 |
-| UI components | 3:1 | - |
-| Graphical objects | 3:1 | - |
+|本文 | 4.5:1 | 7:1 |
+|大きいテキスト (18px+) | 3:1 | 4.5:1 |
+| UIコンポーネント | 3:1 | - |
+|グラフィックオブジェクト | 3:1 | - |
 
-### Color Independence
+### 色の独立性
 
-Never use color as the only means of conveying information:
+情報を伝える唯一の手段として色を使用しないでください。```テキスト
+✗ エラーフィールドは赤色でのみ表示されます
+✓ 赤枠のエラーフィールド + エラーアイコン + テキストメッセージ
 
-```text
-✗ Error fields shown only in red
-✓ Error fields with red border + error icon + text message
+✗ 赤いアスタリスクのみが付いている必須フィールド
+✓ 「(必須)」というラベルが付いた必須フィールド、またはアイコン + ツールチップが付いているフィールド
 
-✗ Required fields marked only with red asterisk
-✓ Required fields labeled "(required)" or with icon + tooltip
+✗ ステータスはカラードットのみで表示されます
+✓ 色 + アイコン + ラベルテキストによるステータス
 
-✗ Status shown only by color dots
-✓ Status with color + icon + label text
+「」### アクセシブルな色の組み合わせ
 
-```
+**背景の安全なテキストの色:**
 
-### Accessible Color Combinations
-
-**Safe text colors on backgrounds:**
-
-| Background | Text Color | Contrast |
+|背景 |テキストの色 |コントラスト |
 | ---------- | ---------- | -------- |
-| White (#FFFFFF) | Dark gray (#1F2937) | 15.5:1 ✓ |
-| Light gray (#F3F4F6) | Dark gray (#374151) | 10.9:1 ✓ |
-| Primary blue (#2563EB) | White (#FFFFFF) | 4.6:1 ✓ |
-| Dark (#111827) | White (#FFFFFF) | 18.1:1 ✓ |
+|ホワイト (#FFFFFF) |ダークグレー (#1F2937) | 15.5:1 ✓ |
+|ライトグレー (#F3F4F6) |ダークグレー (#374151) | 10.9:1 ✓ |
+|プライマリーブルー (#2563EB) |ホワイト (#FFFFFF) | 4.6:1 ✓ |
+|ダーク (#111827) |ホワイト (#FFFFFF) | 18.1:1 ✓ |
 
-**Colors to avoid for text:**
+**テキストで避けるべき色:**
 
-- Yellow on white (insufficient contrast)
-- Light gray on white
-- Orange on white (marginal at best)
+- 白地に黄色（コントラストが不十分）
+- 白地にライトグレー
+- 白地にオレンジ（せいぜい限界）
 
 ---
 
-## Keyboard Navigation
+## キーボード ナビゲーション
 
-### Requirements
+### 要件
 
-1. **All interactive elements** must be reachable via Tab key
-2. **Logical tab order** following visual layout
-3. **No keyboard traps** (user can always Tab away)
-4. **Focus visible** at all times during keyboard navigation
-5. **Skip links** to bypass repetitive navigation
+1. **すべてのインタラクティブ要素**には、Tab キーを使用してアクセスできる必要があります
+2. 視覚的なレイアウトに従う **論理的なタブ オーダー**
+3. **キーボード トラップなし** (ユーザーはいつでも Tab キーで移動できます)
+4. キーボード ナビゲーション中、常に **フォーカスが表示**
+5. **リンクをスキップ**して、反復的なナビゲーションを回避します
 
-### Focus Indicators
-
-```css
-/* Example focus styles */
-:focus {
-  outline: 2px solid #2563EB;
-  outline-offset: 2px;
+### フォーカスインジケーター```css
+/* フォーカス スタイルの例 */
+:フォーカス{
+  アウトライン: 2px ソリッド #2563EB;
+  アウトラインオフセット: 2px;
 }
 
 :focus:not(:focus-visible) {
-  outline: none; /* Hide for mouse users */
+  概要: なし。 /* マウス ユーザー向けに非表示 */
 }
 
 :focus-visible {
-  outline: 2px solid #2563EB;
-  outline-offset: 2px;
+  アウトライン: 2px ソリッド #2563EB;
+  アウトラインオフセット: 2px;
 }
 
-```
+「」### キーボード ショートカット
 
-### Keyboard Shortcuts
-
-| Key | Expected Behavior |
+|キー |期待される動作 |
 | --- | ----------------- |
-| Tab | Move to next interactive element |
-| Shift+Tab | Move to previous element |
-| Enter | Activate button/link |
-| Space | Activate button, toggle checkbox |
-| Escape | Close modal/dropdown |
-| Arrow keys | Navigate within components |
+|タブ |次のインタラクティブ要素に移動 |
+| Shift+Tab |前の要素に移動 |
+| | を入力してくださいボタン/リンクをアクティブにする |
+|スペース |ボタンをアクティブにし、チェックボックスを切り替えます |
+|エスケープ |モーダル/ドロップダウンを閉じる |
+|矢印キー |コンポーネント内を移動する |
 
 ---
 
-## Screen Reader Support
+## スクリーン リーダーのサポート
 
-### Semantic HTML Elements
+### セマンティック HTML 要素
 
-Use appropriate elements for their purpose:
+目的に応じて適切な要素を使用します。
 
-| Purpose | Element | Not This |
+|目的 |要素 |これではありません |
 | ------- | ------- | -------- |
-| Navigation | `<nav>` | `<div class="nav">` |
-| Main content | `<main>` | `<div id="main">` |
-| Header | `<header>` | `<div class="header">` |
-| Footer | `<footer>` | `<div class="footer">` |
-| Button | `<button>` | `<div onclick>` |
-| Link | `<a href>` | `<span onclick>` |
+|ナビゲーション | `<nav>` | `<div class="nav">` |
+|主な内容 | `<main>` | `<div id="main">` |
+|ヘッダー | `<header>` | `<div class="header">` |
+|フッター | `<footer>` | `<div class="footer">` |
+|ボタン | `<button>` | `<div onclick>` |
+|リンク | `<a href>` | `<span onclick>` |
 
-### Heading Hierarchy
+### 見出し階層```テキスト
+h1 - ページ タイトル (ページごとに 1 つ)
+  h2 - 主要セクション
+    h3 - サブセクション
+      h4 - サブサブセクション
+    h3 - 別のサブセクション
+  h2 - 別の主要セクション
 
-```text
-h1 - Page Title (one per page)
-  h2 - Major Section
-    h3 - Subsection
-      h4 - Sub-subsection
-    h3 - Another Subsection
-  h2 - Another Major Section
+「」**レベルをスキップしないでください** (h1 → h2 なしの h3)
 
-```
+### 画像の代替テキスト```テキスト
+装飾: alt="" (空、省略不可)
+参考情報: alt="画像に表示されている内容の説明"
+機能: alt="画像が実行するアクション"
+複合: alt="簡単な説明" + 近くにある詳細な説明
 
-**Never skip levels** (h1 → h3 without h2)
+「」**代替テキストの例:**```テキスト
+✓ alt="第 4 四半期の売上高が 1,000 万ドルから 1,500 万ドルに増加したことを示す棒グラフ"
+✓ alt="会社ロゴ"
+✓ alt="" (装飾的な背景パターンの場合)
 
-### Image Alt Text
-
-```text
-Decorative: alt="" (empty, not omitted)
-Informative: alt="Description of what image shows"
-Functional: alt="Action the image performs"
-Complex: alt="Brief description" + detailed description nearby
-
-```
-
-**Alt text examples:**
-
-```text
-✓ alt="Bar chart showing sales growth from $10M to $15M in Q4"
-✓ alt="Company logo"
-✓ alt="" (for decorative background pattern)
-
-✗ alt="image" or alt="photo"
+✗ alt="画像" または alt="写真"
 ✗ alt="img_12345.jpg"
-✗ Missing alt attribute entirely
+✗ alt 属性が完全に欠落しています
 
-```
+「」---
 
----
+## タッチとポインタ
 
-## Touch and Pointer
+### タッチターゲットのサイズ
 
-### Touch Target Sizes
-
-| Platform | Minimum | Recommended |
+|プラットフォーム |最小 |おすすめ |
 | -------- | ------- | ----------- |
-| WCAG 2.1 | 44×44px | 48×48px |
-| iOS (Apple) | 44×44pt | - |
-| Android | 48×48dp | - |
+| WCAG 2.1 | 44×44ピクセル | 48×48ピクセル |
+| iOS (アップル) | 44×44pt | - |
+|アンドロイド | 48×48dp | - |
 
-### Touch Target Spacing
+### タッチターゲットの間隔
 
-- Minimum 8px between adjacent targets
-- Prefer 16px+ for comfort
-- Larger targets for primary actions
+- 隣接するターゲット間の最小 8 ピクセル
+- 快適さのために 16px 以上をお勧めします
+- 主なアクションのターゲットを大きくする
 
-### Pointer Gestures
+### ポインタジェスチャ
 
-- Complex gestures must have single-pointer alternatives
-- Drag operations need equivalent click actions
-- Avoid hover-only functionality on touch devices
+- 複雑なジェスチャには単一ポインタの代替手段が必要です
+- ドラッグ操作には同等のクリック操作が必要です
+- タッチデバイスでのホバーのみの機能を避ける
 
 ---
 
-## Forms Accessibility
+## フォームのアクセシビリティ
 
-### Labels
+### ラベル
 
-Every input must have an associated label:
-
-```text
-<label for="email">Email Address</label>
+すべての入力には関連するラベルが必要です。```テキスト
+<label for="email">メールアドレス</label>
 <input type="email" id="email" name="email">
 
-```
-
-### Required Fields
-
-```text
-<!-- Announce to screen readers -->
-<label for="name">
-  Name <span aria-label="required">*</span>
+「」### 必須フィールド```テキスト
+<!-- スクリーン リーダーに通知する -->
+<label for="名前">
+  名前<span aria-label="required">*</span>
 </label>
-<input type="text" id="name" required aria-required="true">
+<input type="text" id="name" 必須 aria-required="true">
 
-```
-
-### Error Handling
-
-```text
-<label for="email">Email</label>
-<input type="email" id="email" aria-invalid="true" aria-describedby="email-error">
+「」### エラー処理```テキスト
+<label for="email">メール</label>
+<input type="email" id="email" aria-invalid="true" aria-descriptionby="email-error">
 <span id="email-error" role="alert">
-  Please enter a valid email address
-</span>
+  有効なメールアドレスを入力してください
+</スパン>
 
-```
+「」### フォームの説明
 
-### Form Instructions
-
-- Provide format hints before input
-- Show password requirements before errors
-- Group related fields with fieldset/legend
+- 入力前に形式のヒントを提供する
+- エラーの前にパスワード要件を表示
+- 関連するフィールドをフィールドセット/凡例でグループ化します
 
 ---
 
-## Dynamic Content
+## 動的コンテンツ
 
-### Live Regions
+### ライブリージョン
 
-For content that updates dynamically:
+動的に更新されるコンテンツの場合:```テキスト
+aria-live="polite" - 都合の良いときにアナウンスします
+aria-live="assertive" - すぐにアナウンスします (中断します)
+role="alert" - 緊急メッセージ (断定的なメッセージなど)
+role="status" - ステータスの更新 (礼儀正しいなど)
 
-```text
-aria-live="polite" - Announce when convenient
-aria-live="assertive" - Announce immediately (interrupts)
-role="alert" - Urgent messages (like assertive)
-role="status" - Status updates (like polite)
-
-```
-
-### Loading States
-
-```text
+「」### ロード状態```テキスト
 <button aria-busy="true" aria-live="polite">
-  <span class="spinner"></span>
-  Loading...
-</button>
+  <span class="スピナー"></span>
+  読み込み中...
+</ボタン>
 
-```
+「」### モーダルダイアログ
 
-### Modal Dialogs
-
-- Focus moves into modal when opened
-- Focus trapped within modal
-- Escape key closes modal
-- Focus returns to trigger element when closed
+- 開くとフォーカスがモーダルに移動します
+- モーダル内に閉じ込められた焦点
+- Escキーでモーダルを閉じます
+- 閉じるとフォーカスがトリガー要素に戻ります
 
 ---
 
-## Testing Accessibility
+## アクセシビリティのテスト
 
-### Manual Testing Checklist
+### 手動テストのチェックリスト
 
-1. **Keyboard only:** Navigate entire page with Tab/Enter
-2. **Screen reader:** Test with VoiceOver (Mac) or NVDA (Windows)
-3. **Zoom 200%:** Content remains readable and usable
-4. **High contrast:** Test with system high contrast mode
-5. **No mouse:** Complete all tasks without pointing device
+1. **キーボードのみ:** Tab/Enter を使用してページ全体を移動します
+2. **スクリーン リーダー:** VoiceOver (Mac) または NVDA (Windows) でテストします。
+3. **ズーム 200%:** コンテンツは引き続き読み取り可能で使用可能です
+4. **ハイ コントラスト:** システム ハイ コントラスト モードでテストします。
+5. **マウスなし:** ポインティング デバイスを使用せずにすべてのタスクを完了します。
 
-### Automated Tools
+### 自動化ツール
 
-- axe DevTools (browser extension)
-- WAVE (WebAIM browser extension)
-- Lighthouse (Chrome DevTools)
-- Color contrast checkers (WebAIM, Contrast Ratio)
+- ax DevTools (ブラウザ拡張機能)
+- WAVE (WebAIM ブラウザ拡張機能)
+- ライトハウス (Chrome DevTools)
+- カラーコントラストチェッカー（WebAIM、コントラスト比）
 
-### Common Issues to Check
+### 確認すべき一般的な問題
 
-- [ ] Missing or empty alt text
-- [ ] Empty links or buttons
-- [ ] Missing form labels
-- [ ] Insufficient color contrast
-- [ ] Missing language attribute
-- [ ] Incorrect heading structure
-- [ ] Missing skip navigation link
-- [ ] Inaccessible custom widgets
+- [ ] 代替テキストが欠落しているか空です
+- [ ] 空のリンクまたはボタン
+- [ ] フォームラベルがありません
+- [ ] 色のコントラストが不十分です
+- [ ] 言語属性がありません
+- [ ] 見出しの構造が正しくありません
+- [ ] スキップ ナビゲーション リンクがありません
+- [ ] アクセスできないカスタム ウィジェット
 
 ---
 
-## ARIA Quick Reference
+## ARIA クイック リファレンス
 
-### Roles
+### 役割
 
-| Role | Purpose |
+|役割 |目的 |
 | ---- | ------- |
-| `button` | Clickable button |
-| `link` | Navigation link |
-| `dialog` | Modal dialog |
-| `alert` | Important message |
-| `navigation` | Navigation region |
-| `main` | Main content |
-| `search` | Search functionality |
-| `tab/tablist/tabpanel` | Tab interface |
+| `button` |クリック可能なボタン |
+| `link` |ナビゲーションリンク |
+| `dialog` |モーダルダイアログ |
+| `alert` |重要なメッセージ |
+| `navigation` |ナビゲーション領域 |
+| `main` |主な内容 |
+| `search` |検索機能 |
+| `tab/tablist/tabpanel` |タブインターフェイス |
 
-### Properties
+### プロパティ
 
-| Property | Purpose |
+|プロパティ |目的 |
 | -------- | ------- |
-| `aria-label` | Accessible name |
-| `aria-labelledby` | Reference to labeling element |
-| `aria-describedby` | Reference to description |
-| `aria-hidden` | Hide from assistive tech |
-| `aria-expanded` | Expandable state |
-| `aria-selected` | Selection state |
-| `aria-disabled` | Disabled state |
-| `aria-required` | Required field |
-| `aria-invalid` | Invalid input |
+| `aria-label` |アクセシブルな名前 |
+| `aria-labelledby` |ラベル付け要素への参照 |
+| `aria-describedby` |説明への参照 |
+| `aria-hidden` |支援技術から隠す |
+| `aria-expanded` |展開可能な状態 |
+| `aria-selected` |選択状態 |
+| `aria-disabled` |無効状態 |
+| `aria-required` |必須フィールド |
+| `aria-invalid` |無効な入力 |
 
-### Golden Rule
+### 黄金律
 
-**First rule of ARIA:** Don't use ARIA if native HTML works.
+**ARIA の最初のルール:** ネイティブ HTML が機能する場合は ARIA を使用しないでください。```テキスト
+✗ <div role="button" tabindex="0">クリック</div>
+✓ <ボタン>クリック</ボタン>
 
-```text
-✗ <div role="button" tabindex="0">Click</div>
-✓ <button>Click</button>
-
-```
+「」

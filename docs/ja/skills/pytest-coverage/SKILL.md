@@ -2,27 +2,26 @@
 name: pytest-coverage
 description: 'Run pytest tests with coverage, discover lines missing coverage, and increase coverage to 100%.'
 ---
+目標は、テストでコードのすべての行をカバーすることです。
 
-The goal is for the tests to cover all lines of code.
-
-Generate a coverage report with:
+以下を使用してカバレッジ レポートを生成します。
 
 pytest --cov --cov-report=annotate:cov_annotate
 
-If you are checking for coverage of a specific module, you can specify it like this:
+特定のモジュールのカバレッジを確認する場合は、次のように指定できます。
 
 pytest --cov=your_module_name --cov-report=annotate:cov_annotate
 
-You can also specify specific tests to run, for example:
+実行する特定のテストを指定することもできます。次に例を示します。
 
-pytest tests/test_your_module.py --cov=your_module_name --cov-report=annotate:cov_annotate
+pytest テスト/test_your_module.py --cov=your_module_name --cov-report=annotate:cov_annotate
 
-Open the cov_annotate directory to view the annotated source code.
-There will be one file per source file. If a file has 100% source coverage, it means all lines are covered by tests, so you do not need to open the file.
+cov_annotate ディレクトリを開いて、注釈付きのソース コードを表示します。
+ソース ファイルごとに 1 つのファイルが存在します。ファイルのソース カバレッジが 100% である場合は、すべての行がテストでカバーされていることを意味するため、ファイルを開く必要はありません。
 
-For each file that has less than 100% test coverage, find the matching file in cov_annotate and review the file.
+テスト カバレッジが 100% 未満の各ファイルについて、cov_annotate で一致するファイルを見つけて、そのファイルを確認します。
 
-If a line starts with a ! (exclamation mark), it means that the line is not covered by tests.
-Add tests to cover the missing lines.
+行が ! で始まる場合(感嘆符) は、その行がテストの対象外であることを意味します。
+欠落している行をカバーするテストを追加します。
 
-Keep running the tests and improving coverage until all lines are covered.
+すべての行がカバーされるまでテストを実行し、カバレッジを改善し続けます。

@@ -2,25 +2,22 @@
 name: rust-mcp-server-generator
 description: 'Generate a complete Rust Model Context Protocol server project with tools, prompts, resources, and tests using the official rmcp SDK'
 ---
+# Rust MCP サーバージェネレーター
 
-# Rust MCP Server Generator
+あなたは Rust MCP サーバー ジェネレーターです。公式 `rmcp` SDK を使用して、本番環境に対応した完全な Rust MCP サーバー プロジェクトを作成します。
 
-You are a Rust MCP server generator. Create a complete, production-ready Rust MCP server project using the official `rmcp` SDK.
+## プロジェクトの要件
 
-## Project Requirements
+ユーザーに次のことを尋ねます。
+1. **プロジェクト名** (例: "my-mcp-server")
+2. **サーバーの説明** (例: 「気象データ MCP サーバー」)
+3. **トランスポート タイプ** (stdio、sse、http、またはすべて)
+4. **含めるツール** (例: 「天気検索」、「予報」、「アラート」)
+5. **プロンプトとリソースを含めるかどうか**
 
-Ask the user for:
-1. **Project name** (e.g., "my-mcp-server")
-2. **Server description** (e.g., "A weather data MCP server")
-3. **Transport type** (stdio, sse, http, or all)
-4. **Tools to include** (e.g., "weather lookup", "forecast", "alerts")
-5. **Whether to include prompts and resources**
+## プロジェクトの構造
 
-## Project Structure
-
-Generate this structure:
-
-```
+この構造を生成します。```
 {project-name}/
 ├── Cargo.toml
 ├── .gitignore
@@ -40,13 +37,9 @@ Generate this structure:
 │   └── state.rs
 └── tests/
     └── integration_test.rs
-```
+```## ファイルテンプレート
 
-## File Templates
-
-### Cargo.toml
-
-```toml
+### Cargo.toml```toml
 [package]
 name = "{project-name}"
 version = "0.1.0"
@@ -78,51 +71,39 @@ http = ["dep:axum", "dep:tower-http"]
 [[bin]]
 name = "{project-name}"
 path = "src/main.rs"
-```
-
-### .gitignore
-
-```gitignore
+```### .gitignore```gitignore
 /target
 Cargo.lock
 *.swp
 *.swo
 *~
 .DS_Store
-```
-
-### README.md
-
-```markdown
+```### README.md```markdown
 # {Project Name}
 
 {Server description}
 
 ## Installation
 
-```bash
-cargo build --release
-```
+```バッシュ
+カーゴビルド --release```
 
 ## Usage
 
 ### Stdio Transport
 
-```bash
-cargo run
-```
+```バッシュ
+カーゴラン```
 
 ### SSE Transport
 
-```bash
-cargo run --features http -- --transport sse
-```
+```バッシュ
+カーゴ ラン --features http -- --transport sse```
 
 ### HTTP Transport
 
-```bash
-cargo run --features http -- --transport http
-```
+```バッシュ
+カーゴ ラン --features http -- --transport http```
 
 ## Configuration
 
@@ -130,14 +111,13 @@ Configure in your MCP client (e.g., Claude Desktop):
 
 ```json
 {
-  "mcpServers": {
-    "{project-name}": {
-      "command": "path/to/target/release/{project-name}",
-      "args": []
+  "mcpサーバー": {
+    "{プロジェクト名}": {
+      "コマンド": "パス/to/target/release/{プロジェクト名}",
+      "引数": []
     }
   }
-}
-```
+}```
 
 ## Tools
 
@@ -147,20 +127,14 @@ Configure in your MCP client (e.g., Claude Desktop):
 
 Run tests:
 
-```bash
-cargo test
-```
+```バッシュ
+貨物試験```
 
 Run with logging:
 
-```bash
-RUST_LOG=debug cargo run
-```
-```
-
-### src/main.rs
-
-```rust
+```バッシュ
+RUST_LOG=デバッグカーゴラン```
+```### src/main.rs```rust
 use anyhow::Result;
 use rmcp::{
     protocol::ServerCapabilities,
@@ -213,11 +187,7 @@ async fn main() -> Result<()> {
     tracing::info!("Server shutting down");
     Ok(())
 }
-```
-
-### src/handler.rs
-
-```rust
+```### src/handler.rs```rust
 use rmcp::{
     model::*,
     protocol::*,
@@ -339,11 +309,7 @@ impl ServerHandler for McpHandler {
         }
     }
 }
-```
-
-### src/state.rs
-
-```rust
+```### src/state.rs```rust
 use std::sync::Arc;
 use tokio::sync::RwLock;
 
@@ -370,19 +336,11 @@ impl ServerState {
         *self.counter.read().await
     }
 }
-```
-
-### src/tools/mod.rs
-
-```rust
+```### src/tools/mod.rs```rust
 pub mod example;
 
 pub use example::ExampleParams;
-```
-
-### src/tools/example.rs
-
-```rust
+```### src/tools/example.rs```rust
 use rmcp::model::Parameters;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
@@ -413,23 +371,11 @@ mod tests {
         assert!(result.contains("test"));
     }
 }
-```
-
-### src/prompts/mod.rs
-
-```rust
+```### src/prompts/mod.rs```rust
 // Prompt implementations can go here if needed
-```
-
-### src/resources/mod.rs
-
-```rust
+```### src/resources/mod.rs```rust
 // Resource implementations can go here if needed
-```
-
-### tests/integration_test.rs
-
-```rust
+```### テスト/integration_test.rs```rust
 use rmcp::{
     model::*,
     protocol::*,
@@ -484,24 +430,20 @@ async fn test_list_resources() {
     let result = handler.list_resources(None, context).await.unwrap();
     assert!(!result.resources.is_empty());
 }
-```
+```## 実装ガイドライン
 
-## Implementation Guidelines
+1. **rmcp-macros を使用**: `#[tool]`、`#[tool_router]`、および `#[tool_handler]` マクロを利用して、よりクリーンなコードを実現します。
+2. **タイプ セーフティ**: すべてのパラメータ タイプに `schemars::JsonSchema` を使用します
+3. **エラー処理**: `Result` 型を適切なエラー メッセージとともに返します
+4. **非同期/待機**: すべてのハンドラーは非同期である必要があります
+5. **状態管理**: 共有状態には `Arc<RwLock<T>>` を使用します
+6. **テスト**: ツールの単体テストとハンドラーの統合テストを含めます。
+7. **ログ**: `tracing` マクロを使用します (`info!`、`debug!`、`warn!`、`error!`)
+8. **ドキュメント**: すべての公開アイテムにドキュメント コメントを追加します。
 
-1. **Use rmcp-macros**: Leverage `#[tool]`, `#[tool_router]`, and `#[tool_handler]` macros for cleaner code
-2. **Type Safety**: Use `schemars::JsonSchema` for all parameter types
-3. **Error Handling**: Return `Result` types with proper error messages
-4. **Async/Await**: All handlers must be async
-5. **State Management**: Use `Arc<RwLock<T>>` for shared state
-6. **Testing**: Include unit tests for tools and integration tests for handlers
-7. **Logging**: Use `tracing` macros (`info!`, `debug!`, `warn!`, `error!`)
-8. **Documentation**: Add doc comments to all public items
+## ツールパターンの例
 
-## Example Tool Patterns
-
-### Simple Read-Only Tool
-
-```rust
+### シンプルな読み取り専用ツール```rust
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct GreetParams {
     pub name: String,
@@ -515,11 +457,7 @@ pub struct GreetParams {
 async fn greet(params: Parameters<GreetParams>) -> String {
     format!("Hello, {}!", params.inner().name)
 }
-```
-
-### Tool with Error Handling
-
-```rust
+```### エラー処理機能を備えたツール```rust
 #[derive(Debug, Deserialize, JsonSchema)]
 pub struct DivideParams {
     pub a: f64,
@@ -535,11 +473,7 @@ async fn divide(params: Parameters<DivideParams>) -> Result<f64, String> {
         Ok(p.a / p.b)
     }
 }
-```
-
-### Tool with State
-
-```rust
+```### 状態のあるツール```rust
 #[tool(
     name = "increment",
     description = "Increments the counter",
@@ -548,22 +482,14 @@ async fn divide(params: Parameters<DivideParams>) -> Result<f64, String> {
 async fn increment(state: &ServerState) -> i32 {
     state.increment().await
 }
-```
+```## 生成されたサーバーの実行
 
-## Running the Generated Server
-
-After generation:
-
-```bash
+生成後:```bash
 cd {project-name}
 cargo build
 cargo test
 cargo run
-```
-
-For Claude Desktop integration:
-
-```json
+```クロード デスクトップ統合の場合:```json
 {
   "mcpServers": {
     "{project-name}": {
@@ -572,6 +498,4 @@ For Claude Desktop integration:
     }
   }
 }
-```
-
-Now generate the complete project based on the user's requirements!
+```次に、ユーザーの要件に基づいて完全なプロジェクトを生成します。

@@ -2,97 +2,94 @@
 name: refactor-method-complexity-reduce
 description: 'Refactor given method `${input:methodName}` to reduce its cognitive complexity to `${input:complexityThreshold}` or below, by extracting helper methods.'
 ---
+# 認知的な複雑さを軽減するためのリファクタリング方法
 
-# Refactor Method to Reduce Cognitive Complexity
+## 目的
+メソッド `${input:methodName}` をリファクタリングし、ロジックを焦点を絞ったヘルパー メソッドに抽出することで、認知的な複雑さを `${input:complexityThreshold}` 以下に軽減します。
 
-## Objective
-Refactor the method `${input:methodName}`, to reduce its cognitive complexity to `${input:complexityThreshold}` or below, by extracting logic into focused helper methods.
+## 指示
 
-## Instructions
+1. **現在の方法を分析**して、認知の複雑さの原因を特定します。
+   - ネストされた条件文
+   - 複数の if-else または switch チェーン
+   - 繰り返されるコードブロック
+   - 条件付きの複数のループ
+   - 複雑なブール式
 
-1. **Analyze the current method** to identify sources of cognitive complexity:
-   - Nested conditional statements
-   - Multiple if-else or switch chains
-   - Repeated code blocks
-   - Multiple loops with conditions
-   - Complex boolean expressions
+2. **抽出の機会を特定する**:
+   - 別のメソッドに抽出できる検証ロジック
+   - 型固有またはケース固有の繰り返し処理
+   - 複雑な変換または計算
+   - 複数回出現する共通パターン
 
-2. **Identify extraction opportunities**:
-   - Validation logic that can be extracted into a separate method
-   - Type-specific or case-specific processing that repeats
-   - Complex transformations or calculations
-   - Common patterns that appear multiple times
+3. **焦点を当てたヘルパー メソッドを抽出**:
+   - 各ヘルパーは単一の明確な責任を負う必要があります
+   - 検証を個別の `Validate*` メソッドに抽出します
+   - 型固有のロジックをハンドラー メソッドに抽出する
+   - 一般的な操作のためのユーティリティ メソッドを作成する
+   - 適切なアクセス レベル (静的、プライベート、非同期) を使用します。
 
-3. **Extract focused helper methods**:
-   - Each helper should have a single, clear responsibility
-   - Extract validation into separate `Validate*` methods
-   - Extract type-specific logic into handler methods
-   - Create utility methods for common operations
-   - Use appropriate access levels (static, private, async)
+4. **メインメソッドを簡略化**:
+   - ネストの深さを減らす
+   - 大規模な if-else チェーンをより小規模な調整された呼び出しに置き換えます
+   - よりクリーンなディスパッチのために適切な場合は switch ステートメントを使用します
+   - main メソッドが高レベルのフローとして読み取れることを確認します。
 
-4. **Simplify the main method**:
-   - Reduce nesting depth
-   - Replace massive if-else chains with smaller orchestrated calls
-   - Use switch statements where appropriate for cleaner dispatch
-   - Ensure the main method reads as a high-level flow
+5. **機能を維持**:
+   - 同じ入出力動作を維持する
+   - すべての検証とエラー処理を維持する
+   - 例外の種類とエラー メッセージを保持する
+   - すべてのパラメータがヘルパーに適切に渡されていることを確認します。
 
-5. **Preserve functionality**:
-   - Maintain the same input/output behavior
-   - Keep all validation and error handling
-   - Preserve exception types and error messages
-   - Ensure all parameters are properly passed to helpers
+6. **ベストプラクティス**:
+   - インスタンスの状態が必要ない場合はヘルパー メソッドを静的にします。
+   - null チェックとガード句を早期に使用する
+   - 不要なローカル変数の作成を避ける
+   - 複数の戻り値にタプルの使用を検討する
+   - 関連するヘルパー メソッドをグループ化する
 
-6. **Best practices**:
-   - Make helper methods static when they don't need instance state
-   - Use null checks and guard clauses early
-   - Avoid creating unnecessary local variables
-   - Consider using tuples for multiple return values
-   - Group related helper methods together
+## 実装アプローチ
 
-## Implementation Approach
+- メインフローをリファクタリングする前にヘルパー メソッドを抽出する
+- 段階的にテストして回帰がないことを確認します
+- 抽出された責任を説明する意味のある名前を使用します
+- 抽出したメソッドを使用場所の近くに保管します
+- 繰り返されるコードパターンを汎用メソッドにすることを検討する
 
-- Extract helper methods before refactoring the main flow
-- Test incrementally to ensure no regressions
-- Use meaningful names that describe the extracted responsibility
-- Keep extracted methods close to where they're used
-- Consider making repeated code patterns into generic methods
+## 結果
 
-## Result
+リファクタリングされたメソッドは次のことを行う必要があります。
+- 認知の複雑性が `${input:complexityThreshold}` の目標閾値以下に軽減されている
+- 読みやすく、保守しやすくなる
+- 懸念事項を明確に分離する
+- テストとデバッグが容易になる
+- すべての元の機能を保持します
 
-The refactored method should:
-- Have cognitive complexity reduced to the target threshold of `${input:complexityThreshold}` or below
-- Be more readable and maintainable
-- Have clear separation of concerns
-- Be easier to test and debug
-- Retain all original functionality
+## テストと検証
 
-## Testing and Validation
+**重要: リファクタリングの完了後、次のことを行う必要があります:**1. リファクタリングされたメソッドとその周辺機能に関連するすべての既存のテストを実行します**
+2. **必須: テスト結果が「failed=0」を示すことを明示的に確認します**
+   - **テストが合格したとは決して想定しないでください** - 常に実際のテスト出力を調べてください
+   - 合格/不合格数を含む概要行を検索します (例: 「passed=X failed=Y」)
+   - **概要に「failed=0」以外の数字が表示される場合、テストは失敗しています**
+   - テスト出力がファイルにある場合は、ファイル全体を読み取り、失敗数を見つけて確認します。
+   - テストの実行は、テストが合格したことを確認することと同じではありません
+   - **失敗がゼロであることを明示的に確認するまでは続行しないでください**
+3. **いずれかのテストが失敗した場合 (失敗 > 0):**
+   - 失敗したテストの数を明確に述べます
+   - それぞれの障害を分析して、どの機能が壊れているかを理解します
+   - 一般的な原因: null 処理、空のコレクション チェック、条件ロジック エラー
+   - リファクタリングされたコード内の根本原因を特定する
+   - リファクタリングされたコードを修正して元の動作を復元します。
+   - テストを再実行し、出力で「failed=0」であることを確認します。
+   - すべてのテストが合格する (失敗=0) まで繰り返します。
+4. **コンパイルを確認** - コンパイル エラーがないことを確認します。
+5. **認知の複雑性をチェック** - メトリクスが `${input:complexityThreshold}` の目標しきい値以下であることを確認します。
 
-**CRITICAL: After completing the refactoring, you MUST:**
-
-1. **Run all existing tests** related to the refactored method and its surrounding functionality
-2. **MANDATORY: Explicitly verify test results show "failed=0"**
-   - **NEVER assume tests passed** - always examine the actual test output
-   - Search for the summary line containing pass/fail counts (e.g., "passed=X failed=Y")
-   - **If the summary shows any number other than "failed=0", tests have FAILED**
-   - If test output is in a file, read the entire file to locate and verify the failure count
-   - Running tests is NOT the same as verifying tests passed
-   - **Do not proceed** until you have explicitly confirmed zero failures
-3. **If any tests fail (failed > 0):**
-   - State clearly how many tests failed
-   - Analyze each failure to understand what functionality was broken
-   - Common causes: null handling, empty collection checks, condition logic errors
-   - Identify the root cause in the refactored code
-   - Correct the refactored code to restore the original behavior
-   - Re-run tests and verify "failed=0" in the output
-   - Repeat until all tests pass (failed=0)
-4. **Verify compilation** - Ensure there are no compilation errors
-5. **Check cognitive complexity** - Confirm the metric is at or below the target threshold of `${input:complexityThreshold}`
-
-## Confirmation Checklist
-- [ ] Code compiles without errors
-- [ ] **Test results explicitly state "failed=0"** (verified by reading the output)
-- [ ] All test failures analyzed and corrected (if any occurred)
-- [ ] Cognitive complexity is at or below the target threshold of `${input:complexityThreshold}`
-- [ ] All original functionality is preserved
-- [ ] Code follows project conventions and standards
+## 確認チェックリスト
+- [ ] コードはエラーなしでコンパイルされます。
+- [ ] **テスト結果は明示的に「failed=0」と表示されます** (出力を読み取ることで確認されます)
+- [ ] すべてのテスト失敗が分析され、修正されました (発生した場合)
+- [ ] 認知の複雑さは `${input:complexityThreshold}` の目標閾値以下です
+- [ ] すべての元の機能が保持されます
+- [ ] コードはプロジェクトの規則と標準に従っています

@@ -1,115 +1,113 @@
-# Browsers & Engines Reference
+# ブラウザとエンジンのリファレンス
 
-Web browsers, rendering engines, and browser-specific information.
+Web ブラウザ、レンダリング エンジン、およびブラウザ固有の情報。
 
-## Major Browsers
+## 主要なブラウザ
 
 ### Google Chrome
 
-**Engine**: Blink (rendering), V8 (JavaScript)  
-**Released**: 2008  
-**Market Share**: ~65% (desktop)  
+**エンジン**: Blink (レンダリング)、V8 (JavaScript)  
+**リリース**: 2008  
+**市場シェア**: ~65% (デスクトップ)  
 
-**Developer Tools**: 
-- Elements panel
-- Console
-- Network tab
-- Performance profiler
-- Lighthouse audits
+**開発者ツール**: 
+- 要素パネル
+- コンソール
+- ネットワークタブ
+- パフォーマンスプロファイラー
+- ライトハウス監査
 
-### Mozilla Firefox
+### モジラ Firefox
 
-**Engine**: Gecko (rendering), SpiderMonkey (JavaScript)  
-**Released**: 2004  
-**Market Share**: ~3% (desktop)  
+**エンジン**: Gecko (レンダリング)、SpiderMonkey (JavaScript)  
+**リリース**: 2004  
+**市場シェア**: ~3% (デスクトップ)  
 
-**Features**:
-- Strong privacy focus
-- Container tabs
-- Enhanced tracking protection
-- Developer Edition
+**特徴**:
+- プライバシーを重視する
+- コンテナタブ
+- 強化された追跡保護
+- 開発者版
 
-### Apple Safari
+### アップルサファリ
 
-**Engine**: WebKit (rendering), JavaScriptCore (JavaScript)  
-**Released**: 2003  
-**Market Share**: ~20% (desktop), dominant on iOS  
+**エンジン**: WebKit (レンダリング)、JavaScriptCore (JavaScript)  
+**リリース**: 2003  
+**市場シェア**: ~20% (デスクトップ)、iOS で優勢  
 
-**Features**:
-- Energy efficient
-- Privacy-focused
-- Intelligent Tracking Prevention
-- Only browser allowed on iOS
+**特徴**:
+- エネルギー効率が高い
+- プライバシー重視
+- インテリジェントな追跡防止
+- iOS ではブラウザのみが許可されます
 
 ### Microsoft Edge
 
-**Engine**: Blink (Chromium-based since 2020)  
-**Released**: 2015 (EdgeHTML), 2020 (Chromium)  
+**エンジン**: Blink (2020 年以降は Chromium ベース)  
+**リリース**: 2015 (EdgeHTML)、2020 (Chromium)  
 
-**Features**:
-- Windows integration
-- Collections
-- Vertical tabs
-- IE Mode (compatibility)
+**特徴**:
+- Windowsの統合
+- コレクション
+- 垂直タブ
+- IEモード（互換性）
 
-### Opera
+### オペラ
 
-**Engine**: Blink  
-**Based on**: Chromium  
+**エンジン**: 点滅  
+**ベース**: クロム  
 
-**Features**:
-- Built-in VPN
-- Ad blocker
-- Sidebar
+**特徴**:
+- 内蔵VPN
+- 広告ブロッカー
+- サイドバー
 
-## Rendering Engines
+## レンダリング エンジン
 
-### Blink
+### 点滅
 
-**Used by**: Chrome, Edge, Opera, Vivaldi  
-**Forked from**: WebKit (2013)  
-**Language**: C++  
+**使用者**: Chrome、Edge、Opera、Vivaldi  
+**フォーク元**: WebKit (2013)  
+**言語**: C++  
 
-### WebKit
+### ウェブキット
 
-**Used by**: Safari  
-**Origin**: KHTML (KDE)  
-**Language**: C++  
+**使用者**: Safari  
+**起源**: KHTML (KDE)  
+**言語**: C++  
 
-### Gecko
+### ヤモリ
 
-**Used by**: Firefox  
-**Developed by**: Mozilla  
-**Language**: C++, Rust  
+**使用者**: Firefox  
+**開発者**: Mozilla  
+**言語**: C++、Rust  
 
-### Legacy Engines
+### レガシー エンジン
 
-- **Trident**: Internet Explorer (deprecated)
-- **EdgeHTML**: Original Edge (deprecated)
-- **Presto**: Old Opera (deprecated)
+- **Trident**: Internet Explorer (非推奨)
+- **EdgeHTML**: オリジナルの Edge (非推奨)
+- **Presto**: 古い Opera (非推奨)
 
-## JavaScript Engines
+## JavaScript エンジン
 
-| Engine | Browser | Language |
-|--------|---------|----------|
-| V8 | Chrome, Edge | C++ |
-| SpiderMonkey | Firefox | C++, Rust |
-| JavaScriptCore | Safari | C++ |
-| Chakra | IE/Edge (legacy) | C++ |
+|エンジン |ブラウザ |言語 |
+|----------|----------|----------|
+| V8 |クローム、エッジ | C++ |
+|スパイダーモンキー | Firefox | C++、Rust |
+| JavaScriptコア |サファリ | C++ |
+|チャクラ | IE/エッジ (レガシー) | C++ |
 
-### V8 Features
+### V8 の機能
 
-- JIT compilation
-- Inline caching
-- Hidden classes
-- Garbage collection
-- WASM support
+- JITコンパイル
+- インラインキャッシュ
+- 隠しクラス
+- ガベージコレクション
+- WASMのサポート
 
-## Browser DevTools
+## ブラウザ開発ツール
 
-### Chrome DevTools
-
-```javascript
+### Chrome デベロッパーツール```javascript
 // Console API
 console.log('message');
 console.table(array);
@@ -122,32 +120,28 @@ $$() // document.querySelectorAll()
 $x() // XPath query
 copy(object) // Copy to clipboard
 monitor(function) // Log function calls
-```
+```**パネル**:
+- 要素: DOM 検査
+- コンソール: JavaScript コンソール
+- ソース: デバッガ
+- ネットワーク: HTTP リクエスト
+- パフォーマンス: プロファイリング
+- メモリ: ヒープ スナップショット
+- 用途: 保管、サービスワーカー
+- セキュリティ: 証明書情報
+- ライトハウス: 監査
 
-**Panels**:
-- Elements: DOM inspection
-- Console: JavaScript console
-- Sources: Debugger
-- Network: HTTP requests
-- Performance: Profiling
-- Memory: Heap snapshots
-- Application: Storage, service workers
-- Security: Certificate  info
-- Lighthouse: Audits
+### Firefox 開発ツール
 
-### Firefox DevTools
+**ユニークな機能**:
+- CSS グリッド インスペクター
+- フォントエディター
+- アクセシビリティインスペクター
+- ネットワークスロットリング
 
-**Unique Features**:
-- CSS Grid Inspector
-- Font Editor
-- Accessibility Inspector
-- Network throttling
+## ブラウザ間の互換性
 
-## Cross-Browser Compatibility
-
-### Browser Prefixes (Vendor Prefixes)
-
-```css
+### ブラウザー プレフィックス (ベンダー プレフィックス)```css
 /* Legacy - use autoprefixer instead */
 .element {
   -webkit-transform: rotate(45deg); /* Chrome, Safari */
@@ -156,13 +150,9 @@ monitor(function) // Log function calls
   -o-transform: rotate(45deg); /* Opera */
   transform: rotate(45deg); /* Standard */
 }
-```
+```**最新のアプローチ**: ビルド ツール (Autoprefixer) を使用する
 
-**Modern approach**: Use build tools (Autoprefixer)
-
-### User Agent String
-
-```javascript
+### ユーザーエージェント文字列```javascript
 // Check browser
 const userAgent = navigator.userAgent;
 
@@ -176,22 +166,14 @@ if (userAgent.includes('Firefox')) {
 if ('serviceWorker' in navigator) {
   // Modern browser
 }
-```
+```### グレースフル デグラデーションとプログレッシブ エンハンスメント
 
-### Graceful Degradation vs Progressive Enhancement
-
-**Graceful Degradation**: Build for modern, degrade for old
-
-```css
+**グレースフル デグラデーション**: 現代向けにビルド、古い向けにデグレード```css
 .container {
   display: grid; /* Modern browsers */
   display: block; /* Fallback */
 }
-```
-
-**Progressive Enhancement**: Build base, enhance for modern
-
-```css
+```**プログレッシブな強化**: ベースを構築し、最新のものに合わせて強化します```css
 .container {
   display: block; /* Base */
 }
@@ -201,112 +183,108 @@ if ('serviceWorker' in navigator) {
     display: grid; /* Enhancement */
   }
 }
-```
+```## ブラウザの機能
 
-## Browser Features
+### サービスワーカー
 
-### Service Workers
+オフライン機能用のバックグラウンド スクリプト
 
-Background scripts for offline functionality
+**サポートされている**: すべての最新ブラウザ
 
-**Supported**: All modern browsers
+### Webアセンブリ
 
-### WebAssembly
+Web 用のバイナリ命令フォーマット
 
-Binary instruction format for web
+**サポートされている**: すべての最新ブラウザ
 
-**Supported**: All modern browsers
+### Web コンポーネント
 
-### Web Components
+カスタム HTML 要素
 
-Custom HTML elements
-
-**Supported**: All modern browsers (with polyfills)
+**サポートされている**: すべての最新ブラウザ (ポリフィル付き)
 
 ### WebRTC
 
-Real-time communication
+リアルタイム通信
 
-**Supported**: All modern browsers
+**サポートされている**: すべての最新ブラウザ
 
-## Browser Storage
+## ブラウザストレージ
 
-| Storage | Size | Expiration | Scope |
-|---------|------|------------|-------|
-| Cookies | 4KB | Configurable | Domain |
-| LocalStorage | 5-10MB | Never | Origin |
-| SessionStorage | 5-10MB | Tab close | Origin |
-| IndexedDB | 50MB+ | Never | Origin |
+|ストレージ |サイズ |有効期限 |範囲 |
+|----------|------|---------------|----------|
+|クッキー | 4KB |設定可能 |ドメイン |
+|ローカルストレージ | 5～10MB |決して |由来 |
+|セッションストレージ | 5～10MB |タブを閉じる |由来 |
+|インデックス付きDB | 50MB以上 |決して |由来 |
 
-## Mobile Browsers
+## モバイルブラウザ
 
-### iOS Safari
+### iOS サファリ
 
-- Only browser allowed on iOS
-- All iOS browsers use WebKit
-- Different from desktop Safari
+- iOS ではブラウザのみが許可されます
+- すべての iOS ブラウザは WebKit を使用します
+- デスクトップSafariとは異なります
 
-### Chrome Mobile (Android)
+### Chrome モバイル (Android)
 
-- Blink engine
-- Similar to desktop Chrome
+- ブリンクエンジン
+- デスクトップ Chrome に似ています
 
-### Samsung Internet
+### サムスンインターネット
 
-- Based on Chromium
-- Popular on Samsung devices
+- クロムベース
+- Samsung デバイスで人気
 
-## Browser Market Share (2026)
+## ブラウザ市場シェア (2026 年)
 
-**Desktop**:
-- Chrome: ~65%
-- Safari: ~20%
-- Edge: ~5%
+**デスクトップ**:
+- クロム: ~65%
+- サファリ: ~20%
+- エッジ: ~5%
 - Firefox: ~3%
-- Other: ~7%
+- その他: ~7%
 
-**Mobile**:
-- Chrome: ~65%
-- Safari: ~25%
-- Samsung Internet: ~5%
-- Other: ~5%
+**モバイル**:
+- クロム: ~65%
+- サファリ: ~25%
+- Samsung インターネット: ~5%
+- その他: ~5%
 
-## Testing Browsers
+## ブラウザのテスト
 
-### Tools
+### ツール
 
-- **BrowserStack**: Cloud browser testing
-- **Sauce Labs**: Automated testing
-- **CrossBrowserTesting**: Live testing
-- **LambdaTest**: Cross-browser testing
+- **BrowserStack**: クラウド ブラウザのテスト
+- **Sauce Labs**: 自動テスト
+- **CrossBrowserTesting**: ライブ テスト
+- **LambdaTest**: クロスブラウザーテスト
 
-### Virtual Machines
+### 仮想マシン
 
-- **VirtualBox**: Free virtualization
-- **Parallels**: Mac virtualization
-- **Windows Dev VMs**: Free Windows VMs
+- **VirtualBox**: 無料の仮想化
+- **Parallels**: Mac 仮想化
+- **Windows Dev VM**: 無料の Windows VM
 
-## Developer Features
+## 開発者向け機能
 
-### Chromium-based Developer Features
+### Chromium ベースの開発者の機能
 
-- **Remote Debugging**: Debug mobile devices
-- **Workspaces**: Edit files directly
-- **Snippets**: Reusable code snippets
-- **Coverage**: Unused code detection
+- **リモート デバッグ**: モバイル デバイスをデバッグします
+- **ワークスペース**: ファイルを直接編集します
+- **スニペット**: 再利用可能なコード スニペット
+- **対象範囲**: 未使用コードの検出
 
-### Firefox Developer Edition
+### Firefox 開発者版
 
-- **CSS Grid Inspector**
-- **Flexbox Inspector**
-- **Font Panel**
-- **Accessibility Audits**
+- **CSS グリッド インスペクター**
+- **フレックスボックスインスペクター**
+- **フォントパネル**
+- **アクセシビリティ監査**
 
-## Browser Extensions
+## ブラウザ拡張機能
 
-### Manifest V3 (Modern)
-
-```json
+### マニフェスト V3 (モダン)```json
 {
   "manifest_version": 3,
   "name": "My Extension",
@@ -320,39 +298,37 @@ Real-time communication
     "js": ["content.js"]
   }]
 }
-```
+```## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Apple Safari
-- Blink
-- blink element
-- Browser
-- Browsing context
-- Chrome
-- Developer tools
-- Engine
+**対象となる重要な用語**:
+- アップルサファリ
+- 点滅
+- 点滅要素
+- ブラウザ
+- コンテキストの閲覧
+- クロム
+- 開発者ツール
+- エンジン
 - Firefox OS
-- Gecko
+- ヤモリ
 - Google Chrome
-- JavaScript engine
-- Microsoft Edge
+- JavaScriptエンジン
+- マイクロソフトエッジ
 - Microsoft Internet Explorer
-- Mozilla Firefox
-- Netscape Navigator
-- Opera browser
-- Presto
-- Rendering engine
-- Trident
-- User agent
-- Vendor prefix
-- WebKit
+- モジラ Firefox
+- ネットスケープナビゲーター
+- オペラブラウザ
+- プレスト
+- レンダリングエンジン
+- トライデント
+- ユーザーエージェント
+- ベンダープレフィックス
+- ウェブキット
 
-## Additional Resources
+## 追加のリソース
 
 - [Chrome DevTools](https://developer.chrome.com/docs/devtools/)
-- [Firefox Developer Tools](https://firefox-source-docs.mozilla.org/devtools-user/)
-- [Safari Web Inspector](https://developer.apple.com/safari/tools/)
-- [Can I Use](https://caniuse.com/)
-- [Browser Market Share](https://gs.statcounter.com/)
+- [Firefox 開発者ツール](https://firefox-source-docs.mozilla.org/devtools-user/)
+- [Safari Web インスペクター](https://developer.apple.com/safari/tools/)
+- [使用できますか](https://caniuse.com/)
+- [ブラウザ市場シェア](https://gs.statcounter.com/)

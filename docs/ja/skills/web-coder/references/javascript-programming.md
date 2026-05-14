@@ -1,32 +1,30 @@
-# JavaScript & Programming Reference
+# JavaScript とプログラミングのリファレンス
 
-Comprehensive reference for JavaScript, ECMAScript, programming concepts, and modern JS patterns.
+JavaScript、ECMAScript、プログラミングの概念、最新の JS パターンに関する包括的なリファレンス。
 
-## Core Concepts
+## コアコンセプト
 
 ### JavaScript
-High-level, interpreted programming language that conforms to the ECMAScript specification. Primary language for web development alongside HTML and CSS.
+ECMAScript 仕様に準拠した高レベルのインタープリタ型プログラミング言語。 HTML や CSS と並ぶ Web 開発の主要言語。
 
-**Key Characteristics**:
-- Dynamically typed
-- Prototype-based inheritance
-- First-class functions
-- Event-driven
-- Asynchronous execution
+**主な特徴**:
+- 動的に型付けされる
+- プロトタイプベースの継承
+- 第一級の関数
+- イベント駆動型
+- 非同期実行
 
 ### ECMAScript
-The standardized specification that JavaScript implements.
+JavaScript が実装する標準化された仕様。
 
-**Major Versions**:
-- **ES5** (2009): Strict mode, JSON support
-- **ES6/ES2015**: Classes, arrow functions, promises, modules
-- **ES2016+**: Async/await, optional chaining, nullish coalescing
+**メジャー バージョン**:
+- **ES5** (2009): 厳密モード、JSON サポート
+- **ES6/ES2015**: クラス、アロー関数、プロミス、モジュール
+- **ES2016+**: 非同期/待機、オプションのチェーン、ヌル合体
 
-## Data Types
+## データ型
 
-### Primitive Types
-
-```javascript
+### プリミティブ型```javascript
 // String
 let name = "John";
 let greeting = 'Hello';
@@ -54,11 +52,7 @@ let empty = null;
 
 // Symbol (unique identifier)
 let sym = Symbol('description');
-```
-
-### Type Checking
-
-```javascript
+```### 型チェック```javascript
 typeof "hello"; // "string"
 typeof 42; // "number"
 typeof true; // "boolean"
@@ -74,11 +68,7 @@ Array.isArray([]); // true
 
 // Null check
 value === null; // true if null
-```
-
-### Type Coercion and Conversion
-
-```javascript
+```### 型強制と変換```javascript
 // Implicit coercion
 "5" + 2; // "52" (string concatenation)
 "5" - 2; // 3 (numeric subtraction)
@@ -93,28 +83,24 @@ Boolean(0); // false
 Boolean(1); // true
 parseInt("123px"); // 123
 parseFloat("3.14"); // 3.14
-```
+```### 真実の価値観と虚偽の価値観
 
-### Truthy and Falsy Values
-
-**Falsy values** (evaluate to false):
+**偽の値** (偽と評価される):
 - `false`
-- `0`, `-0`
-- `""` (empty string)
-- `null`
+- `0`、`-0`
+- `""` (空の文字列)
+- @@コード4@@
 - `undefined`
 - `NaN`
 
-**Everything else is truthy**, including:
-- `"0"` (string)
-- `"false"` (string)
-- `[]` (empty array)
-- `{}` (empty object)
-- `function() {}` (empty function)
+**その他の内容はすべて真実です**。以下を含みます。
+- `"0"` (文字列)
+- `"false"` (文字列)
+- `[]` (空の配列)
+- `{}` (空のオブジェクト)
+- `function() {}` (空の関数)
 
-## Variables and Constants
-
-```javascript
+## 変数と定数```javascript
 // var (function-scoped, hoisted - avoid in modern code)
 var oldStyle = "avoid this";
 
@@ -130,29 +116,17 @@ MAX = 200; // ✗ TypeError
 const person = { name: "John" };
 person.name = "Jane"; // ✓ works (mutating object)
 person = {}; // ✗ TypeError (reassigning variable)
-```
+```## 関数
 
-## Functions
-
-### Function Declaration
-
-```javascript
+### 関数の宣言```javascript
 function greet(name) {
   return `Hello, ${name}!`;
 }
-```
-
-### Function Expression
-
-```javascript
+```### 関数式```javascript
 const greet = function(name) {
   return `Hello, ${name}!`;
 };
-```
-
-### Arrow Functions
-
-```javascript
+```### アロー関数```javascript
 // Basic syntax
 const add = (a, b) => a + b;
 
@@ -170,16 +144,12 @@ const getRandom = () => Math.random();
 
 // Implicit return of object (wrap in parentheses)
 const makePerson = (name, age) => ({ name, age });
-```
+```### 第一級関数
 
-### First-Class Functions
-
-Functions are values that can be:
-- Assigned to variables
-- Passed as arguments
-- Returned from other functions
-
-```javascript
+関数は次のような値です。
+- 変数への代入
+- 引数として渡されます
+- 他の関数から返される```javascript
 // Assign to variable
 const fn = function() { return 42; };
 
@@ -197,13 +167,9 @@ function createMultiplier(factor) {
 }
 const double = createMultiplier(2);
 double(5); // 10
-```
+```### 閉鎖
 
-### Closures
-
-Functions that remember their lexical scope:
-
-```javascript
+語彙範囲を記憶する関数:```javascript
 function createCounter() {
   let count = 0; // Private variable
   
@@ -227,13 +193,9 @@ counter.increment(); // 1
 counter.increment(); // 2
 counter.decrement(); // 1
 counter.getCount(); // 1
-```
+```### コールバック関数
 
-### Callback Functions
-
-Function passed as an argument to be executed later:
-
-```javascript
+後で実行される引数として渡される関数:```javascript
 // Array methods use callbacks
 const numbers = [1, 2, 3, 4, 5];
 
@@ -244,11 +206,7 @@ const doubled = numbers.map(num => num * 2);
 const evens = numbers.filter(num => num % 2 === 0);
 
 const sum = numbers.reduce((acc, num) => acc + num, 0);
-```
-
-### IIFE (Immediately Invoked Function Expression)
-
-```javascript
+```### IIFE (即時に呼び出される関数式)```javascript
 (function() {
   // Code here runs immediately
   console.log("IIFE executed");
@@ -263,13 +221,9 @@ const sum = numbers.reduce((acc, num) => acc + num, 0);
 (() => {
   console.log("Arrow IIFE");
 })();
-```
+```## オブジェクト
 
-## Objects
-
-### Object Creation
-
-```javascript
+### オブジェクトの作成```javascript
 // Object literal
 const person = {
   name: "John",
@@ -290,11 +244,7 @@ const john = new Person("John", 30);
 // Object.create
 const proto = { greet() { return "Hello"; } };
 const obj = Object.create(proto);
-```
-
-### Accessing Properties
-
-```javascript
+```### プロパティへのアクセス```javascript
 const obj = { name: "John", age: 30 };
 
 // Dot notation
@@ -308,11 +258,7 @@ obj[key]; // "John"
 // Optional chaining (ES2020)
 obj.address?.city; // undefined (no error if address doesn't exist)
 obj.getName?.(); // undefined (no error if getName doesn't exist)
-```
-
-### Object Methods
-
-```javascript
+```### オブジェクトメソッド```javascript
 const person = { name: "John", age: 30, city: "NYC" };
 
 // Get keys
@@ -336,11 +282,7 @@ person.age = 31; // Silently fails (throws in strict mode)
 
 // Seal (prevent adding/removing properties)
 Object.seal(person);
-```
-
-### Destructuring
-
-```javascript
+```### 構造の分割```javascript
 // Object destructuring
 const person = { name: "John", age: 30, city: "NYC" };
 const { name, age } = person;
@@ -363,11 +305,7 @@ const [first, second, ...rest] = numbers;
 // Skip elements
 const [a, , c] = numbers;
 // a = 1, c = 3
-```
-
-## Arrays
-
-```javascript
+```## 配列```javascript
 // Create arrays
 const arr = [1, 2, 3];
 const empty = [];
@@ -418,13 +356,9 @@ const portion = arr.slice(1, 3); // Index 1 to 3 (exclusive)
 
 // Flat (flatten nested arrays)
 [[1, 2], [3, 4]].flat(); // [1, 2, 3, 4]
-```
+```## 制御フロー
 
-## Control Flow
-
-### Conditionals
-
-```javascript
+### 条件文```javascript
 // if/else
 if (condition) {
   // code
@@ -459,11 +393,7 @@ const value = falsy || "default";
 
 // Optional chaining
 const city = user?.address?.city;
-```
-
-### Loops
-
-```javascript
+```### ループ```javascript
 // for loop
 for (let i = 0; i < 10; i++) {
   console.log(i);
@@ -498,13 +428,9 @@ for (let i = 0; i < 10; i++) {
   if (i === 3) continue; // Skip iteration
   console.log(i);
 }
-```
+```## 非同期 JavaScript
 
-## Asynchronous JavaScript
-
-### Callbacks
-
-```javascript
+### コールバック```javascript
 function fetchData(callback) {
   setTimeout(() => {
     callback("Data received");
@@ -512,11 +438,7 @@ function fetchData(callback) {
 }
 
 fetchData(data => console.log(data));
-```
-
-### Promises
-
-```javascript
+```### 約束```javascript
 // Create promise
 const promise = new Promise((resolve, reject) => {
   setTimeout(() => {
@@ -540,11 +462,7 @@ Promise.all([promise1, promise2]); // Wait for all
 Promise.race([promise1, promise2]); // First to complete
 Promise.allSettled([promise1, promise2]); // Wait for all (ES2020)
 Promise.any([promise1, promise2]); // First to succeed (ES2021)
-```
-
-### Async/Await
-
-```javascript
+```### 非同期/待機```javascript
 // Async function
 async function fetchData() {
   try {
@@ -561,11 +479,7 @@ fetchData().then(data => console.log(data));
 
 // Top-level await (ES2022, in modules)
 const data = await fetchData();
-```
-
-## Classes
-
-```javascript
+```## クラス```javascript
 class Person {
   // Constructor
   constructor(name, age) {
@@ -614,13 +528,9 @@ Person.species(); // "Homo sapiens"
 
 const jane = new Employee("Jane", 25, "Developer");
 jane.greet(); // "Hello, I'm Jane, I'm a Developer"
-```
+```## モジュール
 
-## Modules
-
-### ES6 Modules (ESM)
-
-```javascript
+### ES6 モジュール (ESM)```javascript
 // Export (math.js)
 export const PI = 3.14159;
 export function add(a, b) {
@@ -634,11 +544,7 @@ export default class Calculator {
 import Calculator, { PI, add } from './math.js';
 import * as math from './math.js';
 import { add as sum } from './math.js'; // Rename
-```
-
-### CommonJS (Node.js)
-
-```javascript
+```### CommonJS (Node.js)```javascript
 // Export (math.js)
 module.exports = {
   add(a, b) {
@@ -648,11 +554,7 @@ module.exports = {
 
 // Import
 const math = require('./math');
-```
-
-## Error Handling
-
-```javascript
+```## エラー処理```javascript
 // Try/catch
 try {
   // Code that might throw
@@ -673,135 +575,133 @@ class ValidationError extends Error {
 }
 
 throw new ValidationError("Invalid input");
-```
+```## ベストプラクティス
 
-## Best Practices
+### やるべきこと
+- ✅ デフォルトでは `const` を使用し、必要に応じて `let` を使用します
+- ✅ 厳密モードを使用する (`'use strict';`)
+- ✅ コールバックにアロー関数を使用する
+- ✅ 文字列補間にテンプレート リテラルを使用する
+- ✅ よりクリーンなコードのために分割を使用する
+- ✅ 非同期コードには async/await を使用します
+- ✅ エラーを適切に処理する
+- ✅ わかりやすい変数名を使用する
+- ✅ 機能を小さく、集中的に保つ
+- ✅ 最新の ES6+ 機能を使用する
 
-### Do's
-- ✅ Use `const` by default, `let` when needed
-- ✅ Use strict mode (`'use strict';`)
-- ✅ Use arrow functions for callbacks
-- ✅ Use template literals for string interpolation
-- ✅ Use destructuring for cleaner code
-- ✅ Use async/await for asynchronous code
-- ✅ Handle errors properly
-- ✅ Use descriptive variable names
-- ✅ Keep functions small and focused
-- ✅ Use modern ES6+ features
+### やってはいけないこと
+- ❌ `var` を使用します (`let` または `const` を使用します)
+- ❌ グローバルスコープを汚染する
+- ❌ `==` を使用します (厳密な等価性を得るには `===` を使用します)
+- ❌ 関数パラメータを変更する
+- ❌ `eval()` または `with()` を使用します
+- ❌ エラーをサイレントに無視します
+- ❌ I/O 操作に同期コードを使用する
+- ❌ 深くネストされたコールバックを作成する (コールバック地獄)
 
-### Don'ts
-- ❌ Use `var` (use `let` or `const`)
-- ❌ Pollute global scope
-- ❌ Use `==` (use `===` for strict equality)
-- ❌ Modify function parameters
-- ❌ Use `eval()` or `with()`
-- ❌ Ignore errors silently
-- ❌ Use synchronous code for I/O operations
-- ❌ Create deeply nested callbacks (callback hell)
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Algorithm
-- Argument
-- Array
-- Asynchronous
-- Binding
+**対象となる重要な用語**:
+- アルゴリズム
+- 引数
+- 配列
+- 非同期
+- バインディング
 - BigInt
-- Bitwise flags
-- Block (scripting)
-- Boolean
-- Callback function
-- Camel case
-- Class
-- Closure
-- Code point
-- Code unit
-- Compile
-- Compile time
-- Conditional
-- Constant
-- Constructor
-- Control flow
-- Deep copy
-- Deserialization
+- ビットごとのフラグ
+- ブロック (スクリプト)
+- ブール値
+- コールバック関数
+- キャメルケース
+- クラス
+- 閉鎖
+- コードポイント
+- コード単位
+- コンパイル
+- コンパイル時間
+- 条件付き
+- 定数
+- コンストラクター
+- 制御フロー
+- ディープコピー
+- デシリアライズ
 - ECMAScript
-- Encapsulation
-- Exception
-- Expando
-- First-class function
-- Function
-- Hoisting
+- カプセル化
+- 例外
+- エキスパンド
+- 最高級の機能
+- 機能
+- 吊り上げ
 - IIFE
-- Identifier
-- Immutable
-- Inheritance
-- Instance
+- 識別子
+- 不変
+- 継承
+- インスタンス
 - JavaScript
 - JSON
-- JSON type representation
-- Just-In-Time Compilation (JIT)
-- Kebab case
-- Keyword
-- Literal
-- Local scope
-- Local variable
-- Loop
-- Method
-- Mixin
-- Modularity
-- Mutable
-- Namespace
+- JSON型表現
+- ジャストインタイムコンパイル (JIT)
+- ケバブケース
+- キーワード
+- リテラル
+- ローカルスコープ
+- ローカル変数
+- ループ
+- 方法
+- ミックスイン
+- モジュール性
+- 変更可能
+- 名前空間
 - NaN
-- Native
-- Null
-- Nullish value
-- Number
-- Object
-- Object reference
+- ネイティブ
+- ヌル
+- ヌル値
+- 番号
+- オブジェクト
+- オブジェクト参照
 - OOP
-- Operand
-- Operator
-- Parameter
-- Parse
-- Polymorphism
-- Primitive
-- Promise
-- Property (JavaScript)
-- Prototype
-- Prototype-based programming
-- Pseudocode
-- Recursion
-- Regular expression
-- Scope
-- Serialization
-- Serializable object
-- Shallow copy
-- Signature (functions)
-- Sloppy mode
-- Snake case
-- Static method
-- Static typing
-- Statement
-- Strict mode
-- String
-- Stringifier
-- Symbol
-- Synchronous
-- Syntax
-- Syntax error
-- Type
-- Type coercion
-- Type conversion
-- Truthy
-- Falsy
-- Undefined
-- Value
-- Variable
+- オペランド
+- オペレーター
+- パラメータ
+- 解析する
+- ポリモーフィズム
+- 原始的
+- 約束
+- プロパティ (JavaScript)
+- プロトタイプ
+- プロトタイプベースのプログラミング
+- 疑似コード
+- 再帰
+- 正規表現
+- 範囲
+- 連載
+- シリアル化可能なオブジェクト
+- 浅いコピー
+- シグネチャ（機能）
+- ずさんなモード
+- ヘビケース
+- 静的メソッド
+- 静的型付け
+- 声明
+- ストリクトモード
+- 文字列
+- ストリンファイアー
+- シンボル
+- 同期
+- 構文
+- 構文エラー
+- タイプ
+- 型の強制
+- 型変換
+- 真実
+- 偽りの
+- 未定義
+- 値
+- 変数
 
-## Additional Resources
+## 追加のリソース
 
-- [MDN JavaScript Reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-- [ECMAScript Specification](https://tc39.es/ecma262/)
+- [MDN JavaScript リファレンス](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [ECMAScript仕様](https://tc39.es/ecma262/)
 - [JavaScript.info](https://javascript.info/)
-- [You Don't Know JS (book series)](https://github.com/getify/You-Dont-Know-JS)
+- [You Don't Know JS (書籍シリーズ)](https://github.com/getify/You-Dont-Know-JS)

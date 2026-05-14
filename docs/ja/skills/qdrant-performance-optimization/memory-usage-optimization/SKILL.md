@@ -2,66 +2,62 @@
 name: qdrant-memory-usage-optimization
 description: "Diagnoses and reduces Qdrant memory usage. Use when someone reports 'memory too high', 'RAM keeps growing', 'node crashed', 'out of memory', 'memory leak', or asks 'why is memory usage so high?', 'how to reduce RAM?'. Also use when memory doesn't match calculations, quantization didn't help, or nodes crash during recovery."
 ---
+# メモリ使用量を理解する
 
-# Understanding memory usage
+Qdrant は 2 種類のメモリで動作します。
 
-Qdrant operates with two types of memory:
+- 常駐メモリ (別名 RSSAnon) - ID トラッカーなどの内部データ構造に使用されるメモリと、`always_ram=true` の量子化ベクトルやペイロード インデックスなど、RAM に常駐する必要があるコンポーネントに使用されるメモリ。
 
-- Resident memory (aka RSSAnon) - memory used for internal data structures like the ID tracker, plus components that must stay in RAM, such as quantized vectors when `always_ram=true` and payload indexes.
+- OS ページ キャッシュ - ディスク読み取りのキャッシュに使用されるメモリ。必要に応じて解放できます。通常、元のベクトルはページ キャッシュに保存されるため、RAM がいっぱいになってもサービスがクラッシュすることはありませんが、パフォーマンスが低下する可能性があります。
 
-- OS page cache - memory used for caching disk reads, which can be released when needed. Original vectors are normally stored in page cache, so the service won't crash if RAM is full, but performance may degrade.
+OS ページ キャッシュが使用可能なすべての RAM を占有するのは正常ですが、常駐メモリが合計 RAM の 80% を超えている場合は、問題の兆候です。
 
-It is normal for the OS page cache to occupy all available RAM, but if resident memory is above 80% of total RAM, it is a sign of a problem.
+## メモリ使用量の監視
 
-## Memory usage monitoring
+- Qdrant は、`/metrics` エンドポイントを通じてメモリ使用量を公開します。 [監視ドキュメント](https://search.qdrant.tech/md/documentation/operations/monitoring/) を参照してください。
 
-- Qdrant exposes memory usage through the `/metrics` endpoint. See [Monitoring docs](https://search.qdrant.tech/md/documentation/operations/monitoring/).
-
-<!-- ToDo: Talk about memory usage of each components once API is available -->
-
-
-## How much memory is needed for Qdrant?
-
-Optimal memory usage depends on the use case.
-
-- For regular search scenarios, general guidelines are provided in the [Capacity planning docs](https://search.qdrant.tech/md/documentation/operations/capacity-planning/).
-
-For a detailed breakdown of memory usage at large scale, see [Large scale memory usage example](https://search.qdrant.tech/md/documentation/tutorials-operations/large-scale-search/?s=memory-usage).
-
-Payload indexes and HNSW graph also require memory, along with vectors themselves, so it's important to consider them in calculations.
-
-Additionally, Qdrant requires some extra memory for optimizations. During optimization, optimized segments are fully loaded into RAM, so it is important to leave enough headroom.
-The larger `max_segment_size` is, the more headroom is needed.
+<!-- ToDo: API が利用可能になったら、各コンポーネントのメモリ使用量について説明します -->
 
 
-### When to put HNSW index on disk
+## Qdrant にはどれくらいのメモリが必要ですか?
 
-Putting frequently used components (such as HNSW index) on disk might cause significant performance degradation.
-There are some scenarios, however, when it can be a good option:
+最適なメモリ使用量はユースケースによって異なります。
 
-- Deployments with low latency disks - local NVMe or similar.
-- Multi-tenant deployments, where only a subset of tenants is frequently accessed, so that only a fraction of data & index is loaded in RAM at a time.
-- For deployments with [inline storage](https://search.qdrant.tech/md/documentation/operations/optimize/?s=inline-storage-in-hnsw-index) enabled.
+- 通常の検索シナリオの場合、一般的なガイドラインが [キャパシティ プランニング ドキュメント](https://search.qdrant.tech/md/documentation/operations/capacity-planning/) に記載されています。
+
+大規模なメモリ使用量の詳細な内訳については、[大規模なメモリ使用量の例](https://search.qdrant.tech/md/documentation/tutorials-operations/large-scale-search/?s=memory-usage) を参照してください。
+
+ペイロード インデックスと HNSW グラフはベクトル自体に加えてメモリも必要とするため、計算ではそれらを考慮することが重要です。
+
+さらに、Qdrant は最適化のために追加のメモリを必要とします。最適化中、最適化されたセグメントは RAM に完全にロードされるため、十分なヘッドルームを残すことが重要です。
+`max_segment_size` が大きいほど、より多くのヘッドルームが必要になります。
 
 
-## How to minimize memory footprint
+### HNSW インデックスをディスクに配置するタイミング
 
-The main challenge is to put on disk those parts of data, which are rarely accessed.
-Here are the main techniques to achieve that:
+頻繁に使用されるコンポーネント (HNSW インデックスなど) をディスクに配置すると、パフォーマンスが大幅に低下する可能性があります。
+ただし、これが良い選択肢となるシナリオもいくつかあります。
 
-- Use quantization to store only compressed vectors in RAM [Quantization docs](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+- 低遅延ディスクを使用した展開 - ローカル NVMe など。
+- マルチテナント展開。テナントのサブセットのみが頻繁にアクセスされるため、一度に RAM に読み込まれるデータとインデックスの一部のみが使用されます。
+- [インライン ストレージ](https://search.qdrant.tech/md/documentation/operations/optimize/?s=inline-storage-in-hnsw-index) が有効になっている展開の場合。
 
-- Use float16 or int8 datatypes to reduce memory usage of vectors by 2x or 4x respectively, with some tradeoff in precision. Read more about vector datatypes in [documentation](https://search.qdrant.tech/md/documentation/manage-data/vectors/?s=datatypes)
 
-- Leverage Matryoshka Representation Learning (MRL) to store only small vectors in RAM while keeping large vectors on disk. Examples of how to use MRL with Qdrant Cloud inference: [MRL docs](https://search.qdrant.tech/md/documentation/inference/?s=reduce-vector-dimensionality-with-matryoshka-models)
+## メモリ使用量を最小限に抑える方法
 
-- For multi-tenant deployments with small tenants, vectors might be stored on disk because the same tenant's data is stored together [Multitenancy docs](https://search.qdrant.tech/md/documentation/manage-data/multitenancy/?s=calibrate-performance)
+主な課題は、めったにアクセスされないデータの部分をディスクに置くことです。
+それを実現するための主なテクニックは次のとおりです。
 
-- For deployments with fast local storage and relatively low requirements for search throughput, it may be possible to store all components of vector store on disk. Read more about the performance implications of on-disk storage in [the article](https://qdrant.tech/articles/memory-consumption/)
+- 量子化を使用して、圧縮ベクトルのみを RAM に保存します [量子化ドキュメント](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
 
-- For low RAM environments, consider `async_scorer` config, which enables support of `io_uring` for parallel disk access, which can significantly improve performance of on-disk storage. Read more about `async_scorer` in [the article](https://qdrant.tech/articles/io_uring/) (only available on Linux with kernel 5.11+)
+- float16 または int8 データ型を使用すると、ベクトルのメモリ使用量がそれぞれ 2 倍または 4 倍に削減されますが、精度は若干犠牲になります。ベクター データ型の詳細については、[ドキュメント](https://search.qdrant.tech/md/documentation/manage-data/vectors/?s=datatypes) をご覧ください。- Matryoshka Representation Learning (MRL) を利用して、大きなベクトルをディスク上に保持しながら、小さなベクトルのみを RAM に保存します。 Qdrant Cloud 推論で MRL を使用する方法の例: [MRL ドキュメント](https://search.qdrant.tech/md/documentation/inference/?s=reduce-vector-digitality-with-matryoshka-models)
 
-- Consider storing Sparse Vectors and text payload on disk, as they are usually more disk-friendly than dense vectors.
-- Configure payload indexes to be stored on disk [docs](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=on-disk-payload-index)
-- Configure sparse vectors to be stored on disk [docs](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=sparse-vector-index)
+- 小規模なテナントを含むマルチテナント展開の場合、同じテナントのデータが一緒に保存されるため、ベクトルがディスクに保存される可能性があります [マルチテナントのドキュメント](https://search.qdrant.tech/md/documentation/manage-data/multitenancy/?s=calibrate-performance)
 
+- 高速なローカル ストレージと検索スループットの要件が比較的低い展開の場合、ベクター ストアのすべてのコンポーネントをディスクに保存できる場合があります。オンディスク ストレージのパフォーマンスへの影響について詳しくは、[記事](https://qdrant.tech/articles/memory-consumption/) をご覧ください。
+
+- RAM が少ない環境の場合は、`async_scorer` 構成を検討してください。これにより、並列ディスク アクセス用の `io_uring` のサポートが有効になり、ディスク上のストレージのパフォーマンスが大幅に向上します。 `async_scorer` について詳しくは、[記事](https://qdrant.tech/articles/io_uring/) をご覧ください (カーネル 5.11 以降の Linux でのみ利用可能)
+
+- スパース ベクターとテキスト ペイロードは通常、密なベクターよりもディスクに優しいため、ディスクに保存することを検討してください。
+- ディスクに保存されるペイロード インデックスを構成する [ドキュメント](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=on-disk-payload-index)
+- スパース ベクトルをディスクに保存するように構成する [ドキュメント](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=sparse-vector-index)

@@ -2,106 +2,92 @@
 name: publish-to-pages
 description: 'Publish presentations and web content to GitHub Pages. Converts PPTX, PDF, HTML, or Google Slides to a live GitHub Pages URL. Handles repo creation, file conversion, Pages enablement, and returns the live URL. Use when the user wants to publish, deploy, or share a presentation or HTML file via GitHub Pages.'
 ---
+# ページに公開する
 
-# publish-to-pages
+プレゼンテーションや Web コンテンツを一度に GitHub Pages に公開します。
 
-Publish any presentation or web content to GitHub Pages in one shot.
+## 1. 前提条件の確認
 
-## 1. Prerequisites Check
+これらをサイレントに実行します。表面的なエラーのみ:「」バッシュ
+コマンド -v gh >/dev/null || echo "欠落: gh CLI — https://cli.github.com からインストール"
+gh 認証ステータス &>/dev/null || echo "欠落: gh が認証されていません — 'gh auth login' を実行してください"
+コマンド -v python3 >/dev/null || echo "欠落: python3 (PPTX 変換に必要)"
+「」`poppler-utils` はオプションです (`pdftoppm` による PDF 変換)。それをブロックしないでください。
 
-Run these silently. Only surface errors:
+## 2. 入力検出
 
-```bash
-command -v gh >/dev/null || echo "MISSING: gh CLI — install from https://cli.github.com"
-gh auth status &>/dev/null || echo "MISSING: gh not authenticated — run 'gh auth login'"
-command -v python3 >/dev/null || echo "MISSING: python3 (needed for PPTX conversion)"
-```
+ユーザーが提供したものから入力タイプを決定します。
 
-`poppler-utils` is optional (PDF conversion via `pdftoppm`). Don't block on it.
+|入力 |検出 |
+|------|-----------|
+| HTML ファイル |拡張子 `.html` または `.htm` |
+| PPTX ファイル |拡張子 `.pptx` |
+| PDFファイル |拡張子 `.pdf` |
+| Google スライドの URL | URL には `docs.google.com/presentation` が含まれています |
 
-## 2. Input Detection
+**リポ名**が指定されていない場合は、ユーザーに尋ねます。デフォルト: 拡張子なしのファイル名。
 
-Determine input type from what the user provides:
+## 3. 変換
 
-| Input | Detection |
-|-------|-----------|
-| HTML file | Extension `.html` or `.htm` |
-| PPTX file | Extension `.pptx` |
-| PDF file | Extension `.pdf` |
-| Google Slides URL | URL contains `docs.google.com/presentation` |
+### 大きなファイルの処理
 
-Ask the user for a **repo name** if not provided. Default: filename without extension.
+どちらの変換スクリプトも、大きなファイルを自動的に検出し、**外部アセット モード**に切り替えます。
+- **PPTX:** ファイルが 20MB を超えるか、画像が 50 枚を超える → 画像は `assets/` に別のファイルとして保存されます
+- **PDF:** ファイル >20MB または >50 ページ → ページ PNG は `assets/` に保存されます
+- ファイルが 150MB を超えると警告が表示されます (PPTX では代わりに PDF パスが提案されます)
 
-## 3. Conversion
+これにより、個々のファイルは GitHub の 100MB 制限を十分に下回ります。小さなファイルでも、単一の自己完結型 HTML が生成されます。
 
-### Large File Handling
-
-Both conversion scripts automatically detect large files and switch to **external assets mode**:
-- **PPTX:** Files >20MB or with >50 images → images saved as separate files in `assets/`
-- **PDF:** Files >20MB or with >50 pages → page PNGs saved in `assets/`
-- Files >150MB print a warning (PPTX suggests PDF path instead)
-
-This keeps individual files well under GitHub's 100MB limit. Small files still produce a single self-contained HTML.
-
-You can force the behavior with `--external-assets` or `--no-external-assets`.
+`--external-assets` または `--no-external-assets` を使用して動作を強制できます。
 
 ### HTML
-No conversion needed. Use the file directly as `index.html`.
+変換は必要ありません。ファイルを `index.html` として直接使用します。
 
 ### PPTX
-Run the conversion script:
-```bash
+変換スクリプトを実行します。「」バッシュ
 python3 SKILL_DIR/scripts/convert-pptx.py INPUT_FILE /tmp/output.html
-# For large files, force external assets:
+# 大きなファイルの場合は、外部アセットを強制します。
 python3 SKILL_DIR/scripts/convert-pptx.py INPUT_FILE /tmp/output.html --external-assets
-```
-If `python-pptx` is missing, tell the user: `pip install python-pptx`
+「」`python-pptx` が欠落している場合は、ユーザーに次のように伝えます: `pip install python-pptx`
 
 ### PDF
-Convert with the included script (requires `poppler-utils` for `pdftoppm`):
-```bash
+付属のスクリプトを使用して変換します (`pdftoppm` の場合は `poppler-utils` が必要です):「」バッシュ
 python3 SKILL_DIR/scripts/convert-pdf.py INPUT_FILE /tmp/output.html
-# For large files, force external assets:
+# 大きなファイルの場合は、外部アセットを強制します。
 python3 SKILL_DIR/scripts/convert-pdf.py INPUT_FILE /tmp/output.html --external-assets
-```
-Each page is rendered as a PNG and embedded into HTML with slide navigation.
-If `pdftoppm` is missing, tell the user: `apt install poppler-utils` (or `brew install poppler` on macOS).
+「」各ページは PNG としてレンダリングされ、スライド ナビゲーションを備えた HTML に埋め込まれます。
+`pdftoppm` がない場合は、ユーザーに次のように伝えます: `apt install poppler-utils` (macOS では `brew install poppler`)。
 
-### Google Slides
-1. Extract the presentation ID from the URL (the long string between `/d/` and `/`)
-2. Download as PPTX:
-```bash
-curl -L "https://docs.google.com/presentation/d/PRESENTATION_ID/export/pptx" -o /tmp/slides.pptx
-```
-3. Then convert the PPTX using the convert script above.
+### Google スライド
+1. URL からプレゼンテーション ID を抽出します (`/d/` と `/` の間の長い文字列)
+2. PPTX としてダウンロードします。「」バッシュ
+カール -L "https://docs.google.com/presentation/d/PRESENTATION_ID/export/pptx" -o /tmp/slides.pptx
+「」3. 次に、上記の変換スクリプトを使用して PPTX を変換します。
 
-## 4. Publishing
+## 4. 出版
 
-### Visibility
-Repos are created **public** by default. If the user specifies `private` (or wants a private repo), use `--private` — but note that GitHub Pages on private repos requires a Pro, Team, or Enterprise plan.
+### 可視性
+リポジトリはデフォルトで**パブリック**に作成されます。ユーザーが `private` を指定する場合 (またはプライベート リポジトリが必要な場合)、`--private` を使用します。ただし、プライベート リポジトリの GitHub Pages には Pro、Team、または Enterprise プランが必要であることに注意してください。
 
-### Publish
-```bash
-bash SKILL_DIR/scripts/publish.sh /path/to/index.html REPO_NAME public "Description"
-```
+＃＃＃ 公開「」バッシュ
+bash SKILL_DIR/scripts/publish.sh /path/to/index.html REPO_NAME public "説明"
+「」ユーザーが要求した場合は、`public` の代わりに `private` を渡します。
 
-Pass `private` instead of `public` if the user requests it.
+スクリプトはリポジトリを作成し、`index.html` (存在する場合はさらに `assets/`) をプッシュし、GitHub Pages を有効にします。
 
-The script creates the repo, pushes `index.html` (plus `assets/` if present), and enables GitHub Pages.
+**注意:** 外部アセット モードを使用すると、出力 HTML は `assets/` 内のファイルを参照します。パブリッシュ スクリプトは、HTML ファイルとともに `assets/` ディレクトリを自動的に検出してコピーします。 HTML ファイルとその `assets/` ディレクトリが同じ親ディレクトリにあることを確認してください。
 
-**Note:** When external assets mode is used, the output HTML references files in `assets/`. The publish script automatically detects and copies the `assets/` directory alongside the HTML file. Make sure the HTML file and its `assets/` directory are in the same parent directory.
+## 5. 出力
 
-## 5. Output
+ユーザーに次のように伝えます。
+- **リポジトリ:** `https://github.com/USERNAME/REPO_NAME`
+- **ライブ URL:** `https://USERNAME.github.io/REPO_NAME/`
+- **注意:** ページが公開されるまでに 1 ～ 2 分かかります。
 
-Tell the user:
-- **Repository:** `https://github.com/USERNAME/REPO_NAME`
-- **Live URL:** `https://USERNAME.github.io/REPO_NAME/`
-- **Note:** Pages takes 1-2 minutes to go live.
+## エラー処理
 
-## Error Handling
-
-- **Repo already exists:** Suggest appending a number (`my-slides-2`) or a date (`my-slides-2026`).
-- **Pages enablement fails:** Still return the repo URL. User can enable Pages manually in repo Settings.
-- **PPTX conversion fails:** Tell user to run `pip install python-pptx`.
-- **PDF conversion fails:** Suggest installing `poppler-utils` (`apt install poppler-utils` or `brew install poppler`).
-- **Google Slides download fails:** The presentation may not be publicly accessible. Ask user to make it viewable or download the PPTX manually.
+- **リポジトリは既に存在します:** 数値 (`my-slides-2`) または日付 (`my-slides-2026`) を追加することを提案します。
+- **ページの有効化に失敗します:** それでもリポジトリ URL が返されます。ユーザーはリポジトリ設定でページを手動で有効にすることができます。
+- **PPTX 変換が失敗します:** `pip install python-pptx` を実行するようにユーザーに指示します。
+- **PDF 変換が失敗する:** `poppler-utils` (`apt install poppler-utils` または `brew install poppler`) をインストールすることをお勧めします。
+- **Google スライドのダウンロードが失敗する:** プレゼンテーションは一般公開されていない可能性があります。 PPTX を表示可能にするか、PPTX を手動でダウンロードするようにユーザーに依頼します。

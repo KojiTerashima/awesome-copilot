@@ -1,15 +1,14 @@
-# Secret & Credential Detection Patterns
+# 秘密および資格情報の検出パターン
 
-Load this file during Step 3 (Secrets & Exposure Scan).
+ステップ 3 (秘密および暴露スキャン) 中にこのファイルをロードします。
 
 ---
 
-## High-Confidence Secret Patterns
+## 信頼性の高い秘密のパターン
 
-These patterns almost always indicate a real secret:
+これらのパターンは、ほとんどの場合、本当の秘密を示しています。
 
-### API Keys & Tokens
-```regex
+### API キーとトークン```regex
 # OpenAI
 sk-[a-zA-Z0-9]{48}
 
@@ -57,16 +56,10 @@ key-[a-zA-Z0-9]{32}
 
 # Heroku
 [0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}
-```
-
-### Private Keys
-```regex
+```### 秘密鍵```regex
 -----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY( BLOCK)?-----
 -----BEGIN CERTIFICATE-----
-```
-
-### Database Connection Strings
-```regex
+```### データベース接続文字列```regex
 # MongoDB
 mongodb(\+srv)?:\/\/[^:]+:[^@]+@
 
@@ -78,39 +71,29 @@ redis:\/\/:[^@]+@
 
 # Generic connection string with password
 (connection[_-]?string|connstr|db[_-]?url).*password=
-```
-
-### Hardcoded Passwords (variable name signals)
-```regex
+```### ハードコードされたパスワード (変数名シグナル)```regex
 # Variable names that suggest secrets
 (password|passwd|pwd|secret|api_key|apikey|auth_token|access_token|private_key)
   \s*[=:]\s*["'][^"']{8,}["']
-```
+```---
 
----
+## エントロピーベースの検出
 
-## Entropy-Based Detection
-
-Apply to string literals > 20 characters in assignment context.
-High entropy (Shannon entropy > 4.5 bits/char) + length > 20 = likely secret.
-
-```
+代入コンテキスト内の 20 文字を超える文字列リテラルに適用されます。
+高エントロピー (シャノン エントロピー > 4.5 ビット/文字) + 長さ > 20 = 秘密である可能性があります。```
 Calculate entropy: -sum(p * log2(p)) for each character frequency p
 Threshold: > 4.5 bits/char AND > 20 chars AND assigned to a variable
-```
-
-Common false positives to exclude:
-- Lorem ipsum text
-- HTML/CSS content
-- Base64-encoded non-sensitive config (but flag and note)
-- UUID/GUID (entropy is high but format is recognizable)
+```除外すべき一般的な誤検知:
+- ロレム・イプサムテキスト
+- HTML/CSSコンテンツ
+- Base64 でエンコードされた非機密設定 (ただし、フラグとメモ)
+- UUID/GUID (エントロピーは高いがフォーマットは認識可能)
 
 ---
 
-## Files That Should Never Be Committed
+## 決してコミットしてはいけないファイル
 
-Flag if these files exist in the repo root or are tracked by git:
-```
+これらのファイルがリポジトリ ルートに存在するか、git によって追跡されているかどうかをフラグします。```
 .env
 .env.local
 .env.production
@@ -127,46 +110,34 @@ gcp-key.json
 secrets.yaml
 secrets.json
 config/secrets.yml
-```
-
-Also check `.gitignore` — if a secret file pattern is NOT in .gitignore, flag it.
+````.gitignore` もチェックしてください。シークレット ファイル パターンが .gitignore にない場合は、それにフラグを立てます。
 
 ---
 
-## CI/CD & IaC Secret Risks
+## CI/CD および IaC の秘密のリスク
 
-### GitHub Actions — flag these patterns:
-```yaml
+### GitHub アクション — 次のパターンにフラグを立てます。```yaml
 # Hardcoded values in env: blocks (should use ${{ secrets.NAME }})
 env:
   API_KEY: "actual-value-here"   # VULNERABLE
 
 # Printing secrets
 - run: echo ${{ secrets.MY_SECRET }}   # leaks to logs
-```
-
-### Docker — flag these:
-```dockerfile
+```### Docker — 以下にフラグを立てます。```dockerfile
 # Secrets in ENV (persisted in image layers)
 ENV AWS_SECRET_KEY=actual-value
 
 # Secrets passed as build args (visible in image history)
 ARG API_KEY=actual-value
-```
-
-### Terraform — flag these:
-```hcl
+```### Terraform — 以下にフラグを立てます。```hcl
 # Hardcoded sensitive values (should use var or data source)
 password = "hardcoded-password"
 access_key = "AKIAIOSFODNN7EXAMPLE"
-```
+```---
 
----
+## 安全なパターン (フラグを立てないでください)
 
-## Safe Patterns (Do NOT flag)
-
-These are intentional placeholders — recognize and skip:
-```
+これらは意図的なプレースホルダーです。認識してスキップしてください。```
 "your-api-key-here"
 "<YOUR_API_KEY>"
 "${API_KEY}"

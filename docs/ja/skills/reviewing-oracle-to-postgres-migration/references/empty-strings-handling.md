@@ -1,24 +1,22 @@
-# Oracle to PostgreSQL: Empty String Handling Differences
+# Oracle と PostgreSQL: 空文字列処理の違い
 
-## Problem
+## 問題
 
-Oracle automatically converts empty strings (`''`) to `NULL` in VARCHAR2 columns. PostgreSQL preserves empty strings as distinct from `NULL`. This difference can cause application logic errors and test failures during migration.
+Oracle は、VARCHAR2 列の空の文字列 (`''`) を `NULL` に自動的に変換します。 PostgreSQL は、空の文字列を `NULL` とは区別して保持します。この違いにより、移行中にアプリケーション ロジック エラーやテストの失敗が発生する可能性があります。
 
-## Behavior Comparison
+## 動作の比較
 
-**Oracle:**
-- Empty string (`''`) is **always** treated as `NULL` in VARCHAR2 columns
-- `WHERE column = ''` never matches rows; use `WHERE column IS NULL`
-- Cannot distinguish between explicit empty string and `NULL`
+**オラクル:**
+- 空の文字列 (`''`) は、VARCHAR2 列では **常に** `NULL` として扱われます
+- `WHERE column = ''` は行と一致しません。 `WHERE column IS NULL`を使用してください
+- 明示的な空文字列と `NULL` を区別できません
 
 **PostgreSQL:**
-- Empty string (`''`) and `NULL` are **distinct** values
-- `WHERE column = ''` matches empty strings
-- `WHERE column IS NULL` matches `NULL` values
+- 空の文字列 (`''`) と `NULL` は **別の** 値です
+- `WHERE column = ''` は空の文字列と一致します
+- `WHERE column IS NULL` は `NULL` の値と一致します
 
-## Code Example
-
-```sql
+## コード例```sql
 -- Oracle behavior
 INSERT INTO table (varchar_column) VALUES ('');
 SELECT * FROM table WHERE varchar_column IS NULL;  -- Returns the row
@@ -27,43 +25,29 @@ SELECT * FROM table WHERE varchar_column IS NULL;  -- Returns the row
 INSERT INTO table (varchar_column) VALUES ('');
 SELECT * FROM table WHERE varchar_column IS NULL;  -- Returns nothing
 SELECT * FROM table WHERE varchar_column = '';     -- Returns the row
-```
+```## 移行アクション
 
-## Migration Actions
-
-### 1. Stored Procedures
-Update logic that assumes empty strings convert to `NULL`:
-
-```sql
+### 1. ストアド プロシージャ
+空の文字列が `NULL` に変換されることを前提とした更新ロジック:```sql
 -- Preserve Oracle behavior (convert empty to NULL):
 column = NULLIF(param, '')
 
 -- Or accept PostgreSQL behavior (preserve empty string):
 column = param
-```
-
-### 2. Application Code
-Review code that checks for `NULL` and ensure it handles empty strings appropriately:
-
-```csharp
+```### 2. アプリケーションコード
+`NULL` をチェックするコードを確認し、空の文字列が適切に処理されることを確認します。```csharp
 // Before (Oracle-specific)
 if (value == null) { }
 
 // After (PostgreSQL-compatible)
 if (string.IsNullOrEmpty(value)) { }
-```
-
-### 3. Tests
-Update assertions to be compatible with both behaviors:
-
-```csharp
+```### 3. テスト
+両方の動作と互換性があるようにアサーションを更新します。```csharp
 // Migration-compatible test pattern
 var value = reader.IsDBNull(columnIndex) ? null : reader.GetString(columnIndex);
 Assert.IsTrue(string.IsNullOrEmpty(value));
-```
-
-### 4. Data Migration
-Decide whether to:
-- Convert existing `NULL` values to empty strings
-- Convert empty strings to `NULL` using `NULLIF(column, '')`
-- Leave values as-is and update application logic
+```### 4. データ移行
+次のことを行うかどうかを決定します。
+- 既存の `NULL` 値を空の文字列に変換します
+- `NULLIF(column, '')` を使用して空の文字列を `NULL` に変換します
+- 値をそのままにして、アプリケーション ロジックを更新します

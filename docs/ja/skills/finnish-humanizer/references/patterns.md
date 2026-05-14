@@ -1,338 +1,328 @@
-# Finnish Humanizer — Täysi patternilista
+# Finnish Humanizer — 完全なパターンのリスト
 
-Kaikki 26 AI-patternia esimerkkeineen. SKILL.md sisältää 7 kanonista esimerkkiä; tämä tiedosto sisältää loput.
+全 26 AI パターンと例。 SKILL.md には 7 つの標準的な例が含まれています。このファイルには残りの部分が含まれています。
 
-## Sisällysluettelo
+## 目次
 
-- [Suomenkieliset AI-patternit (1–12)](#suomenkieliset-ai-patternit)
-  - [1. Passiivin ylikäyttö](#1-passiivin-ylikäyttö)
-  - [2. Nominaalirakenteet](#2-nominaalirakenteet)
-  - [3. Pronominien ylikäyttö](#3-pronominien-ylikäyttö)
-  - [4. Puuttuvat partikkelit](#4-puuttuvat-partikkelit)
-  - [5. Käännösrakenteet](#5-käännösrakenteet)
-  - [6. Genetiiviketjut](#6-genetiiviketjut)
-  - [7. Adjektiivikasaumat](#7-adjektiivikasaumat)
-  - [8. Ylipitkät virkkeet](#8-ylipitkät-virkkeet)
-  - [9. Joka/jotka-kasautuminen](#9-jokajotka-kasautuminen)
-  - [10. Virkakielisyys väärässä kontekstissa](#10-virkakielisyys-väärässä-kontekstissa)
-  - [11. Astevaihtelun välttely](#11-astevaihtelun-välttely)
-  - [12. Liiallinen kohteliaisuus](#12-liiallinen-kohteliaisuus)
-- [Universaalit AI-patternit suomeksi (13–26)](#universaalit-ai-patternit-suomeksi)
-  - [13. Merkittävyyden liioittelu](#13-merkittävyyden-liioittelu)
-  - [14. Mainosmainen kieli](#14-mainosmainen-kieli)
-  - [15. Mielistelevä sävy](#15-mielistelevä-sävy)
-  - [16. Liiallinen varautuminen](#16-liiallinen-varautuminen)
-  - [17. Täytesanat ja -lauseet](#17-täytesanat-ja--lauseet)
-  - [18. Geneerinen lopetus](#18-geneerinen-lopetus)
-  - [19. Epämääräiset viittaukset](#19-epämääräiset-viittaukset)
-  - [20. "Haasteista huolimatta" -kaava](#20-haasteista-huolimatta--kaava)
-  - [21. Kolmen sääntö ja synonyymikierto](#21-kolmen-sääntö-ja-synonyymikierto)
-  - [22. Partisiippirakenteet](#22-partisiippirakenteet)
-  - [23. Kopulan välttely](#23-kopulan-välttely)
-  - [24. Negatiivinen rinnastus](#24-negatiivinen-rinnastus)
-  - [25. Keinotekoiset skaalaviittaukset](#25-keinotekoiset-skaalaviittaukset)
-  - [26. Tietokatkos-vastuuvapauslausekkeet](#26-tietokatkos-vastuuvapauslausekkeet)
-- [Tyylimerkinnät](#tyylimerkinnät)
-- [Täysimittainen esimerkki](#täysimittainen-esimerkki)
-
----
-
-## Suomenkieliset AI-patternit
-
-### 1. Passiivin ylikäyttö
-
-AI käyttää passiivia kaikkialla. Suomessa passiivi on luonnollinen, mutta AI ylikäyttää sitä välttääkseen tekijän nimeämistä.
-
-Ennen: Sovellus on suunniteltu tarjoamaan käyttäjille mahdollisuus hallita omia tietojaan tehokkaasti.
-Jälkeen: Sovelluksella hallitset omat tietosi.
-
-Ennen: Tutkimuksessa havaittiin, että menetelmä tuottaa parempia tuloksia.
-Jälkeen: Tutkimus osoitti menetelmän toimivan paremmin.
-
-### 2. Nominaalirakenteet
-
-Verbi muutetaan substantiiviksi ja lisätään tukiverbi. "Suorittaa tarkistuksen" kun voisi sanoa "tarkistaa".
-
-Ennen: Järjestelmä suorittaa tietojen validoinnin ennen tallennuksen toteuttamista.
-Jälkeen: Järjestelmä validoi tiedot ennen tallennusta.
-
-Ennen: Tiimi tekee arvioinnin projektin etenemisestä.
-Jälkeen: Tiimi arvioi projektin etenemisen.
-
-### 3. Pronominien ylikäyttö
-
-Suomessa pronomini jätetään pois kun konteksti on selvä. AI lisää "me", "se", "tämä" joka paikkaan englannin mallin mukaan.
-
-Ennen: Me uskomme, että meidän ratkaisumme tarjoaa merkittävää arvoa.
-Jälkeen: Ratkaisumme tuottaa arvoa.
-
-Ennen: Se on työkalu, joka auttaa sinua parantamaan tuottavuuttasi.
-Jälkeen: Työkalu parantaa tuottavuuttasi.
-
-### 4. Puuttuvat partikkelit
-
-AI ei käytä partikkeleita (-han/-hän, -pa/-pä, kyllä, vaan, nyt, sit) koska ne ovat epämuodollisia. Suomessa ne ovat normaalia kirjoituskieltä.
-
-Ennen: Tämä on totta. Kyse on kuitenkin siitä, että tilanne on monimutkainen.
-Jälkeen: Onhan se totta. Tilanne on vaan monimutkainen.
-
-Ennen: Kokeile tätä. Se toimii hyvin.
-Jälkeen: Kokeilepa tätä. Kyllä se toimii.
-
-### 5. Käännösrakenteet
-
-AI tuottaa suomea joka noudattaa englannin sanajärjestystä ja rakenteita. Tuloksena on teknisesti oikeaa mutta luonnotonta kieltä.
-
-Ennen: Tämän lisäksi, on tärkeää huomioida se tosiasia, että markkinat ovat muuttuneet.
-Jälkeen: Markkinatkin ovat muuttuneet.
-
-Ennen: Se on juuri tämä seikka, joka tekee asiasta mielenkiintoisen.
-Jälkeen: Juuri tämä tekee asiasta kiinnostavan.
-
-### 6. Genetiiviketjut
-
-Peräkkäiset genetiivimuodot kasautuvat kun AI yrittää ilmaista monimutkaisia suhteita yhdessä rakenteessa.
-
-Ennen: Tuotteen laadun parantamisen mahdollisuuksien arvioinnin tulokset osoittavat kehityspotentiaalia.
-Jälkeen: Arvioimme miten tuotteen laatua voisi parantaa. Kehityspotentiaalia löytyi.
-
-Ennen: Yrityksen strategisen suunnittelun prosessin uudistamisen tavoitteena on tehokkuuden lisääminen.
-Jälkeen: Yritys uudistaa strategista suunnitteluaan tehostuakseen.
-
-### 7. Adjektiivikasaumat
-
-AI kasaa useita adjektiiveja peräkkäin. Suomessa yksi osuva adjektiivi on parempi kuin neljä geneeristä.
-
-Ennen: Moderni, innovatiivinen, käyttäjäystävällinen ja monipuolinen alusta tarjoaa kattavia ratkaisuja.
-Jälkeen: Monipuolinen alusta, jota on helppo käyttää.
-
-Ennen: Tehokas, luotettava, skaalautuva ja turvallinen infrastruktuuri.
-Jälkeen: Luotettava ja skaalautuva infrastruktuuri.
-
-### 8. Ylipitkät virkkeet
-
-AI kirjoittaa yhden pitkän virkkeen johon pakataan useita ajatuksia pilkuilla ja konjunktioilla erotettuna.
-
-Ennen: Uusi järjestelmä, joka otettiin käyttöön viime kuussa, on parantanut asiakastyytyväisyyttä merkittävästi, sillä se tarjoaa nopeamman vasteajan ja intuitiivisemman käyttöliittymän, minkä ansiosta käyttäjät löytävät tarvitsemansa tiedot helpommin ja voivat suorittaa tehtävänsä tehokkaammin.
-Jälkeen: Uusi järjestelmä otettiin käyttöön viime kuussa. Asiakastyytyväisyys on parantunut selvästi. Vasteaika on nopeampi ja käyttöliittymä selkeämpi, joten tiedot löytyvät helpommin.
-
-### 9. Joka/jotka-kasautuminen
-
-AI ketjuttaa sivulauseita "joka"- ja "jotka"-pronomineilla. Suomessa partisiippirakenne tai erillinen virke on luontevampi.
-
-Ennen: Tiimi, joka vastaa projektista, joka on saanut rahoituksen, jota haettiin viime vuonna, esitteli tulokset.
-Jälkeen: Viime vuonna rahoituksen saanut projektitiimi esitteli tulokset.
-
-Ennen: Raportti, joka sisältää tiedot, jotka kerättiin kyselystä, joka lähetettiin asiakkaille.
-Jälkeen: Raportti perustuu asiakkaille lähetetyn kyselyn tuloksiin.
-
-### 10. Virkakielisyys väärässä kontekstissa
-
-AI käyttää virallista kieltä tilanteissa joissa se ei sovi. "Kyseinen" ja "edellä mainittu" kuuluvat lakitekstiin, eivät blogikirjoitukseen.
-
-Ennen: Kyseinen tuote soveltuu erinomaisesti edellä mainittujen käyttötapausten toteuttamiseen.
-Jälkeen: Tuote toimii hyvin näihin tarkoituksiin.
-
-Ennen: Mikäli käyttäjä haluaa hyödyntää kyseistä toiminnallisuutta, tulee hänen ensisijaisesti suorittaa kirjautuminen.
-Jälkeen: Kirjaudu ensin sisään, niin pääset käyttämään toimintoa.
-
-### 11. Astevaihtelun välttely
-
-AI saattaa välttää sanoja joissa astevaihtelu tuottaa vieraannäköisiä muotoja. Ei systemaattinen virhe vaan taipumus valita "turvallisempia" sanoja.
-
-Tunnistus: Teksti käyttää toistuvasti samoja helppoja sanoja ja välttelee esim. muotoja kuten "luvun" (luku), "halvempi" (halpa), "leveämpi" (leveä).
-
-Toimenpide: Ei automaattista korjausta. Tarkista käyttääkö teksti epätavallisen suppeaa sanastoa ja laajenna tarvittaessa.
-
-### 12. Liiallinen kohteliaisuus
-
-AI siirtää englannin kohteliaisuusnormit suomeen. Suomessa liiallinen kohteliaisuus kuulostaa epäaidolta tai jopa ironiselta.
-
-Ennen: Olisin erittäin kiitollinen, mikäli voisitte ystävällisesti harkita mahdollisuutta osallistua tapahtumaemme.
-Jälkeen: Tervetuloa tapahtumaamme.
-
-Ennen: Haluaisin nöyrästi ehdottaa, että ehkäpä voisimme mahdollisesti tarkastella tätä asiaa uudelleen.
-Jälkeen: Tarkastellaan tätä uudelleen.
+- [フィンランド語 AI パターン (1 ～ 12)](#finish- language-ai-patterns)
+  - [1.受動的過剰使用](#1-受動的過剰使用)
+  - [2.公称構造](#2-公称構造)
+  - [3.代名詞の使いすぎ](#3-代名詞の使いすぎ)
+  - [4.欠落粒子](#4-欠落粒子)
+  - [5.翻訳構造](#5 翻訳構造)
+  - [6.生成連鎖](#6-生成連鎖)
+  - [7.形容詞句](#7-形容詞句)
+  - [8.長すぎる文](#8-長すぎる文)
+  - [9.どれ/いくつかのパイルアップ](#9-すべてのいくつかのパイルアップ)
+  - [10.間違った文脈での公用語](#10-間違った文脈での公式言語)
+  - [11.度変動回避](#11 度変動回避)
+  - [12.過剰な礼儀](#12-過剰な礼儀)
+- [フィンランド語のユニバーサル AI パターン (13–26)](#universal-ai-patterns-in-finish)
+  - [13.重要性の誇張](#13-重要性の誇張)
+  - [14.広告言語](#14-広告言語)
+  - [15.思慮深いトーン](#15-思慮深いトーン)
+  - [16.過剰な準備](#16-過剰な準備)
+  - [17.フィラー単語とフレーズ](#17 フィラー単語とフレーズ)
+  - [18.汎用終了](#18-generic-termination)
+  - [19.曖昧な参照](#19-曖昧な参照)
+  - [20. 「課題にもかかわらず」の公式](#20-課題にもかかわらず--公式)
+  - [21. 3 つのルールと同義語のローテーション](#21-3 つのルールと同義語のローテーション)
+  - [22.分詞構文](#22 分詞構文)
+  - [23.コピュラ回避](#23-コピュラ回避)
+  - [24.ネガティブ並列](#24-ネガティブ並列)
+  - [25.人工スケール参照](#25-artificial-scale-references)
+  - [26.ブラックアウトの免責事項](#26 ブラックアウトの免責事項)
+- [スタイルタグ](#styleタグ)
+- [フルスケールの例](#full-scale-example)
 
 ---
 
-## Universaalit AI-patternit suomeksi
+## フィンランド語の AI パターン
 
-Nämä esiintyvät kaikissa kielissä mutta tunnistetaan ja korjataan suomenkielisin esimerkein.
+### 1. 受動態の多用
 
-### 13. Merkittävyyden liioittelu
+AI はあらゆるところでパッシブを使用します。フィンランドでは受動態が自然ですが、AIは作者の名前を避けるために受動態を多用します。
 
-AI paisuttaa kaiken "merkittäväksi", "keskeiseksi" tai "ratkaisevaksi".
-Merkkisanat: merkittävä, keskeinen, ratkaiseva rooli, olennainen, elintärkeä, kriittinen
+Before: このアプリケーションは、ユーザーが自分のデータを効果的に管理する機会を提供するように設計されています。
+変更後: アプリケーションを使用して、自分のデータを管理します。
 
-Ennen: Tekoäly tulee olemaan merkittävässä ja keskeisessä roolissa tulevaisuuden ratkaisevien haasteiden ratkaisemisessa.
-Jälkeen: Tekoälystä tulee tärkeä työkalu moniin ongelmiin.
+変更前: 研究により、この方法により良い結果が得られることがわかりました。
+後: 研究により、この方法の方が効果的であることがわかりました。
 
-### 14. Mainosmainen kieli
+### 2. 公称構造
 
-Teksti kuulostaa mainokselta vaikka konteksti on neutraali.
-Merkkisanat: ainutlaatuinen, uraauurtava, vertaansa vailla, vallankumouksellinen, maailmanluokan
+動詞が名詞に変更され、補助動詞が追加されます。 「チェック」と言えるのに「チェックを実行する」。
 
-Ennen: Uraauurtava ja ainutlaatuinen alustamme tarjoaa vertaansa vailla olevan käyttökokemuksen.
-Jälkeen: Alusta toimii hyvin ja erottuu kilpailijoista.
+Before: システムは保存する前にデータ検証を実行します。
+後: システムは保存する前にデータを検証します。
 
-### 15. Mielistelevä sävy
+前: チームはプロジェクトの進捗状況を評価します。
+後: チームはプロジェクトの進捗状況を評価します。
 
-AI kehuu kysyjää tai aihevalintaa. Suomessa tämä on erityisen kiusallista.
-Merkkisanat: Hyvä kysymys!, Ehdottomasti!, Aivan oikein!, Erinomainen huomio!
+### 3. 代名詞の使いすぎフィンランドでは、文脈が明確な場合は代名詞が省略されます。 AI は英語のモデルに従って、あらゆる場所に「we」、「it」、「this」を追加します。
 
-Ennen: Hyvä kysymys! Tämä on ehdottomasti yksi tärkeimmistä aiheista tällä hetkellä.
-Jälkeen: Aihe on ajankohtainen.
+前: 私たちは、私たちのソリューションが大きな価値を提供すると信じています。
+後: 私たちのソリューションは価値を生み出します。
 
-### 16. Liiallinen varautuminen
+前: 生産性の向上に役立つツールです。
+後: ツールにより生産性が向上します。
 
-AI pehmentää jokaisen väitteen varmuuden vuoksi.
-Merkkisanat: saattaisi mahdollisesti, voitaneen todeta, lienee perusteltua, on syytä olettaa
+### 4. 欠落した粒子
 
-Ennen: Saattaisi olla mahdollista, että tämä lähestymistapa voisi potentiaalisesti tuottaa jonkinlaisia parannuksia tietyissä olosuhteissa.
-Jälkeen: Lähestymistapa todennäköisesti parantaa tuloksia.
+AI は助詞 (-han/-hän、-pa/-pä、はい、しかし、今は座ります) を使用しません。これは非公式だからです。フィンランドでは、これらは通常の書き言葉です。
 
-### 17. Täytesanat ja -lauseet
+前：これは本当です。ただし、問題は状況が複雑であるということです。
+後：本当ですよ。状況はただ複雑です。
 
-AI aloittaa tai täyttää kappaleita fraaseilla jotka eivät lisää sisältöä.
-Merkkisanat: On syytä huomata, Tässä yhteydessä on tärkeää, Kuten aiemmin mainittiin, On hyvä muistaa
+前：これを試してみてください。うまくいきます。
+後：これを試してください。はい、機能します。
 
-Ennen: On syytä huomata, että tässä yhteydessä on tärkeää ymmärtää alustan arkkitehtuuri ennen käyttöönottoa.
-Jälkeen: Ymmärrä alustan arkkitehtuuri ennen käyttöönottoa.
+### 5. 翻訳構造
 
-### 18. Geneerinen lopetus
+AIは英語の語順と構造に従ったフィンランド語を生成します。その結果、技術的には正しいものの、不自然な言語が生成されます。
 
-AI päättää tekstin tyhjällä optimismilla.
-Merkkisanat: Tulevaisuus näyttää valoisalta, jatkaa kehittymistä, avaa uusia mahdollisuuksia
+前: これに加えて、市場が変化したという事実に注意することが重要です。
+後：市場も変わりました。
 
-Ennen: Tulevaisuus näyttää valoisalta ja ala jatkaa kehittymistään, avaten uusia mahdollisuuksia kaikille toimijoille.
-Jälkeen: [Poista kokonaan tai korvaa konkreettisella ennusteella]
+前：まさにそういうところが面白いですね。
+後：そこが面白いところですね。
 
-### 19. Epämääräiset viittaukset
+### 6. 生成連鎖
 
-AI viittaa auktoriteetteihin nimeämättä niitä.
-Merkkisanat: Asiantuntijoiden mukaan, Tutkimukset osoittavat, Alan johtavat toimijat
+AI が複雑な関係を 1 つの構造で表現しようとすると、連続する属格形が積み重なっていきます。
 
-Ennen: Tutkimukset osoittavat, että asiantuntijoiden mukaan tämä on alan paras käytäntö.
-Jälkeen: [Nimeä lähde] tai poista väite.
+Before: 製品の品質向上の可能性を評価した結果、開発の可能性が示されました。
+後: 製品の品質をどのように改善できるかを評価します。発展の可能性が見出されました。
 
-### 20. "Haasteista huolimatta" -kaava
+前: 会社の戦略計画プロセスを刷新する目的は、効率を高めることです。
+変更後: 会社はより効率的にするために戦略計画を更新しました。
 
-AI tunnustaa haasteen mutta mitätöi sen välittömästi. Rakenne: "vaikka X, niin silti Y".
-Merkkisanat: Haasteista huolimatta, Vaikka [ongelma], jatkaa kehittymistä
+### 7. 形容詞句
 
-Ennen: Haasteista huolimatta yritys on onnistunut kasvattamaan markkinaosuuttaan ja jatkaa vahvaa kehitystään.
-Jälkeen: Yritys on kasvattanut markkinaosuuttaan. Haasteitakin on: [nimeä ne].
+AI は複数の形容詞を連続して積み重ねます。フィンランドでは、4 つの一般的な形容詞よりも、1 つの適切な形容詞の方が優れています。
 
-### 21. Kolmen sääntö ja synonyymikierto
+Before: 最新で革新的、ユーザーフレンドリーで多用途なプラットフォームは、包括的なソリューションを提供します。
+After: 使いやすい多機能プラットフォーム。
 
-AI listaa asioita kolmen ryhmissä ja kierrättää synonyymejä välttääkseen toistoa. Suomessa toisto on luonnollista.
+以前: 効率的で信頼性が高く、スケーラブルで安全なインフラストラクチャ。
+変更後: 信頼性が高くスケーラブルなインフラストラクチャ。
 
-Ennen: Ratkaisu on tehokas, vaikuttava ja tuloksellinen. Se parantaa, kehittää ja optimoi prosesseja.
-Jälkeen: Ratkaisu on tehokas. Se parantaa prosesseja.
+### 8. 長すぎる文章
 
-Ennen: Alusta yhdistää, integroi ja kokoaa yhteen eri tietolähteet.
-Jälkeen: Alusta yhdistää eri tietolähteet.
+AI は、コンマと接続詞で区切られたいくつかの考えを含む 1 つの長い文を書きます。
 
-### 22. Partisiippirakenteet
+前: 先月実装された新しいシステムは、より速い応答時間とより直感的なユーザー インターフェイスを提供することで顧客満足度を大幅に向上させ、ユーザーが必要な情報をより簡単に見つけてタスクをより効率的に完了できるようにしました。
+後: 新しいシステムは先月実装されました。顧客満足度は明らかに向上しました。応答時間が速くなり、ユーザー インターフェイスがより明確になったので、情報をより簡単に見つけることができます。
 
-AI ylikäyttää -malla/-mällä ja -en -muotoja korvikkeena konkreettisemmille ilmaisuille.
+### 9. 何らかの蓄積
 
-Ennen: Hyödyntämällä uusia teknologioita ja tarkastelemalla olemassa olevia prosesseja voidaan saavuttaa merkittäviä parannuksia.
-Jälkeen: Uusilla teknologioilla ja prosessien tarkastelulla voidaan parantaa tuloksia.
+AIは従属節と代名詞「that」と「that」を連結します。フィンランドでは、分詞構造または独立した文の方が自然です。前：昨年申請した資金を獲得したプロジェクトの担当チームが成果発表を行いました。
+事後：昨年資金提供を受けたプロジェクトチームが成果を発表。
 
-Ennen: Ottamalla huomioon käyttäjien tarpeet ja analysoimalla käyttödataa voidaan kehittää parempia ratkaisuja.
-Jälkeen: Käyttäjien tarpeet ja käyttödata ohjaavat kehitystä.
+Before: 顧客に送信されたアンケートから収集された情報を含むレポート。
+変更後: このレポートは、お客様に送信されたアンケートの結果に基づいています。
 
-### 23. Kopulan välttely
+### 10. 間違った文脈での公用語
 
-AI välttelee yksinkertaista "on/olla" ja korvaa sen monimutkaisemmilla verbeillä: "toimii", "tarjoaa", "edustaa", "muodostaa".
+AIは公用語がふさわしくない状況で公用語を使用します。 「問題中」および「上記」は法文に属し、ブログ投稿には属しません。
 
-Ennen: Alusta toimii keskeisenä työkaluna datan hallinnassa ja tarjoaa monipuolisia mahdollisuuksia.
-Jälkeen: Alusta on hyvä työkalu datan hallintaan.
+Before: 問題の製品は、上記のユースケースの実装に完全に適しています。
+使用後: この製品はこれらの目的に適しています。
 
-Ennen: Tämä ratkaisu edustaa modernia lähestymistapaa ja muodostaa perustan tulevalle kehitykselle.
-Jälkeen: Tämä on moderni ratkaisu, jolle voi rakentaa jatkossa.
+変更前: ユーザーが問題の機能を使用したい場合は、まずログインする必要があります。
+変更後: 機能にアクセスするには、まずログインしてください。
 
-### 24. Negatiivinen rinnastus
+### 11. 度数変動の回避
 
-"Ei pelkästään...vaan myös" / "ei ainoastaan...vaan" -kaavan ylikäyttö korostuskeinona.
+AI は、度合いの変化によって奇妙に見える形状が生じる単語を避ける可能性があります。系統的な間違いではなく、「より安全な」言葉を選ぶ傾向があります。
 
-Ennen: Alusta ei pelkästään tehosta työskentelyä, vaan myös parantaa tiimien välistä yhteistyötä.
-Jälkeen: Alusta tehostaa työskentelyä ja parantaa yhteistyötä.
+識別: テキストでは同じ簡単な単語が繰り返し使用されており、例: 「luvun」（数）、「halferi」（安い）、「wider」（広い）などの形式。
 
-Ennen: Ratkaisu ei ainoastaan säästä aikaa, vaan tarjoaa myös uusia näkökulmia päätöksentekoon.
-Jälkeen: Ratkaisu säästää aikaa ja tuo uusia näkökulmia.
+処置: 自動修正は行われません。テキストで異常に狭い語彙が使用されているかどうかを確認し、必要に応じて拡張します。
 
-### 25. Keinotekoiset skaalaviittaukset
+### 12. 過剰な礼儀正しさ
 
-"X:stä Y:hyn" -rakenne luo valheellista kattavuutta. AI käyttää sitä vaikuttaakseen kokonaisvaltaiselta.
+AI は英語の礼儀正しさの規範をフィンランド語に移植します。フィンランドでは、過剰な礼儀正しさは本物ではない、あるいは皮肉にさえ聞こえます。
 
-Ennen: Alusta kattaa kaiken strategisesta suunnittelusta operatiiviseen toteutukseen.
-Jälkeen: Alusta tukee sekä suunnittelua että toteutusta.
+前：ぜひご参加をご検討いただけますと幸いです。
+後: イベントへようこそ。
 
-Ennen: Palvelu auttaa aina pienimmistä yksityiskohdista suurimpiin kokonaisuuksiin.
-Jälkeen: Palvelu auttaa eri kokoisissa tehtävissä.
-
-### 26. Tietokatkos-vastuuvapauslausekkeet
-
-AI lisää tarpeettomia vastuuvapauslausekkeita omasta tietotasostaan.
-Merkkisanat: viimeisimpien tietojeni mukaan, saatavilla olevien tietojen perusteella, tämänhetkisen ymmärrykseni mukaan
-
-Ennen: Viimeisimpien tietojeni mukaan markkinatilanne on muuttunut merkittävästi viime vuosina.
-Jälkeen: Markkinatilanne on muuttunut viime vuosina.
-
-Ennen: Saatavilla olevien tietojen perusteella voidaan todeta, että kehitys on ollut positiivista.
-Jälkeen: Kehitys on ollut positiivista.
+前: 謙虚に、おそらくこの問題を再検討できるかもしれないことを提案します。
+後：もう一度見てみましょう。
 
 ---
 
-## Tyylimerkinnät
+## フィンランド語の汎用 AI パターン
 
-Nämä eivät ole patterneita vaan muotoiluvalintoja joita AI suosii:
+これらはすべての言語で発生しますが、フィンランド語の例で識別および修正されています。
 
-- **Lihavoinnin ylikäyttö** — AI lihavoi jokaisen avainsanan. Lihavoi vain se mikä oikeasti vaatii huomiota.
-- **Emojit** — Poista ellei konteksti ole selvästi epämuodollinen (some, chat).
-- **"Otsikko:" -listaus** — AI kirjoittaa "**Hyöty:** parempi suorituskyky" kun voisi sanoa "Suorituskyky paranee".
-- **Kaarevat lainausmerkit** — AI (erit. ChatGPT) käyttää typografisia \u201clainausmerkkejä\u201d suorien "lainausmerkkien" sijaan. Suomessa käytetään suoria lainausmerkkejä.
+### 13. 重要性の誇張
+
+AI はあらゆるものを「重要」、「重要」、または「重要」であるかのように誇張します。
+キーワード: 重要な、中心的な、決定的な役割、不可欠な、重要な、重要な
+
+前: 人工知能は、将来の決定的な課題を解決する上で重要かつ中心的な役割を果たすでしょう。
+後: 人工知能は多くの問題に対する重要なツールになります。
+
+### 14. 広告の表現
+
+文脈は中立的ですが、テキストは広告のように聞こえます。
+キーワード: ユニーク、画期的、比類のない、革命的、世界クラス
+
+Before: 当社の画期的でユニークなプラットフォームは、比類のないユーザー エクスペリエンスを提供します。
+後: プラットフォームはうまく機能し、競合他社よりも優れています。
+
+### 15. 瞑想的な口調
+
+AIは質問者や話題の選択を褒めます。フィンランドでは、これは特に恥ずかしいことです。
+タグ: 良い質問です!、その通りです!、その通りです!、素晴らしい点です!
+
+前: いい質問ですね！これは間違いなく現在最も重要なトピックの 1 つです。
+後：話題は話題です。
+
+### 16. 過剰な準備AIは念のためあらゆる議論を和らげます。
+キーワード: おそらく、述べられた可能性がある、おそらく正当化される、想定されるべきである
+
+変更前: このアプローチにより、特定の状況下で何らかの改善がもたらされる可能性があります。
+変更後: 結果が改善される可能性が高いアプローチ。
+
+### 17. つなぎの単語やフレーズ
+
+AI は、コンテンツを追加しないフレーズで曲を開始したり、曲を埋めたりします。
+キーワード: 注目に値する、この文脈では重要である、前述したように、覚えておくとよい
+
+前: この文脈では、実装前にプラットフォームのアーキテクチャを理解することが重要であることに注意してください。
+後: 導入前にプラットフォーム アーキテクチャを理解します。
+
+### 18. 一般的な終了
+
+AIは空虚な楽観主義でテキストを終了します。
+キーワード: 未来は明るい、発展し続ける、新たな機会を開く
+
+Before: 未来は明るく、業界は発展を続けており、すべてのプレーヤーに新たな機会が開かれています。
+変更後: [完全に削除するか、具体的な予測に置き換えます]
+
+### 19. 不正確な参照
+
+AIは当局を名前を付けずに言及します。
+キーワード: 専門家によると、調査によると、業界のリーダー
+
+前: 専門家によると、これが業界のベスト プラクティスであることが調査で示されています。
+後: [情報源に名前を付ける] か、申し立てを削除します。
+
+### 20. 「困難にもかかわらず」公式
+
+AI はチャレンジを認識しますが、すぐにそれを無効にします。構造: 「X ですが、それでも Y」。
+タグ: 課題にもかかわらず、[問題]にもかかわらず、発展し続ける
+
+Before: 課題にもかかわらず、同社は市場シェアを拡大することに成功し、力強い発展を続けています。
+変更後: 同社は市場シェアを拡大​​しました。 [名前を付けてください]という課題もあります。
+
+### 21. 3 つのルールと同義語のローテーション
+
+AI は物事を 3 つのグループに分けてリストし、重複を避けるために同義語をローテーションします。フィンランドでは、繰り返すのが自然です。
+
+変更前: ソリューションは効率的で効果的です。プロセスを改善、開発、最適化します。
+後: 解決策は効果があります。プロセスが改善されます。
+
+Before: プラットフォームは、さまざまなデータ ソースを接続、統合、統合します。
+変更後: プラットフォームはさまざまなデータ ソースを接続します。
+
+### 22. 分詞構文
+
+AI は、より具体的な表現の代わりに -malla/-mä と -en -forms を多用します。
+
+Before: 新しいテクノロジーを活用し、既存のプロセスを見直すことで、大幅な改善を達成できます。
+後: 新しいテクノロジーとプロセスの見直しにより、結果が向上します。
+
+Before: ユーザーのニーズを考慮し、使用状況データを分析することで、より良いソリューションを開発できます。
+後: ユーザーのニーズと使用状況データが開発をガイドします。
+
+### 23. コピュラの回避
+
+AI は単純な「である/である」を避け、より複雑な動詞 (「行為する」、「提供する」、「表す」、「構成する」) に置き換えます。Before: プラットフォームはデータ管理の中心的なツールとして機能し、さまざまな可能性を提供します。
+後: プラットフォームはデータ管理に優れたツールです。
+
+Before: このソリューションは最新のアプローチを表しており、将来の開発の基礎を形成します。
+変更後: これは、将来的に構築できる最新のソリューションです。
+
+### 24. 否定的な並列
+
+強調の手段として「…だけではなく」/「…だけではなく」という表現を使いすぎる。
+
+Before: このプラットフォームは作業を効率化するだけでなく、チーム間の協力も改善します。
+後: プラットフォームにより作業がより効率的になり、協力関係が向上します。
+
+Before: このソリューションは時間を節約するだけでなく、意思決定に新しい視点を提供します。
+後: このソリューションにより時間が節約され、新たな視点がもたらされます。
+
+### 25. 人工スケール参照
+
+「X to Y」構造により、誤ったカバレッジが作成されます。 AI はそれを包括的に見せるために使用します。
+
+Before: このプラットフォームは、戦略計画から運用の実装まですべてをカバーします。
+変更後: プラットフォームは計画と実装の両方をサポートします。
+
+変更前: このサービスは、細部から最大規模のエンティティに至るまで常に役立ちます。
+変更後: このサービスは、さまざまなサイズのタスクに役立ちます。
+
+### 26. データ停止に関する免責事項
+
+AIは自らの知識レベルから不要な免責事項を追加します。
+キーワード: 私の知る限り、私の知る限り、私の知る限り
+
+Before: 私の最新の情報によると、ここ数年で市場の状況は大きく変化しました。
+後：ここ数年で市場の状況は変化してきました。
+
+変更前: 入手可能な情報に基づくと、開発は順調に進んでいると言えます。
+後: 発展は順調でした。
 
 ---
 
-## Täysimittainen esimerkki
+## スタイルタグ
 
-### Ennen (AI-generoitu)
+これらはパターンではなく、AI が好むデザインの選択肢です。
 
-> **Kattava katsaus moderniin ohjelmistokehitykseen**
+- **太字の過剰使用** — AI はすべてのキーワードを太字にします。本当に注意が必要なものだけが太ります。
+- **絵文字** — 明らかに非公式な文脈（一部、チャット）でない限り削除します。
+- **「タイトル:」リスト** — AI は、「パフォーマンスが向上する」と言える場合は、「**利点:** パフォーマンスが向上します」と書き込みます。
+- **曲線引用符** — AI (特に ChatGPT) は、直線の「引用符」の代わりに活版印刷の「引用符」を使用します。フィンランドでは直接引用符が使用されます。
+
+---
+
+## フルスケールの例
+
+### 以前 (AI 生成)> **最新のソフトウェア開発の包括的な概要**
 >
-> Nykyaikainen ohjelmistokehitys on merkittävä ja keskeinen osa digitaalista transformaatiota. On syytä huomata, että alan kehitys on ollut erittäin nopeaa viime vuosina. Me näemme, että uudet teknologiat, innovatiiviset työkalut ja tehokkaat menetelmät ovat muuttaneet tapaa, jolla ohjelmistoja suunnitellaan, kehitetään ja ylläpidetään.
+> 最新のソフトウェア開発は、デジタル変革の重要かつ中心的な部分です。この分野の発展が近年非常に急速であることは注目に値します。新しいテクノロジー、革新的なツール、効率的な手法により、ソフトウェアの設計、開発、保守の方法が変化していることがわかります。
 >
-> Ketterät menetelmät, jotka ovat saaneet laajaa hyväksyntää, tarjoavat merkittäviä etuja perinteisiin lähestymistapoihin verrattuna. Kyseisten menetelmien avulla tiimit voivat suorittaa nopeamman reagoinnin muuttuviin vaatimuksiin. Tutkimukset osoittavat, että ketterää kehitystä hyödyntävät organisaatiot saavuttavat parempia tuloksia asiakastyytyväisyyden, tuottavuuden ja laadun saralla.
+> アジャイル手法は広く受け入れられており、従来のアプローチに比べて大きな利点があります。これらの方法により、チームは要件の変化により迅速に対応できるようになります。調査によると、アジャイル開発を使用する組織は、顧客満足度、生産性、品質の面でより良い結果を達成しています。
 >
-> Haasteista huolimatta ala jatkaa vahvaa kehitystään. Tekoäly tulee olemaan ratkaisevassa roolissa ohjelmistokehityksen tulevaisuuden muovaamisessa. Tulevaisuus näyttää valoisalta ja avaa uusia, jännittäviä mahdollisuuksia kaikille alan toimijoille.
+> 課題にもかかわらず、業界は力強い発展を続けています。人工知能は、ソフトウェア開発の未来を形作る上で決定的な役割を果たすでしょう。未来は明るく、業界のすべてのプレーヤーにとって新しくエキサイティングな機会が開かれています。
 
-### Jälkeen (luonnollistettu)
+### 後（帰化）
 
-> Ohjelmistokehitys on muuttunut nopeasti. Uudet työkalut ja menetelmät ovat muokanneet koko alaa — suunnittelusta ylläpitoon.
+> ソフトウェア開発は急速に変化しています。新しいツールと手法は、設計からメンテナンスに至るまで、業界全体を形作ってきました。
 >
-> Ketterät menetelmät ovat yleistyneet syystä. Tiimit reagoivat nopeammin muuttuviin vaatimuksiin. Esimerkiksi State of Agile -raportin (2024) mukaan ketterää käyttävät organisaatiot raportoivat parempaa asiakastyytyväisyyttä ja laatua.
+> アジャイル手法がより一般的になったのには理由があります。チームは要件の変化に迅速に対応します。たとえば、State of Agile レポート (2024 年) によると、アジャイルを使用している組織は顧客満足度と品質が向上していると報告しています。
 >
-> Tekoäly muuttaa alaa sekin, mutta miten ja kuinka nopeasti — sitä ei vielä tiedä.
+> 人工知能も業界を変えるでしょうが、どのように、どのくらいのスピードで変化するかはまだわかりません。
 
-### Tehdyt muutokset
+### 変更が加えられました
 
-| # | Pattern | Muutos |
-|---|---------|--------|
-| 1 | Passiivin ylikäyttö | "on ollut erittäin nopeaa" → "on muuttunut nopeasti" |
-| 2 | Nominaalirakenteet | "suorittaa nopeamman reagoinnin" → "reagoivat nopeammin" |
-| 3 | Pronominien ylikäyttö | "Me näemme, että" → poistettu |
-| 5 | Käännösrakenteet | "tapaa, jolla" → "suunnittelusta ylläpitoon" |
-| 7 | Adjektiivikasaumat | "uudet teknologiat, innovatiiviset työkalut ja tehokkaat menetelmät" → "Uudet työkalut ja menetelmät" |
-| 8 | Ylipitkät virkkeet | Ensimmäinen kappale pilkottu |
-| 9 | Joka/jotka-kasautuminen | "jotka ovat saaneet laajaa hyväksyntää" → "ovat yleistyneet" |
-| 10 | Virkakielisyys | "Kyseisten menetelmien avulla" → poistettu |
-| 13 | Merkittävyyden liioittelu | "merkittävä ja keskeinen" → poistettu |
-| 17 | Täytesanat | "On syytä huomata, että" → poistettu |
-| 18 | Geneerinen lopetus | "Tulevaisuus näyttää valoisalta" → rehellinen epävarmuus |
-| 19 | Epämääräiset viittaukset | "Tutkimukset osoittavat" → nimetty lähde |
-| 20 | "Haasteista huolimatta" | Poistettu kaava, haasteet jätetty auki |
-| 21 | Kolmen sääntö | Kolmen ryhmät karsittu |
+| # |パターン |変更 |
+|---|--------|--------|
+| 1 |受動態の使いすぎ | 「とても速かった」 → 「すぐに変わった」 |
+| 2 |公称構造 | 「より速い反応を実行する」→「より速く反応する」 |
+| 3 |代名詞の使いすぎ | 「それがわかります」 → 削除 |
+| 5 |翻訳構造 | 「設計から保守までのやり方」 |
+| 7 |形容詞句 | 「新しいテクノロジー、革新的なツール、効果的な方法」 → 「新しいツールと方法」 |
+| 8 |長すぎる文章 |最初の段落が切り取られています |
+| 9 |どの/いくつかの蓄積 | 「広く受け入れられるようになった」→「一般的になった」 |
+| 10 |公用語 | 「問題のメソッドの使用」 → 削除 |
+| 13 |重要性の誇張 | 「重要かつ中心的な」 → 削除 |
+| 17 |つなぎ言葉 | 「なお、」 → 削除 |
+| 18 |一般的な終了 | 「未来は明るい」 → 正直不安 |
+| 19 |曖昧な参照 | 「研究番組」 → 名前付きソース |
+| 20 | 「困難にもかかわらず」 |公式は削除され、課題は残されたまま |
+| 21 | 3 つのルール | 3 人グループが敗退 |

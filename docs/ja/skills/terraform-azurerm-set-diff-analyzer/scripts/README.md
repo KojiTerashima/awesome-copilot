@@ -1,76 +1,63 @@
-# Terraform AzureRM Set Diff Analyzer Script
+# Terraform AzureRM セット差分アナライザー スクリプト
 
-A Python script that analyzes Terraform plan JSON and identifies "false-positive diffs" in AzureRM Set-type attributes.
+Terraform プラン JSON を分析し、AzureRM セット タイプ属性の "偽陽性の差分" を識別する Python スクリプト。
 
-## Overview
+## 概要
 
-AzureRM Provider's Set-type attributes (such as `backend_address_pool`, `security_rule`, etc.) don't guarantee order, so when adding or removing elements, all elements appear as "changed". This script distinguishes such "false-positive diffs" from actual changes.
+AzureRM プロバイダーの Set タイプ属性 (`backend_address_pool`、`security_rule` など) は順序を保証しないため、要素を追加または削除すると、すべての要素が「変更された」ように表示されます。このスクリプトは、そのような「誤検知の差分」を実際の変更から区別します。
 
-### Use Cases
+### 使用例
 
-- As an **Agent Skill** (recommended)
-- As a **CLI tool** for manual execution
-- For automated analysis in **CI/CD pipelines**
+- **エージェント スキル**として (推奨)
+- 手動実行用の **CLI ツール**として
+- **CI/CD パイプライン**の自動分析用
 
-## Prerequisites
+## 前提条件
 
-- Python 3.8 or higher
-- No additional packages required (uses only standard library)
+- Python 3.8以降
+- 追加のパッケージは必要ありません (標準ライブラリのみを使用します)
 
-## Usage
+## 使用法
 
-### Basic Usage
-
-```bash
+### 基本的な使い方```bash
 # Read from file
 python analyze_plan.py plan.json
 
 # Read from stdin
 terraform show -json plan.tfplan | python analyze_plan.py
-```
+```### オプション
 
-### Options
+|オプション |短い |説明 |デフォルト |
+|----------|----------|---------------|----------|
+| `--format` | `-f` |出力形式 (markdown/json/summary) |値下げ |
+| `--exit-code` | `-e` |変更に基づいて終了コードを返す |偽 |
+| `--quiet` | `-q` |警告を抑制する |偽 |
+| `--verbose` | `-v` |詳細な警告を表示 |偽 |
+| `--ignore-case` | - |大文字と小文字を区別せずに値を比較します。偽 |
+| `--attributes` | - |カスタム属性定義ファイルへのパス | (内蔵) |
+| `--include` | - |分析するリソースをフィルタリングします (複数指定可能) | (すべて) |
+| `--exclude` | - |除外するリソースをフィルターします (複数指定可能) | (なし) |
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--format` | `-f` | Output format (markdown/json/summary) | markdown |
-| `--exit-code` | `-e` | Return exit code based on changes | false |
-| `--quiet` | `-q` | Suppress warnings | false |
-| `--verbose` | `-v` | Show detailed warnings | false |
-| `--ignore-case` | - | Compare values case-insensitively | false |
-| `--attributes` | - | Path to custom attribute definition file | (built-in) |
-| `--include` | - | Filter resources to analyze (can specify multiple) | (all) |
-| `--exclude` | - | Filter resources to exclude (can specify multiple) | (none) |
+### 終了コード (`--exit-code` を使用)
 
-### Exit Codes (with `--exit-code`)
+|コード |意味 |
+|-----|----------|
+| 0 |変更なし、または注文のみの変更 |
+| 1 |実際のセット属性の変更 |
+| 2 |リソースの置き換え（削除+作成） |
+| 3 |エラー |
 
-| Code | Meaning |
-|------|---------|
-| 0 | No changes, or order-only changes |
-| 1 | Actual Set attribute changes |
-| 2 | Resource replacement (delete + create) |
-| 3 | Error |
+## 出力形式
 
-## Output Formats
+### マークダウン (デフォルト)
 
-### Markdown (default)
-
-Human-readable format for PR comments and reports.
-
-```bash
+PR コメントおよびレポート用の人が判読可能な形式。```bash
 python analyze_plan.py plan.json --format markdown
-```
+```### JSON
 
-### JSON
-
-Structured data for programmatic processing.
-
-```bash
+プログラムによる処理のための構造化データ。```bash
 python analyze_plan.py plan.json --format json
-```
-
-Example output:
-```json
+```出力例:```json
 {
   "summary": {
     "order_only_count": 3,
@@ -81,26 +68,15 @@ Example output:
   "resources": [...],
   "warnings": []
 }
-```
+```### 概要
 
-### Summary
-
-One-line summary for CI/CD logs.
-
-```bash
+CI/CD ログの 1 行の概要。```bash
 python analyze_plan.py plan.json --format summary
-```
-
-Example output:
-```
+```出力例:```
 🟢 3 order-only | 🟡 1 set changes
-```
+```## CI/CD パイプラインの使用法
 
-## CI/CD Pipeline Usage
-
-### GitHub Actions
-
-```yaml
+### GitHub アクション```yaml
 name: Terraform Plan Analysis
 
 on:
@@ -131,21 +107,13 @@ jobs:
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           path: analysis.md
-```
-
-### GitHub Actions (Gate with Exit Code)
-
-```yaml
+```### GitHub アクション (終了コードを含むゲート)```yaml
       - name: Analyze and Gate
         run: |
           python path/to/analyze_plan.py plan.json --exit-code --format summary
         # Fail on exit code 2 (resource replacement)
         continue-on-error: false
-```
-
-### Azure Pipelines
-
-```yaml
+```### Azure パイプライン```yaml
 - task: TerraformCLI@0
   inputs:
     command: 'plan'
@@ -160,46 +128,34 @@ jobs:
   inputs:
     pathToPublish: '$(Build.ArtifactStagingDirectory)/analysis.md'
     artifactName: 'plan-analysis'
-```
+```### フィルタリングの例
 
-### Filtering Examples
-
-Analyze only specific resources:
-```bash
+特定のリソースのみを分析します。```bash
 python analyze_plan.py plan.json --include application_gateway --include load_balancer
-```
-
-Exclude specific resources:
-```bash
+```特定のリソースを除外します。```bash
 python analyze_plan.py plan.json --exclude virtual_network
-```
+```## 結果の解釈
 
-## Interpreting Results
+|カテゴリー |意味 |推奨されるアクション |
+|----------|----------|----------|
+| 🟢 注文のみ |偽陽性の差分、実際の変化なし |無視しても安全です |
+| 🟡 実際の変化 |セット要素の追加/削除/変更 |コンテンツを確認します (通常はインプレース更新)。
+| 🔴 リソースの置き換え |削除 + 作成 |ダウンタイムの影響を確認する |
 
-| Category | Meaning | Recommended Action |
-|----------|---------|-------------------|
-| 🟢 Order-only | False-positive diff, no actual change | Safe to ignore |
-| 🟡 Actual change | Set element added/removed/modified | Review the content, usually in-place update |
-| 🔴 Resource replacement | delete + create | Check for downtime impact |
+## カスタム属性の定義
 
-## Custom Attribute Definitions
-
-By default, uses `references/azurerm_set_attributes.json`, but you can specify a custom definition file:
-
-```bash
+デフォルトでは `references/azurerm_set_attributes.json` が使用されますが、カスタム定義ファイルを指定することもできます。```bash
 python analyze_plan.py plan.json --attributes /path/to/custom_attributes.json
-```
+```定義ファイルの形式については、`references/azurerm_set_attributes.md`を参照してください。
 
-See `references/azurerm_set_attributes.md` for the definition file format.
+## 制限事項
 
-## Limitations
+- AzureRM リソース (`azurerm_*`) のみがサポートされています
+- 一部のリソース/属性はサポートされていない場合があります
+- `after_unknown` (適用後に決定される値) を含む属性の比較は不完全である可能性があります。
+- 機密属性の比較は不完全である可能性があります (マスクされています)
 
-- Only AzureRM resources (`azurerm_*`) are supported
-- Some resources/attributes may not be supported
-- Comparisons may be incomplete for attributes containing `after_unknown` (values determined after apply)
-- Comparisons may be incomplete for sensitive attributes (they are masked)
+## 関連ドキュメント
 
-## Related Documentation
-
-- [SKILL.md](../SKILL.md) - Usage as an Agent Skill
-- [azurerm_set_attributes.md](../references/azurerm_set_attributes.md) - Attribute definition reference
+- [SKILL.md](../SKILL.md) - エージェントスキルとしての利用
+- [azurerm_set_attributes.md](../references/azurerm_set_attributes.md) - 属性定義リファレンス

@@ -1,86 +1,73 @@
-# Media & Graphics Reference
+# メディアとグラフィックのリファレンス
 
-Multimedia content, graphics, and related technologies for the web.
+Web 用のマルチメディア コンテンツ、グラフィックス、および関連テクノロジ。
 
-## Image Formats
+## 画像フォーマット
 
 ### JPEG/JPG
 
-Lossy compression for photographs.
+写真の非可逆圧縮。
 
-**Characteristics**:
-- Good for photos
-- No transparency support
-- Small file size
-- Quality degrades with editing
+**特徴**:
+- 写真に最適
+- 透明度はサポートされていません
+- ファイルサイズが小さい
+- 編集すると画質が劣化します
 
-**Usage**:
-```html
+**使用方法**:```html
 <img src="photo.jpg" alt="Photo">
-```
+```### PNG
 
-### PNG
+透明性のあるロスレス圧縮。
 
-Lossless compression with transparency.
-
-**Characteristics**:
-- Supports alpha channel (transparency)
-- Larger file size than JPEG
-- Good for logos, graphics, screenshots
-- PNG-8 (256 colors) vs PNG-24 (16M colors)
-
-```html
+**特徴**:
+- アルファチャンネル（透明度）をサポート
+- JPEGよりもファイルサイズが大きい
+- ロゴ、グラフィック、スクリーンショットに適しています
+- PNG-8 (256 色) 対 PNG-24 (1600 万色)```html
 <img src="logo.png" alt="Logo">
-```
+```### WebP
 
-### WebP
+圧縮率が向上した最新の形式。
 
-Modern format with better compression.
-
-**Characteristics**:
-- Smaller than JPEG/PNG
-- Supports transparency
-- Supports animation
-- Not supported in older browsers
-
-```html
+**特徴**:
+- JPEG/PNGより小さい
+- 透明性をサポート
+- アニメーションをサポート
+- 古いブラウザではサポートされていません```html
 <picture>
   <source srcset="image.webp" type="image/webp">
   <img src="image.jpg" alt="Fallback">
 </picture>
-```
+```### AVIF
 
-### AVIF
+次世代の画像フォーマット。
 
-Next-generation image format.
-
-**Characteristics**:
-- Better compression than WebP
-- Supports HDR
-- Slower encoding
-- Limited browser support
+**特徴**:
+- WebP よりも優れた圧縮率
+- HDRをサポート
+- エンコードが遅い
+- 限定的なブラウザのサポート
 
 ### GIF
 
-Animated images (limited colors).
+アニメーション画像（限定色）。
 
-**Characteristics**:
-- 256 colors max
-- Supports animation
-- Simple transparency (no alpha)
-- Consider modern alternatives (video, WebP)
+**特徴**:
+- 最大 256 色
+- アニメーションをサポート
+- 単純な透明度 (アルファなし)
+- 最新の代替手段を検討する (ビデオ、WebP)
 
-### SVG (Scalable Vector Graphics)
+### SVG (スケーラブル ベクター グラフィックス)
 
-XML-based vector graphics.
+XML ベースのベクター グラフィックス。
 
-**Characteristics**:
-- Scalable without quality loss
-- Small file size for simple graphics
-- CSS/JS manipulatable
-- Animation support
-
-```html
+**特徴**:
+- 品質を損なうことなく拡張可能
+- シンプルなグラフィックの場合はファイル サイズが小さい
+- CSS/JS で操作可能
+- アニメーションのサポート```html
 <!-- Inline SVG -->
 <svg width="100" height="100">
   <circle cx="50" cy="50" r="40" fill="blue" />
@@ -88,10 +75,7 @@ XML-based vector graphics.
 
 <!-- External SVG -->
 <img src="icon.svg" alt="Icon">
-```
-
-**Creating SVG**:
-```html
+```**SVG の作成**:```html
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <!-- Rectangle -->
   <rect x="10" y="10" width="80" height="60" fill="red" />
@@ -105,15 +89,11 @@ XML-based vector graphics.
   <!-- Text -->
   <text x="50" y="180" font-size="20">Hello SVG</text>
 </svg>
-```
+```## キャンバス API
 
-## Canvas API
+2D ラスター グラフィックス (ビットマップ)。
 
-2D raster graphics (bitmap).
-
-### Basic Setup
-
-```html
+### 基本セットアップ```html
 <canvas id="myCanvas" width="400" height="300"></canvas>
 ```
 
@@ -150,11 +130,7 @@ img.onload = () => {
   ctx.drawImage(img, 0, 0);
 };
 img.src = 'image.jpg';
-```
-
-### Canvas Methods
-
-```javascript
+```### Canvas メソッド```javascript
 // Paths
 ctx.beginPath();
 ctx.moveTo(x, y);
@@ -180,24 +156,20 @@ const dataURL = canvas.toDataURL('image/png');
 canvas.toBlob(blob => {
   // Use blob
 }, 'image/png');
-```
+```## WebGL
 
-## WebGL
+ブラウザ上の 3D グラフィックス。
 
-3D graphics in the browser.
-
-**Use Cases**:
-- 3D visualizations
-- Games
-- Data visualization
+**使用例**:
+- 3D ビジュアライゼーション
+- ゲーム
+- データの視覚化
 - VR/AR
 
-**Libraries**:
-- **Three.js**: Easy 3D graphics
-- **Babylon.js**: Game engine
-- **PixiJS**: 2D WebGL renderer
-
-```javascript
+**ライブラリ**:
+- **Three.js**: 簡単な 3D グラフィックス
+- **Babylon.js**: ゲーム エンジン
+- **PixiJS**: 2D WebGL レンダラー```javascript
 // Three.js example
 import * as THREE from 'three';
 
@@ -224,37 +196,29 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
-```
+```## ビデオ
 
-## Video
-
-### HTML5 Video Element
-
-```html
+### HTML5 ビデオ要素```html
 <video controls width="640" height="360">
   <source src="video.mp4" type="video/mp4">
   <source src="video.webm" type="video/webm">
   Your browser doesn't support video.
 </video>
-```
+```**属性**:
+- `controls`: 再生コントロールを表示します
+- `autoplay`: 自動的に起動します
+- `loop`: ビデオを繰り返します
+- `muted`: 音声をミュートします
+- `poster`: サムネイル画像
+- `preload`: なし/メタデータ/自動
 
-**Attributes**:
-- `controls`: Show playback controls
-- `autoplay`: Start automatically
-- `loop`: Repeat video
-- `muted`: Mute audio
-- `poster`: Thumbnail image
-- `preload`: none/metadata/auto
+### ビデオ形式
 
-### Video Formats
+- **MP4 (H.264)**: 広くサポートされています
+- **WebM (VP8/VP9)**: オープン形式
+- **Ogg (Theora)**: オープンフォーマット
 
-- **MP4 (H.264)**: Widely supported
-- **WebM (VP8/VP9)**: Open format
-- **Ogg (Theora)**: Open format
-
-### JavaScript Control
-
-```javascript
+### JavaScript コントロール```javascript
 const video = document.querySelector('video');
 
 // Playback
@@ -274,31 +238,23 @@ video.addEventListener('play', () => {});
 video.addEventListener('pause', () => {});
 video.addEventListener('ended', () => {});
 video.addEventListener('timeupdate', () => {});
-```
+```## オーディオ
 
-## Audio
-
-### HTML5 Audio Element
-
-```html
+### HTML5 オーディオ要素```html
 <audio controls>
   <source src="audio.mp3" type="audio/mpeg">
   <source src="audio.ogg" type="audio/ogg">
 </audio>
-```
+```### オーディオ形式
 
-### Audio Formats
+- **MP3**: 広くサポートされています
+- **AAC**: 高品質
+- **Ogg Vorbis**: オープンフォーマット
+- **WAV**: 非圧縮
 
-- **MP3**: Widely supported
-- **AAC**: Good quality
-- **Ogg Vorbis**: Open format
-- **WAV**: Uncompressed
+### ウェブオーディオ API
 
-### Web Audio API
-
-Advanced audio processing:
-
-```javascript
+高度なオーディオ処理:```javascript
 const audioContext = new AudioContext();
 
 // Load audio
@@ -321,13 +277,9 @@ fetch('audio.mp3')
     // Play
     source.start();
   });
-```
+```## レスポンシブ画像
 
-## Responsive Images
-
-### srcset and sizes
-
-```html
+### srcset とサイズ```html
 <!-- Different resolutions -->
 <img src="image-800.jpg"
      srcset="image-400.jpg 400w,
@@ -344,13 +296,9 @@ fetch('audio.mp3')
              image@2x.jpg 2x,
              image@3x.jpg 3x"
      alt="High DPI image">
-```
+```### 絵要素
 
-### Picture Element
-
-Art direction and format switching:
-
-```html
+アートディレクションとフォーマット切り替え：```html
 <picture>
   <!-- Different formats -->
   <source srcset="image.avif" type="image/avif">
@@ -363,42 +311,32 @@ Art direction and format switching:
   <!-- Fallback -->
   <img src="image.jpg" alt="Fallback">
 </picture>
-```
+```## 画像の最適化
 
-## Image Optimization
+### ベストプラクティス
 
-### Best Practices
+1. **正しい形式を選択**:
+   - 写真: JPEG、WebP、AVIF
+   - グラフィック/ロゴ: PNG、SVG、WebP
+   - アニメーション: ビデオ、WebP
 
-1. **Choose correct format**:
-   - Photos: JPEG, WebP, AVIF
-   - Graphics/logos: PNG, SVG, WebP
-   - Animations: Video, WebP
+2. **画像を圧縮**:
+   - 圧縮ツールを使用する
+   - 品質とファイルサイズのバランスを取る
+   - 大きな画像用のプログレッシブ JPEG
 
-2. **Compress images**:
-   - Use compression tools
-   - Balance quality vs file size
-   - Progressive JPEG for large images
+3. **レスポンシブ画像**:
+   - 適切なサイズを提供する
+   - srcset/pictureを使用する
+   - デバイスのピクセル比を考慮する
 
-3. **Responsive images**:
-   - Serve appropriate sizes
-   - Use srcset/picture
-   - Consider device pixel ratio
-
-4. **Lazy loading**:
-   ```html
+4. **遅延読み込み**:```html
    <img src="image.jpg" loading="lazy" alt="Lazy loaded">
-   ```
-
-5. **Dimensions**:
-   ```html
+   ```5. **寸法**:```html
    <img src="image.jpg" width="800" height="600" alt="With dimensions">
-   ```
+   ```## 画像読み込みテクニック
 
-## Image Loading Techniques
-
-### Lazy Loading
-
-```html
+### 遅延読み込み```html
 <!-- Native lazy loading -->
 <img src="image.jpg" loading="lazy" alt="Image">
 
@@ -419,23 +357,15 @@ const observer = new IntersectionObserver((entries) => {
 });
 
 images.forEach(img => observer.observe(img));
-```
-
-### Progressive Enhancement
-
-```html
+```### プログレッシブ機能強化```html
 <!-- Low quality placeholder -->
 <img src="image-tiny.jpg"
      data-src="image-full.jpg"
      class="blur"
      alt="Progressive image">
-```
+```## ファビコン
 
-## Favicon
-
-Website icon:
-
-```html
+ウェブサイトのアイコン:```html
 <!-- Standard -->
 <link rel="icon" href="/favicon.ico" sizes="any">
 
@@ -446,59 +376,57 @@ Website icon:
 <!-- Multiple sizes -->
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-```
+```## マルチメディアのベスト プラクティス
 
-## Multimedia Best Practices
+### パフォーマンス
 
-### Performance
+- ファイルサイズの最適化
+- 適切な形式を使用する
+- 遅延読み込みの実装
+- 配信には CDN を使用します
+- ビデオを圧縮する
 
-- Optimize file sizes
-- Use appropriate formats
-- Implement lazy loading
-- Use CDN for delivery
-- Compress videos
+### アクセシビリティ
 
-### Accessibility
-
-- Provide alt text for images
-- Include captions/subtitles for videos
-- Provide transcripts for audio
-- Don't autoplay with sound
-- Ensure keyboard controls
+- 画像に代替テキストを提供します
+- ビデオにキャプション/字幕を含めます
+- 音声のトランスクリプトを提供します
+- 音声付きで自動再生しない
+- キーボードコントロールを確実にする
 
 ### SEO
 
-- Descriptive filenames
-- Alt text with keywords
-- Structured data (schema.org)
-- Image sitemaps
+- わかりやすいファイル名
+- キーワードを含む代替テキスト
+- 構造化データ (schema.org)
+- 画像サイトマップ
 
-## Glossary Terms
+## 用語集の用語
 
-**Key Terms Covered**:
-- Alpha
-- Baseline (image)
-- Baseline (scripting)
-- Canvas
-- Favicon
+**対象となる重要な用語**:
+- アルファ
+・ベースライン（イメージ）
+- ベースライン (スクリプト作成)
+- キャンバス
+- ファビコン
 - JPEG
-- Lossless compression
-- Lossy compression
+- 可逆圧縮
+- 非可逆圧縮
 - PNG
-- Progressive enhancement
-- Quality values
-- Raster image
-- Render
-- Rendering engine
+- 段階的な強化
+- 品質の価値観
+- ラスター画像
+- レンダリング
+- レンダリングエンジン
 - SVG
-- Vector images
+- ベクター画像
 - WebGL
 - WebP
 
-## Additional Resources
+## 追加のリソース
 
-- [MDN Canvas Tutorial](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial)
-- [SVG Tutorial](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial)
-- [WebGL Fundamentals](https://webglfundamentals.org/)
-- [Responsive Images Guide](https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images)
-- [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+- [MDN Canvas チュートリアル](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial)
+- [SVG チュートリアル](https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial)
+- [WebGL の基礎](https://webglfundamentals.org/)
+- [レスポンシブ画像ガイド](https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images)
+- [Web オーディオ API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)

@@ -1,30 +1,28 @@
-# Glossary
+# 用語集
 
-- Reference [Glossary of Web Terms](https://developer.mozilla.org/en-US/docs/Glossary)
+・参考 [Web用語集](https://developer.mozilla.org/en-US/docs/Glossary)
 
-## Web Terms
+## ウェブ規約
 
-This glossary contains comprehensive web terms categorized across 15 domains:
+この用語集には、15 のドメインに分類された包括的な Web 用語が含まれています。
 
-- HTML & Markup
-- CSS & Styling  
-- JavaScript & Programming
-- Web APIs & DOM
-- HTTP & Networking
-- Security & Authentication
-- Performance & Optimization
-- Accessibility
-- Web Protocols & Standards
-- Browsers & Engines
-- Development Tools
-- Data Formats & Encoding
-- Media & Graphics
-- Architecture & Patterns
-- Servers & Infrastructure
+- HTML とマークアップ
+- CSS とスタイリング  
+- JavaScript とプログラミング
+- Web API と DOM
+- HTTP とネットワーク
+- セキュリティと認証
+- パフォーマンスと最適化
+- アクセシビリティ
+- Web プロトコルと標準
+- ブラウザとエンジン
+- 開発ツール
+- データ形式とエンコーディング
+- メディアとグラフィックス
+- アーキテクチャとパターン
+- サーバーとインフラストラクチャ
 
-## All Web Terms
-
-- [Abstraction](https://developer.mozilla.org/en-US/docs/Glossary/Abstraction)
+## すべての Web 規約- [Abstraction](https://developer.mozilla.org/en-US/docs/Glossary/Abstraction)
 - [Accent](https://developer.mozilla.org/en-US/docs/Glossary/Accent)
 - [Accessibility](https://developer.mozilla.org/en-US/docs/Glossary/Accessibility)
 - [Accessibility tree](https://developer.mozilla.org/en-US/docs/Glossary/Accessibility_tree)

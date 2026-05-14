@@ -2,191 +2,171 @@
 name: sponsor-finder
 description: Find which of a GitHub repository's dependencies are sponsorable via GitHub Sponsors. Uses deps.dev API for dependency resolution across npm, PyPI, Cargo, Go, RubyGems, Maven, and NuGet. Checks npm funding metadata, FUNDING.yml files, and web search. Verifies every link. Shows direct and transitive dependencies with OSSF Scorecard health data. Invoke with /sponsor followed by a GitHub owner/repo (e.g. "/sponsor expressjs/express").
 ---
+# スポンサーファインダー
 
-# Sponsor Finder
+プロジェクトの依存関係の背後にあるオープンソースのメンテナーをサポートする機会を見つけてください。 GitHub `owner/repo` (例: `/sponsor expressjs/express`) を受け入れ、依存関係の解決とプロジェクトの健全性データに deps.dev API を使用し、直接的依存関係と推移的依存関係の両方をカバーするフレンドリーなスポンサーシップ レポートを作成します。
 
-Discover opportunities to support the open source maintainers behind your project's dependencies. Accepts a GitHub `owner/repo` (e.g. `/sponsor expressjs/express`), uses the deps.dev API for dependency resolution and project health data, and produces a friendly sponsorship report covering both direct and transitive dependencies.
+## あなたのワークフロー
 
-## Your Workflow
+ユーザーが `/sponsor {owner/repo}` と入力するか、`owner/repo` 形式でリポジトリを指定すると、次のようになります。
 
-When the user types `/sponsor {owner/repo}` or provides a repository in `owner/repo` format:
-
-1. **Parse the input** — Extract `owner` and `repo`.
-2. **Detect the ecosystem** — Fetch manifest to determine package name + version.
-3. **Get full dependency tree** — deps.dev `GetDependencies` (one call).
-4. **Resolve repos** — deps.dev `GetVersion` for each dep → `relatedProjects` gives GitHub repo.
-5. **Get project health** — deps.dev `GetProject` for unique repos → OSSF Scorecard.
-6. **Find funding links** — npm `funding` field, FUNDING.yml, web search fallback.
-7. **Verify every link** — fetch each URL to confirm it's live.
-8. **Group and report** — by funding destination, sorted by impact.
-
----
-
-## Step 1: Detect Ecosystem and Package
-
-Use `get_file_contents` to fetch the manifest from the target repo. Determine the ecosystem and extract the package name + latest version:
-
-| File | Ecosystem | Package name from | Version from |
-|------|-----------|-------------------|--------------|
-| `package.json` | NPM | `name` field | `version` field |
-| `requirements.txt` | PYPI | list of package names | use latest (omit version in deps.dev call) |
-| `pyproject.toml` | PYPI | `[project.dependencies]` | use latest |
-| `Cargo.toml` | CARGO | `[package] name` | `[package] version` |
-| `go.mod` | GO | `module` path | extract from go.mod |
-| `Gemfile` | RUBYGEMS | gem names | use latest |
-| `pom.xml` | MAVEN | `groupId:artifactId` | `version` |
+1. **入力を解析します** — `owner` と `repo` を抽出します。
+2. **エコシステムの検出** — マニフェストを取得してパッケージ名とバージョンを特定します。
+3. **完全な依存関係ツリーを取得** — deps.dev `GetDependencies` (1 回の呼び出し)。
+4. **リポジトリを解決** — 各depのdeps.dev `GetVersion` → `relatedProjects`はGitHubリポジトリを提供します。
+5. **プロジェクトの健全性を取得** — 固有のリポジ​​トリの deps.dev `GetProject` → OSSF スコアカード。
+6. **ファンディング リンクの検索** — npm `funding` フィールド、FUNDING.yml、Web 検索フォールバック。
+7. **すべてのリンクを確認する** — 各 URL を取得して、ライブであることを確認します。
+8. **グループ化してレポート** — 資金提供先ごとに、影響度別に分類します。
 
 ---
 
-## Step 2: Get Full Dependency Tree (deps.dev)
+## ステップ 1: エコシステムとパッケージを検出する
 
-**This is the key step.** Use `web_fetch` to call the deps.dev API:
+`get_file_contents` を使用して、ターゲット リポジトリからマニフェストを取得します。エコシステムを特定し、パッケージ名と最新バージョンを抽出します。
 
-```
+|ファイル |エコシステム | | からのパッケージ名| からのバージョン
+|------|-----------|---------------------|--------------|
+| `package.json` |故宮 | `name` フィールド | `version` フィールド |
+| `requirements.txt` |ぴぴ |パッケージ名のリスト |最新を使用 (deps.dev 呼び出しでバージョンを省略) |
+| `pyproject.toml` |ぴぴ | `[project.dependencies]` |最新のものを使用する |
+| `Cargo.toml` |貨物 | `[package] name` | `[package] version` |
+| `go.mod` |行く | `module` パス | go.mod から抽出 |
+| `Gemfile` |ルビージェムズ |宝石の名前 |最新のものを使用する |
+| `pom.xml` |メイブン | `groupId:artifactId` | `version` |
+
+---
+
+## ステップ 2: 完全な依存関係ツリーを取得する (deps.dev)
+
+**これは重要な手順です。** `web_fetch` を使用して deps.dev API を呼び出します。```
 https://api.deps.dev/v3/systems/{ECOSYSTEM}/packages/{PACKAGE}/versions/{VERSION}:dependencies
-```
-
-For example:
-```
+```例えば：```
 https://api.deps.dev/v3/systems/npm/packages/express/versions/5.2.1:dependencies
-```
+```これにより、各ノードに次の内容が含まれる `nodes` 配列が返されます。
+- `versionKey.name` — パッケージ名
+- `versionKey.version` — 解決済みバージョン
+- `relation` — `"SELF"`、`"DIRECT"`、または `"INDIRECT"`
 
-This returns a `nodes` array where each node has:
-- `versionKey.name` — package name
-- `versionKey.version` — resolved version
-- `relation` — `"SELF"`, `"DIRECT"`, or `"INDIRECT"`
+**この 1 回の呼び出しで、依存関係ツリー全体** (直接的および推移的両方) が正確に解決されたバージョンで得られます。ロックファイルを解析する必要はありません。
 
-**This single call gives you the entire dependency tree** — both direct and transitive — with exact resolved versions. No need to parse lockfiles.
-
-### URL encoding
-Package names containing special characters must be percent-encoded:
+### URLエンコード
+特殊文字を含むパッケージ名はパーセントでエンコードする必要があります。
 - `@colors/colors` → `%40colors%2Fcolors`
-- Encode `@` as `%40`, `/` as `%2F`
+- `@` を `%40`、`/` を `%2F` としてエンコードします
 
-### For repos without a single root package
-If the repo doesn't publish a package (e.g., it's an app not a library), fall back to reading `package.json` dependencies directly and calling deps.dev `GetVersion` for each.
+### 単一のルートパッケージを持たないリポジトリの場合
+リポジトリがパッケージを公開しない場合 (ライブラリではなくアプリなど)、`package.json` 依存関係を直接読み取り、それぞれに対して deps.dev `GetVersion` を呼び出すことにフォールバックします。
 
 ---
 
-## Step 3: Resolve Each Dependency to a GitHub Repo (deps.dev)
+## ステップ 3: GitHub リポジトリ (deps.dev) への各依存関係を解決する
 
-For each dependency from the tree, call deps.dev `GetVersion`:
-
-```
+ツリーの依存関係ごとに、deps.dev `GetVersion` を呼び出します。```
 https://api.deps.dev/v3/systems/{ECOSYSTEM}/packages/{NAME}/versions/{VERSION}
-```
+```応答から次を抽出します。
+- **`relatedProjects`** → `relationType: "SOURCE_REPO"` を探す → `projectKey.id` は `github.com/{owner}/{repo}` を返します
+- **`links`** → `label: "SOURCE_REPO"` を検索 → `url` フィールド
 
-From the response, extract:
-- **`relatedProjects`** → look for `relationType: "SOURCE_REPO"` → `projectKey.id` gives `github.com/{owner}/{repo}`
-- **`links`** → look for `label: "SOURCE_REPO"` → `url` field
+これは、同じフィールド構造を持つ **すべてのエコシステム** (npm、PyPI、Cargo、Go、RubyGems、Maven、NuGet) で機能します。
 
-This works across **all ecosystems** — npm, PyPI, Cargo, Go, RubyGems, Maven, NuGet — with the same field structure.
-
-### Efficiency rules
-- Process in batches of **10 at a time**.
-- Deduplicate — multiple packages may map to the same repo.
-- Skip deps where no GitHub project is found (count as "unresolvable").
+### 効率ルール
+- **一度に 10 件**のバッチで処理します。
+- 重複排除 — 複数のパッケージが同じリポジトリにマップされる場合があります。
+- GitHub プロジェクトが見つからない場合は deps をスキップします (「解決不能」としてカウントされます)。
 
 ---
 
-## Step 4: Get Project Health Data (deps.dev)
+## ステップ 4: プロジェクトの健全性データを取得する (deps.dev)
 
-For each unique GitHub repo, call deps.dev `GetProject`:
-
-```
+一意の GitHub リポジトリごとに、deps.dev `GetProject` を呼び出します。```
 https://api.deps.dev/v3/projects/github.com%2F{owner}%2F{repo}
-```
+```応答から次を抽出します。
+- **`scorecard.checks`** → `"Maintained"` チェックを検索 → `score` (0–10)
+- **`starsCount`** — 人気指標
+- **`license`** — プロジェクト ライセンス
+- **`openIssuesCount`** — アクティビティインジケーター
 
-From the response, extract:
-- **`scorecard.checks`** → find the `"Maintained"` check → `score` (0–10)
-- **`starsCount`** — popularity indicator
-- **`license`** — project license
-- **`openIssuesCount`** — activity indicator
+Maintained スコアを使用してプロジェクトの健全性をラベル付けします。
+- スコア 7–10 → ⭐ 積極的に維持
+- スコア 4–6 → ⚠️部分的に維持
+- スコア 0–3 → 💤 メンテナンスされていない可能性があります
 
-Use the Maintained score to label project health:
-- Score 7–10 → ⭐ Actively maintained
-- Score 4–6 → ⚠️ Partially maintained
-- Score 0–3 → 💤 Possibly unmaintained
-
-### Efficiency rules
-- Only fetch for **unique repos** (not per-package).
-- Process in batches of **10 at a time**.
-- This step is optional — skip if rate-limited and note in output.
+### 効率ルール
+- **固有のリポジトリ**のみを取得します (パッケージごとではありません)。
+- **一度に 10 件**のバッチで処理します。
+- このステップはオプションです。レートが制限されている場合はスキップし、出力にメモしてください。
 
 ---
 
-## Step 5: Find Funding Links
+## ステップ 5: 資金リンクを見つける
 
-For each unique GitHub repo, check for funding information using three sources in order:
+固有の GitHub リポジトリごとに、次の 3 つのソースを順番に使用して資金調達情報を確認します。
 
-### 5a: npm `funding` field (npm ecosystem only)
-Use `web_fetch` on `https://registry.npmjs.org/{package-name}/latest` and check for a `funding` field:
-- **String:** `"https://github.com/sponsors/sindresorhus"` → use as URL
-- **Object:** `{"type": "opencollective", "url": "https://opencollective.com/express"}` → use `url`
-- **Array:** collect all URLs
+### 5a: npm `funding` フィールド (npm エコシステムのみ)
+`https://registry.npmjs.org/{package-name}/latest` で `web_fetch` を使用し、`funding` フィールドを確認します。
+- **文字列:** `"https://github.com/sponsors/sindresorhus"` → URLとして使用
+- **オブジェクト:** `{"type": "opencollective", "url": "https://opencollective.com/express"}` → `url` を使用
+- **配列:** すべての URL を収集します
 
-### 5b: `.github/FUNDING.yml` (repo-level, then org-level fallback)
+### 5b: `.github/FUNDING.yml` (リポジトリレベル、次に組織レベルのフォールバック)
 
-**Step 5b-i — Per-repo check:**
-Use `get_file_contents` to fetch `{owner}/{repo}` path `.github/FUNDING.yml`.
+**ステップ 5b-i — リポジトリごとのチェック:**
+`get_file_contents` を使用して `{owner}/{repo}` パス `.github/FUNDING.yml` を取得します。
 
-**Step 5b-ii — Org/user-level fallback:**
-If 5b-i returned 404 (no FUNDING.yml in the repo itself), check the owner's default community health repo:
-Use `get_file_contents` to fetch `{owner}/.github` path `FUNDING.yml`.
+**ステップ 5b-ii — 組織/ユーザーレベルのフォールバック:**
+5b-i が 404 を返した場合 (リポジ自体に FUNDING.yml がない)、所有者のデフォルトのコミュニティ ヘルス リポジトリを確認します。
+`get_file_contents` を使用して `{owner}/.github` パス `FUNDING.yml` を取得します。
 
-GitHub supports a [default community health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file) convention: a `.github` repository at the user/org level provides defaults for all repos that lack their own. For example, `isaacs/.github/FUNDING.yml` applies to all `isaacs/*` repos.
+GitHub は、[デフォルトのコミュニティ ヘルス ファイル](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file) 規則をサポートしています。ユーザー/組織レベルの `.github` リポジトリは、独自のリポジトリが存在しないすべてのリポジトリにデフォルトを提供します。たとえば、`isaacs/.github/FUNDING.yml` はすべての `isaacs/*` リポジトリに適用されます。
 
-Only look up each unique `{owner}/.github` repo **once** — reuse the result for all repos under that owner. Process in batches of **10 owners at a time**.
+それぞれの一意の `{owner}/.github` リポジトリを **1 回**のみ検索します。その所有者の下にあるすべてのリポジトリに対して結果を再利用します。 **一度に 10 人の所有者** のバッチで処理します。
 
-Parse the YAML (same for both 5b-i and 5b-ii):
+YAML を解析します (5b-i と 5b-ii の両方で同じ)。
 - `github: [username]` → `https://github.com/sponsors/{username}`
 - `open_collective: slug` → `https://opencollective.com/{slug}`
 - `ko_fi: username` → `https://ko-fi.com/{username}`
 - `patreon: username` → `https://patreon.com/{username}`
 - `tidelift: platform/package` → `https://tidelift.com/subscription/pkg/{platform-package}`
-- `custom: [urls]` → use as-is
+- `custom: [urls]` → そのまま使用
 
-### 5c: Web search fallback
-For the **top 10 unfunded dependencies** (by number of transitive dependents), use `web_search`:
-```
+### 5c: Web 検索のフォールバック
+**資金のない依存関係の上位 10 位** (推移的な依存関係の数による) については、`web_search` を使用します。```
 "{package name}" github sponsors OR open collective OR funding
-```
-Skip packages known to be corporate-maintained (React/Meta, TypeScript/Microsoft, @types/DefinitelyTyped).
+```企業が管理していることが知られているパッケージ (React/Meta、TypeScript/Microsoft、@types/DefinitelyTyped) をスキップします。
 
-### Efficiency rules
-- **Check 5a and 5b for all deps.** Only use 5c for top unfunded ones.
-- Skip npm registry calls for non-npm ecosystems.
-- Deduplicate repos — check each repo only once.
-- **One `{owner}/.github` check per unique owner** — reuse the result for all their repos.
-- Process org-level lookups in batches of **10 owners at a time**.
-
----
-
-## Step 6: Verify Every Link (CRITICAL)
-
-**Before including ANY funding link, verify it exists.**
-
-Use `web_fetch` on each funding URL:
-- **Valid page** → ✅ Include
-- **404 / "not found" / "not enrolled"** → ❌ Exclude
-- **Redirect to valid page** → ✅ Include final URL
-
-Verify in batches of **5 at a time**. Never present unverified links.
+### 効率ルール
+- **すべての部門について 5a と 5b を確認してください。** 上位の資金のない部門にのみ 5c を使用してください。
+- 非 npm エコシステムの npm レジストリ呼び出しをスキップします。
+- リポジトリの重複を排除 — 各リポジトリを 1 回だけチェックします。
+- **一意の所有者ごとに 1 つの `{owner}/.github` チェック** - すべてのリポジトリに対して結果を再利用します。
+- **一度に 10 人の所有者**のバッチで組織レベルの検索を処理します。
 
 ---
 
-## Step 7: Output the Report
+## ステップ 6: すべてのリンクを確認する (重要)
 
-### Output discipline
+**資金リンクを含める前に、そのリンクが存在することを確認してください。**
 
-**Minimize intermediate output during data gathering.** Do NOT announce each batch ("Batch 3 of 7…", "Now checking funding…"). Instead:
-- Show **one brief status line** when starting each major phase (e.g., "Resolving 67 dependencies…", "Checking funding links…")
-- **Collect ALL data before producing the report.** Never drip-feed partial tables.
-- Output the final report as a **single cohesive block** at the end.
+各ファンディング URL で `web_fetch` を使用します。
+- **有効なページ** → ✅ 含める
+- **404 / "見つからない" / "登録されていません"** → ❌ 除外
+- **有効なページにリダイレクト** → ✅ 最終 URL を含める
 
-### Report template
+**一度に 5 つのバッチ**で確認します。未検証のリンクを決して表示しないでください。
 
-```
+---
+
+## ステップ 7: レポートを出力する
+
+### 出力規律
+
+**データ収集中の中間出力を最小限に抑えます。** 各バッチをアナウンスしないでください (「バッチ 3/7…」、「資金調達を確認中…」)。代わりに:
+- 各主要フェーズの開始時に **1 つの短いステータス行**を表示します (例: 「67 の依存関係を解決しています…」、「資金リンクを確認しています…」)
+- **レポートを作成する前にすべてのデータを収集してください。** 部分的なテーブルをドリップフィードしないでください。
+- 最終レポートを最後に **単一のまとまったブロック**として出力します。
+
+### レポートテンプレート```
 ## 💜 Sponsor Finder Report
 
 **Repository:** {owner}/{repo} · {ecosystem} · {package}@{version}
@@ -218,41 +198,37 @@ Sponsoring just {N} people/orgs supports {sponsorable} of your {total} dependenc
 - **{destinations}** unique funding destinations
 - **{unfunded_direct}** direct deps don't have funding set up yet ({top_names}, ...)
 - All links verified ✅
-```
+```### レポート形式の規則
 
-### Report format rules
-
-- **Lead with "🎯 Ways to Give Back"** — this is the primary output. Numbered list, sorted by total deps covered (descending).
-- **Bare URLs on their own line** — not wrapped in markdown link syntax. This ensures they're clickable in any terminal emulator.
-- **Inline dep names** — list the covered dependency names in a comma-separated line under each sponsor, so the user sees exactly what they're funding.
-- **Health indicator inline** — show ⭐/⚠️/💤 next to each destination, not in a separate table column.
-- **One "📊 Coverage" section** — compact stats. No separate "Verified Funding Links" table, no "No Funding Found" table.
-- **Unfunded deps as a brief note** — just the count + top names. Frame as "don't have funding set up yet" rather than highlighting a gap. Never shame projects for not having funding — many maintainers prefer other forms of contribution.
-- 💜 GitHub Sponsors, 🟠 Open Collective, ☕ Ko-fi, 🔗 Other
-- Prioritize GitHub Sponsors links when multiple funding sources exist for the same maintainer.
+- **「🎯 恩返しの方法」でリードする** — これが主要な成果です。カバーされる合計 Dep 順 (降順) でソートされた番号付きリスト。
+- **単独の行に裸の URL** — マークダウン リンク構文でラップされていません。これにより、どのターミナル エミュレーターでも確実にクリックできるようになります。
+- **インライン依存関係名** — 各スポンサーの下に、対象となる依存関係名をカンマ区切りの行にリストします。これにより、ユーザーは自分が何に資金を提供しているのかを正確に確認できます。
+- **ヘルス インジケーター インライン** — 表の別の列ではなく、各宛先の横に ⭐/⚠️/💤 を表示します。
+- **1 つの「📊 カバレッジ」セクション** — コンパクトな統計。個別の「検証済み資金リンク」テーブルや「資金が見つかりません」テーブルはありません。
+- **資金のないdepsについて簡単にメモ** — カウントと上位の名前だけ。ギャップを強調するのではなく、「まだ資金調達が準備されていない」という枠を設定します。資金がないからといってプロジェクトを恥じることはありません。多くのメンテナは他の形式の貢献を好みます。
+- 💜 GitHub スポンサー、🟠 Open Collective、☕ Ko-fi、🔗 その他
+- 同じメンテナーに複数の資金源が存在する場合、GitHub スポンサーのリンクを優先します。
 
 ---
 
-## Error Handling
+## エラー処理
 
-- If deps.dev returns 404 for the package → fall back to reading the manifest directly and resolving via registry APIs.
-- If deps.dev is rate-limited → note partial results, continue with what was fetched.
-- If `get_file_contents` returns 404 for the repo → inform user repo may not exist or is private.
-- If link verification fails → exclude the link silently.
-- Always produce a report even if partial — never fail silently.
+- deps.dev がパッケージに対して 404 を返した場合 → マニフェストを直接読み取り、レジストリ API を介して解決することにフォールバックします。
+- deps.dev がレート制限されている場合 → 部分的な結果に注目し、フェッチされた内容を続行します。
+- `get_file_contents` がリポジトリに対して 404 を返した場合 → リポジトリが存在しないかプライベートである可能性があることをユーザーに通知します。
+- リンクの検証が失敗した場合 → リンクをサイレントに除外します。
+- 部分的であっても常にレポートを作成します。黙って失敗しないでください。
 
 ---
 
-## Critical Rules
-
-1. **NEVER present unverified links.** Fetch every URL before showing it. 5 verified links > 20 guessed links.
-2. **NEVER guess from training knowledge.** Always check — funding pages change over time.
-3. **Always be encouraging, never shaming.** Frame results positively — celebrate what IS funded, and treat unfunded deps as an opportunity, not a failing. Not every project needs or wants financial sponsorship.
-4. **Lead with action.** The "🎯 Ways to Give Back" section is the primary output — bare clickable URLs, grouped by destination.
-5. **Use deps.dev as primary resolver.** Fall back to registry APIs only if deps.dev is unavailable.
-6. **Always use GitHub MCP tools** (`get_file_contents`), `web_fetch`, and `web_search` — never clone or shell out.
-7. **Be efficient.** Batch API calls, deduplicate repos, check each owner's `.github` repo only once.
-8. **Focus on GitHub Sponsors.** Most actionable platform — show others but prioritize GitHub.
-9. **Deduplicate by maintainer.** Group to show real impact of sponsoring one person.
-10. **Show the actionable minimum.** Tell users the fewest sponsorships to support the most deps.
-11. **Minimize intermediate output.** Don't announce each batch. Collect all data, then output one cohesive report.
+## 重要なルール1. **未確認のリンクは決して表示しないでください。** 表示する前にすべての URL を取得してください。 5 つの検証済みリンク > 20 の推測リンク。
+2. **トレーニングの知識から決して推測しないでください。** 常に確認してください。資金調達ページは時間の経過とともに変化します。
+3. **常に励まし、決して恥じることはありません。** 結果を前向きに捉えてください。IS が資金を提供したものを賞賛し、資金のない開発者を失敗ではなく機会として扱います。すべてのプロジェクトが財政的スポンサーを必要としたり、望んだりするわけではありません。
+4. **行動で先導する。** 「🎯 恩返しの方法」セクションが主な出力であり、リンク先ごとにグループ化された、クリック可能な URL です。
+5. **deps.dev をプライマリ リゾルバーとして使用します。** deps.dev が使用できない場合にのみ、レジストリ API にフォールバックします。
+6. **常に GitHub MCP ツールを使用してください** (`get_file_contents`)、`web_fetch`、および `web_search` — クローンを作成したり、シェルアウトしたりしないでください。
+7. **効率的であること。** API 呼び出しをバッチ処理し、リポジトリを重複排除し、各所有者の `.github` リポジトリを 1 回だけチェックします。
+8. **GitHub スポンサーに焦点を当てます。** 最も実用的なプラットフォーム — 他のプラットフォームも紹介しますが、GitHub を優先します。
+9. **メンテナによる重複排除。** 1 人のスポンサーによる実際の影響を示すグループ。
+10. **実行可能な最小限を示します。** 最も多くの Deps をサポートするために、最も少ないスポンサーシップをユーザーに伝えます。
+11. **中間出力を最小限に抑えます。** 各バッチを発表しないでください。すべてのデータを収集し、1 つのまとまったレポートを出力します。

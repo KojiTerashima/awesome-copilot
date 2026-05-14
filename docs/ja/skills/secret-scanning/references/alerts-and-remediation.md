@@ -1,142 +1,136 @@
-# Alerts and Remediation Reference
+# アラートと修復のリファレンス
 
-Detailed reference for secret scanning alert types, validity checks, remediation workflows, and API access.
+シークレット スキャン アラート タイプ、有効性チェック、修復ワークフロー、および API アクセスに関する詳細なリファレンス。
 
-## Alert Types
+## アラートの種類
 
-### User Alerts
+### ユーザーアラート
 
-Generated when secret scanning detects a supported secret in the repository.
+シークレット スキャンがリポジトリ内でサポートされているシークレットを検出したときに生成されます。
 
-- Displayed in the repository **Security** tab
-- Created for provider patterns, non-provider patterns, custom patterns, and AI-detected secrets
-- Scanning covers entire Git history on all branches
+- リポジトリの **セキュリティ** タブに表示されます
+- プロバイダー パターン、非プロバイダー パターン、カスタム パターン、AI 検出シークレット用に作成
+- スキャンはすべてのブランチ上の Git 履歴全体をカバーします
 
-### Push Protection Alerts
+### プッシュ保護アラート
 
-Generated when a contributor bypasses push protection to push a secret.
+寄稿者がプッシュ保護をバイパスしてシークレットをプッシュするときに生成されます。
 
-- Displayed in the Security tab (filter: `bypassed: true`)
-- Record the bypass reason chosen by the contributor
-- Include the commit and file where the secret was pushed
+・セキュリティタブに表示（フィルタ：`bypassed: true`）
+- 寄稿者が選択したバイパス理由を記録します
+- シークレットがプッシュされたコミットとファイルを含めます
 
-**Bypass reasons and their alert behavior:**
+**バイパスの理由とそのアラート動作:**
 
-| Bypass Reason | Alert Status |
+|バイパス理由 |アラートステータス |
 |---|---|
-| It's used in tests | Closed (resolved as "used in tests") |
-| It's a false positive | Closed (resolved as "false positive") |
-| I'll fix it later | Open |
+|テストで使用されます |クローズ済み (「テストで使用」として解決) |
+|それは誤検知です |クローズ済み (「誤検知」として解決) |
+|後で修正します |開く |
 
-### Partner Alerts
+### パートナーアラート
 
-Generated when GitHub detects a leaked secret matching a partner's pattern.
+GitHub がパートナーのパターンと一致する漏洩シークレットを検出したときに生成されます。
 
-- Sent directly to the service provider (e.g., AWS, Stripe, GitHub)
-- **Not** displayed in the repository Security tab
-- Provider may automatically revoke the credential
-- No action required by the repository owner
+- サービスプロバイダー (AWS、Stripe、GitHub など) に直接送信されます。
+- リポジトリの [セキュリティ] タブに **表示されません**
+- プロバイダーは資格情報を自動的に取り消す場合があります
+- リポジトリ所有者によるアクションは必要ありません
 
-## Alert Lists
+## アラート リスト
 
-### Default Alerts List
+### デフォルトのアラートリスト
 
-The primary view showing alerts for:
-- Supported provider patterns (e.g., GitHub PATs, AWS keys, Stripe keys)
-- Custom patterns defined at repo/org/enterprise level
+プライマリ ビューには次のアラートが表示されます。
+- サポートされているプロバイダー パターン (GitHub PAT、AWS キー、ストライプ キーなど)
+- リポジトリ/組織/エンタープライズレベルで定義されたカスタムパターン
 
-### Generic Alerts List
+### 一般的なアラートのリスト
 
-Separate view (toggle from default list) showing:
-- Non-provider patterns (private keys, connection strings)
-- AI-detected generic secrets (passwords)
+以下を示す別のビュー (デフォルトのリストから切り替える):
+- 非プロバイダー パターン (秘密キー、接続文字列)
+- AI が検出した汎用シークレット (パスワード)
 
-**Limitations:**
-- Maximum 5,000 alerts per repository (open + closed)
-- Only first 5 detected locations shown for non-provider patterns
-- Only first detected location shown for AI-detected secrets
-- Not shown in security overview summary views
+**制限事項:**
+- リポジトリあたり最大 5,000 件のアラート (オープン + クローズ)
+- 非プロバイダー パターンの場合は、最初の 5 つの検出された場所のみが表示されます
+- AI によって検出されたシークレットについては、最初に検出された場所のみが表示されます
+- セキュリティ概要の概要ビューには表示されません
 
-## Paired Credentials
+## ペアになった資格情報
 
-When a resource requires paired credentials (e.g., access key + secret key):
-- Alert is only created when BOTH parts are detected in the same file
-- Prevents noise from partial leaks
-- Reduces false positives
+リソースがペアの資格情報 (アクセス キー + 秘密キーなど) を必要とする場合:
+- 両方の部分が同じファイル内で検出された場合にのみアラートが作成されます
+- 部分的な漏れによる騒音を防ぎます。
+- 誤検知を減らす
 
-## Validity Checks
+## 有効性チェック有効性チェックでは、検出されたシークレットがまだアクティブであるかどうかを確認します。
 
-Validity checks verify whether a detected secret is still active.
+### 仕組み
 
-### How It Works
+1. リポジトリ/組織設定で有効性チェックを有効にする
+2. GitHub は定期的にシークレットを発行者の API に送信します
+3. アラートに検証結果が表示される
 
-1. Enable validity checks in repository/organization settings
-2. GitHub periodically sends the secret to the issuer's API
-3. Validation result is displayed on the alert
+### 検証ステータス
 
-### Validation Statuses
-
-| Status | Meaning | Priority |
+|ステータス |意味 |優先順位 |
 |---|---|---|
-| `Active` | Secret is confirmed to be valid and exploitable | 🔴 Immediate |
-| `Inactive` | Secret has been revoked or expired | 🟡 Lower priority |
-| `Unknown` | GitHub cannot determine validity | 🟠 Investigate |
+| `Active` |シークレットは有効で悪用可能であることが確認されています。 🔴 即時 |
+| `Inactive` |シークレットが取り消されているか、期限切れになっています | 🟡 優先度が低い |
+| `Unknown` | GitHub は有効性を判断できません | 🟠 調査する |
 
-### On-Demand Validation
+### オンデマンド検証
 
-Click the validation button on an individual alert to trigger an immediate check.
+個々のアラートの検証ボタンをクリックすると、即時チェックがトリガーされます。
 
-### Privacy
+### プライバシー
 
-GitHub makes minimal API calls (typically GET requests) to the least intrusive endpoints, selecting endpoints that don't return personal information.
+GitHub は、個人情報を返さないエンドポイントを選択して、最も侵入性の低いエンドポイントに対して最小限の API 呼び出し (通常は GET リクエスト) を行います。
 
-## Extended Metadata Checks
+## 拡張メタデータ チェック
 
-Provides additional context about detected secrets when validity checks are enabled.
+有効性チェックが有効になっている場合に、検出されたシークレットに関する追加のコンテキストを提供します。
 
-### Available Metadata
+### 利用可能なメタデータ
 
-Depends on what the service provider shares:
-- Secret owner information
-- Scope and permissions of the secret
-- Creation date and expiration
-- Associated account or project
+サービスプロバイダーが何を共有するかによって異なります。
+- 秘密の所有者情報
+- シークレットの範囲と権限
+- 作成日と有効期限
+- 関連するアカウントまたはプロジェクト
 
-### Benefits
+### メリット
 
-- **Deeper insight** — know who owns a secret
-- **Prioritize remediation** — understand scope and impact
-- **Improve incident response** — quickly identify responsible teams
-- **Enhance compliance** — ensure secrets align with governance policies
-- **Reduce false positives** — additional context helps determine if action is needed
+- **より深い洞察** — 誰が秘密を所有しているかを知る
+- **修復を優先する** — 範囲と影響を理解する
+- **インシデント対応の改善** — 責任あるチームを迅速に特定
+- **コンプライアンスの強化** — 機密がガバナンス ポリシーと一致していることを確認します
+- **誤検知を減らす** - 追加のコンテキストは、アクションが必要かどうかを判断するのに役立ちます
 
-### Enabling
+### 有効化
 
-- Requires validity checks to be enabled first
-- Can be enabled at repository, organization, or enterprise level
-- Available via security configurations for bulk enablement
+- 最初に有効性チェックを有効にする必要があります
+- リポジトリ、組織、またはエンタープライズ レベルで有効化可能
+- 一括有効化のためのセキュリティ構成経由で利用可能
 
-## Remediation Workflow
+## 修復ワークフロー
 
-### Priority: Rotate the Credential
+### 優先度: 資格情報をローテーションする
 
-**Always rotate (revoke and reissue) the exposed credential first.** This is more important than removing the secret from Git history.
+**常に最初に公開された資格情報をローテーション (取り消しおよび再発行) してください。** これは、Git 履歴からシークレットを削除するよりも重要です。
 
-### Step-by-Step Remediation
+### 段階的な修復1. **アラートを受信** — [セキュリティ] タブ、電子メール通知、または Webhook 経由
+2. **重大度の評価** — 有効性ステータスを確認します (アクティブ = 緊急)
+3. **資格情報をローテーション** - 古い資格情報を取り消し、新しい資格情報を生成します。
+4. **参照の更新** — 古い認証情報を使用したすべてのコード/構成を更新します。
+5. **影響を調査** — 暴露期間中に不正使用がないかログを確認します
+6. **アラートを閉じる** — 適切な理由で解決済みとしてマークします
+7. **オプションで Git 履歴をクリーンアップします** — コミット履歴から削除します (時間がかかります)
 
-1. **Receive alert** — via Security tab, email notification, or webhook
-2. **Assess severity** — check validity status (active = urgent)
-3. **Rotate the credential** — revoke the old credential and generate a new one
-4. **Update references** — update all code/config that used the old credential
-5. **Investigate impact** — check logs for unauthorized use during the exposure window
-6. **Close the alert** — mark as resolved with appropriate reason
-7. **Optionally clean Git history** — remove from commit history (time-intensive)
+### Git 履歴からシークレットを削除する
 
-### Removing Secrets from Git History
-
-If needed, use `git filter-repo` (recommended) or `BFG Repo-Cleaner`:
-
-```bash
+必要に応じて、`git filter-repo` (推奨) または `BFG Repo-Cleaner` を使用します。```bash
 # Install git-filter-repo
 pip install git-filter-repo
 
@@ -145,101 +139,75 @@ git filter-repo --path secrets.env --invert-paths
 
 # Force push the cleaned history
 git push --force --all
-```
+```> **注意:** 履歴の書き換えは破壊的であり、既存のクローンと PR が無効になります。これは、資格情報をローテーションした後、絶対に必要な場合にのみ実行してください。
 
-> **Note:** Rewriting history is disruptive — it invalidates existing clones and PRs. Only do this when absolutely necessary and after rotating the credential.
+### アラートを閉じる
 
-### Dismissing Alerts
+適切な理由を選択してください:
 
-Choose the appropriate reason:
-
-| Reason | When to Use |
+|理由 |いつ使用するか |
 |---|---|
-| **False positive** | Detected string is not a real secret |
-| **Revoked** | Credential has already been revoked/rotated |
-| **Used in tests** | Secret is only in test code with acceptable risk |
+| **偽陽性** |検出された文字列は実際の秘密ではありません。
+| **取り消し** |資格情報はすでに取り消されているかローテーションされています |
+| **テストで使用** |シークレットはリスクが許容できるテスト コード内にのみ含まれます。
 
-Add a dismissal comment for audit trail.
+監査証跡の却下コメントを追加します。
 
-## Alert Notifications
+## アラート通知
 
-Alerts generate notifications via:
-- **Email** — to repository admins, organization owners, security managers
-- **Webhooks** — `secret_scanning_alert` event
-- **GitHub Actions** — `secret_scanning_alert` event trigger
-- **Security overview** — aggregated view at organization level
+アラートは次の方法で通知を生成します。
+- **電子メール** — リポジトリ管理者、組織所有者、セキュリティ マネージャー宛
+- **Webhook** — `secret_scanning_alert` イベント
+- **GitHub アクション** — `secret_scanning_alert` イベント トリガー
+- **セキュリティの概要** — 組織レベルでの集約ビュー
 
 ## REST API
 
-### List Alerts
-
-```
+### アラートのリスト```
 GET /repos/{owner}/{repo}/secret-scanning/alerts
-```
+```クエリパラメータ: `state` (オープン/解決済み)、`secret_type`、`resolution`、`sort`、`direction`
 
-Query parameters: `state` (open/resolved), `secret_type`, `resolution`, `sort`, `direction`
-
-### Get Alert Details
-
-```
+### アラートの詳細を取得する```
 GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}
-```
+```戻り値: シークレット タイプ、シークレット値 (許可されている場合)、場所、有効性、解決ステータス、`dismissed_comment`
 
-Returns: secret type, secret value (if permitted), locations, validity, resolution status, `dismissed_comment`
-
-### Update Alert
-
-```
+### アップデートアラート```
 PATCH /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}
-```
+```本文: `state` (オープン/解決済み)、`resolution` (false_positive/revoked/used_in_tests/wont_fix)、`resolution_comment`
 
-Body: `state` (open/resolved), `resolution` (false_positive/revoked/used_in_tests/wont_fix), `resolution_comment`
-
-### List Alert Locations
-
-```
+### アラートの場所をリストする```
 GET /repos/{owner}/{repo}/secret-scanning/alerts/{alert_number}/locations
-```
+```戻り値: ファイル パス、行番号、コミット SHA、BLOB SHA
 
-Returns: file path, line numbers, commit SHA, blob SHA
-
-### Organization-Level Endpoints
-
-```
+### 組織レベルのエンドポイント```
 GET /orgs/{org}/secret-scanning/alerts
-```
+```組織内のすべてのリポジトリにわたるアラートをリストします。
 
-Lists alerts across all repositories in the organization.
-
-## Webhook Events
+## Webhook イベント
 
 ### `secret_scanning_alert`
 
-Triggered when a secret scanning alert is:
-- Created
-- Resolved
-- Reopened
-- Validated (validity status changes)
+シークレット スキャン アラートが次の場合にトリガーされます。
+- 作成済み
+- 解決済み
+- 再開しました
+- Validated (有効性ステータスが変更されます)
 
-Payload includes: alert number, secret type, resolution, commit SHA, and location details.
+ペイロードには、アラート番号、シークレット タイプ、解決策、コミット SHA、および場所の詳細が含まれます。
 
-## Exclusion Configuration
+## 除外設定
 
 ### `secret_scanning.yml`
 
-Place at `.github/secret_scanning.yml` to auto-close alerts for specific paths:
-
-```yaml
+特定のパスのアラートを自動的に閉じるには、`.github/secret_scanning.yml` に配置します。```yaml
 paths-ignore:
   - "docs/**"              # Documentation with example secrets
   - "test/fixtures/**"     # Test fixture data
   - "**/*.example"         # Example configuration files
   - "samples/credentials"  # Sample credential files
-```
+```**制限:**
+- 最大 1,000 エントリ
+- ファイルは 1 MB 未満である必要があります
+- 除外されたパスはプッシュ保護からも除外されます
 
-**Limits:**
-- Maximum 1,000 entries
-- File must be under 1 MB
-- Excluded paths are also excluded from push protection
-
-**Alerts for excluded paths are closed as "ignored by configuration."**
+**除外されたパスのアラートは、「構成によって無視される」として閉じられます。**

@@ -1,99 +1,85 @@
-# Multiple Legacy Contexts - Migration Reference
+# 複数のレガシーコンテキスト - 移行リファレンス
 
-## Identifying Multiple Contexts
+## 複数のコンテキストの識別
 
-A React 16/17 codebase often has several legacy contexts used for different concerns:
-
-```bash
-# Find distinct context names used in childContextTypes
+React 16/17 コードベースには、さまざまな関心事に使用されるいくつかのレガシー コンテキストが含まれることがよくあります。「」バッシュ
+# childContextTypes で使用される個別のコンテキスト名を検索します
 grep -rn "childContextTypes" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
-# Each hit is a separate context to migrate
-```
+# 各ヒットは移行する個別のコンテキストです
+「」クラスヘビーのコードベースの一般的なパターン:
 
-Common patterns in class-heavy codebases:
-
-- **Theme context** - dark/light mode, color palette
-- **Auth context** - current user, login/logout functions
-- **Router context** - current route, navigation (if using older react-router)
-- **Store context** - Redux store, dispatch (if using older connect patterns)
-- **Locale/i18n context** - language, translation function
-- **Toast/notification context** - show/hide notifications
+- **テーマのコンテキスト** - ダーク/ライト モード、カラー パレット
+- **認証コンテキスト** - 現在のユーザー、ログイン/ログアウト機能
+- **ルーターコンテキスト** - 現在のルート、ナビゲーション (古い反応ルーターを使用している場合)
+- **ストア コンテキスト** - Redux ストア、ディスパッチ (古い接続パターンを使用している場合)
+- **ロケール/i18n コンテキスト** - 言語、翻訳機能
+- **トースト/通知コンテキスト** - 通知の表示/非表示
 
 ---
 
-## Migration Order
+## 移行順序
 
-Migrate contexts one at a time. Each is an independent migration:
-
-```
-For each legacy context:
-  1. Create src/contexts/[Name]Context.js
-  2. Update the provider
-  3. Update all consumers
-  4. Run the app - verify no warning for this context
-  5. Move to the next context
-```
-
-Do not migrate all providers first then all consumers - it leaves the app in a broken intermediate state.
+コンテキストを一度に 1 つずつ移行します。それぞれは独立した移行です。「」
+各レガシー コンテキストについて:
+  1. src/contexts/[名前]Context.js を作成します。
+  2.プロバイダーを更新する
+  3. すべてのコンシューマーを更新する
+  4. アプリを実行します - このコンテキストに対する警告がないことを確認します
+  5. 次のコンテキストに移動します
+「」最初にすべてのプロバイダーを移行し、次にすべてのコンシューマーを移行しないでください。移行すると、アプリが壊れた中間状態のままになります。
 
 ---
 
-## Multiple Contexts in the Same Provider
+## 同じプロバイダー内の複数のコンテキスト
 
-Some apps combined multiple contexts in one provider component:
-
-```jsx
-// Before - one provider exports multiple context values:
+一部のアプリは、1 つのプロバイダー コンポーネントで複数のコンテキストを組み合わせていました。```jsx
+// 前 - 1 つのプロバイダーが複数のコンテキスト値をエクスポートします。
 class AppProvider extends React.Component {
-  static childContextTypes = {
-    theme: PropTypes.string,
-    user: PropTypes.object,
-    locale: PropTypes.string,
-    notifications: PropTypes.array,
+  静的 childContextTypes = {
+    テーマ: PropTypes.string、
+    ユーザー: PropTypes.object、
+    ロケール: PropTypes.string、
+    通知: PropTypes.array、
   };
 
   getChildContext() {
-    return {
-      theme: this.state.theme,
-      user: this.state.user,
-      locale: this.state.locale,
-      notifications: this.state.notifications,
+    戻り値 {
+      テーマ: this.state.theme、
+      ユーザー: this.state.user、
+      ロケール: this.state.locale、
+      通知: this.state.notifications,
     };
   }
 }
-```
-
-**Migration approach - split into separate contexts:**
-
-```jsx
+「」**移行アプローチ - 個別のコンテキストに分割:**```jsx
 // src/contexts/ThemeContext.js
-export const ThemeContext = React.createContext('light');
+エクスポート const ThemeContext = React.createContext('light');
 
 // src/contexts/AuthContext.js
-export const AuthContext = React.createContext({ user: null, login: () => {}, logout: () => {} });
+import const AuthContext = React.createContext({ ユーザー: null、ログイン: () => {}、ログアウト: () => {} });
 
 // src/contexts/LocaleContext.js
-export const LocaleContext = React.createContext('en');
+エクスポート const LocaleContext = React.createContext('en');
 
 // src/contexts/NotificationContext.js
-export const NotificationContext = React.createContext([]);
-```
+エクスポート const NoticeContext = React.createContext([]);
+「」
 
 ```jsx
-// AppProvider.js - now wraps with multiple providers
-import { ThemeContext } from './contexts/ThemeContext';
-import { AuthContext } from './contexts/AuthContext';
-import { LocaleContext } from './contexts/LocaleContext';
-import { NotificationContext } from './contexts/NotificationContext';
+// AppProvider.js - 複数のプロバイダーをラップするようになりました
+import { ThemeContext } から './contexts/ThemeContext';
+import { AuthContext } から './contexts/AuthContext';
+import { LocaleContext } から './contexts/LocaleContext';
+import { NoticeContext } から './contexts/NotificationContext';
 
 class AppProvider extends React.Component {
   render() {
-    const { theme, user, locale, notifications } = this.state;
-    return (
-      <ThemeContext.Provider value={theme}>
-        <AuthContext.Provider value={{ user, login: this.login, logout: this.logout }}>
-          <LocaleContext.Provider value={locale}>
-            <NotificationContext.Provider value={notifications}>
+    const {テーマ、ユーザー、ロケール、通知} = this.state;
+    戻る (
+      <ThemeContext.Provider 値={テーマ}>
+        <AuthContext.Provider 値={{ ユーザー、ログイン: this.login、ログアウト: this.logout }}>
+          <LocaleContext.Provider 値={locale}>
+            <NotificationContext.Provider 値={通知}>
               {this.props.children}
             </NotificationContext.Provider>
           </LocaleContext.Provider>
@@ -102,30 +88,26 @@ class AppProvider extends React.Component {
     );
   }
 }
-```
+「」---
 
----
+## 複数のコンテキストを持つコンシューマ (クラス コンポーネント)
 
-## Consumer With Multiple Contexts (Class Component)
+クラス コンポーネントは `static contextType` を 1 つだけ使用できます。複数の場合は、`Consumer` レンダリング プロパティを使用するか、関数コンポーネントに変換します。
 
-Class components can only use ONE `static contextType`. For multiple, use `Consumer` render props or convert to a function component.
-
-### Option A - Render Props (keep as class component)
-
-```jsx
-import { ThemeContext } from '../contexts/ThemeContext';
-import { AuthContext } from '../contexts/AuthContext';
+### オプション A - 小道具のレンダリング (クラス コンポーネントとして保持)```jsx
+import { ThemeContext } から '../contexts/ThemeContext';
+import { AuthContext } から '../contexts/AuthContext';
 
 class UserPanel extends React.Component {
   render() {
-    return (
+    戻る (
       <ThemeContext.Consumer>
-        {(theme) => (
+        {(テーマ) => (
           <AuthContext.Consumer>
-            {({ user, logout }) => (
+            {({ ユーザー, ログアウト }) => (
               <div className={`panel panel-${theme}`}>
                 <span>{user?.name}</span>
-                <button onClick={logout}>Sign out</button>
+                <button onClick={logout}>サインアウト</button>
               </div>
             )}
           </AuthContext.Consumer>
@@ -134,62 +116,48 @@ class UserPanel extends React.Component {
     );
   }
 }
-```
+「」### オプション B - 関数コンポーネントに変換 (推奨)```jsx
+import { useContext } から 'react';
+import { ThemeContext } から '../contexts/ThemeContext';
+import { AuthContext } から '../contexts/AuthContext';
 
-### Option B - Convert to Function Component (preferred)
+関数 UserPanel() {
+  const テーマ = useContext(ThemeContext);
+  const { ユーザー、ログアウト } = useContext(AuthContext);
 
-```jsx
-import { useContext } from 'react';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { AuthContext } from '../contexts/AuthContext';
-
-function UserPanel() {
-  const theme = useContext(ThemeContext);
-  const { user, logout } = useContext(AuthContext);
-
-  return (
+  戻る (
     <div className={`panel panel-${theme}`}>
       <span>{user?.name}</span>
-      <button onClick={logout}>Sign out</button>
+      <button onClick={logout}>サインアウト</button>
     </div>
   );
 }
-```
-
-If converting to a function component is out of scope for this migration sprint - use Option A. If the class component is simple (mostly just render), Option B is worth the minor rewrite.
+「」関数コンポーネントへの変換がこの移行スプリントの範囲外である場合は、オプション A を使用します。クラス コンポーネントが単純 (ほとんどがレンダリングのみ) の場合は、オプション B を少し書き直す価値があります。
 
 ---
 
-## Context File Naming Conventions
+## コンテキスト ファイルの命名規則
 
-Use consistent naming across the codebase:
-
-```
-src/
-  contexts/
-    ThemeContext.js      → exports: ThemeContext, ThemeProvider (optional)
-    AuthContext.js       → exports: AuthContext, AuthProvider (optional)
-    LocaleContext.js     → exports: LocaleContext
-```
-
-Each file exports the context object. The provider can stay in its original file and just import the context.
+コードベース全体で一貫した命名を使用します。「」
+ソース/
+  コンテキスト/
+    ThemeContext.js → エクスポート: ThemeContext、ThemeProvider (オプション)
+    AuthContext.js → エクスポート: AuthContext、AuthProvider (オプション)
+    LocaleContext.js → エクスポート: LocaleContext
+「」各ファイルはコンテキスト オブジェクトをエクスポートします。プロバイダーは元のファイルに留まり、コンテキストをインポートするだけで済みます。
 
 ---
 
-## Verification After All Contexts Migrated
+## すべてのコンテキストが移行された後の検証「」バッシュ
+# 従来のコンテキスト パターンの場合はゼロヒットを返す必要があります
+エコー "=== childContextTypes ===
+grep -rn "childContextTypes" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." |トイレ -l
 
-```bash
-# Should return zero hits for legacy context patterns
-echo "=== childContextTypes ==="
-grep -rn "childContextTypes" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l
+echo "=== contextTypes (レガシー) ===
+grep -rn "^\s*static contextTypes\s*=\|contextTypes\.propTypes" src/ --include="*.js" | grep -v "\.test\." |トイレ -l
 
-echo "=== contextTypes (legacy) ==="
-grep -rn "^\s*static contextTypes\s*=\|contextTypes\.propTypes" src/ --include="*.js" | grep -v "\.test\." | wc -l
+エコー "=== getChildContext ===
+grep -rn "getChildContext" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." |トイレ -l
 
-echo "=== getChildContext ==="
-grep -rn "getChildContext" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l
-
-echo "All three should be 0"
-```
-
-Note: `static contextType` (singular) is the MODERN API - that's correct. Only `contextTypes` (plural) is legacy.
+echo "3 つすべて 0 でなければなりません"
+「」注: `static contextType` (単数形) は MODERN API です - それは正しいです。 `contextTypes` (複数形) のみがレガシーです。

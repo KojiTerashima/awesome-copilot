@@ -1,70 +1,58 @@
-# Experiments: Generating Synthetic Test Data
+# 実験: 合成テスト データの生成
 
-Creating diverse, targeted test data for evaluation.
+評価用にターゲットを絞った多様なテストデータを作成します。
 
-## Dimension-Based Approach
+## ディメンションベースのアプローチ
 
-Define axes of variation, then generate combinations:
-
-```python
-dimensions = {
-    "issue_type": ["billing", "technical", "shipping"],
-    "customer_mood": ["frustrated", "neutral", "happy"],
-    "complexity": ["simple", "moderate", "complex"],
+変化の軸を定義し、組み合わせを生成します。「」パイソン
+寸法 = {
+    "issue_type": ["請求", "技術", "配送"],
+    "customer_mood": ["イライラ"、"どちらでもない"、"幸せ"],
+    "複雑さ": ["単純"、"中程度"、"複雑"]、
 }
-```
+「」## 2 段階の生成
 
-## Two-Step Generation
+1. **タプルの生成** (ディメンション値の組み合わせ)
+2. **自然なクエリに変換** (タプルごとに個別の LLM 呼び出し)「」パイソン
+# ステップ 1: タプルを作成する
+タプル = [
+    (「請求」、「イライラ」、「複雑」)、
+    (「配送」、「中立」、「シンプル」)、
+】
 
-1. **Generate tuples** (combinations of dimension values)
-2. **Convert to natural queries** (separate LLM call per tuple)
-
-```python
-# Step 1: Create tuples
-tuples = [
-    ("billing", "frustrated", "complex"),
-    ("shipping", "neutral", "simple"),
-]
-
-# Step 2: Convert to natural query
+# ステップ 2: 自然なクエリに変換する
 def tuple_to_query(t):
-    prompt = f"""Generate a realistic customer message:
-    Issue: {t[0]}, Mood: {t[1]}, Complexity: {t[2]}
+    プロンプト = f"""現実的な顧客メッセージを生成します。
+    問題: {t[0]}、気分: {t[1]}、複雑さ: {t[2]}
     
-    Write naturally, include typos if appropriate. Don't be formulaic."""
-    return llm(prompt)
-```
+    自然に書き、必要に応じてタイプミスも含めてください。型にはまらないでください。」
+    llm(プロンプト)を返す
+「」## ターゲットの障害モード
 
-## Target Failure Modes
-
-Dimensions should target known failures from error analysis:
-
-```python
-# From error analysis findings
-dimensions = {
-    "timezone": ["EST", "PST", "UTC", "ambiguous"],  # Known failure
-    "date_format": ["ISO", "US", "EU", "relative"],   # Known failure
+ディメンションは、エラー分析からの既知の障害を対象にする必要があります。「」パイソン
+# エラー分析結果から
+寸法 = {
+    "timezone": ["EST", "PST", "UTC", "ambiguous"], # 既知の障害
+    "date_format": ["ISO", "US", "EU", "relative"], # 既知の障害
 }
-```
+「」## 品質管理
 
-## Quality Control
+- **検証**: プレースホルダー テキスト、最小長をチェックします。
+- **重複排除**: 埋め込みを使用して重複に近いクエリを削除します。
+- **バランス**: ディメンション値全体を確実にカバーします。
 
-- **Validate**: Check for placeholder text, minimum length
-- **Deduplicate**: Remove near-duplicate queries using embeddings
-- **Balance**: Ensure coverage across dimension values
+## いつ使用するか
 
-## When to Use
-
-| Use Synthetic | Use Real Data |
+|合成繊維を使用 |実データを使用する |
 | ------------- | ------------- |
-| Limited production data | Sufficient traces |
-| Testing edge cases | Validating actual behavior |
-| Pre-launch evals | Post-launch monitoring |
+|限定生産データ |十分なトレース |
+|エッジケースのテスト |実際の動作を検証する |
+|起動前評価 |打ち上げ後のモニタリング |
 
-## Sample Sizes
+## サンプルサイズ
 
-| Purpose | Size |
+|目的 |サイズ |
 | ------- | ---- |
-| Initial exploration | 50-100 |
-| Comprehensive eval | 100-500 |
-| Per-dimension | 10-20 per combination |
+|初期の探索 | 50-100 |
+|総合評価 | 100-500 |
+|次元ごと |組み合わせごとに 10 ～ 20 |

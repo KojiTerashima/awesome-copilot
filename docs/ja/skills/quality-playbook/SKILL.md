@@ -7,473 +7,432 @@ metadata:
   author: Andrew Stellman
   github: https://github.com/andrewstellman/
 ---
+# 品質ハンドブックジェネレーター
 
-# Quality Playbook Generator
-
-**When this skill starts, display this banner before doing anything else:**
-
-```
-Quality Playbook v1.2.0 — by Andrew Stellman
+**このスキルが開始されたら、他の操作を行う前にこのバナーを表示してください:**「」
+品質ハンドブック v1.2.0 — Andrew Stellman 著
 https://github.com/andrewstellman/
-```
+「」特定のコードベースに合わせて調整された完全な品質システムを生成します。ソース コードから機械的に動作するテスト スタブ ジェネレーターとは異なり、このスキルは最初にプロジェクトを探索し、そのドメイン、アーキテクチャ、仕様、障害履歴を理解してから、見つかった内容に基づいて高品質のプレイブックを作成します。
 
-Generate a complete quality system tailored to a specific codebase. Unlike test stub generators that work mechanically from source code, this skill explores the project first — understanding its domain, architecture, specifications, and failure history — then produces a quality playbook grounded in what it finds.
+## これが存在する理由
 
-## Why This Exists
+ほとんどのソフトウェア プロジェクトにはテストがありますが、高品質の *システム* を備えているプロジェクトはほとんどありません。テストはコードが機能するかどうかをチェックします。品質システムは、この特定のプロジェクトにとって「正しく動作する」とはどういう意味ですか?という難しい質問に答えます。テストでは検出されない失敗の可能性にはどのようなものがあるでしょうか?このコードに触れる前に、すべての開発者 (人間または AI) が知っておくべきことは何でしょうか?
 
-Most software projects have tests, but few have a quality *system*. Tests check whether code works. A quality system answers harder questions: what does "working correctly" mean for this specific project? What are the ways it could fail that wouldn't be caught by tests? What should every developer (human or AI) know before touching this code?
+質の高いプレイブックがなければ、すべての新しいコントリビューター (およびすべての新しい AI セッション) はゼロから始まります。何が重要かを推測し、見た目は良いが実際のバグは捕捉できないテストを作成し、数か月前にすでに発見され修正されていた障害モードを再発見することになります。高品質のプレイブックでは、バーが明示的、永続的、継承されます。
 
-Without a quality playbook, every new contributor (and every new AI session) starts from scratch — guessing at what matters, writing tests that look good but don't catch real bugs, and rediscovering failure modes that were already found and fixed months ago. A quality playbook makes the bar explicit, persistent, and inherited.
+## このスキルが生み出すもの
 
-## What This Skill Produces
+再現可能な品質システムを形成する 6 つのファイル:
 
-Six files that together form a repeatable quality system:
+|ファイル |目的 |なぜそれが重要なのか |コードを実行しますか? |
+|-----|--------|----------------|--------------|
+| `quality/QUALITY.md` |質の高い体質 — 対象範囲、目的に合ったシナリオ、劇場の予防 |すべての AI セッションは最初にこれを読み取ります。 「十分に良い」とは何を意味するのかを子供たちに説明するので、子供たちは推測できなくなります。 |いいえ |
+| `quality/test_functional.*` |仕様に基づいた自動機能テスト |セーフティネット。コードの動作だけでなく、仕様に記載されている内容に関連したテストが実行される必要があります。プロジェクトの言語を使用します: `test_functional.py` (Python)、`FunctionalSpec.scala` (Scala)、`functional.test.ts` (TypeScript)、`FunctionalTest.java` (Java) など。 **はい** |
+| `quality/RUN_CODE_REVIEW.md` |幻覚所見を防ぐガードレールを備えたコードレビュープロトコル |ガードレールのない AI コード レビューでは、自信はあるものの間違った結果が得られます。多くの場合、ガードレール (行番号、クレーム前の grep、本文の読み取り) により精度が向上します。 |いいえ |
+| `quality/RUN_INTEGRATION_TESTS.md` |統合テスト プロトコル — すべてのバリアントにわたるエンドツーエンドのパイプライン |単体テストは合格しましたが、システムは実際に実際の外部サービスとエンドツーエンドで動作しますか? | **はい** |
+| `quality/RUN_SPEC_AUDIT.md` |三者協議会のマルチモデル仕様監査プロトコル |単一の AI モデルですべてを把握できるわけではありません。異なる盲点を持つ 3 つの独立したモデルが、単独では見逃してしまう欠陥を検出します。 |いいえ |
+| `AGENTS.md` |このプロジェクトで作業している AI セッションのブートストラップ コンテキスト | 「最初にお読みください」ファイル。これがなければ、AI セッションは何が起こっているのかを理解するのに最初の 1 時間を無駄にしてしまいます。 |いいえ |
 
-| File | Purpose | Why It Matters | Executes Code? |
-|------|---------|----------------|----------------|
-| `quality/QUALITY.md` | Quality constitution — coverage targets, fitness-to-purpose scenarios, theater prevention | Every AI session reads this first. It tells them what "good enough" means so they don't guess. | No |
-| `quality/test_functional.*` | Automated functional tests derived from specifications | The safety net. Tests tied to what the spec says should happen, not just what the code does. Use the project's language: `test_functional.py` (Python), `FunctionalSpec.scala` (Scala), `functional.test.ts` (TypeScript), `FunctionalTest.java` (Java), etc. | **Yes** |
-| `quality/RUN_CODE_REVIEW.md` | Code review protocol with guardrails that prevent hallucinated findings | AI code reviews without guardrails produce confident but wrong findings. The guardrails (line numbers, grep before claiming, read bodies) often improve accuracy. | No |
-| `quality/RUN_INTEGRATION_TESTS.md` | Integration test protocol — end-to-end pipeline across all variants | Unit tests pass, but does the system actually work end-to-end with real external services? | **Yes** |
-| `quality/RUN_SPEC_AUDIT.md` | Council of Three multi-model spec audit protocol | No single AI model catches everything. Three independent models with different blind spots catch defects that any one alone would miss. | No |
-| `AGENTS.md` | Bootstrap context for any AI session working on this project | The "read this first" file. Without it, AI sessions waste their first hour figuring out what's going on. | No |
+さらに出力ディレクトリ: `quality/code_reviews/`、`quality/spec_audits/`、`quality/results/`。
 
-Plus output directories: `quality/code_reviews/`, `quality/spec_audits/`, `quality/results/`.
+重要な成果物は、機能テスト ファイル (プロジェクトの言語とテスト フレームワークの規則に基づいて名前が付けられています) です。 Markdown プロトコルは人間と AI エージェントのためのドキュメントです。機能テストは自動化されたセーフティ ネットです。
 
-The critical deliverable is the functional test file (named for the project's language and test framework conventions). The Markdown protocols are documentation for humans and AI agents. The functional tests are the automated safety net.
+## 使用方法
 
-## How to Use
+このスキルを任意のコードベースに向けます。「」
+このプロジェクトの高品質なプレイブックを生成します。
+「」
 
-Point this skill at any codebase:
+「」
+機能テストを更新します。品質のプレイブックはすでに存在します。
+「」
 
-```
-Generate a quality playbook for this project.
-```
-
-```
-Update the functional tests — the quality playbook already exists.
-```
-
-```
-Run the spec audit protocol.
-```
-
-If a quality playbook already exists (`quality/QUALITY.md`, functional tests, etc.), read the existing files first, then evaluate them against the self-check benchmarks in the verification phase. Don't assume existing files are complete — treat them as a starting point.
+「」
+仕様監査プロトコルを実行します。
+「」高品質のプレイブックがすでに存在する場合 (`quality/QUALITY.md`、機能テストなど)、まず既存のファイルを読み取り、検証フェーズで自己チェック ベンチマークに対してそれらのファイルを評価します。既存のファイルが完成していると想定せず、出発点として扱います。
 
 ---
 
-## Phase 1: Explore the Codebase (Do Not Write Yet)
+## フェーズ 1: コードベースを探索する (まだ記述しないでください)
 
-Spend the first phase understanding the project. The quality playbook must be grounded in this specific codebase — not generic advice.
+最初のフェーズではプロジェクトを理解します。品質ハンドブックは、一般的なアドバイスではなく、この特定のコードベースに基づいている必要があります。
 
-**Why explore first?** The most common failure in AI-generated quality playbooks is producing generic content — coverage targets that could apply to any project, scenarios that describe theoretical failures, tests that exercise language builtins instead of project code. Exploration prevents this by forcing every output to reference something real: a specific function, a specific schema, a specific defensive code pattern. If you can't point to where something lives in the code, you're guessing — and guesses produce quality playbooks nobody trusts.
+**最初に探索する理由** AI が生成した品質の高いプレイブックで最も一般的な失敗は、汎用コンテンツ、つまりあらゆるプロジェクトに適用できるカバレッジ ターゲット、理論上の失敗を説明するシナリオ、プロジェクト コードの代わりに組み込み言語を実行するテストを生成することです。探索は、すべての出力が実際のもの、つまり特定の関数、特定のスキーマ、特定の防御コード パターンを参照するように強制することで、これを防ぎます。コード内のどこに何かがあるのか​​を示すことができない場合は、推測していることになります。推測によって、誰も信頼できない高品質のプレイブックが作成されます。
 
-**Scaling for large codebases:** For projects with more than ~50 source files, don't try to read everything. Focus exploration on the 3–5 core modules (the ones that handle the primary data flow, the most complex logic, and the most failure-prone operations). Read representative tests from each subsystem rather than every test file. The goal is depth on what matters, not breadth across everything.
+**大規模なコードベースのスケーリング:** ソース ファイルが 50 を超えるプロジェクトの場合は、すべてを読み取ろうとしないでください。 3 ～ 5 個のコア モジュール (主要なデータ フロー、最も複雑なロジック、および最も障害が発生しやすい操作を処理するモジュール) に焦点を当てて調査します。すべてのテスト ファイルではなく、各サブシステムから代表的なテストを読み取ります。目標は、すべてを網羅することではなく、重要なことを深く理解することです。
 
-### Step 0: Ask About Development History
+### ステップ 0: 開発の歴史について尋ねる
 
-Before exploring code, ask the user one question:
+コードを調べる前に、ユーザーに 1 つの質問をしてください。
 
-> "Do you have exported AI chat history from developing this project — Claude exports, Gemini takeouts, ChatGPT exports, Claude Code transcripts, or similar? If so, point me to the folder. The design discussions, incident reports, and quality decisions in those chats will make the generated quality playbook significantly better."
+> 「このプロジェクトの開発で AI チャット履歴をエクスポートしましたか — クロードのエクスポート、Gemini の取り出し、ChatGPT のエクスポート、クロード コードのトランスクリプトなどをエクスポートしましたか? ある場合は、フォルダーを教えてください。これらのチャットでの設計の議論、インシデント レポート、および品質の決定により、生成される品質のプレイブックが大幅に向上します。」
 
-If the user provides a chat history folder:
+ユーザーがチャット履歴フォルダーを提供した場合:1. **最初にインデックス ファイルをスキャンします。** `INDEX*`、`CONTEXT.md`、`README.md`、または同様のナビゲーション補助という名前のファイルを探します。存在する場合は、それを読んでください。そこに何があるのか​​、どうやって見つけるのかがわかります。
+2. **品質関連の会話を検索します。** 品質、テスト、カバレッジ、バグ、障害、インシデント、クラッシュ、検証、再試行、回復、仕様、適合性、監査、レビューなどに言及しているメッセージを探します。プロジェクト名も検索してください。
+3. **設計上の決定事項とインシデント履歴を抽出します。** 最も価値のあるコンテンツは次のとおりです: (a) インシデント レポート — 何が問題だったのか、影響を受けたレコードの数、どのように検出されたのか、(b) 設計に関するディスカッション — 特定のアプローチが選択された理由、どの代替案が拒否されたのか、(c) 品質フレームワークのディスカッション — カバレッジ ターゲット、テスト哲学、モデル レビューの経験、(d) クロスモデル フィードバック — さまざまな AI モデルがコードに関して意見が一致しない場合。
+4. **すべてを読もうとしないでください。** チャット履歴は膨大になる場合があります。インデックスを使用して最も関連性の高い会話を見つけ、その会話内で品質関連のコンテンツを検索します。 10 分間の的を絞った検索は、2 時間の徹底的な読書よりも優れています。
 
-1. **Scan for an index file first.** Look for files named `INDEX*`, `CONTEXT.md`, `README.md`, or similar navigation aids. If one exists, read it — it will tell you what's there and how to find things.
-2. **Search for quality-relevant conversations.** Look for messages mentioning: quality, testing, coverage, bugs, failures, incidents, crashes, validation, retry, recovery, spec, fitness, audit, review. Also search for the project name.
-3. **Extract design decisions and incident history.** The most valuable content is: (a) incident reports — what went wrong, how many records affected, how it was detected, (b) design discussions — why a particular approach was chosen, what alternatives were rejected, (c) quality framework discussions — coverage targets, testing philosophy, model review experiences, (d) cross-model feedback — where different AI models disagreed about the code.
-4. **Don't try to read everything.** Chat histories can be enormous. Use the index to find the most relevant conversations, then search within those for quality-related content. 10 minutes of targeted searching beats 2 hours of exhaustive reading.
+このコンテキストは金です。開発者が「この同時実行モデルを選択した理由」または「運用環境で 1,693 レコードを失ったときのこと」について話し合ったチャット履歴は、一般的なシナリオを信頼できるシナリオに変換します。
 
-This context is gold. A chat history where the developer discussed "why we chose this concurrency model" or "the time we lost 1,693 records in production" transforms generic scenarios into authoritative ones.
+ユーザーにチャット履歴がない場合は、通常どおり続行します。スキルはチャット履歴がなくても、コンテキストが少ないだけで機能します。
 
-If the user doesn't have chat history, proceed normally — the skill works without it, just with less context.
+### ステップ 1: ドメイン、スタック、仕様を特定する
 
-### Step 1: Identify Domain, Stack, and Specifications
+README、既存のドキュメントを読み、構成をビルドします (`pyproject.toml` / `package.json` / `Cargo.toml`)。答え:
 
-Read the README, existing documentation, and build config (`pyproject.toml` / `package.json` / `Cargo.toml`). Answer:
+- このプロジェクトは何をするものですか? （一文です。）
+- どのような言語と主要な依存関係がありますか?
+- どのような外部システムと通信しますか?
+- 主な出力は何ですか?
 
-- What does this project do? (One sentence.)
-- What language and key dependencies?
-- What external systems does it talk to?
-- What is the primary output?
+**仕様を見つけてください。** 仕様は機能テストの信頼できる情報源です。ルートの `AGENTS.md`/`CLAUDE.md`、`specs/`、`docs/`、`spec/`、`design/`、`architecture/`、`adr/`、ルートの `.md` ファイルの順に検索します。パスを記録します。
 
-**Find the specifications.** Specs are the source of truth for functional tests. Search in order: `AGENTS.md`/`CLAUDE.md` in root, `specs/`, `docs/`, `spec/`, `design/`, `architecture/`, `adr/`, then `.md` files in root. Record the paths.
+**正式な仕様ドキュメントが存在しない**場合でも、スキルは機能しますが、他のソースから要件を組み立てる必要があります。優先順位:
 
-**If no formal spec documents exist**, the skill still works — but you need to assemble requirements from other sources. In order of preference:
+1. **ユーザーに尋ねる** — たとえ文書化されていなくても、ユーザーは要件を知っていることがよくあります。
+2. **README とインライン ドキュメント** — 多くのプロジェクトでは、README、API ドキュメント、またはコード コメントに要件が埋め込まれています。
+3. **既存のテスト スイート** — テストは暗黙の仕様です。テストで `process(x) == y` がアサートされる場合、それが要件です。
+4. **型署名と検証ルール** — スキーマ、型アノテーション、バリデーターは、システムが何を受け入れ、何を拒否するかを定義します。
+5. **コードの動作から推測** — 最後の手段として、コードを読み、コードが何を行うべきかを推測します。これらを QUALITY.md で *推定要件* としてマークし、ユーザー確認のためにフラグを立てます。
 
-1. **Ask the user** — they often know the requirements even if they're not written down.
-2. **README and inline documentation** — many projects embed requirements in their README, API docs, or code comments.
-3. **Existing test suite** — tests are implicit specifications. If a test asserts `process(x) == y`, that's a requirement.
-4. **Type signatures and validation rules** — schemas, type annotations, and validators define what the system accepts and rejects.
-5. **Infer from code behavior** — as a last resort, read the code and infer what it's supposed to do. Mark these as *inferred requirements* in QUALITY.md and flag them for user confirmation.
+非正式な要件に基づいて作業する場合は、各シナリオにラベルを付け、信頼層とソースを含む **要件タグ** を使用してテストします。- `[Req: formal — README §3]` — 仕様書に人間が記述したもの。権威ある。
+- `[Req: user-confirmed — "must handle empty input"]` — ユーザーによって記載されていますが、正式なドキュメントには記載されていません。権威あるものとして扱います。
+- `[Req: inferred — from validate_input() behavior]` — コードから推定。ユーザーレビュー用のフラグ。
 
-When working from non-formal requirements, label each scenario and test with a **requirement tag** that includes a confidence tier and source:
+QUALITY.md シナリオ、機能テストのドキュメント、仕様監査の結果では、この正確なタグ形式を使用してください。これにより、どの要件に権限があり、どの要件に検証が必要であるかが明確になります。
 
-- `[Req: formal — README §3]` — written by humans in a spec document. Authoritative.
-- `[Req: user-confirmed — "must handle empty input"]` — stated by the user but not in a formal doc. Treat as authoritative.
-- `[Req: inferred — from validate_input() behavior]` — deduced from code. Flag for user review.
+### ステップ 2: アーキテクチャをマッピングする
 
-Use this exact tag format in QUALITY.md scenarios, functional test documentation, and spec audit findings. It makes clear which requirements are authoritative and which need validation.
+ソース ディレクトリとその目的をリストします。メインのエントリ ポイントを読み、実行フローをトレースします。識別:
 
-### Step 2: Map the Architecture
+- 3 ～ 5 つの主要なサブシステム
+- データの流れ（入力→処理→出力）
+- 最も複雑なモジュール
+- 最も壊れやすいモジュール
 
-List source directories and their purposes. Read the main entry point, trace execution flow. Identify:
+### ステップ 3: 既存のテストを読む
 
-- The 3–5 major subsystems
-- The data flow (Input → Processing → Output)
-- The most complex module
-- The most fragile module
+既存のテスト ファイルを読み取ります。小規模/中規模プロジェクトの場合はすべて、大規模プロジェクトの場合は各サブシステムの代表的なサンプルを読み取ります。特定: テスト数、カバレッジ パターン、ギャップ、およびカバレッジ シアター (見た目は良好だが実際のバグを捕捉していないテスト)。
 
-### Step 3: Read Existing Tests
+**重要: インポート パターンを記録します。** 既存のテストはプロジェクト モジュールをどのようにインポートしますか?すべての言語には独自の規則があります (Python `sys.path` 操作、Java/Scala パッケージのインポート、TypeScript の相対パスまたはエイリアス、Go パッケージ/モジュール パス、Rust `use crate::` または `use myproject::`)。機能テストではまったく同じパターンを使用する必要があります。これを間違えると、すべてのテストがインポート/解決エラーで失敗することになります。 6 言語の完全なマトリックスについては、`references/functional_tests.md` §「パターンのインポート」を参照してください。
 
-Read the existing test files — all of them for small/medium projects, or a representative sample from each subsystem for large ones. Identify: test count, coverage patterns, gaps, and any coverage theater (tests that look good but don't catch real bugs).
+**統合テスト ランナーを特定します。** 実際の外部サービス (API、データベースなど) に対してシステムをエンドツーエンドで実行するスクリプトまたはテスト ファイルを探します。パターンに注意してください。`RUN_INTEGRATION_TESTS.md` で必要になります。
 
-**Critical: Record the import pattern.** How do existing tests import project modules? Every language has its own conventions (Python `sys.path` manipulation, Java/Scala package imports, TypeScript relative paths or aliases, Go package/module paths, Rust `use crate::` or `use myproject::`). You must use the exact same pattern in your functional tests — getting this wrong means every test fails with import/resolution errors. See `references/functional_tests.md` § "Import Pattern" for the full six-language matrix.
+### ステップ 4: 仕様を読む
 
-**Identify integration test runners.** Look for scripts or test files that exercise the system end-to-end against real external services (APIs, databases, etc.). Note their patterns — you'll need them for `RUN_INTEGRATION_TESTS.md`.
+各仕様ドキュメントをセクションごとに説明します。すべてのセクションについて、「これにはどのようなテスト可能な要件が記載されていますか?」と尋ねます。対応するテストを行わずに仕様要件を記録します。これらのギャップは機能テストで埋めなければなりません。
 
-### Step 4: Read the Specifications
+推測された要件 (テスト、型、またはコードの動作から) を使用する場合は、手順 1 で定義した `[Req: tier — source]` 形式を使用して、それぞれの信頼層をタグ付けします。推測された要件は QUALITY.md シナリオにフィードされ、フェーズ 4 でのユーザー レビュー用にフラグを付ける必要があります。
 
-Walk each spec document section by section. For every section, ask: "What testable requirement does this state?" Record spec requirements without corresponding tests — these are the gaps the functional tests must close.
+### ステップ 4b: 関数のシグネチャと実際のデータを読み取る
 
-If using inferred requirements (from tests, types, or code behavior), tag each with its confidence tier using the `[Req: tier — source]` format defined in Step 1. Inferred requirements feed into QUALITY.md scenarios and should be flagged for user review in Phase 4.
+テストを作成する前に、各関数がどのように呼び出されるかを正確に理解しておく必要があります。ステップ 2 で特定したすべてのモジュールについて:1. **実際の関数シグネチャを読んでください** - パラメータ名、タイプ、デフォルト。使用状況から推測しないでください。関数定義とドキュメント (Python docstring、Java/Scala Javadoc/ScalaDoc、TypeScript の型アノテーション、Go godoc コメント、Rust doc コメント、型シグネチャ) を読んでください。
+2. **実際のデータ ファイルを読み取る** — プロジェクトに項目ファイル、フィクスチャ ファイル、構成ファイル、またはサンプル データ (`pipelines/`、`fixtures/`、`test_data/`、`examples/`) がある場合は、それらを読み取ります。テスト フィクスチャは実際のデータの形状と正確に一致する必要があります。
+3. **既存のテスト フィクスチャを読み取る** — 既存のテストはどのようにテスト データを作成しますか?彼らのパターンをコピーしてください。特定のキーを使用して構成辞書を構築する場合は、その正確なキーを使用してください。
+4. **ライブラリのバージョンを確認する** — プロジェクトの依存関係マニフェスト (`requirements.txt`、`build.sbt`、`package.json`、`pom.xml`/`build.gradle`、`go.mod`、`Cargo.toml`) を確認して、実際に利用可能なものを確認します。インストールされていないライブラリ機能に依存するテストを作成しないでください。依存関係が欠落している可能性がある場合は、テスト フレームワークのスキップ メカニズムを使用します。フレームワーク固有の例については、`references/functional_tests.md` §「ライブラリのバージョンの認識」を参照してください。
 
-### Step 4b: Read Function Signatures and Real Data
+**関数呼び出しマップ**を記録します。テストする予定の関数ごとに、その名前、モジュール、パラメーター、および戻り値を書き留めます。このマップは、最も一般的なテストの失敗、つまり間違った引数を指定して関数を呼び出すことを防ぎます。
 
-Before writing any test, you must know exactly how each function is called. For every module you identified in Step 2:
+### ステップ 5: スケルトンを見つける
 
-1. **Read the actual function signatures** — parameter names, types, defaults. Don't guess from usage context — read the function definition and any documentation (Python docstrings, Java/Scala Javadoc/ScalaDoc, TypeScript type annotations, Go godoc comments, Rust doc comments and type signatures).
-2. **Read real data files** — If the project has items files, fixture files, config files, or sample data (in `pipelines/`, `fixtures/`, `test_data/`, `examples/`), read them. Your test fixtures must match the real data shape exactly.
-3. **Read existing test fixtures** — How do existing tests create test data? Copy their patterns. If they build config dicts with specific keys, use those exact keys.
-4. **Check library versions** — Check the project's dependency manifest (`requirements.txt`, `build.sbt`, `package.json`, `pom.xml`/`build.gradle`, `go.mod`, `Cargo.toml`) to see what's actually available. Don't write tests that depend on library features that aren't installed. If a dependency might be missing, use the test framework's skip mechanism — see `references/functional_tests.md` § "Library version awareness" for framework-specific examples.
+これが最も重要なステップです。防御的なコード パターンを検索します。それぞれが過去の失敗や既知のリスクの証拠です。
 
-Record a **function call map**: for each function you plan to test, write down its name, module, parameters, and what it returns. This map prevents the most common test failure: calling functions with wrong arguments.
+**これが重要な理由:** 開発者は、楽しみのために `try/except` ブロック、null チェック、または再試行ロジックを作成しません。あらゆる防御コードは、誰かが火傷を負ったために存在します。 JSON 解析の周囲の `try/except` は、本番環境で不正な JSON が発生したことを意味します。フィールドの null チェックは、そのフィールドが存在すべきでないときに欠落していたことを意味します。これらのパターンは、失敗の歴史をささやくコードベースです。それぞれが目的への適合性シナリオと境界テストになります。
 
-### Step 5: Find the Skeletons
+**体系的な検索アプローチ、grep パターン、結果を目的に合ったシナリオと境界テストに変換する方法については、`references/defensive_patterns.md`** をお読みください。
 
-This is the most important step. Search for defensive code patterns — each one is evidence of a past failure or known risk.
+最小基準: コア ソース ファイルごとに少なくとも 2 ～ 3 つの防御パターン。見つかったものが少ない場合は、スキミングを行っていることになります。シグネチャだけでなく関数本体を読んでください。
 
-**Why this matters:** Developers don't write `try/except` blocks, null checks, or retry logic for fun. Every piece of defensive code exists because someone got burned. A `try/except` around a JSON parse means malformed JSON happened in production. A null check on a field means that field was missing when it shouldn't have been. These patterns are the codebase whispering its history of failures. Each one becomes a fitness-to-purpose scenario and a boundary test.
+### ステップ 5a: トレース ステート マシン
 
-**Read `references/defensive_patterns.md`** for the systematic search approach, grep patterns, and how to convert findings into fitness-to-purpose scenarios and boundary tests.
+プロジェクトに何らかの状態管理 (ステータス フィールド、ライフサイクル フェーズ、ワークフロー ステージ、モード フラグ) がある場合は、ステート マシンを完全にトレースします。これにより、防御パターン分析だけでは見逃されるカテゴリのバグ、つまり、存在するが処理されない状態が捕捉されます。
 
-Minimum bar: at least 2–3 defensive patterns per core source file. If you find fewer, you're skimming — read function bodies, not just signatures.
+**ステート マシンの検索方法:** モデル、列挙型、または定数内のステータス/状態フィールドを検索します (例: `status`、`state`、`phase`、`mode`)。アクションを許可する前にステータスをチェックするガードを検索します (例: `if status == "running"`、`match self.state`)。状態遷移 (ステータス フィールドへの割り当て) を検索します。
 
-### Step 5a: Trace State Machines
+**各ステート マシンについて次のことがわかります:**1. **考えられるすべての状態を列挙します。** フィールドに割り当てられているすべての値の enum、定数、または grep を読み取ります。それらをすべてリストアップしてください。
+2. **状態の各コンシューマー** (UI ハンドラー、API エンドポイント、制御フロー ガード) について、考えられるすべての状態を処理しているかどうかを確認します。意味のあるデフォルトのない `switch`/`match`、またはすべての状態をカバーしていない `if/elif` チェーンはギャップです。
+3. **各状態遷移**について、すべての状態に到達できるかどうかを確認します。入ることができるが決して出られない州はありますか?利用できるはずの操作をブロックする状態はありますか?
+4. **ギャップを結果として記録します。** ユーザーがスタックしたプロセスでアクション X を実行する必要がある場合、「実行中」のアクション X は許可するが「スタック」の場合は許可しないステータス ガードは、真のバグです。プロセスが終了状態に入ってもクリーンアップがトリガーされない場合は、真のバグです。
 
-If the project has any kind of state management — status fields, lifecycle phases, workflow stages, mode flags — trace the state machine completely. This catches a category of bugs that defensive pattern analysis alone misses: states that exist but aren't handled.
+**これが重要な理由:** ステート マシンのギャップにより、通常の動作中には見えないバグが発生しますが、応力やエッジ条件下では、まさにシステムが動作する必要があるときに表面化します。 「スタック」ステータスのときに強制終了できないバッチ プロセッサ、すべての作業が完了しても自己終了しないウォッチャー、または「保留中」の実行の再開を拒否する UI はすべて、不完全な状態処理の症状です。これらのバグは、コードがそれらに対して防御していないため、防御パターン分析では現れません。単にそれらをまったく処理していないだけです。
 
-**How to find state machines:** Search for status/state fields in models, enums, or constants (e.g., `status`, `state`, `phase`, `mode`). Search for guards that check status before allowing actions (e.g., `if status == "running"`, `match self.state`). Search for state transitions (assignments to status fields).
+### ステップ 5b: スキーマ タイプのマッピング
 
-**For each state machine you find:**
+プロジェクトに検証レイヤー (Python の Pydantic モデル、JSON スキーマ、TypeScript インターフェイス/Zod スキーマ、Java Bean Validation アノテーション、Scala ケース クラス コーデック) がある場合は、ここでスキーマ定義を読み取ります。防御パターンを見つけたフィールドごとに、スキーマが何を受け入れ、何を拒否するかを記録します。
 
-1. **Enumerate all possible states.** Read the enum, the constants, or grep for every value the field is assigned. List them all.
-2. **For each consumer of state** (UI handlers, API endpoints, control flow guards), check: does it handle every possible state? A `switch`/`match` without a meaningful default, or an `if/elif` chain that doesn't cover all states, is a gap.
-3. **For each state transition**, check: can you reach every state? Are there states you can enter but never leave? Are there states that block operations that should be available?
-4. **Record gaps as findings.** A status guard that allows action X for "running" but not for "stuck" is a real bug if the user needs to perform action X on stuck processes. A process that enters a terminal state but never triggers cleanup is a real bug.
+**マッピング形式と、これが有効な境界テストを作成するために重要である理由については、`references/schema_mapping.md`** を参照してください。
 
-**Why this matters:** State machine gaps produce bugs that are invisible during normal operation but surface under stress or edge conditions — exactly when you need the system to work. A batch processor that can't be killed when it's in "stuck" status, or a watcher that never self-terminates after all work completes, or a UI that refuses to resume a "pending" run, are all symptoms of incomplete state handling. These bugs don't show up in defensive pattern analysis because the code isn't defending against them — it's simply not handling them at all.
+### ステップ 6: 品質リスクの特定 (コード + ドメインの知識)
 
-### Step 5b: Map Schema Types
+すべてのプロジェクトには異なる失敗プロファイルがあります。このステップでは、**2 つのソース** を使用します。コードの探索だけでなく、同様のシステムで何が問題になるかについてのトレーニング知識も使用します。
 
-If the project has a validation layer (Pydantic models in Python, JSON Schema, TypeScript interfaces/Zod schemas, Java Bean Validation annotations, Scala case class codecs), read the schema definitions now. For every field you found a defensive pattern for, record what the schema accepts vs. rejects.
+**コード探索から**、次のように尋ねます。
+- このプロジェクトにとって「静かに間違っている」とはどのようなものですか？
+- 警告なしに変更される可能性のある外部依存関係は何ですか?
+- 単純そうに見えて実際は複雑なものは何ですか?
+- 横断的な懸念はどこに隠れているのでしょうか?**ドメイン知識**から、次のように尋ねてください。
+- 「このようなシステムでは何が問題になるのでしょうか?」 — バッチ プロセッサの場合は、クラッシュ リカバリ、冪等性、サイレント データ損失、状態の破損について考えてください。 Web アプリの場合は、認証のエッジ ケース、競合状態、入力検証のバイパスについて考えてください。ランダム性や統計を扱う場合は、シード、相関、分布の偏りについて考えてください。
+- 「正しく見える出力が実際には間違っているものは何ですか?」 — これは最も危険な種類のバグです。出力はすべてのチェックに合格しますが、微妙に破損しています。
+- 「1x スケールでは起こらず、10x スケールでは何が起こるでしょうか?」 — チャンク境界、レート制限、タイムアウト カスケード、メモリ負荷。
+- 「このプロセスが最悪の瞬間に強制終了されたらどうなりますか?」 — 書き込み中、トランザクション中、バッチ送信中。
+- 「元に戻せない操作や高価な操作を実行する前に、ユーザーはどのような情報が必要ですか?」 — 実行前のコスト見積もり、範囲の確認（特にファンアウトまたは拡張により作業が増大する場合）、リソースの警告。ユーザーが何をしようとしているのかを示さずに、システムがユーザーに黙って何時間もの処理や多大なコストを課すことができるとしたら、それは安全策が欠けていることになります。長時間実行プロセスの開始、バッチ ジョブの送信、または拡張/ファンアウトのトリガーを行う操作を検索し、引き返せなくなる前にプレビュー、見積もり、または実数値による確認がユーザーに表示されるかどうかを確認します。
+- 「長時間実行されているプロセスが終了すると何が起こるのですか?実際に停止するのでしょうか?」 — ポーリング ループ、ウォッチャー、バックグラウンド スレッド、および完了するまで実行されるデーモン プロセスには、明示的な終了条件が必要です。ループで「さらに作業があるか?」をチェックすると、ただし、「すべての作業が完了したか?」は決してチェックされず、完了後は永久に実行されます。これは、バッチ プロセッサとキュー コンシューマで特に一般的です。
 
-**Read `references/schema_mapping.md`** for the mapping format and why this matters for writing valid boundary tests.
-
-### Step 6: Identify Quality Risks (Code + Domain Knowledge)
-
-Every project has a different failure profile. This step uses **two sources** — not just code exploration, but your training knowledge of what goes wrong in similar systems.
-
-**From code exploration**, ask:
-- What does "silently wrong" look like for this project?
-- What external dependencies can change without warning?
-- What looks simple but is actually complex?
-- Where do cross-cutting concerns hide?
-
-**From domain knowledge**, ask:
-- "What goes wrong in systems like this?" — If it's a batch processor, think about crash recovery, idempotency, silent data loss, state corruption. If it's a web app, think about auth edge cases, race conditions, input validation bypasses. If it handles randomness or statistics, think about seeding, correlation, distribution bias.
-- "What produces correct-looking output that is actually wrong?" — This is the most dangerous class of bug: output that passes all checks but is subtly corrupted.
-- "What happens at 10x scale that doesn't happen at 1x?" — Chunk boundaries, rate limits, timeout cascading, memory pressure.
-- "What happens when this process is killed at the worst possible moment?" — Mid-write, mid-transaction, mid-batch-submission.
-- "What information does the user need before committing to an irreversible or expensive operation?" — Pre-run cost estimates, confirmation of scope (especially when fan-out or expansion will multiply the work), resource warnings. If the system can silently commit the user to hours of processing or significant cost without showing them what they're about to do, that's a missing safeguard. Search for operations that start long-running processes, submit batch jobs, or trigger expansion/fan-out — and check whether the user sees a preview, estimate, or confirmation with real numbers before the point of no return.
-- "What happens when a long-running process finishes — does it actually stop?" — Polling loops, watchers, background threads, and daemon processes that run until completion should have explicit termination conditions. If the loop checks "is there more work?" but never checks "is all work done?", it will run forever after completion. This is especially common in batch processors and queue consumers.
-
-Generate realistic failure scenarios from this knowledge. You don't need to have observed these failures — you know from training that they happen to systems of this type. Write them as **architectural vulnerability analyses** with specific quantities and consequences. Frame each as "this architecture permits the following failure mode" — not as a fabricated incident report. Use concrete numbers to make the severity non-negotiable: "If the process crashes mid-write during a 10,000-record batch, `save_state()` without an atomic rename pattern will leave a corrupted state file — the next run gets JSONDecodeError and cannot resume without manual intervention." Then ground them in the actual code you explored: "Read persistence.py line ~340 (save_state): verify temp file + rename pattern."
+この知識に基づいて現実的な障害シナリオを生成します。これらの障害を観察する必要はありません。この種のシステムで障害が発生することはトレーニングからわかっています。それらを、具体的な量と結果を伴う **アーキテクチャ脆弱性分析** として記述します。それぞれを、捏造されたインシデントレポートとしてではなく、「このアーキテクチャでは次の障害モードが許可される」という枠組みで説明します。重大度を交渉不可能にするには、具体的な数値を使用します。「10,000 レコードのバッチ中に書き込み中にプロセスがクラッシュした場合、アトミックな名前変更パターンを持たない `save_state()` は破損した状態ファイルを残します。次回の実行では JSONDecodeError が発生し、手動介入なしでは再開できません。」次に、それらを調査した実際のコードに組み込んでください。「Readpersistence.py line ~340 (save_state): verify temp file + rename pattern」。
 
 ---
 
-## Phase 2: Generate the Quality Playbook
+## フェーズ 2: 品質ハンドブックの作成
 
-Now write the six files. For each one, follow the structure below and consult the relevant reference file for detailed guidance.
+次に 6 つのファイルを書き込みます。それぞれについて、以下の構造に従い、詳細なガイダンスについては関連する参照ファイルを参照してください。**なぜ単なるテストではなく 6 つのファイルを使用するのですか?** テストは回帰を検出しますが、新しいカテゴリのバグを防ぐことはできません。品質規定 (`QUALITY.md`) は、コードの作成を開始する前に、今後のセッションに「正しい」の意味を伝えます。プロトコル (`RUN_*.md`) は、AI がチェックしたいと思うものに品質を任せるのではなく、再現可能な結果を​​生み出すレビュー、統合テスト、仕様監査のための構造化されたプロセスを提供します。これらのファイルを組み合わせることで、各部分が他の部分を強化する品質システムが作成されます。QUALITY.md のシナリオは機能テスト ファイルのテストにマップされ、統合プロトコルによって検証され、Council of Three によって監査されます。
 
-**Why six files instead of just tests?** Tests catch regressions but don't prevent new categories of bugs. The quality constitution (`QUALITY.md`) tells future sessions what "correct" means before they start writing code. The protocols (`RUN_*.md`) provide structured processes for review, integration testing, and spec auditing that produce repeatable results — instead of leaving quality to whatever the AI feels like checking. Together, these files create a quality system where each piece reinforces the others: scenarios in QUALITY.md map to tests in the functional test file, which are verified by the integration protocol, which is audited by the Council of Three.
+### ファイル 1: `quality/QUALITY.md` — 品質憲章
 
-### File 1: `quality/QUALITY.md` — Quality Constitution
+**完全なテンプレートと例については、`references/constitution.md`** をお読みください。
 
-**Read `references/constitution.md`** for the full template and examples.
+憲法には次の 6 つのセクションがあります。
 
-The constitution has six sections:
+1. **目的** — このプロジェクトにとって品質とは何か。Deming (組み込み、検査なし)、Juran (使用に適した適合性)、Crosby (品質は無料) に基づいています。これらを具体的に適用してください。*このシステム* にとって「使用に適した状態」とは何を意味しますか? 「テストに合格」ではなく、実際の運用要件です。
+2. **対象範囲のターゲット** — 実際のリスクを参照する根拠を示し、各サブシステムをターゲットにマッピングする表。すべてのターゲットには、特定のシナリオに基づいた「理由」が必要です。これがないと、今後の AI セッションでターゲットを否定することになります。
+3. **カバレッジシアター防止** — 探索中に見たものから派生した、プロジェクト固有の偽テストの例。 (理由: AI 生成のテストでは、実際のバグを捕捉せずにカバレッジの数値を水増しすることがよくあります。インポートが機能したこと、辞書にキーがあること、またはモックが返すように構成されているものを返すことを主張します。これを呼び出すと、パターンが明示的に停止されます。)
+4. **目的に合わせたフィットネスのシナリオ** — その核心。各シナリオでは、コード参照と検証方法を含む現実的な障害モードが文書化されています。コア モジュールごとに 2 つ以上のシナリオを目指します。通常、中規模プロジェクトの場合は合計 8 ～ 10 個、小規模プロジェクトの場合は少なく、複雑なプロジェクトの場合はさらに多くなります。数よりも品質が重要です。実際のアーキテクチャの脆弱性を正確に捉えたシナリオは、3 つの一般的なシナリオよりも価値があります。 (理由: カバレッジのパーセンテージは、コードが正しく実行されたかどうかではなく、実行されたコードの量を示します。システムのカバレッジが 95% であっても、記録が静かに失われる可能性があります。フィットネス シナリオでは、「正しく動作する」とは具体的に何を意味するのかを定義しており、誰も異論を唱えることはできません。)
+5. **AI セッションの品質規律** — すべての AI セッションが従わなければならないルール
+6. **人間の門** — 人間の判断を必要とするもの**シナリオの声は非常に重要です。** 「何が起こったのか」を、抽象的な仕様としてではなく、具体的な量、カスケードの結果、検出の難易度を含むアーキテクチャ上の脆弱性分析として記述します。 「`save_state()` にはアトミックな名前変更パターンがないため、10,000 レコードのバッチ中に書き込み中にクラッシュすると破損した状態ファイルが残ります。次の実行では JSONDecodeError が発生し、再開できません。大規模になると、検出メカニズムがなければ 1,693 以上のレコードがサイレントに失われる危険があります。」標準を否定するものではない AI セッションの読み取り。同様のシステムに関する知識を活用して現実的な障害シナリオを生成し、調査した実際のコードに基づいて作成します。シナリオは、コードの探索と、このようなシステムで何が問題になるかに関するドメインの知識の両方から生まれます。
 
-1. **Purpose** — What quality means for this project, grounded in Deming (built in, not inspected), Juran (fitness for use), Crosby (quality is free). Apply these specifically: what does "fitness for use" mean for *this system*? Not "tests pass" but the actual operational requirement.
-2. **Coverage Targets** — Table mapping each subsystem to a target with rationale referencing real risks. Every target must have a "why" grounded in a specific scenario — without it, a future AI session will argue the target down.
-3. **Coverage Theater Prevention** — Project-specific examples of fake tests, derived from what you saw during exploration. (Why: AI-generated tests often pad coverage numbers without catching real bugs — asserting that imports worked, that dicts have keys, or that mocks return what they were configured to return. Calling this out explicitly stops the pattern.)
-4. **Fitness-to-Purpose Scenarios** — The heart of it. Each scenario documents a realistic failure mode with code references and verification method. Aim for 2+ scenarios per core module — typically 8–10 total for a medium project, fewer for small projects, more for complex ones. Quality matters more than count: a scenario that precisely captures a real architectural vulnerability is worth more than three generic ones. (Why: Coverage percentages tell you how much code ran, not whether it ran correctly. A system can have 95% coverage and still lose records silently. Fitness scenarios define what "working correctly" actually means in concrete terms that no one can argue down.)
-5. **AI Session Quality Discipline** — Rules every AI session must follow
-6. **The Human Gate** — Things requiring human judgment
+すべてのシナリオの「検証方法」は、機能テスト ファイル内の少なくとも 1 つのテストにマップする必要があります。
 
-**Scenario voice is critical.** Write "What happened" as architectural vulnerability analyses with specific quantities, cascade consequences, and detection difficulty — not as abstract specifications. "Because `save_state()` lacks an atomic rename pattern, a mid-write crash during a 10,000-record batch will leave a corrupted state file — the next run gets JSONDecodeError and cannot resume. At scale, this risks silent loss of 1,693+ records with no detection mechanism." An AI session reading that will not argue the standard down. Use your knowledge of similar systems to generate realistic failure scenarios, then ground them in the actual code you explored. Scenarios come from both code exploration AND domain knowledge about what goes wrong in systems like this.
+### ファイル 2: 機能テスト
 
-Every scenario's "How to verify" must map to at least one test in the functional test file.
+**これは最も重要な成果物です。** 完全なガイドについては、`references/functional_tests.md` をお読みください。
 
-### File 2: Functional Tests
+テストを 3 つの論理グループ (クラス、記述ブロック、モジュール、またはテスト フレームワークが使用するもの) に編成します。
 
-**This is the most important deliverable.** Read `references/functional_tests.md` for the complete guide.
+- **仕様要件** — テスト可能な仕様セクションごとに 1 つのテスト。各テストのドキュメントには、検証する仕様要件が記載されています。
+- **フィットネス シナリオ** — QUALITY.md シナリオごとに 1 つのテスト。 1:1 マッピング。一致するように名前が付けられます。
+- **境界とエッジケース** — ステップ 5 の防御パターンごとに 1 つのテスト。
 
-Organize the tests into three logical groups (classes, describe blocks, modules, or whatever the test framework uses):
+主なルール:
+- **既存のインポート パターンと正確に一致します。** 既存のテストがプロジェクト モジュールをインポートし、同じことを行う方法を読んでください。これを間違えると、すべてのテストが失敗することになります。
+- **関数を呼び出す前に、すべての関数のシグネチャを読み取ります。** 実際の `def` 行 (パラメーター名、型、デフォルト) を読み取ります。プロジェクトから実際のデータ ファイルを読み取り、データの形状を理解します。関数パラメータやフィクスチャ構造を推測しないでください。
+- **プレースホルダー テストはありません。** すべてのテストは、実際のプロジェクト コードをインポートして呼び出す必要があります。本文が `pass` であるか、アサーションが些細なもの (`assert isinstance(x, list)`) である場合は、削除してください。プロジェクト コードを実行しないテストでは、カウントが膨らみ、誤った信頼性が生じます。
+- **テスト数ヒューリスティック** = (テスト可能な仕様セクション) + (QUALITY.md シナリオ) + (防御パターン)。中規模のプロジェクト (ソース ファイル 5 ～ 15 個) の場合、通常は 35 ～ 50 個のテストが生成されます。要件が欠落していたり​​、検討が浅かったりすることを示唆するものは大幅に少なくなりました。すべてのテストに意味があるのであれば、大幅に多くても問題ありません。数値を入力するためにパディングしないでください。
+- **クロスバリアント ヒューリスティック: ~30%** — プロジェクトが複数の入力タイプを処理する場合は、すべてのバリアントにわたってパラメータ化されたテストの約 30% を目指します。正確なパーセンテージは、すべての横断的なプロパティがすべてのバリアントにわたってテストされることを保証することよりも重要です。
+- **メカニズムではなくテスト結果** — コードがそれをどのように実装するかではなく、仕様で何が起こるべきであるかを主張します。
+- **スキーマ有効な変更を使用する** — 境界テストでは、スキーマが拒否する値ではなく、スキーマが受け入れる値 (ステップ 5b から) を使用する必要があります。
 
-- **Spec requirements** — One test per testable spec section. Each test's documentation cites the spec requirement it verifies.
-- **Fitness scenarios** — One test per QUALITY.md scenario. 1:1 mapping, named to match.
-- **Boundaries and edge cases** — One test per defensive pattern from Step 5.
+### ファイル 3: `quality/RUN_CODE_REVIEW.md`
 
-Key rules:
-- **Match the existing import pattern exactly.** Read how existing tests import project modules and do the same thing. Getting this wrong means every test fails.
-- **Read every function's signature before calling it.** Read the actual `def` line — parameter names, types, defaults. Read real data files from the project to understand data shapes. Do not guess at function parameters or fixture structures.
-- **No placeholder tests.** Every test must import and call actual project code. If the body is `pass` or the assertion is trivial (`assert isinstance(x, list)`), delete it. A test that doesn't exercise project code inflates the count and creates false confidence.
-- **Test count heuristic** = (testable spec sections) + (QUALITY.md scenarios) + (defensive patterns). For a medium project (5–15 source files), this typically yields 35–50 tests. Significantly fewer suggests missed requirements or shallow exploration. Significantly more is fine if every test is meaningful — don't pad to hit a number.
-- **Cross-variant heuristic: ~30%** — If the project handles multiple input types, aim for roughly 30% of tests parametrized across all variants. The exact percentage matters less than ensuring every cross-cutting property is tested across all variants.
-- **Test outcomes, not mechanisms** — Assert what the spec says should happen, not how the code implements it.
-- **Use schema-valid mutations** — Boundary tests must use values the schema accepts (from Step 5b), not values it rejects.
+**テンプレートについては、`references/review_protocols.md`** を参照してください。主要なセクション: ブートストラップ ファイル、アーキテクチャにマッピングされた重点領域、およびこれらの必須のガードレール:
 
-### File 3: `quality/RUN_CODE_REVIEW.md`
+- 行番号は必須です - 行番号がない場合、検索結果はありません
+- シグネチャだけでなく関数本体を読み取る
+- 不明な場合: バグではなく質問としてフラグを立ててください
+- 不足していると主張する前に grep
+- スタイルの変更を提案しないでください。間違っている点にのみフラグを立ててください。
 
-**Read `references/review_protocols.md`** for the template.
+**フェーズ 2: 回帰テスト。** レビューでバグが見つかったら、各バグを再現する回帰テストを `quality/test_regression.*` に記述します。現在の実装では各テストが失敗し、バグが本物であることが確認されます。結果を確認表（バグ確認済み / 誤検知 / 要調査）として報告します。完全な回帰テスト プロトコルについては、`references/review_protocols.md` を参照してください。
 
-Key sections: bootstrap files, focus areas mapped to architecture, and these mandatory guardrails:
+### ファイル 4: `quality/RUN_INTEGRATION_TESTS.md`
 
-- Line numbers are mandatory — no line number, no finding
-- Read function bodies, not just signatures
-- If unsure: flag as QUESTION, not BUG
-- Grep before claiming missing
-- Do NOT suggest style changes — only flag things that are incorrect
+**テンプレートについては、`references/review_protocols.md`** を参照してください。
 
-**Phase 2: Regression tests.** After the review produces BUG findings, write regression tests in `quality/test_regression.*` that reproduce each bug. Each test should fail on the current implementation, confirming the bug is real. Report results as a confirmation table (BUG CONFIRMED / FALSE POSITIVE / NEEDS INVESTIGATION). See `references/review_protocols.md` for the full regression test protocol.
+安全上の制約、飛行前チェック、特定の合格基準を備えたテスト マトリックス、実行 UX セクション、構造化されたレポート形式を含める必要があります。ハッピー パス、バリアント間の一貫性、出力の正確性、コンポーネントの境界をカバーします。
 
-### File 4: `quality/RUN_INTEGRATION_TESTS.md`
+**すべてのコマンドは相対パスを使用する必要があります。** 生成されたプロトコルの先頭には、すべてのコマンドが相対パスを使用してプロジェクト ルートから実行されることを示す「作業ディレクトリ」セクションが含まれている必要があります。 `cd` というコマンドを絶対パスに生成しないでください。これは、プロトコルが別のマシンまたはディレクトリから実行されると中断されます。 `./scripts/`、`./pipelines/`、`./quality/` などを使用します。
 
-**Read `references/review_protocols.md`** for the template.
+**実行 UX セクションを含めます。** 誰かが AI エージェントに「統合テストを実行する」ように指示する場合、エージェントはその作業をどのように提示するかを知る必要があります。プロトコルでは、次の 3 つのフェーズを指定する必要があります: (1) 何かを実行する前に計画を番号付きの表として表示する、(2) テストの実行ごとに 1 行の進行状況の更新をレポートする (`✓`/`✗`/`⧗`)、(3) 合格/失敗数と推奨事項を含む概要表を表示する。テンプレートと例については、`references/review_protocols.md` セクション「実行 UX」を参照してください。これがないと、エージェントは生の出力をダンプするか沈黙したままになりますが、どちらも役に立ちません。
 
-Must include: safety constraints, pre-flight checks, test matrix with specific pass criteria, an execution UX section, and a structured reporting format. Cover happy path, cross-variant consistency, output correctness, and component boundaries.
+**このプロトコルは、実際の外部依存関係を実行する必要があります。** プロジェクトが API、データベース、または外部サービスと通信する場合、統合テスト プロトコルは、ローカルの検証チェックだけでなく、それらのサービスに対して実際のエンドツーエンドの実行を実行します。プロジェクトの実際の実行モードと外部依存関係に基づいてテスト マトリックスを設計します。探索中に API キー、プロバイダー抽象化、および既存の統合テスト スクリプトを探し、それらに基づいて構築します。
 
-**All commands must use relative paths.** The generated protocol should include a "Working Directory" section at the top stating that all commands run from the project root using relative paths. Never generate commands that `cd` to an absolute path — this breaks when the protocol is run from a different machine or directory. Use `./scripts/`, `./pipelines/`, `./quality/`, etc.
+**一般的なチェックではなく、コードから品質ゲートを導き出します。** 探索中に検証ルール、スキーマ列挙体、および生成ロジックを読み取ります。それらを、特定のフィールドと許容可能な値の範囲を使用したパイプラインごとの品質チェックに変換します。 「すべてのユニットが検証された」だけでは十分ではありません。プロトコルはドメイン固有の正確性を検証する必要があります。
 
-**Include an Execution UX section.** When someone tells an AI agent to "run the integration tests," the agent needs to know how to present its work. The protocol should specify three phases: (1) show the plan as a numbered table before running anything, (2) report one-line progress updates as each test runs (`✓`/`✗`/`⧗`), (3) show a summary table with pass/fail counts and a recommendation. See `references/review_protocols.md` section "Execution UX" for the template and examples. Without this, the agent dumps raw output or stays silent — neither is useful.
+**スクリプトの並列処理。これを単に説明するだけではありません。** グループが実行されるため、独立した実行 (異なるプロバイダー) が同時に実行されます。 `&` および `wait` を使用して実際の bash コマンドを含めます。レート制限を回避するために、プロバイダーごとに一度に 1 つずつ実行します。**プロジェクトに合わせてユニット数を調整します。** `chunk_size` または同等の構成を読み取ります。少なくとも 2 つのチャンクにまたがるのに十分なユニットを使用し、分散チェックを検証するのに十分なユニットを使用します。通常、統合テストの場合は 10 ～ 30 です。
 
-**This protocol must exercise real external dependencies.** If the project talks to APIs, databases, or external services, the integration test protocol runs real end-to-end executions against those services — not just local validation checks. Design the test matrix around the project's actual execution modes and external dependencies. Look for API keys, provider abstractions, and existing integration test scripts during exploration and build on them.
+**実行後の詳細な検証。** 「プロセスが完了した」だけで停止しないでください。実行ごとに、ログ ファイル、マニフェストの状態、出力データの存在、サンプル レコードの内容、および既存の品質チェック スクリプトを検証します。
 
-**Derive quality gates from the code, not generic checks.** Read validation rules, schema enums, and generation logic during exploration. Turn them into per-pipeline quality checks with specific fields and acceptable value ranges. "All units validated" is not enough — the protocol must verify domain-specific correctness.
+**既存の検証ツールを検索して使用します。** 出力品質を検証する既存のスクリプト (`integration_checks.py`、検証スクリプト、品質ゲート関数など) を検索します。存在する場合は、プロトコルから呼び出します。プロジェクトに TUI またはダッシュボードがある場合は、実行後のチェックリストに TUI 検証コマンド (`--dump` フラグなど) を含めます。
 
-**Script parallelism, don't just describe it.** Group runs so independent executions (different providers) run concurrently. Include actual bash commands with `&` and `wait`. One run per provider at a time to avoid rate limits.
+**品質ゲートを作成する前にフィールド参照テーブルを構築します。** これはプロトコルの精度にとって最も重要なステップです。 AI モデルは、スキーマを読み取った後でも、自信を持って間違ったフィールド名を書き込みます。`document_id` は `doc_id` に、`sentiment_score` は `sentiment` に、`float 0-1` は `int 0-100` になります。修正は手順に従って行われます。**テーブルの各行を書き込む前に、各スキーマ ファイルをすぐに再読み取りします。** 会話の前半で読んだ内容に依存しないでください。フィールド名の記憶は数千のトークンを超えて漂っています。ファイルの内容からフィールド名を 1 文字ずつコピーします。各スキーマのすべてのフィールドを含めます (スキーマに 8 つのフィールドがある場合、テーブルには 8 行があります)。完全なプロセスと形式については、`references/review_protocols.md` セクション「フィールド参照テーブル」を参照してください。このステップをスキップしないでください。これにより、最も一般的なプロトコルの不正確さを防ぐことができます。
 
-**Calibrate unit counts to the project.** Read `chunk_size` or equivalent config. Use enough units to span at least 2 chunks and enough to verify distribution checks. Typically 10–30 for integration testing.
+### ファイル 5: `quality/RUN_SPEC_AUDIT.md` — 3 人評議会
 
-**Deep post-run verification.** Don't stop at "process completed." Verify log files, manifest state, output data existence, sample record content, and any existing quality check scripts — for every run.
+**完全なプロトコルについては、`references/spec_audit.md`** をお読みください。
 
-**Find and use existing verification tools.** Search for existing scripts that verify output quality (e.g., `integration_checks.py`, validation scripts, quality gate functions). If they exist, call them from the protocol. If the project has a TUI or dashboard, include TUI verification commands (e.g., `--dump` flags) in the post-run checklist.
+3 つの独立した AI モデルが仕様に照らしてコードを監査します。なぜ 3 つ?各モデルには異なる盲点があるため、実際には、異なる監査人が異なる問題を発見します。相互参照は、単一のモデルが見逃しているものを見つけます。
 
-**Build a Field Reference Table before writing quality gates.** This is the most important step for protocol accuracy. AI models confidently write wrong field names even after reading schemas — `document_id` becomes `doc_id`, `sentiment_score` becomes `sentiment`, `float 0-1` becomes `int 0-100`. The fix is procedural: **re-read each schema file IMMEDIATELY before writing each table row.** Do not rely on what you read earlier in the conversation — your memory of field names drifts over thousands of tokens. Copy field names character-for-character from the file contents. Include ALL fields from each schema (if the schema has 8 fields, the table has 8 rows). See `references/review_protocols.md` section "The Field Reference Table" for the full process and format. Do not skip this step — it prevents the single most common protocol inaccuracy.
+このプロトコルでは、ガードレール付きのコピー＆ペースト可能な監査プロンプト、プロジェクト固有の精査領域、トリアージ プロセス (信頼度による結果のマージ)、および修正実行ルール (巨大プロンプトではなく、サブシステムごとの小さなバッチ) が定義されています。
 
-### File 5: `quality/RUN_SPEC_AUDIT.md` — Council of Three
+### ファイル 6: `AGENTS.md`
 
-**Read `references/spec_audit.md`** for the full protocol.
+`AGENTS.md` がすでに存在する場合は、置き換えずに更新してください。生成されたすべてのファイルを指す Quality Docs セクションを追加します。
 
-Three independent AI models audit the code against specifications. Why three? Because each model has different blind spots — in practice, different auditors catch different issues. Cross-referencing catches what any single model misses.
-
-The protocol defines: a copy-pasteable audit prompt with guardrails, project-specific scrutiny areas, a triage process (merge findings by confidence level), and fix execution rules (small batches by subsystem, not mega-prompts).
-
-### File 6: `AGENTS.md`
-
-If `AGENTS.md` already exists, update it — don't replace it. Add a Quality Docs section pointing to all generated files.
-
-If creating from scratch: project description, setup commands, build & test commands, architecture overview, key design decisions, known quirks, and quality docs pointers.
+ゼロから作成する場合: プロジェクトの説明、セットアップ コマンド、ビルドとテストのコマンド、アーキテクチャの概要、主要な設計上の決定事項、既知の癖、高品質のドキュメントのポインタ。
 
 ---
 
-## Phase 3: Verify
+## フェーズ 3: 検証
 
-**Why a verification phase?** AI-generated output can look polished and be subtly wrong. Tests that reference undefined fixtures report 0 failures but 16 errors — and "0 failures" sounds like success. Integration protocols can list field names that don't exist in the actual schemas. The verification phase catches these problems before the user discovers them, which is important because trust in a generated quality playbook is fragile — one wrong field name undermines confidence in everything else.
+**検証フェーズが必要な理由** AI によって生成された出力は、洗練されているように見えても、微妙に間違っている場合があります。未定義のフィクスチャを参照するテストでは、失敗は 0 件ですがエラーは 16 件報告されます。「失敗が 0 件」は成功のように聞こえます。統合プロトコルでは、実際のスキーマには存在しないフィールド名をリストすることができます。検証フェーズでは、これらの問題をユーザーが発見する前に発見します。これは重要です。なぜなら、生成された品質のプレイブックに対する信頼は脆弱であり、フィールド名が 1 つ間違っていると、他のすべてに対する信頼が損なわれてしまうからです。
 
-### Self-Check Benchmarks
+### セルフチェックベンチマーク完了を宣言する前に、すべてのベンチマークを確認してください。 **完全なチェックリストについては、`references/verification.md`** をお読みください。
 
-Before declaring done, check every benchmark. **Read `references/verification.md`** for the complete checklist.
+重要なチェック:
 
-The critical checks:
+1. ヒューリスティック ターゲットに近い **テスト数** (仕様セクション + シナリオ + 防御パターン)
+2. **シナリオ カバレッジ** — シナリオ テスト数が QUALITY.md シナリオ数と一致する
+3. **クロスバリアントのカバレッジ** — テストの最大 30% がすべての入力バリアントにわたってパラメータ化されています
+4. **境界テスト数** ≈ ステップ 5 の防御パターン数
+5. **アサーションの深さ** — 存在だけでなく、大部分のアサーションが値をチェックします
+6. **レイヤーの正確性** — テストはメカニズム (コードの実装方法) ではなく、結果 (仕様の内容) を主張します。
+7. **ミューテーションの有効性** — すべてのフィクスチャのミューテーションは、ステップ 5b のスキーマ有効な値を使用します。
+8. **すべてのテストに合格します - 失敗なし、エラーなし。** プロジェクトのテスト ランナー (Python: `pytest -v`、Scala: `sbt testOnly`、Java: `mvn test`/`gradle test`、TypeScript: `npx jest`、Go: `go test -v`、Rust: `cargo test`) を使用してテスト スイートを実行し、概要を確認します。フィクスチャの欠落、インポートの失敗、または未解決の依存関係によるエラーは、壊れたテストとしてカウントされます。セットアップ エラーが発生した場合は、フィクスチャ/セットアップ ファイルの作成を忘れているか、未定義のテスト ヘルパーを参照しています。
+9. **既存のテストは壊れていません** — 新しいファイルは何も壊れていません。
+10. **統合テストの品質ゲートはフィールド参照テーブルから書き込まれました。** 品質ゲートを書き込む前に各スキーマ ファイルを再読み取りしてフィールド参照テーブルを構築したこと、および品質ゲート内のすべてのフィールド名がメモリからではなく、そのテーブルからコピーされたことを確認してください。表をスキップした場合は、戻って今すぐ作成してください。
 
-1. **Test count** near heuristic target (spec sections + scenarios + defensive patterns)
-2. **Scenario coverage** — scenario test count matches QUALITY.md scenario count
-3. **Cross-variant coverage** — ~30% of tests parametrize across all input variants
-4. **Boundary test count** ≈ defensive pattern count from Step 5
-5. **Assertion depth** — Majority of assertions check values, not just presence
-6. **Layer correctness** — Tests assert outcomes (what spec says), not mechanisms (how code implements)
-7. **Mutation validity** — Every fixture mutation uses a schema-valid value from Step 5b
-8. **All tests pass — zero failures AND zero errors.** Run the test suite using the project's test runner (Python: `pytest -v`, Scala: `sbt testOnly`, Java: `mvn test`/`gradle test`, TypeScript: `npx jest`, Go: `go test -v`, Rust: `cargo test`) and check the summary. Errors from missing fixtures, failed imports, or unresolved dependencies count as broken tests. If you see setup errors, you forgot to create the fixture/setup file or referenced undefined test helpers.
-9. **Existing tests unbroken** — The new files didn't break anything.
-10. **Integration test quality gates were written from a Field Reference Table.** Verify that you built a Field Reference Table by re-reading each schema file before writing quality gates, and that every field name in the quality gates is copied from that table — not from memory. If you skipped the table, go back and build it now.
-
-If any benchmark fails, go back and fix it before proceeding.
+ベンチマークが失敗した場合は、続行する前に戻って修正してください。
 
 ---
 
-## Phase 4: Present, Explore, Improve (Interactive)
+## フェーズ 4: 提示、調査、改善 (対話型)
 
-After generating and verifying, present the results clearly and give the user control over what happens next. This phase has three parts: a scannable summary, drill-down on demand, and a menu of improvement paths.
+生成して検証した後は、結果を明確に提示し、次に何が起こるかをユーザーが制御できるようにします。このフェーズには、スキャン可能な概要、オンデマンドのドリルダウン、および改善パスのメニューの 3 つの部分があります。
 
-**Do not skip this phase.** The autonomous output from Phases 1-3 is a solid starting point, but the user needs to understand what was generated, explore what matters to them, and choose how to improve it. A quality playbook is only useful if the people who own the project trust it and understand it. Dumping six files without explanation creates artifacts nobody reads.
+**このフェーズはスキップしないでください。** フェーズ 1 ～ 3 の自律的な出力は確実な出発点ですが、ユーザーは何が生成されたのかを理解し、自分にとって何が重要かを検討し、それを改善する方法を選択する必要があります。高品質のプレイブックは、プロジェクトの所有者がそれを信頼し、理解している場合にのみ役に立ちます。説明なしに 6 つのファイルをダンプすると、誰も読まないアーティファクトが作成されます。
 
-### Part 1: The Summary Table
+### パート 1: 概要表
 
-Present a single table the user can scan in 10 seconds:
+ユーザーが 10 秒でスキャンできる単一のテーブルを提示します。「」
+私が生成したものは次のとおりです。
 
-```
-Here's what I generated:
+|ファイル |何をするのか |主要な指標 |自信 |
+|-----|---------------|---------------|---------------|
+|品質.md |品質体質 | 10 のシナリオ | ██████░░ 高 — コードに基づいていますが、シナリオは実際の事件からではなく推測されたものです |
+|機能テスト |自動テスト | 47 合格 | ████████ 高 — すべてのテストに合格、35% の交差バリアント |
+| RUN_CODE_REVIEW.md |コードレビュープロトコル | 8つの重点分野 | ████████ 高 — 建築に由来 |
+| RUN_INTEGRATION_TESTS.md |結合テストプロトコル | 9 実行 × 3 プロバイダ | ██████░░ 中 — 高品質のゲートには閾値調整が必要 |
+| RUN_SPEC_AUDIT.md |三者評議会の監査 | 10 の精査領域 | ████████ 高 — ガードレールを含む |
+|エージェント.md | AI セッションのブートストラップ |更新されました | ████████高 — 事実 |
+「」実際に生成したものにテーブルを適合させます。ファイル名、メトリクス、信頼レベルはプロジェクトによって異なります。信頼度列は最も重要です。これは、ユーザーがどこに注意を向けるべきかを示します。
 
-| File | What It Does | Key Metric | Confidence |
-|------|-------------|------------|------------|
-| QUALITY.md | Quality constitution | 10 scenarios | ██████░░ High — grounded in code, but scenarios are inferred, not from real incidents |
-| Functional tests | Automated tests | 47 passing | ████████ High — all tests pass, 35% cross-variant |
-| RUN_CODE_REVIEW.md | Code review protocol | 8 focus areas | ████████ High — derived from architecture |
-| RUN_INTEGRATION_TESTS.md | Integration test protocol | 9 runs × 3 providers | ██████░░ Medium — quality gates need threshold tuning |
-| RUN_SPEC_AUDIT.md | Council of Three audit | 10 scrutiny areas | ████████ High — guardrails included |
-| AGENTS.md | AI session bootstrap | Updated | ████████ High — factual |
-```
+**信頼レベル:**
+- **高** — コード、仕様、またはスキーマから直接派生します。修正が必要になる可能性は低いです。
+- **中** — 合理的な推論ですが、間違っている可能性があります。ユーザー入力によるメリット。
+- **低** — 最良の推測です。役に立つためには間違いなくユーザー入力が必要です。
 
-Adapt the table to what you actually generated — the file names, metrics, and confidence levels will vary by project. The confidence column is the most important: it tells the user where to focus their attention.
+表の後に、各アーティファクトを実行するためのコピー準備完了プロンプトを含む「クイック スタート」ブロックを追加します。「」
+これらのアーティファクトを使用するには、新しい AI セッションを開始し、次のプロンプトのいずれかを試してください。
 
-**Confidence levels:**
-- **High** — Derived directly from code, specs, or schemas. Unlikely to need revision.
-- **Medium** — Reasonable inference, but could be wrong. Benefits from user input.
-- **Low** — Best guess. Definitely needs user input to be useful.
+• コードレビューを実行します。
+  「quality/RUN_CODE_REVIEW.md を読み、その指示に従って [モジュールまたはファイル] を確認してください。」
 
-After the table, add a "Quick Start" block with ready-to-copy prompts for executing each artifact:
+• 機能テストを実行します。
+  "[テスト ランナー コマンド、例: pytestquality/ -v、mvn test -Dtest=FunctionalTest など]"
 
-```
-To use these artifacts, start a new AI session and try one of these prompts:
+• 統合テストを実行します。
+  「quality/RUN_INTEGRATION_TESTS.md を読み、その指示に従ってください。」
 
-• Run a code review:
-  "Read quality/RUN_CODE_REVIEW.md and follow its instructions to review [module or file]."
+• 仕様監査を開始します (3 人協議):
+  「quality/RUN_SPEC_AUDIT.md を読み、[モデル名] を使用してその指示に従います。」
+「」テスト ランナーのコマンドとモジュール名を実際のプロジェクトに合わせて変更します。重要なのは、ユーザーにコピー＆ペースト可能なプロンプトを提供することです。ユーザーが実行できる内容の説明ではなく、ユーザーが入力する実際のテキストです。
 
-• Run the functional tests:
-  "[test runner command, e.g. pytest quality/ -v, mvn test -Dtest=FunctionalTest, etc.]"
+Quick Start ブロックの後に、次の 1 行を追加します。
 
-• Run the integration tests:
-  "Read quality/RUN_INTEGRATION_TESTS.md and follow its instructions."
+> 「詳細を確認するには、これらのいずれかについて質問してください。たとえば、『シナリオ 3 を見せて』や『統合テスト マトリックスを説明して』などです。」
 
-• Start a spec audit (Council of Three):
-  "Read quality/RUN_SPEC_AUDIT.md and follow its instructions using [model name]."
-```
+### パート 2: オンデマンドのドリルダウン
 
-Adapt the test runner command and module names to the actual project. The point is to give the user copy-pasteable prompts — not descriptions of what they could do, but the actual text they'd type.
+ユーザーが特定の項目について質問した場合は、ファイル全体ではなく、重要な決定事項と不明な点を中心にまとめてください。例:
 
-After the Quick Start block, add one line:
+- **「シナリオ 4 について教えてください」** → シナリオのテキストを表示し、それがどこから来たのか (防御パターンまたは領域知識) を説明し、推測したことと知っていることのフラグを立てます。
+- **「統合テスト マトリックスを表示」** → 実行グループを表示し、並列処理戦略を説明し、スキーマから導出した品質ゲートと推測した品質ゲートをメモします。
+- **「機能テストはどのように機能しますか?」** → 3 つのテスト グループを示し、仕様とシナリオへのマッピングを説明し、最も自信のないテストを強調表示します。
 
-> "You can ask me about any of these to see the details — for example, 'show me Scenario 3' or 'walk me through the integration test matrix.'"
+ユーザーは、何かを改善する準備が整う前に、いくつかのドリルダウンを実行することがあります。大丈夫です。自分のペースで探索させてください。
 
-### Part 2: Drill-Down on Demand
+### パート 3: 改善メニュー
 
-When the user asks about a specific item, give a focused summary — not the whole file, but the key decisions and what you're uncertain about. Examples:
+ユーザーが概要を確認した後 (必要に応じて詳細を確認した後)、改善オプションを提示します。
 
-- **"Tell me about Scenario 4"** → Show the scenario text, explain where it came from (which defensive pattern or domain knowledge), and flag what you inferred vs. what you know.
-- **"Show me the integration test matrix"** → Show the run groups, explain the parallelism strategy, and note which quality gates you derived from schemas vs. guessed at.
-- **"How do the functional tests work?"** → Show the three test groups, explain the mapping to specs and scenarios, and highlight any tests you're least confident about.
-
-The user may go through several drill-downs before they're ready to improve anything. That's fine — let them explore at their own pace.
-
-### Part 3: The Improvement Menu
-
-After the user has seen the summary (and optionally drilled into details), present the improvement options:
-
-> "Three ways to make this better:"
+> 「これを改善する 3 つの方法:」
 >
-> **1. Review and harden individual items** — Pick any scenario, test, or protocol section and I'll walk through it with you. Good for: tightening specific quality gates, fixing inferred scenarios, adding missing edge cases.
+> **1.個々の項目を確認して強化します** — シナリオ、テスト、またはプロトコルのセクションを選択してください。私がそれについて説明します。用途: 特定の品質ゲートを厳格化する、推定されたシナリオを修正する、欠落しているエッジ ケースを追加する。
 >
-> **2. Guided Q&A** — I'll ask you 3-5 targeted questions about things I couldn't infer from the code: incident history, expected distributions, cost tolerance, model preferences. Good for: filling knowledge gaps that make scenarios more authoritative.
+> **2.ガイド付き Q&A** — コードから推測できなかった事項 (インシデント履歴、予想される分布、コストの許容範囲、モデルの好み) について、的を絞った 3 ～ 5 つの質問をします。用途: 知識のギャップを埋めてシナリオの信頼性を高める。
 >
-> **3. Review development history** — Point me to exported AI chat history (Claude, Gemini, ChatGPT exports, Claude Code transcripts) and I'll mine it for design decisions, incident reports, and quality discussions that should be in QUALITY.md. Good for: grounding scenarios in real project history instead of inference.
+> **3.開発履歴の確認** — エクスポートされた AI チャット履歴 (Claude、Gemini、ChatGPT エクスポート、Claude Code トランスクリプト) を教えてください。設計上の決定、インシデント レポート、QUALITY.md に含める必要がある品質に関する議論のためにそれをマイニングします。こんな方に適しています: 推論ではなく、実際のプロジェクト履歴に基づいてシナリオを確立します。
 >
-> "You can do any combination of these, in any order. Which would you like to start with?"
+> 「これらを任意に組み合わせて、任意の順序で実行できます。どれから始めますか?」
 
-### Executing Each Improvement Path
+### 各改善パスの実行
 
-**Path 1: Review and harden.** The user picks an item. Walk through it: show the current text, explain your reasoning, ask if it's accurate. Revise based on their feedback. Re-run tests if the functional tests change.
+**パス 1: 確認して強化します。** ユーザーが項目を選択します。それを見てみましょう: 現在のテキストを表示し、推論を説明し、それが正確かどうかを尋ねます。フィードバックに基づいて修正します。機能テストが変更された場合は、テストを再実行します。
 
-**Path 2: Guided Q&A.** Ask 3-5 questions derived from what you actually found during exploration. These categories cover the most common high-leverage gaps:
+**パス 2: ガイド付き Q&A。** 探索中に実際に見つけたものに基づいて 3 ～ 5 つの質問をします。これらのカテゴリは、最も一般的な高レバレッジのギャップをカバーします。- **シナリオのインシデント履歴。** 「[特定の防御コード] を見つけました。どのような障害が原因でしょうか? 影響を受けたレコードは何件ありますか?」
+- **品質ゲートのしきい値。** 「[フィールド] に [値] が含まれていることを確認しています。どのような分布が正規分布ですか? 問題の兆候は何ですか?」
+- **統合テストの規模とコスト** 「このプロトコルは [N] 個のテストを実行し、およそ [X] ドルのコストがかかります。カバレッジを増やすか減らす必要がありますか?」
+- **テスト範囲** 「[N] 個の機能テストを生成しました。既存のスイートは [他の領域] をカバーしています。ギャップはありますか?」
+- **仕様監査のためのモデル設定** 「どの AI モデルを使用していますか?特定の強みに気づきましたか?」
 
-- **Incident history for scenarios.** "I found [specific defensive code]. What failure caused this? How many records were affected?"
-- **Quality gate thresholds.** "I'm checking that [field] contains [values]. What distribution is normal? What signals a problem?"
-- **Integration test scale and cost.** "The protocol runs [N] tests costing roughly $[X]. Should I increase or decrease coverage?"
-- **Test scope.** "I generated [N] functional tests. Your existing suite covers [other areas]. Are there gaps?"
-- **Model preferences for spec audit.** "Which AI models do you use? Have you noticed specific strengths?"
+ユーザーが回答した後、生成されたファイルを修正し、テストを再実行します。
 
-After the user answers, revise the generated files and re-run tests.
+**パス 3: 開発履歴を確認します。** ユーザーがチャット履歴フォルダーを提供した場合:
 
-**Path 3: Review development history.** If the user provides a chat history folder:
+1. インデックス ファイルをスキャンし、品質関連の会話に移動します (ステップ 0 と同じアプローチですが、今回は特定のターゲットを使用します。どのシナリオに基礎付けが必要か、どの品質ゲートにしきい値が必要か、どの設計決定に根拠が必要かがわかります)。
+2. 抽出: 具体的な数値を含むインシデント ストーリー、防御パターンの設計理論的根拠、品質フレームワークの議論、クロスモデルの監査結果。
+3. 実際のインシデントの詳細を使用して QUALITY.md シナリオを改訂します。統合テストのしきい値を実際の値で更新します。監査結果が存在する場合は、Council of Three の実証データを追加します。
+4. 修正後にテストを再実行します。
 
-1. Scan for index files and navigate to quality-relevant conversations (same approach as Step 0, but now with specific targets — you know which scenarios need grounding, which quality gates need thresholds, which design decisions need rationale).
-2. Extract: incident stories with specific numbers, design rationale for defensive patterns, quality framework discussions, cross-model audit results.
-3. Revise QUALITY.md scenarios with real incident details. Update integration test thresholds with real-world values. Add Council of Three empirical data if audit results exist.
-4. Re-run tests after revisions.
+ユーザーがステップ 0 でチャット履歴をすでに提供している場合は、すでにその履歴をマイニングしていますが、特定の会話を紹介したり、特定のトピックについてさらに深く掘り下げるように求めたりする可能性があります。
 
-If the user already provided chat history in Step 0, you've already mined it — but they may want to point you to specific conversations or ask you to dig deeper into a particular topic.
+### 反復
 
-### Iteration
-
-The user can cycle through these paths as many times as they want. Each pass makes the quality playbook more grounded. When they're satisfied, they'll move on naturally — there's no explicit "done" step.
+ユーザーはこれらのパスを何度でも循環できます。パスごとに、品質の高いプレイブックがより根拠のあるものになります。彼らが満足すると、自然に次のステップに進みます。明示的な「完了」ステップはありません。
 
 ---
 
-## Fixture Strategy
+## フィクスチャ戦略
 
-The `quality/` folder is separate from the project's unit test folder. Create the appropriate test setup for the project's language:
+`quality/` フォルダーは、プロジェクトの単体テスト フォルダーとは別のものです。プロジェクトの言語に適切なテスト設定を作成します。
 
-- **Python:** `quality/conftest.py` for pytest fixtures. If fixtures are defined inline (common with pytest's `tmp_path` pattern), prefer that over shared fixtures.
-- **Java:** A test class with `@BeforeEach`/`@BeforeAll` setup methods, or a shared test utility class.
-- **Scala:** A trait mixed into test specs (e.g., `trait FunctionalTestFixtures`), or inline data builders.
-- **TypeScript/JavaScript:** A `quality/setup.ts` with `beforeAll`/`beforeEach` hooks, or inline test factories.
-- **Go:** Helper functions in the same `_test.go` file or a shared `testutil_test.go`. Use `t.Helper()` for test helpers. Go convention prefers inline test setup over shared fixtures.
-- **Rust:** Helper functions in a `#[cfg(test)] mod tests` block, or a shared `test_utils.rs` module. Use builder patterns for test data.
+- **Python:** `quality/conftest.py` (pytest フィクスチャ用)。フィクスチャがインラインで定義されている場合 (pytest の `tmp_path` パターンと共通)、共有フィクスチャよりもそれを優先します。
+- **Java:** `@BeforeEach`/`@BeforeAll` セットアップ メソッドを備えたテスト クラス、または共有テスト ユーティリティ クラス。
+- **Scala:** テスト仕様 (例: `trait FunctionalTestFixtures`) またはインライン データ ビルダーに混合された特性。
+- **TypeScript/JavaScript:** `beforeAll`/`beforeEach` フックを備えた `quality/setup.ts`、またはインライン テスト ファクトリ。
+- **Go:** 同じ `_test.go` ファイルまたは共有 `testutil_test.go` 内のヘルパー関数。テスト ヘルパーには `t.Helper()` を使用します。 Go の規約では、共有フィクスチャよりもインライン テストのセットアップが優先されます。
+- **Rust:** `#[cfg(test)] mod tests` ブロック、または共有 `test_utils.rs` モジュール内のヘルパー関数。テストデータにはビルダーパターンを使用します。
 
-Examine existing test files to understand how they set up test data. Whatever pattern the existing tests use, copy it. Study existing fixture patterns for realistic data shapes.
-
----
-
-## Terminology
-
-- **Functional testing** — Does the code produce the output specs say it should? Distinct from unit testing (individual functions in isolation).
-- **Integration testing** — Do components work together end-to-end, including real external services?
-- **Spec audit** — AI models read code and compare against specs. No code executed. Catches where code doesn't match documentation.
-- **Coverage theater** — Tests that produce high coverage numbers but don't catch real bugs. Example: asserting a function didn't throw without checking its output.
-- **Fitness-to-purpose** — Does the code do what it's supposed to do under real-world conditions? A system can have 95% coverage and still lose records silently.
+既存のテスト ファイルを調べて、テスト データがどのように設定されているかを理解します。既存のテストで使用されているパターンが何であれ、それをコピーします。現実的なデータ形状については、既存のフィクスチャ パターンを研究します。
 
 ---
 
-## Principles
-
-1. Fitness-to-purpose over coverage percentages
-2. Scenarios come from code exploration AND domain knowledge
-3. Concrete failure modes make standards non-negotiable — abstract requirements invite rationalization
-4. Guardrails transform AI review quality (line numbers, read bodies, grep before claiming)
-5. Triage before fixing — many "defects" are spec bugs or design decisions
+## 用語- **機能テスト** — コードは、必要とされる出力仕様を生成しますか?単体テスト (個々の機能を分離したテスト) とは異なります。
+- **統合テスト** — 実際の外部サービスを含め、コンポーネントはエンドツーエンドで連携しますか?
+- **仕様監査** — AI モデルがコードを読み取り、仕様と比較します。コードは実行されませんでした。コードがドキュメントと一致しない箇所を検出します。
+- **カバレッジシアター** — 高いカバレッジ数値を生成しますが、実際のバグは捕捉しないテスト。例: 出力をチェックせずに関数をアサートしてもスローされませんでした。
+- **目的への適合性** — コードは現実世界の条件下で想定どおりに動作しますか?システムのカバレッジが 95% であっても、記録が何も通知されずに失われる可能性があります。
 
 ---
 
-## Reference Files
+## 原則
 
-Read these as you work through each phase:
+1. カバレッジのパーセンテージに対する目的への適合性
+2. シナリオはコードの探索とドメインの知識から得られます
+3. 具体的な障害モードにより標準は交渉の余地がなくなり、抽象的な要件が合理化を招く
+4. ガードレールは AI レビューの品質を変革します (行番号、本文の読み取り、クレーム前の grep)
+5. 修正前の優先順位付け — 多くの「欠陥」は仕様のバグまたは設計上の決定です。
 
-| File | When to Read | Contains |
-|------|-------------|----------|
-| `references/defensive_patterns.md` | Step 5 (finding skeletons) | Grep patterns, how to convert findings to scenarios |
-| `references/schema_mapping.md` | Step 5b (schema types) | Field mapping format, mutation validity rules |
-| `references/constitution.md` | File 1 (QUALITY.md) | Full template with section-by-section guidance |
-| `references/functional_tests.md` | File 2 (functional tests) | Test structure, anti-patterns, cross-variant strategy |
-| `references/review_protocols.md` | Files 3–4 (code review, integration) | Templates for both protocols |
-| `references/spec_audit.md` | File 5 (Council of Three) | Full audit protocol, triage process, fix execution |
-| `references/verification.md` | Phase 3 (verify) | Complete self-check checklist with all 13 benchmarks |
+---
+
+## 参照ファイル
+
+各フェーズを進める際には、以下をお読みください。
+
+|ファイル |いつ読むべきか |含まれています |
+|------|---------------|----------|
+| `references/defensive_patterns.md` |ステップ 5 (スケルトンを見つける) | Grep パターン、結果をシナリオに変換する方法 |
+| `references/schema_mapping.md` |ステップ 5b (スキーマ タイプ) |フィールド マッピングの形式、突然変異の有効性ルール |
+| `references/constitution.md` |ファイル 1 (QUALITY.md) |セクションごとのガイダンスを含む完全なテンプレート |
+| `references/functional_tests.md` |ファイル 2 (機能テスト) |テスト構造、アンチパターン、クロスバリアント戦略 |
+| `references/review_protocols.md` |ファイル 3 ～ 4 (コード レビュー、統合) |両方のプロトコルのテンプレート |
+| `references/spec_audit.md` |ファイル 5 (3 人の評議会) |完全な監査プロトコル、トリアージ プロセス、修正の実行 |
+| `references/verification.md` |フェーズ 3 (検証) | 13 のベンチマークすべてを含む完全なセルフチェック チェックリスト |

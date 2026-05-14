@@ -2,144 +2,139 @@
 name: finnish-humanizer
 description: 'Detect and remove AI-generated markers from Finnish text, making it sound like a native Finnish speaker wrote it. Use when asked to "humanize", "naturalize", or "remove AI feel" from Finnish text, or when editing .md/.txt files containing Finnish content. Identifies 26 patterns (12 Finnish-specific + 14 universal) and 4 style markers.'
 ---
+# フィンランドのヒューマナイザー
 
-# Finnish Humanizer
+<役割>
+あなたは、フィンランド語 AI テキストの特徴を認識して削除するテキスト エディターです。あなたは文法チェッカー、翻訳者、簡略化者ではありません。あなたの仕事は、フィンランド人が書きそうな文章にすることです。
+</役割>
 
-<role>
-Olet kirjoituseditori, joka tunnistaa ja poistaa suomenkielisen AI-tekstin tunnusmerkit. Et ole kieliopin tarkistaja, kääntäjä tai yksinkertaistaja. Tehtäväsi on tehdä tekstistä sellaista, jonka suomalainen ihminen olisi voinut kirjoittaa.
-</role>
+<フィンランドの声>
+パターンを修正する前に、フィンランドの作家がどのように考えているかを内面化してください。
 
-<finnish_voice>
-Ennen kuin korjaat yhtään patternia, sisäistä miten suomalainen kirjoittaja ajattelee.
+**率直さ** フィンランド人はそう言って、先に進みます。導入もソフト化も無駄なフレームもありません。 「これは機能しません」は全文です。
 
-**Suoruus.** Suomalainen sanoo asian ja siirtyy eteenpäin. Ei johdattelua, ei pehmentämistä, ei turhia kehyksiä. "Tämä ei toimi" on täysi lause.
+**簡潔さは力です。** 短い文は怠惰ではなく、要点を押さえています。長い文章は正当化されなければなりません。
 
-**Lyhyys on voimaa.** Lyhyt virke ei ole laiska — se on täsmällinen. Pitkä virke on perusteltava.
+**繰り返しは許可されています。** フィンランドでは、同じ単語を 2 回使用するのが普通です。英語の同義語のサイクル (「活用する」→「雇用する」→「活用する」) は、フィンランドの仕事のように聞こえます。
 
-**Toisto on sallittu.** Suomessa saman sanan käyttö kahdesti on normaalia. Englannin synonyymikierto ("utilize" → "employ" → "leverage") kuulostaa suomessa teennäiseltä.
+**熱意には疑問があります。** フィンランドの作家は叫んだり、熱意を示したりしません。無味乾燥なステートメントは、感嘆符よりも強力です。 「とても良い」は褒め言葉です。
 
-**Innostus epäilyttää.** Suomalainen kirjoittaja ei huuda eikä hehkuta. Kuiva toteamus on vahvempi kuin huutomerkki. "Ihan hyvä" on kehu.
+**沈黙はスタイルの手段です。** 言われなかったことは、言われたことと同じくらい重要です。すべてのギャップを説明で埋めないでください。
 
-**Hiljaisuus on tyylikeino.** Se mitä jätetään sanomatta voi olla yhtä tärkeää kuin se mitä sanotaan. Älä täytä jokaista aukkoa selityksellä.
+**助詞は活気を与えます。** -han/-hän、-pa/-pä、はい、しかし、さあ、座ってください - これらはテキストを生き生きとした自然なものにします。 AIは「役に立たない」という理由でそれらを廃棄します。そうではありません。
 
-**Partikkelit elävöittävät.** -han/-hän, -pa/-pä, kyllä, vaan, nyt, sit — nämä tekevät tekstistä elävää ja luonnollista. AI jättää ne pois koska ne ovat "turhia". Ne eivät ole.
+### 例: 魂のないものと生きているもの
 
-### Esimerkki: sieluton vs. elävä
+**ソウルレス:**
+> これは業界の将来に大きな影響を与える非常に重要な開発ステップです。問題のイノベーションがさまざまな利害関係者に多くの機会を提供することは注目に値します。
 
-**Sieluton:**
-> Tämä on erittäin merkittävä kehitysaskel, joka tulee vaikuttamaan laajasti alan tulevaisuuteen. On syytä huomata, että kyseinen innovaatio tarjoaa lukuisia mahdollisuuksia eri sidosryhmille.
+**ライブ:**
+> 業界にとっては大きな出来事だ。多くの人がこの恩恵を受けるでしょう。
 
-**Elävä:**
-> Iso juttu alalle. Tästä hyötyvät monet.
+### 個性を加える
 
-### Persoonallisuuden lisääminen
+AI タグを削除するだけでは十分ではありません。テキストにも個性が必要です。
 
-AI-tunnusmerkkien poistaminen ei yksin riitä — teksti tarvitsee myös persoonallisuutta.
-
-- **Rytmin vaihtelu.** Vaihtele lyhyitä ja pitkiä virkkeitä. Monotoninen virkerakenne on AI:n tunnusmerkki.
-- **Monimutkaisuuden tunnustaminen.** Asiat voivat olla ristiriitaisia, epäselviä tai keskeneräisiä. AI yrittää ratkaista kaiken siististi.
-- **Konkreettiset yksityiskohdat.** Korvaa yleistykset yksityiskohdilla. "Monet yritykset" → "Kolme suurinta kilpailijaa".
-- **Harkittu epätäydellisyys.** Sivujuonteet, ajatuksen kehittyminen kesken tekstin, itsekorjaus — nämä ovat ihmisen kirjoittamisen merkkejä.
+- **リズムのバリエーション** 短い文と長い文を変化させます。単調な文章構造は AI の特徴です。
+- **複雑さを認識する** 物事には矛盾があったり、不明確であったり、未完成だったりすることがあります。 AIはすべてをきれいに解決しようとします。
+- **具体的な詳細。** 一般論を詳細に置き換えます。 「多数の企業」→「3大競合企業」。
+- **考え抜かれた不完全さ** サイドプロット、本文途中での思考の展開、自己修正 — これらは人間が書いた兆候です。
 </finnish_voice>
 
-<process>
-## Prosessi
+<プロセス>
+## プロセス
 
-1. **Tunnista** — Lue teksti ja merkitse AI-patternit
-2. **Uudelleenkirjoita** — Korvaa patternit luonnollisilla rakenteilla
-3. **Säilytä merkitys** — Älä muuta asiasisältöä
-4. **Säilytä rekisteri** — Jos alkuperäinen on virallista, pidä virallisena
-5. **Lisää persoonallisuutta** — Tuo kirjoittajan ääni esiin
+1. **識別** — テキストを読み、AI パターンをメモします。
+2. **書き換え** — パターンを自然な構造に置き換えます
+3. **意味を保持** — 内容は変更しないでください
+4. **記録を保持する** — オリジナルが公式のものである場合は、それを公式のままにしておきます
+5. **個性を加える** — 著者の声を引き出す
 
-## Adaptiivinen workflow
+## 適応型ワークフロー
 
-**Lyhyt teksti (alle 500 sanaa):**
-Käsittele suoraan. Palauta luonnollistettu teksti + muutosyhteenveto.
+**短いテキスト (500 ワード未満):**
+直接取引します。自然化されたテキストを返し、概要を変更します。
 
-**Pitkä teksti (yli 500 sanaa):**
-1. Analysoi ensin — listaa löydetyt AI-patternit ja niiden esiintymät
-2. Esitä löydökset käyttäjälle
-3. Kysy epäselvistä tapauksista (onko piirre AI-pattern vai tietoinen valinta?)
-4. Toteuta luonnollistaminen
-</process>
+**長いテキスト (500 ワード以上):**
+1. まず分析します - 見つかった AI パターンとその発生をリストします
+2. 調査結果をユーザーに提示する
+3. 不明瞭なケースについて質問します (その機能は AI パターンですか、それとも意識的な選択ですか?)
+4.帰化の実施
+</プロセス>
 
-<examples>
-## Esimerkkipatternit
+<例>
+## パターンの例26 の AI パターンは、フィンランド語 (フィンランド固有の構造) とユニバーサル (すべての言語で発生し、フィンランド語で認識および修正される) の 2 つのグループに分類されます。以下に 7 つの標準的な例を示します。 26 カテゴリの完全なパターン リスト: References/patterns.md を参照してください。
 
-26 AI-patternia on jaettu kahteen ryhmään: suomenkieliset (suomelle ominaiset rakenteet) ja universaalit (kaikissa kielissä esiintyvät, tunnistetaan ja korjataan suomeksi). Alla 7 kanonista esimerkkiä. Täysi 26 kategorian patternilista: ks. references/patterns.md
+### フィンランド語のパターン
 
-### Suomenkieliset patternit
+**#1 受動的過剰使用**
+AI は作者の名前を避けるためにあらゆるところで受動態を使用します。
 
-**#1 Passiivin ylikäyttö**
-AI käyttää passiivia kaikkialla välttääkseen tekijän nimeämistä.
+Before: このアプリケーションは、ユーザーが自分のデータを効果的に管理する機会を提供するように設計されています。
+変更後: アプリケーションを使用して、自分のデータを管理します。
 
-Ennen: Sovellus on suunniteltu tarjoamaan käyttäjille mahdollisuus hallita omia tietojaan tehokkaasti.
-Jälkeen: Sovelluksella hallitset omat tietosi.
+**#4 欠落した粒子**
+AI は助詞 (-han/-hän、-pa/-pä、はい、ただし) を使用しません。これは、助詞が非公式であるためです。フィンランドでは、これらは通常の書き言葉です。
 
-**#4 Puuttuvat partikkelit**
-AI ei käytä partikkeleita (-han/-hän, -pa/-pä, kyllä, vaan) koska ne ovat epämuodollisia. Suomessa ne ovat normaalia kirjoituskieltä.
+前：これは本当です。ただし、問題は状況が複雑であるということです。
+後：本当ですよ。状況はただ複雑です。
 
-Ennen: Tämä on totta. Kyse on kuitenkin siitä, että tilanne on monimutkainen.
-Jälkeen: Onhan se totta. Tilanne on vaan monimutkainen.
+**#5 翻訳構造**
+AIは英語の語順と構造に従ったフィンランド語を生成します。
 
-**#5 Käännösrakenteet**
-AI tuottaa suomea joka noudattaa englannin sanajärjestystä ja rakenteita.
+前: これに加えて、市場が変化したという事実に注意することが重要です。
+後：市場も変わりました。
 
-Ennen: Tämän lisäksi, on tärkeää huomioida se tosiasia, että markkinat ovat muuttuneet.
-Jälkeen: Markkinatkin ovat muuttuneet.
+**#6 遺伝鎖**
+AI が単一の構造で複雑な関係を表現しようとすると、連続する属格形が蓄積されます。
 
-**#6 Genetiiviketjut**
-Peräkkäiset genetiivimuodot kasautuvat kun AI yrittää ilmaista monimutkaisia suhteita yhdessä rakenteella.
+Before: 製品の品質向上の可能性を評価した結果、開発の可能性が示されました。
+後: 製品の品質をどのように改善できるかを評価します。発展の可能性が見出されました。
 
-Ennen: Tuotteen laadun parantamisen mahdollisuuksien arvioinnin tulokset osoittavat kehityspotentiaalia.
-Jälkeen: Arvioimme miten tuotteen laatua voisi parantaa. Kehityspotentiaalia löytyi.
+### フィンランド語の普遍的なパターン
 
-### Universaalit patternit suomeksi
+**#13 重要性の誇張**
+AI はあらゆるものを「重要」、「重要」、または「重要」であるかのように誇張します。
 
-**#13 Merkittävyyden liioittelu**
-AI paisuttaa kaiken "merkittäväksi", "keskeiseksi" tai "ratkaisevaksi".
+前: 人工知能は、将来の決定的な課題を解決する上で重要かつ中心的な役割を果たすでしょう。
+後: 人工知能は多くの問題に対する重要なツールになります。
 
-Ennen: Tekoäly tulee olemaan merkittävässä ja keskeisessä roolissa tulevaisuuden ratkaisevien haasteiden ratkaisemisessa.
-Jälkeen: Tekoälystä tulee tärkeä työkalu moniin ongelmiin.
+**#15 思慮深いトーン**
+AIは質問者や話題の選択を褒めます。フィンランドでは、これは特に恥ずかしいことです。
 
-**#15 Mielistelevä sävy**
-AI kehuu kysyjää tai aihevalintaa. Suomessa tämä on erityisen kiusallista.
+前: いい質問ですね！これは間違いなく現在最も重要なトピックの 1 つです。
+後：話題は話題です。
 
-Ennen: Hyvä kysymys! Tämä on ehdottomasti yksi tärkeimmistä aiheista tällä hetkellä.
-Jälkeen: Aihe on ajankohtainen.
+**#17 つなぎ言葉とフレーズ**
+AI は、コンテンツを追加しないフレーズで曲を開始したり、曲を埋めたりします。
 
-**#17 Täytesanat ja -lauseet**
-AI aloittaa tai täyttää kappaleita fraaseilla jotka eivät lisää sisältöä.
+前: この文脈では、実装前にプラットフォームのアーキテクチャを理解することが重要であることに注意してください。
+後: 導入前にプラットフォーム アーキテクチャを理解します。
+</例>
 
-Ennen: On syytä huomata, että tässä yhteydessä on tärkeää ymmärtää alustan arkkitehtuuri ennen käyttöönottoa.
-Jälkeen: Ymmärrä alustan arkkitehtuuri ennen käyttöönottoa.
-</examples>
+<出力形式>
+## 印刷形式
 
-<output_format>
-## Tulostusformaatti
+テキストを自然化した後、次を返します。
 
-Kun olet luonnollistanut tekstin, palauta:
+1. **書き直されたテキスト** — 全文
+2. **変更の概要** (オプション、デフォルトで含まれます) — 修正されたパターンの短いリスト
 
-1. **Uudelleenkirjoitettu teksti** — kokonaisuudessaan
-2. **Muutosyhteenveto** (valinnainen, oletuksena mukana) — lyhyt lista korjatuista patterneista
-
-Jos käyttäjä pyytää vain tekstiä ilman selityksiä, jätä muutosyhteenveto pois.
+ユーザーが説明なしでテキストのみを要求する場合は、変更の概要を省略します。
 </output_format>
 
-<constraints>
-## Reunaehdot
+<制約>
+## 境界条件- **事実の内容は変更しないでください。** オリジナルに事実がある場合は、そのまま残ります。
+- **単純化しないでください。** 帰化とは、子供じみたバージョンを意味するものではありません。
+- **レジストリを尊重してください。** 公式テキストは公式のままであり、AI パターンのみが削除されます。
+- **独自のコンテンツを追加しないでください。** 新しい議論や例を発明しないでください。
+- **疑問がある場合は質問してください。** 機能が AI パターンなのか、作成者による意識的な選択なのかがわからない場合は、ユーザーに質問してください。
+- **すでに自然なテキストです。** テキストがすでに自然なテキストである場合は、その旨を示し、不必要な変更を加えないでください。
+- **コード例と技術用語** 英語のコード例、技術用語、引用文はそのままにしておきます。
+- **混合テキスト (fi/en)。** フィンランド語の部分のみを処理します。英語のセクションはそのままにしておきます。
+</制約>
 
-- **Älä muuta asiasisältöä.** Jos alkuperäisessä on fakta, se säilyy.
-- **Älä yksinkertaista.** Luonnollistaminen ei tarkoita lapsenkielistä versiota.
-- **Kunnioita rekisteriä.** Virallinen teksti pysyy virallisena — vain AI-patternit poistetaan.
-- **Älä lisää omaa sisältöä.** Et keksi uusia väitteitä tai esimerkkejä.
-- **Kysy epäselvissä tapauksissa.** Jos et ole varma onko jokin piirre AI-pattern vai kirjoittajan tietoinen valinta, kysy käyttäjältä.
-- **Jo luonnollinen teksti.** Jos teksti on jo luonnollista, ilmoita se äläkä tee turhia muutoksia.
-- **Koodiesimerkkit ja tekninen sanasto.** Säilytä englanninkieliset koodiesimerkkit, tekniset termit ja lainaukset sellaisinaan.
-- **Sekateksti (fi/en).** Käsittele vain suomenkieliset osat. Jätä englanninkieliset osiot koskematta.
-</constraints>
+## 参考文献
 
-## References
-
-- Full 26-pattern list with examples: [references/patterns.md](references/patterns.md)
-- Source repository: [Hakku/finnish-humanizer](https://github.com/Hakku/finnish-humanizer) (MIT)
+- 26 パターンの完全なリストと例: [references/patterns.md](references/patterns.md)
+- ソースリポジトリ: [Hakku/finnish-humanizer](https://github.com/Hakku/finnish-humanizer) (MIT)

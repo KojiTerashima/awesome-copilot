@@ -1,69 +1,67 @@
-# Annotations Overview
+# 注釈の概要
 
-Annotations allow you to add human or automated feedback to traces, spans, documents, and sessions. Annotations are essential for evaluation, quality assessment, and building training datasets.
+注釈を使用すると、人間によるフィードバックまたは自動フィードバックをトレース、スパン、ドキュメント、セッションに追加できます。アノテーションは、評価、品質評価、トレーニング データセットの構築に不可欠です。
 
-## Annotation Types
+## 注釈の種類
 
-Phoenix supports four types of annotations:
+Phoenix は 4 種類のアノテーションをサポートしています。
 
-| Type                    | Target                           | Purpose                                  | Example Use Case                 |
-| ----------------------- | -------------------------------- | ---------------------------------------- | -------------------------------- |
-| **Span Annotation**     | Individual span                  | Feedback on a specific operation         | "This LLM response was accurate" |
-| **Document Annotation** | Document within a RETRIEVER span | Feedback on retrieved document relevance | "This document was not helpful"  |
-| **Trace Annotation**    | Entire trace                     | Feedback on end-to-end interaction       | "User was satisfied with result" |
-| **Session Annotation**  | User session                     | Feedback on multi-turn conversation      | "Session ended successfully"     |
+|タイプ |ターゲット |目的 |使用例 |
+| ----------------------- | -------------------------------- | -------------------------------------- | -------------------------------- |
+| **スパン注釈** |個別のスパン |特定の操作に関するフィードバック | 「この LLM 応答は正確でした」 |
+| **ドキュメントの注釈** | RETRIEVER スパン内のドキュメント |取得した文書の関連性に関するフィードバック | 「このドキュメントは役に立ちませんでした」 |
+| **トレース注釈** |トレース全体 |エンドツーエンドのインタラクションに関するフィードバック | 「ユーザーは結果に満足しました」 |
+| **セッションの注釈** |ユーザーセッション |マルチターン会話に関するフィードバック | "セッションは正常に終了しました" |
 
-## Annotation Fields
+## 注釈フィールド
 
-Every annotation has these fields:
+すべての注釈には次のフィールドがあります。
 
-### Required Fields
+### 必須フィールド
 
-| Field     | Type   | Description                                                                   |
-| --------- | ------ | ----------------------------------------------------------------------------- |
-| Entity ID | String | ID of the target entity (span_id, trace_id, session_id, or document_position) |
-| `name`    | String | Annotation name/label (e.g., "quality", "relevance", "helpfulness")           |
+|フィールド |タイプ |説明 |
+| --------- | ------ | ---------------------------------------------------------------------------- |
+|エンティティID |文字列 |ターゲット エンティティの ID (span_id、trace_id、session_id、または document_position) |
+| `name` |文字列 |注釈名/ラベル (例: 「品質」、「関連性」、「有用性」) |
 
-### Result Fields (At Least One Required)
+### 結果フィールド (少なくとも 1 つは必須)
 
-| Field         | Type              | Description                                                       |
-| ------------- | ----------------- | ----------------------------------------------------------------- |
-| `label`       | String (optional) | Categorical value (e.g., "good", "bad", "relevant", "irrelevant") |
-| `score`       | Float (optional)  | Numeric value (typically 0-1, but can be any range)               |
-| `explanation` | String (optional) | Free-text explanation of the annotation                           |
+|フィールド |タイプ |説明 |
+| ------------- | ----------------- | ------------------------------------------------------------------ |
+| `label` |文字列 (オプション) |カテゴリ値 (例: 「良い」、「悪い」、「関連する」、「無関係」) |
+| `score` |フロート (オプション) |数値 (通常は 0 ～ 1 ですが、任意の範囲にすることができます) |
+| `explanation` |文字列 (オプション) |注釈のフリーテキスト説明 |
 
-**At least one** of `label`, `score`, or `explanation` must be provided.
+**`label`、`score`、または `explanation` のうち少なくとも 1 つ**を指定する必要があります。
 
-### Optional Fields
+### オプションのフィールド
 
-| Field            | Type   | Description                                                                             |
-| ---------------- | ------ | --------------------------------------------------------------------------------------- |
-| `annotator_kind` | String | Who created this annotation: "HUMAN", "LLM", or "CODE" (default: "HUMAN")               |
-| `identifier`     | String | Unique identifier for upsert behavior (updates existing if same name+entity+identifier) |
-| `metadata`       | Object | Custom metadata as key-value pairs                                                      |
+|フィールド |タイプ |説明 |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------- |
+| `annotator_kind` |文字列 |この注釈の作成者: "HUMAN"、"LLM"、または "CODE" (デフォルト: "HUMAN") |
+| `identifier` |文字列 |更新/挿入動作の一意の識別子 (名前+エンティティ+識別子が同じ場合は既存のものを更新) |
+| `metadata` |オブジェクト |キーと値のペアとしてのカスタム メタデータ |
 
-## Annotator Kinds
-
-| Kind    | Description                    | Example                           |
+## アノテーターの種類|種類 |説明 |例 |
 | ------- | ------------------------------ | --------------------------------- |
-| `HUMAN` | Manual feedback from a person  | User ratings, expert labels       |
-| `LLM`   | Automated feedback from an LLM | GPT-4 evaluating response quality |
-| `CODE`  | Automated feedback from code   | Rule-based checks, heuristics     |
+| `HUMAN` |担当者からの手動フィードバック |ユーザー評価、専門家ラベル |
+| `LLM` | LLM からの自動フィードバック | GPT-4 による応答品質の評価 |
+| `CODE` |コードからの自動フィードバック |ルールベースのチェック、ヒューリスティック |
 
-## Examples
+## 例
 
-**Quality Assessment:**
+**品質評価:**
 
-- `quality` - Overall quality (label: good/fair/poor, score: 0-1)
-- `correctness` - Factual accuracy (label: correct/incorrect, score: 0-1)
-- `helpfulness` - User satisfaction (label: helpful/not_helpful, score: 0-1)
+- `quality` - 全体的な品質 (ラベル: 良い/普通/悪い、スコア: 0-1)
+- `correctness` - 事実の正確さ (ラベル: 正しい/間違っている、スコア: 0-1)
+- `helpfulness` - ユーザー満足度 (ラベル: 役に立った/役に立たなかった、スコア: 0-1)
 
-**RAG-Specific:**
+**RAG 固有:**
 
-- `relevance` - Document relevance to query (label: relevant/irrelevant, score: 0-1)
-- `faithfulness` - Answer grounded in context (label: faithful/unfaithful, score: 0-1)
+- `relevance` - クエリに対するドキュメントの関連性 (ラベル: 関連/無関連、スコア: 0-1)
+- `faithfulness` - 文脈に基づいた回答 (ラベル: 忠実/不誠実、スコア: 0-1)
 
-**Safety:**
+**安全性:**
 
-- `toxicity` - Contains harmful content (score: 0-1)
-- `pii_detected` - Contains personally identifiable information (label: yes/no)
+- `toxicity` - 有害なコンテンツが含まれています (スコア: 0-1)
+- `pii_detected` - 個人を特定できる情報が含まれています (ラベル: はい/いいえ)

@@ -1,14 +1,12 @@
-# Framework-specific Fix Guide
+# フレームワーク固有の修正ガイド
 
-This document explains specific fix techniques for each framework and styling method.
+このドキュメントでは、各フレームワークとスタイル設定方法の具体的な修正テクニックについて説明します。
 
 ---
 
-## Pure CSS / SCSS
+## 純粋な CSS / SCSS
 
-### Fixing Layout Overflow
-
-```css
+### レイアウトのオーバーフローを修正する```css
 /* Before: Overflow occurs */
 .container {
   width: 100%;
@@ -20,11 +18,7 @@ This document explains specific fix techniques for each framework and styling me
   max-width: 100%;
   overflow-x: hidden;
 }
-```
-
-### Text Clipping Prevention
-
-```css
+```### テキストクリッピングの防止```css
 /* Single line truncation */
 .text-truncate {
   overflow: hidden;
@@ -46,11 +40,7 @@ This document explains specific fix techniques for each framework and styling me
   overflow-wrap: break-word;
   hyphens: auto;
 }
-```
-
-### Spacing Unification
-
-```css
+```### 間隔の統一```css
 /* Unify spacing with CSS custom properties */
 :root {
   --spacing-xs: 0.25rem;
@@ -64,11 +54,7 @@ This document explains specific fix techniques for each framework and styling me
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
 }
-```
-
-### Improving Contrast
-
-```css
+```### コントラストの向上```css
 /* Before: Insufficient contrast */
 .text {
   color: #999999;
@@ -80,15 +66,11 @@ This document explains specific fix techniques for each framework and styling me
   color: #595959; /* Contrast ratio 7:1 */
   background-color: #ffffff;
 }
-```
+```---
 
----
+## 追い風 CSS
 
-## Tailwind CSS
-
-### Layout Fixes
-
-```jsx
+### レイアウトの修正```jsx
 {/* Before: Overflow */}
 <div className="w-full">
   <img src="..." />
@@ -98,11 +80,7 @@ This document explains specific fix techniques for each framework and styling me
 <div className="w-full max-w-full overflow-hidden">
   <img src="..." className="w-full h-auto object-contain" />
 </div>
-```
-
-### Text Clipping Prevention
-
-```jsx
+```### テキストクリッピングの防止```jsx
 {/* Single line truncation */}
 <p className="truncate">Long text...</p>
 
@@ -111,11 +89,7 @@ This document explains specific fix techniques for each framework and styling me
 
 {/* Allow wrapping */}
 <p className="break-words">Long text...</p>
-```
-
-### Responsive Support
-
-```jsx
+```### レスポンシブサポート```jsx
 {/* Mobile-first responsive */}
 <div className="
   flex flex-col gap-4
@@ -126,11 +100,7 @@ This document explains specific fix techniques for each framework and styling me
     Content
   </div>
 </div>
-```
-
-### Spacing Unification (Tailwind Config)
-
-```javascript
+```### 間隔の統一 (Tailwind 構成)```javascript
 // tailwind.config.js
 module.exports = {
   theme: {
@@ -142,11 +112,7 @@ module.exports = {
     },
   },
 }
-```
-
-### Accessibility Improvements
-
-```jsx
+```### アクセシビリティの改善```jsx
 {/* Add focus state */}
 <button className="
   bg-blue-500 text-white
@@ -160,15 +126,11 @@ module.exports = {
 <p className="text-gray-700 bg-white"> {/* Changed from text-gray-500 */}
   Readable text
 </p>
-```
+```---
 
----
+## React + CSS モジュール
 
-## React + CSS Modules
-
-### Fixes in Module Scope
-
-```css
+### モジュール範囲内の修正```css
 /* Component.module.css */
 
 /* Before */
@@ -183,11 +145,7 @@ module.exports = {
   overflow: hidden;
   max-width: 100%;
 }
-```
-
-### Component-side Fixes
-
-```jsx
+```### コンポーネント側の修正```jsx
 // Component.jsx
 import styles from './Component.module.css';
 
@@ -196,15 +154,11 @@ import styles from './Component.module.css';
 
 // After: Add conditional class
 <div className={`${styles.container} ${isOverflow ? styles.overflow : ''}`}>
-```
+```---
 
----
+## スタイルコンポーネント / 感情
 
-## styled-components / Emotion
-
-### Style Fixes
-
-```jsx
+### スタイルの修正```jsx
 // Before
 const Container = styled.div`
   width: 100%;
@@ -220,11 +174,7 @@ const Container = styled.div`
     padding: 1rem;
   }
 `;
-```
-
-### Responsive Support
-
-```jsx
+```### レスポンシブサポート```jsx
 const Card = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -239,11 +189,7 @@ const Card = styled.div`
     gap: 1rem;
   }
 `;
-```
-
-### Consistency with Theme
-
-```jsx
+```### テーマとの一貫性```jsx
 // theme.js
 export const theme = {
   colors: {
@@ -263,15 +209,11 @@ const Text = styled.p`
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: ${({ theme }) => theme.spacing.md};
 `;
-```
+```---
 
----
+## Vue (スコープ付きスタイル)
 
-## Vue (Scoped Styles)
-
-### Fixing Scoped Styles
-
-```vue
+### スコープ付きスタイルの修正```vue
 <template>
   <div class="container">
     <p class="text">Content</p>
@@ -297,26 +239,18 @@ const Text = styled.p`
   }
 }
 </style>
-```
-
-### Deep Selectors (Affecting Child Components)
-
-```vue
+```### ディープセレクター (子コンポーネントに影響)```vue
 <style scoped>
 /* Override child component styles (use cautiously) */
 :deep(.child-class) {
   margin-bottom: 1rem;
 }
 </style>
-```
+```---
 
----
+## Next.js / アプリルーター
 
-## Next.js / App Router
-
-### Global Style Fixes
-
-```css
+### グローバルスタイルの修正```css
 /* app/globals.css */
 :root {
   --foreground: #171717;
@@ -334,11 +268,7 @@ img {
   max-width: 100%;
   height: auto;
 }
-```
-
-### Fixes in Layout Components
-
-```tsx
+```### レイアウトコンポーネントの修正```tsx
 // app/layout.tsx
 export default function RootLayout({ children }) {
   return (
@@ -357,15 +287,11 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
-```
+```---
 
----
+## 一般的なパターン
 
-## Common Patterns
-
-### Fixing Flexbox Layout Issues
-
-```css
+### フレックスボックスのレイアウトの問題を修正する```css
 /* Before: Items overflow */
 .flex-container {
   display: flex;
@@ -383,11 +309,7 @@ export default function RootLayout({ children }) {
   flex: 1 1 300px; /* grow, shrink, basis */
   min-width: 0; /* Prevent flexbox overflow issues */
 }
-```
-
-### Fixing Grid Layout Issues
-
-```css
+```### グリッドレイアウトの問題の修正```css
 /* Before: Fixed column count */
 .grid-container {
   display: grid;
@@ -400,11 +322,7 @@ export default function RootLayout({ children }) {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
-```
-
-### Organizing z-index
-
-```css
+```### Z-インデックスの整理```css
 /* Systematize z-index */
 :root {
   --z-dropdown: 100;
@@ -417,11 +335,7 @@ export default function RootLayout({ children }) {
 .modal {
   z-index: var(--z-modal);
 }
-```
-
-### Adding Focus States
-
-```css
+```### フォーカス状態の追加```css
 /* Add focus state to all interactive elements */
 button:focus-visible,
 a:focus-visible,
@@ -437,24 +351,16 @@ textarea:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.5);
 }
-```
+```---
 
----
+## デバッグ手法
 
-## Debugging Techniques
-
-### Visualizing Element Boundaries
-
-```css
+### 要素の境界を視覚化する```css
 /* Use only during development */
 * {
   outline: 1px solid red !important;
 }
-```
-
-### Detecting Overflow
-
-```javascript
+```### オーバーフローの検出```javascript
 // Run in console to detect overflow elements
 document.querySelectorAll('*').forEach(el => {
   if (el.scrollWidth > el.clientWidth) {
@@ -464,11 +370,7 @@ document.querySelectorAll('*').forEach(el => {
     console.log('Vertical overflow:', el);
   }
 });
-```
-
-### Checking Contrast Ratio
-
-```javascript
+```### コントラスト比の確認```javascript
 // Use Chrome DevTools Lighthouse or axe DevTools
 // Or check at the following site:
 // https://webaim.org/resources/contrastchecker/

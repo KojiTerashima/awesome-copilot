@@ -1,201 +1,185 @@
-# Finding Defensive Patterns (Step 5)
+# 防御パターンを見つける (ステップ 5)
 
-Defensive code patterns are evidence of past failures or known risks. Every null guard, try/catch, normalization function, and sentinel check exists because something went wrong — or because someone anticipated it would. Your job is to find these patterns systematically and convert them into fitness-to-purpose scenarios and boundary tests.
+防御的なコード パターンは、過去の失敗または既知のリスクの証拠です。すべての null ガード、try/catch、正規化関数、センチネル チェックは、何か問題が発生したために、または誰かが問題を予期したために存在します。あなたの仕事は、これらのパターンを系統的に見つけて、目的に合ったシナリオと境界テストに変換することです。
 
-## Systematic Search
+## 体系的な検索
 
-Don't skim — grep the codebase methodically. The exact patterns depend on the project's language. Here are common defensive-code indicators grouped by what they protect against:
+流し読みしないでください。コードベースを系統的に grep してください。正確なパターンはプロジェクトの言語によって異なります。以下は、保護対象ごとに一般的な防御コードの指標をグループ化したものです。
 
-**Null/nil guards:**
+**ヌル/ニルガード:**
 
-| Language | Grep pattern |
+|言語 | grep パターン |
 |---|---|
-| Python | `None`, `is None`, `is not None` |
-| Java | `null`, `Optional`, `Objects.requireNonNull` |
-| Scala | `Option`, `None`, `.getOrElse`, `.isEmpty` |
-| TypeScript | `undefined`, `null`, `??`, `?.` |
-| Go | `== nil`, `!= nil`, `if err != nil` |
-| Rust | `Option`, `unwrap`, `.is_none()`, `?` |
+|パイソン | `None`、`is None`、`is not None` |
+|ジャワ | `null`、`Optional`、`Objects.requireNonNull` |
+|スカラ座 | `Option`、`None`、`.getOrElse`、`.isEmpty` |
+|タイプスクリプト | `undefined`、`null`、`??`、`?.` |
+|行く | `== nil`、`!= nil`、`if err != nil` |
+|さび | `Option`、`unwrap`、`.is_none()`、`?` |
 
-**Exception/error handling:**
+**例外/エラー処理:**
 
-| Language | Grep pattern |
+|言語 | grep パターン |
 |---|---|
-| Python | `except`, `try:`, `raise` |
-| Java | `catch`, `throws`, `try {` |
-| Scala | `Try`, `catch`, `recover`, `Failure` |
-| TypeScript | `catch`, `throw`, `.catch(` |
-| Go | `if err != nil`, `errors.New`, `fmt.Errorf` |
-| Rust | `Result`, `Err(`, `unwrap_or`, `match` |
+|パイソン | `except`、`try:`、`raise` |
+|ジャワ | `catch`、`throws`、`try {` |
+|スカラ座 | `Try`、`catch`、`recover`、`Failure` |
+|タイプスクリプト | `catch`、`throw`、`.catch(` |
+|行く | `if err != nil`、`errors.New`、`fmt.Errorf` |
+|さび | `Result`、`Err(`、`unwrap_or`、`match` |
 
-**Internal/private helpers (often defensive):**
+**社内/個人のヘルパー (多くの場合防御的):**
 
-| Language | Grep pattern |
+|言語 | grep パターン |
 |---|---|
-| Python | `def _`, `__` |
-| Java/Scala | `private`, `protected` |
-| TypeScript | `private`, `#` (private fields) |
-| Go | lowercase function names (unexported) |
-| Rust | `pub(crate)`, non-`pub` functions |
+|パイソン | `def _`、`__` |
+| Java/スカラ | `private`、`protected` |
+|タイプスクリプト | `private`、`#` (プライベートフィールド) |
+|行く |小文字の関数名 (未エクスポート) |
+|さび | `pub(crate)`、`pub` 以外の関数 |
 
-**Sentinel values, fallbacks, boundary checks:** Search for `== 0`, `< 0`, `default`, `fallback`, `else`, `match`, `switch` — these are language-agnostic.
+**センチネル値、フォールバック、境界チェック:** `== 0`、`< 0`、`default`、`fallback`、`else`、`match`、`switch` を検索します。これらは言語に依存しません。
 
-## What to Look For Beyond Grep
+## grep 以外に何を探すべきか
 
-- **Bugs that were fixed** — Git history, TODO comments, workarounds, defensive code that checks for things that "shouldn't happen"
-- **Design decisions** — Comments explaining "why" not just "what." Configuration that could have been hardcoded but isn't. Abstractions that exist for a reason.
-- **External data quirks** — Any place the code normalizes, validates, or rejects input from an external system
-- **Parsing functions** — Every parser (regex, string splitting, format detection) has failure modes. What happens with malformed input? Empty input? Unexpected types?
-- **Boundary conditions** — Zero values, empty strings, maximum ranges, first/last elements, type boundaries
+- **修正されたバグ** — Git 履歴、TODO コメント、回避策、「起こってはならない」ことをチェックする防御コード
+- **設計上の決定** — 「何を」だけでなく「なぜ」を説明するコメント。ハードコーディングされた可能性があるが、実際にはハードコーディングされていない構成。理由があって存在する抽象化。
+- **外部データの異常** — コードが外部システムからの入力を正規化、検証、または拒否するあらゆる場所
+- **解析関数** — すべてのパーサー (正規表現、文字列分割、形式検出) には障害モードがあります。不正な入力では何が起こるのでしょうか?入力が空ですか?意外なタイプ？
+- **境界条件** — ゼロ値、空の文字列、最大範囲、最初/最後の要素、型境界
 
-## Converting Findings to Scenarios
+## 調査結果をシナリオに変換する
 
-For each defensive pattern, ask: "What failure does this prevent? What input would trigger this code path?"
+防御パターンごとに、「これによりどのような障害が防止されますか? どの入力がこのコード パスをトリガーしますか?」と尋ねます。
 
-The answer becomes a fitness-to-purpose scenario:
+答えは、目的に合ったシナリオになります。```マークダウン
+### シナリオ N: [記憶に残る名前]
 
-```markdown
-### Scenario N: [Memorable Name]
+**要件タグ:** [要件: function_name() の動作から推測] *(SKILL.md フェーズ 1、ステップ 1 の正規の `[Req: tier — source]` 形式を使用)*
 
-**Requirement tag:** [Req: inferred — from function_name() behavior] *(use the canonical `[Req: tier — source]` format from SKILL.md Phase 1, Step 1)*
+**何が起こったのか:** [このコードが防止する障害モード。実際の関数、ファイル、行を参照してください。捏造されたインシデントではなく、脆弱性分析としてフレーム化されます。]
 
-**What happened:** [The failure mode this code prevents. Reference the actual function, file, and line. Frame as a vulnerability analysis, not a fabricated incident.]
+**要件:** [この失敗を防ぐためにコードで行う必要があること。]
 
-**The requirement:** [What the code must do to prevent this failure.]
+**確認方法:** [これが低下した場合に失敗する具体的なテスト。]
+「」## 検出結果を境界テストに変換する
 
-**How to verify:** [A concrete test that would fail if this regressed.]
-```
-
-## Converting Findings to Boundary Tests
-
-Each defensive pattern also maps to a boundary test:
-
-```python
+各防御パターンは境界テストにも対応します。「」パイソン
 # Python (pytest)
-def test_defensive_pattern_name(fixture):
-    """[Req: inferred — from function_name() guard] guards against X."""
-    # Mutate fixture to trigger the defensive code path
-    # Assert the system handles it gracefully
-```
+def test_defensive_pattern_name(フィクスチャ):
+    """[要求: function_name() ガードから推論] は X を防ぎます。"""
+    # フィクスチャを変更して防御コード パスをトリガーする
+    # システムが適切に処理することをアサートします
+「」
 
-```java
+```ジャワ
 // Java (JUnit 5)
-@Test
-@DisplayName("[Req: inferred — from methodName() guard] guards against X")
+@テスト
+@DisplayName("[要求: メソッド名() ガードから推論] X をガードします")
 void testDefensivePatternName() {
-    fixture.setField(null);  // Trigger defensive code path
-    var result = process(fixture);
-    assertNotNull(result);  // Assert graceful handling
+    fixture.setField(null);  // 防御コードパスをトリガーする
+    var result = プロセス(フィクスチャ);
+    アサートノットヌル(結果);  // 適切な処理をアサートします
 }
-```
+「」
 
-```scala
-// Scala (ScalaTest)
-// [Req: inferred — from methodName() guard]
-"defensive pattern: methodName()" should "guard against X" in {
-  val input = fixture.copy(field = None)  // Trigger defensive code path
-  val result = process(input)
-  result should equal (defined)  // Assert graceful handling
+「スカラ」
+// スカラ (ScalaTest)
+// [Req: 推論 — methodName() ガードから]
+「防御パターン:methodName()」は、{ で「X に対して防御」する必要があります。
+  val input = fixture.copy(field = None) // 防御コードパスをトリガーします
+  val 結果 = プロセス(入力)
+  結果は (定義済み) と等しくなる必要があります // 適切な処理をアサートします
 }
-```
+「」
 
-```typescript
+```タイプスクリプト
 // TypeScript (Jest)
-test('[Req: inferred — from functionName() guard] guards against X', () => {
-    const input = { ...fixture, field: null };  // Trigger defensive code path
-    const result = process(input);
-    expect(result).toBeDefined();  // Assert graceful handling
+test('[Req: 推論 — functionName() ガードから] X をガードします', () => {
+    const input = { ...フィクスチャ、フィールド: null };  // 防御コードパスをトリガーする
+    const 結果 = プロセス (入力);
+    期待(結果).toBeDefined();  // 適切な処理をアサートします
 });
-```
+「」
 
-```go
-// Go (testing)
+「行く」
+// 実行（テスト）
 func TestDefensivePatternName(t *testing.T) {
-    // [Req: inferred — from FunctionName() guard] guards against X
+    // [Req: 推論 — FunctionName() ガードから] X をガードします
     t.Helper()
-    fixture.Field = nil  // Trigger defensive code path
-    result, err := Process(fixture)
-    if err != nil {
-        t.Fatalf("expected graceful handling, got error: %v", err)
+    fixture.Field = nil // 防御コードパスをトリガーします
+    結果、エラー := プロセス(フィクスチャ)
+    エラーの場合 != nil {
+        t.Fatalf("予期された正常な処理、エラーが発生しました: %v"、err)
     }
-    // Assert the system handled it
+    // システムが処理したことをアサートします
 }
-```
+「」
 
-```rust
-// Rust (cargo test)
-#[test]
+「錆びる」
+// Rust (貨物テスト)
+#[テスト]
 fn test_defensive_pattern_name() {
-    // [Req: inferred — from function_name() guard] guards against X
-    let input = Fixture { field: None, ..default_fixture() };
+    // [Req: 推論 — function_name() ガードから] X をガードします
+    let input = Fixture { フィールド: なし、..default_fixture() };
     let result = process(&input);
-    assert!(result.is_ok(), "expected graceful handling");
+    assert!(result.is_ok(), "予期される正常な処理");
 }
-```
+「」## ステート マシン パターン
 
-## State Machine Patterns
+ステート マシンは、防御パターンの特別なカテゴリです。ステータス フィールド、ライフサイクル フェーズ、またはモード フラグを見つけたら、完全なステート マシンをトレースします。完全なプロセスについては、SKILL.md のステップ 5a を参照してください。
 
-State machines are a special category of defensive pattern. When you find status fields, lifecycle phases, or mode flags, trace the full state machine — see SKILL.md Step 5a for the complete process.
+**ステート マシンの検索方法:**
 
-**How to find state machines:**
-
-| Language | Grep pattern |
+|言語 | grep パターン |
 |---|---|
-| Python | `status`, `state`, `phase`, `mode`, `== "running"`, `== "pending"` |
-| Java | `enum.*Status`, `enum.*State`, `.getStatus()`, `switch.*status` |
-| Scala | `sealed trait.*State`, `case object`, `status match` |
-| TypeScript | `status:`, `state:`, `Status =`, `switch.*status` |
-| Go | `Status`, `State`, `type.*Phase`, `switch.*status` |
-| Rust | `enum.*State`, `enum.*Status`, `match.*state` |
+|パイソン | `status`、`state`、`phase`、`mode`、`== "running"`、`== "pending"` |
+|ジャワ | `enum.*Status`、`enum.*State`、`.getStatus()`、`switch.*status` |
+|スカラ座 | `sealed trait.*State`、`case object`、`status match` |
+|タイプスクリプト | `status:`、`state:`、`Status =`、`switch.*status` |
+|行く | `Status`、`State`、`type.*Phase`、`switch.*status` |
+|さび | `enum.*State`、`enum.*Status`、`match.*state` |
 
-**For each state machine found:**
+**見つかった各ステート マシンについて:**
 
-1. List every possible state value (read the enum or grep for assignments)
-2. For each handler/consumer that checks state, verify it handles ALL states
-3. Look for states you can enter but never leave (terminal state without cleanup)
-4. Look for operations that should be available in a state but are blocked by an incomplete guard
+1. 考えられるすべての状態値をリストします (割り当ての enum または grep を読み取ります)。
+2. 状態をチェックする各ハンドラー/コンシューマーについて、すべての状態を処理していることを確認します。
+3. 入ることはできるが決して出ることのできない状態 (クリーンアップのない最終状態) を探します。
+4. ある状態で使用できるはずだが、不完全なガードによってブロックされている操作を探します。
 
-**Converting state machine gaps to scenarios:**
+**ステート マシン ギャップをシナリオに変換:**```マークダウン
+### シナリオ N: [ステータス] が [操作] をブロックします。
 
-```markdown
-### Scenario N: [Status] blocks [operation]
+**要件タグ:** [要件: handler() ステータス ガードから推論]
 
-**Requirement tag:** [Req: inferred — from handler() status guard]
+**何が起こったのか:** [ハンドラー] はステータスが「[allowed_states]」の場合にのみ [操作] を許可しますが、システムは ([条件] などにより) 「[missing_state]」ステータスに入る可能性があります。これが発生すると、ユーザーは [操作] できなくなり、インターフェイスを介した回避策はありません。
 
-**What happened:** The [handler] only allows [operation] when status is "[allowed_states]", but the system can enter "[missing_state]" status (e.g., due to [condition]). When this happens, the user cannot [operation] and has no workaround through the interface.
+**要件:** [operation] は、[missing_state] を含む、ユーザーが合理的に必要とするすべての状態で利用可能でなければなりません。
 
-**The requirement:** [operation] must be available in all states where the user would reasonably need it, including [missing_state].
+**確認方法:** [エンティティ] を「[missing_state]」ステータスに設定します。 [操作]を試みます。成功したことをアサートするか、明らかなエラーと回避策を示します。
+「」## セーフガード パターンがありません
 
-**How to verify:** Set up a [entity] in "[missing_state]" status. Attempt [operation]. Assert it succeeds or provides a clear error with a workaround.
-```
+適切なプレビューや確認を行わずに、ユーザーに高コスト、取り消し不能、または長時間にわたる作業を強いる操作を検索します。
 
-## Missing Safeguard Patterns
-
-Search for operations that commit the user to expensive, irreversible, or long-running work without adequate preview or confirmation:
-
-| Pattern | What to look for |
+|パターン |何を探すか |
 |---|---|
-| Pre-commit information gap | Operations that start batch jobs, fan-out expansions, or API calls without showing estimated cost, scope, or duration |
-| Silent expansion | Fan-out or multiplication steps where the final work count isn't known until runtime, with no warning shown |
-| No termination condition | Polling loops, watchers, or daemon processes that check for new work but never check whether all work is done |
-| Retry without backoff | Error handling that retries immediately or on a fixed interval without exponential backoff, risking rate limit floods |
+|コミット前の情報ギャップ |推定コスト、範囲、期間を示さずにバッチ ジョブ、ファンアウト拡張、または API 呼び出しを開始する操作 |
+|サイレント拡張 |警告が表示されず、実行時まで最終的な作業数が不明なファンアウトまたは乗算ステップ |
+|終了条件なし |新しい作業をチェックするが、すべての作業が完了したかどうかは決してチェックしないポーリング ループ、ウォッチャー、またはデーモン プロセス。
+|バックオフなしで再試行 |指数関数的バックオフなしで即時または固定間隔で再試行するエラー処理。レート制限フラッディングの危険性があります。
 
-**Converting missing safeguards to scenarios:**
+**不足している安全対策をシナリオに変換:**```マークダウン
+### シナリオ N: [操作] の前に [安全策] はありません
 
-```markdown
-### Scenario N: No [safeguard] before [operation]
+**要件タグ:** [要件: init_run()/start_watch() の動作から推論]
 
-**Requirement tag:** [Req: inferred — from init_run()/start_watch() behavior]
+**何が起こったのか:** [操作] は [欠落情報] を表示せずにユーザーを [結果] にコミットします。実際には、[例] は警告なしに [少数] ユニットから [多数] ユニットにファンアウトし、[コスト/時間の影響] が発生しました。
 
-**What happened:** [Operation] commits the user to [consequence] without showing [missing information]. In practice, a [example] fanned out from [small number] to [large number] units with no warning, resulting in [cost/time consequence].
+**要件:** [操作] にコミットする前に、[ユーザーが見るべきもの] を示す [安全対策] を表示します。
 
-**The requirement:** Before committing to [operation], display [safeguard] showing [what the user needs to see].
+**確認方法:** [操作] を開始し、復帰不能点の手前で [安全措置情報] が表示されることをアサートします。
+「」## 最小バー
 
-**How to verify:** Initiate [operation] and assert that [safeguard information] is displayed before the point of no return.
-```
+コア ロジック モジュール内のソース ファイルごとに少なくとも 2 ～ 3 つの防御パターンが見つかるはずです。見つかったものが少ない場合は、シグネチャやコメントだけでなく、関数本体をより注意深く読んでください。
 
-## Minimum Bar
-
-You should find at least 2–3 defensive patterns per source file in the core logic modules. If you find fewer, read function bodies more carefully — not just signatures and comments.
-
-For a medium-sized project (5–15 source files), expect to find 15–30 defensive patterns total. Each one should produce at least one boundary test. Additionally, trace at least one state machine if the project has status/state fields, and check at least one long-running operation for missing safeguards.
+中規模のプロジェクト (ソース ファイルが 5 ～ 15 個) の場合、合計 15 ～ 30 の防御パターンが見つかることが予想されます。それぞれが少なくとも 1 つの境界テストを作成する必要があります。さらに、プロジェクトにステータス/状態フィールドがある場合は少なくとも 1 つのステート マシンをトレースし、少なくとも 1 つの長時間実行操作で安全対策が欠落していないか確認します。

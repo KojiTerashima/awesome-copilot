@@ -1,92 +1,76 @@
-# Evaluators: LLM Evaluators in Python
+# エバリュエーター: Python の LLM エバリュエーター
 
-LLM evaluators use a language model to judge outputs. Use when criteria are subjective.
+LLM 評価者は、言語モデルを使用して出力を判断します。基準が主観的な場合に使用します。
 
-## Quick Start
+## クイックスタート「」パイソン
+phoenix.evals より、ClassificationEvaluator、LLM をインポート
 
-```python
-from phoenix.evals import ClassificationEvaluator, LLM
+llm = LLM(プロバイダー = "openai", モデル = "gpt-4o")
 
-llm = LLM(provider="openai", model="gpt-4o")
+HELPFULNESS_TEMPLATE = """応答がどの程度役に立ったかを評価してください。
 
-HELPFULNESS_TEMPLATE = """Rate how helpful the response is.
+<質問>{{入力}}</質問>
+<応答>{{出力}}</応答>
 
-<question>{{input}}</question>
-<response>{{output}}</response>
+「役立つ」とは、質問に直接答えることを意味します。
+「not_helpful」は、質問に答えていないことを意味します。
 
-"helpful" means directly addresses the question.
-"not_helpful" means does not address the question.
+あなたの答え (役に立った/役に立たなかった):"""
 
-Your answer (helpful/not_helpful):"""
+有用性 = 分類評価者(
+    名前=「役に立つ」、
+    プロンプト_テンプレート=HELPFULNESS_TEMPLATE、
+    llm=llm、
+    選択肢={"役に立たない": 0, "役に立った": 1}
+）
+「」## テンプレート変数
 
-helpfulness = ClassificationEvaluator(
-    name="helpfulness",
-    prompt_template=HELPFULNESS_TEMPLATE,
-    llm=llm,
-    choices={"not_helpful": 0, "helpful": 1}
-)
-```
+わかりやすくするために、XML タグを使用して変数をラップします。
 
-## Template Variables
-
-Use XML tags to wrap variables for clarity:
-
-| Variable | XML Tag |
+|変数 | XML タグ |
 | -------- | ------- |
 | `{{input}}` | `<question>{{input}}</question>` |
 | `{{output}}` | `<response>{{output}}</response>` |
 | `{{reference}}` | `<reference>{{reference}}</reference>` |
 | `{{context}}` | `<context>{{context}}</context>` |
 
-## create_classifier (Factory)
+## create_classifier (ファクトリー)
 
-Shorthand factory that returns a `ClassificationEvaluator`. Prefer direct
-`ClassificationEvaluator` instantiation for more parameters/customization:
+`ClassificationEvaluator` を返す省略表現ファクトリ。直接を好む
+追加のパラメーター/カスタマイズのための `ClassificationEvaluator` インスタンス化:「」パイソン
+phoenix.evals から create_classifier、LLM をインポート
 
-```python
-from phoenix.evals import create_classifier, LLM
+関連性 = create_classifier(
+    名前 = "関連性",
+    prompt_template="""この回答は質問に関連していますか?
+<質問>{{入力}}</質問>
+<応答>{{出力}}</応答>
+回答 (関連/無関係):"""、
+    llm=LLM(プロバイダー="openai", モデル="gpt-4o"),
+    選択肢={"関連性": 1.0, "無関係": 0.0},
+）
+「」## 入力マッピング
 
-relevance = create_classifier(
-    name="relevance",
-    prompt_template="""Is this response relevant to the question?
-<question>{{input}}</question>
-<response>{{output}}</response>
-Answer (relevant/irrelevant):""",
-    llm=LLM(provider="openai", model="gpt-4o"),
-    choices={"relevant": 1.0, "irrelevant": 0.0},
-)
-```
+列名はテンプレート変数と一致する必要があります。列の名前を変更するか、`bind_evaluator` を使用します。「」パイソン
+# オプション 1: テンプレート変数に一致するように列の名前を変更します
+df = df.rename(columns={"user_query": "入力", "ai_response": "出力"})
 
-## Input Mapping
+# オプション 2:bind_evaluator を使用する
+phoenix.evalsからbind_evaluatorをインポート
 
-Column names must match template variables. Rename columns or use `bind_evaluator`:
+バウンド = バインド評価者(
+    評価者=有用性、
+    input_mapping={"入力": "ユーザークエリ", "出力": "ai_response"},
+）
+「」## ランニング「」パイソン
+phoenix.evalsからのインポートevaluate_dataframe
 
-```python
-# Option 1: Rename columns to match template variables
-df = df.rename(columns={"user_query": "input", "ai_response": "output"})
+results_df = Evaluate_dataframe(dataframe=df, evaluators=[有用性])
+「」## ベストプラクティス
 
-# Option 2: Use bind_evaluator
-from phoenix.evals import bind_evaluator
-
-bound = bind_evaluator(
-    evaluator=helpfulness,
-    input_mapping={"input": "user_query", "output": "ai_response"},
-)
-```
-
-## Running
-
-```python
-from phoenix.evals import evaluate_dataframe
-
-results_df = evaluate_dataframe(dataframe=df, evaluators=[helpfulness])
-```
-
-## Best Practices
-
-1. **Be specific** - Define exactly what pass/fail means
-2. **Include examples** - Show concrete cases for each label
-3. **Explanations by default** - `ClassificationEvaluator` includes explanations automatically
-4. **Study built-in prompts** - See
-   `phoenix.evals.__generated__.classification_evaluator_configs` for examples
-   of well-structured evaluation prompts (Faithfulness, Correctness, DocumentRelevance, etc.)
+1. **具体的である** - 合格/不合格が何を意味するかを正確に定義する
+2. **例を含める** - 各ラベルの具体的なケースを示します
+3. **デフォルトの説明** - `ClassificationEvaluator` には説明が自動的に含まれます
+4. **組み込みプロンプトを研究する** - を参照してください。
+   `phoenix.evals.__generated__.classification_evaluator_configs` の例
+   適切に構造化された評価プロンプト (忠実性、正確さ、文書の関連性など)

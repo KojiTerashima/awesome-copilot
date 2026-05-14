@@ -1,78 +1,60 @@
-# Experiments: Running Experiments in Python
+# 実験: Python で実験を実行する
 
-Execute experiments with `run_experiment`.
+`run_experiment` を使用して実験を実行します。
 
-## Basic Usage
+## 基本的な使い方「」パイソン
+phoenix.clientインポートクライアントから
+phoenix.client.experiments から run_experiment をインポート
 
-```python
-from phoenix.client import Client
-from phoenix.client.experiments import run_experiment
+client = クライアント()
+データセット = client.datasets.get_dataset(name="qa-test-v1")
 
-client = Client()
-dataset = client.datasets.get_dataset(name="qa-test-v1")
-
-def my_task(example):
+def my_task(例):
     return call_llm(example.input["question"])
 
-def exact_match(output, expected):
-    return 1.0 if output.strip().lower() == expected["answer"].strip().lower() else 0.0
+def strict_match(出力、期待値):
+    Output.strip(). lower() == Expected["answer"].strip(). lower() の場合は 1.0 を返し、それ以外の場合は 0.0
 
-experiment = run_experiment(
-    dataset=dataset,
-    task=my_task,
-    evaluators=[exact_match],
-    experiment_name="qa-experiment-v1",
-)
-```
-
-## Task Functions
-
-```python
-# Basic task
-def task(example):
+実験 = run_experiment(
+    データセット=データセット、
+    task=my_task、
+    評価者=[完全一致]、
+    実験名 = "qa-実験-v1",
+）
+「」## タスク関数「」パイソン
+# 基本的なタスク
+デフォルトタスク(例):
     return call_llm(example.input["question"])
 
-# With context (RAG)
-def rag_task(example):
-    return call_llm(f"Context: {example.input['context']}\nQ: {example.input['question']}")
-```
+# コンテキストあり (RAG)
+def rag_task(例):
+    return call_llm(f"コンテキスト: {example.input['context']}\nQ: {example.input['question']}")
+「」## 評価パラメータ
 
-## Evaluator Parameters
-
-| Parameter | Access |
+|パラメータ |アクセス |
 | --------- | ------ |
-| `output` | Task output |
-| `expected` | Example expected output |
-| `input` | Example input |
-| `metadata` | Example metadata |
+| `output` |タスクの出力 |
+| `expected` |予想される出力の例 |
+| `input` |入力例 |
+| `metadata` |メタデータの例 |
 
-## Options
+## オプション「」パイソン
+実験 = run_experiment(
+    データセット=データセット、
+    task=my_task、
+    評価者=評価者、
+    実験名 = "私の実験",
+    dry_run=3, # 3 つの例でテストする
+    repetitions=3, # 各例を 3 回実行します
+）
+「」＃＃ 結果「」パイソン
+print(実験.aggregate_scores)
+# {'精度': 0.85, '忠実さ': 0.92}
 
-```python
-experiment = run_experiment(
-    dataset=dataset,
-    task=my_task,
-    evaluators=evaluators,
-    experiment_name="my-experiment",
-    dry_run=3,       # Test with 3 examples
-    repetitions=3,   # Run each example 3 times
-)
-```
-
-## Results
-
-```python
-print(experiment.aggregate_scores)
-# {'accuracy': 0.85, 'faithfulness': 0.92}
-
-for run in experiment.runs:
+Experiment.runs で実行する場合:
     print(run.output, run.scores)
-```
+「」## 後で評価を追加「」パイソン
+phoenix.client.experimentsからのインポートevaluate_experiment
 
-## Add Evaluations Later
-
-```python
-from phoenix.client.experiments import evaluate_experiment
-
-evaluate_experiment(experiment=experiment, evaluators=[new_evaluator])
-```
+Evaluate_experiment(experiment=実験、evaluators=[new_evaluator])
+「」

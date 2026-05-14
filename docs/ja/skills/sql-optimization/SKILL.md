@@ -2,15 +2,13 @@
 name: sql-optimization
 description: 'Universal SQL performance optimization assistant for comprehensive query tuning, indexing strategies, and database performance analysis across all SQL databases (MySQL, PostgreSQL, SQL Server, Oracle). Provides execution plan analysis, pagination optimization, batch operations, and performance monitoring guidance.'
 ---
+# SQL パフォーマンス最適化アシスタント
 
-# SQL Performance Optimization Assistant
+${selection} (選択がない場合はプロジェクト全体) に対するエキスパート SQL パフォーマンスの最適化。 MySQL、PostgreSQL、SQL Server、Oracle、その他の SQL データベース全体で機能するユニバーサル SQL 最適化手法に焦点を当てます。
 
-Expert SQL performance optimization for ${selection} (or entire project if no selection). Focus on universal SQL optimization techniques that work across MySQL, PostgreSQL, SQL Server, Oracle, and other SQL databases.
+## 🎯 コア最適化領域
 
-## 🎯 Core Optimization Areas
-
-### Query Performance Analysis
-```sql
+### クエリのパフォーマンス分析```sql
 -- ❌ BAD: Inefficient query patterns
 SELECT * FROM orders o
 WHERE YEAR(o.created_at) = 2024
@@ -30,10 +28,7 @@ WHERE o.created_at >= '2024-01-01'
 -- CREATE INDEX idx_orders_created_at ON orders(created_at);
 -- CREATE INDEX idx_customers_status ON customers(status);
 -- CREATE INDEX idx_orders_customer_id ON orders(customer_id);
-```
-
-### Index Strategy Optimization
-```sql
+```### インデックス戦略の最適化```sql
 -- ❌ BAD: Poor indexing strategy
 CREATE INDEX idx_user_data ON users(email, first_name, last_name, created_at);
 
@@ -47,10 +42,7 @@ CREATE INDEX idx_users_name ON users(last_name, first_name);
 -- For user status queries
 CREATE INDEX idx_users_status_created ON users(status, created_at)
 WHERE status IS NOT NULL;
-```
-
-### Subquery Optimization
-```sql
+```### サブクエリの最適化```sql
 -- ❌ BAD: Correlated subquery
 SELECT p.product_name, p.price
 FROM products p
@@ -68,12 +60,9 @@ FROM (
     FROM products
 ) ranked
 WHERE price > avg_category_price;
-```
+```## 📊 パフォーマンス チューニング テクニック
 
-## 📊 Performance Tuning Techniques
-
-### JOIN Optimization
-```sql
+### 結合の最適化```sql
 -- ❌ BAD: Inefficient JOIN order and conditions
 SELECT o.*, c.name, p.product_name
 FROM orders o
@@ -90,10 +79,7 @@ INNER JOIN customers c ON o.customer_id = c.id AND c.status = 'active'
 INNER JOIN order_items oi ON o.id = oi.order_id
 INNER JOIN products p ON oi.product_id = p.id
 WHERE o.created_at > '2024-01-01';
-```
-
-### Pagination Optimization
-```sql
+```### ページネーションの最適化```sql
 -- ❌ BAD: OFFSET-based pagination (slow for large offsets)
 SELECT * FROM products 
 ORDER BY created_at DESC 
@@ -110,10 +96,7 @@ SELECT * FROM products
 WHERE id > 1000
 ORDER BY id 
 LIMIT 20;
-```
-
-### Aggregation Optimization
-```sql
+```### 集計の最適化```sql
 -- ❌ BAD: Multiple separate aggregation queries
 SELECT COUNT(*) FROM orders WHERE status = 'pending';
 SELECT COUNT(*) FROM orders WHERE status = 'shipped';
@@ -125,12 +108,9 @@ SELECT
     COUNT(CASE WHEN status = 'shipped' THEN 1 END) as shipped_count,
     COUNT(CASE WHEN status = 'delivered' THEN 1 END) as delivered_count
 FROM orders;
-```
+```## 🔍 クエリのアンチパターン
 
-## 🔍 Query Anti-Patterns
-
-### SELECT Performance Issues
-```sql
+### SELECT のパフォーマンスの問題```sql
 -- ❌ BAD: SELECT * anti-pattern
 SELECT * FROM large_table lt
 JOIN another_table at ON lt.id = at.ref_id;
@@ -139,10 +119,7 @@ JOIN another_table at ON lt.id = at.ref_id;
 SELECT lt.id, lt.name, at.value
 FROM large_table lt
 JOIN another_table at ON lt.id = at.ref_id;
-```
-
-### WHERE Clause Optimization
-```sql
+```### WHERE 句の最適化```sql
 -- ❌ BAD: Function calls in WHERE clause
 SELECT * FROM orders 
 WHERE UPPER(customer_email) = 'JOHN@EXAMPLE.COM';
@@ -151,10 +128,7 @@ WHERE UPPER(customer_email) = 'JOHN@EXAMPLE.COM';
 SELECT * FROM orders 
 WHERE customer_email = 'john@example.com';
 -- Consider: CREATE INDEX idx_orders_email ON orders(LOWER(customer_email));
-```
-
-### OR vs UNION Optimization
-```sql
+```### OR と UNION の最適化```sql
 -- ❌ BAD: Complex OR conditions
 SELECT * FROM products 
 WHERE (category = 'electronics' AND price < 1000)
@@ -164,12 +138,9 @@ WHERE (category = 'electronics' AND price < 1000)
 SELECT * FROM products WHERE category = 'electronics' AND price < 1000
 UNION ALL
 SELECT * FROM products WHERE category = 'books' AND price < 50;
-```
+```## 📈 データベースに依存しない最適化
 
-## 📈 Database-Agnostic Optimization
-
-### Batch Operations
-```sql
+### バッチ操作```sql
 -- ❌ BAD: Row-by-row operations
 INSERT INTO products (name, price) VALUES ('Product 1', 10.00);
 INSERT INTO products (name, price) VALUES ('Product 2', 15.00);
@@ -180,10 +151,7 @@ INSERT INTO products (name, price) VALUES
 ('Product 1', 10.00),
 ('Product 2', 15.00),
 ('Product 3', 20.00);
-```
-
-### Temporary Table Usage
-```sql
+```### 一時テーブルの使用法```sql
 -- ✅ GOOD: Using temporary tables for complex operations
 CREATE TEMPORARY TABLE temp_calculations AS
 SELECT customer_id, 
@@ -198,31 +166,22 @@ SELECT c.name, tc.total_spent, tc.order_count
 FROM temp_calculations tc
 JOIN customers c ON tc.customer_id = c.id
 WHERE tc.total_spent > 1000;
-```
+```## 🛠️ インデックス管理
 
-## 🛠️ Index Management
-
-### Index Design Principles
-```sql
+### インデックス設計原則```sql
 -- ✅ GOOD: Covering index design
 CREATE INDEX idx_orders_covering 
 ON orders(customer_id, created_at) 
 INCLUDE (total_amount, status);  -- SQL Server syntax
 -- Or: CREATE INDEX idx_orders_covering ON orders(customer_id, created_at, total_amount, status); -- Other databases
-```
-
-### Partial Index Strategy
-```sql
+```### 部分インデックス戦略```sql
 -- ✅ GOOD: Partial indexes for specific conditions
 CREATE INDEX idx_orders_active 
 ON orders(created_at) 
 WHERE status IN ('pending', 'processing');
-```
+```## 📊 パフォーマンス監視クエリ
 
-## 📊 Performance Monitoring Queries
-
-### Query Performance Analysis
-```sql
+### クエリのパフォーマンス分析```sql
 -- Generic approach to identify slow queries
 -- (Specific syntax varies by database)
 
@@ -246,51 +205,49 @@ SELECT
 FROM sys.dm_exec_query_stats qs
 CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) qt
 ORDER BY avg_elapsed_time DESC;
-```
+```## 🎯 ユニバーサル最適化チェックリスト
 
-## 🎯 Universal Optimization Checklist
+### クエリ構造
+- [ ] 本番クエリでの SELECT * の回避
+- [ ] 適切な JOIN タイプの使用 (INNER または LEFT/RIGHT)
+- [ ] WHERE 句の早い段階でフィルタリングする
+- [ ] 必要に応じてサブクエリに IN の代わりに EXISTS を使用する
+- [ ] インデックスの使用を妨げる WHERE 句内の関数の回避
 
-### Query Structure
-- [ ] Avoiding SELECT * in production queries
-- [ ] Using appropriate JOIN types (INNER vs LEFT/RIGHT)
-- [ ] Filtering early in WHERE clauses
-- [ ] Using EXISTS instead of IN for subqueries when appropriate
-- [ ] Avoiding functions in WHERE clauses that prevent index usage
+### インデックス戦略
+- [ ] 頻繁にクエリされる列にインデックスを作成する
+- [ ] 複合インデックスを正しい列順序で使用する
+- [ ] 過剰なインデックス作成の回避 (INSERT/UPDATE のパフォーマンスに影響します)
+- [ ] 有益な場合はカバーインデックスを使用する
+- [ ] 特定のクエリ パターンに対する部分インデックスの作成
 
-### Index Strategy
-- [ ] Creating indexes on frequently queried columns
-- [ ] Using composite indexes in the right column order
-- [ ] Avoiding over-indexing (impacts INSERT/UPDATE performance)
-- [ ] Using covering indexes where beneficial
-- [ ] Creating partial indexes for specific query patterns
+### データ型とスキーマ
+- [ ] ストレージ効率を高めるために適切なデータ型を使用する
+- [ ] 適切な正規化 (OLTP の場合は 3NF、OLAP の場合は非正規化)
+- [ ] 制約を使用してクエリ オプティマイザーを支援する
+- [ ] 適切な場合に大きなテーブルを分割する
 
-### Data Types and Schema
-- [ ] Using appropriate data types for storage efficiency
-- [ ] Normalizing appropriately (3NF for OLTP, denormalized for OLAP)
-- [ ] Using constraints to help query optimizer
-- [ ] Partitioning large tables when appropriate
+### クエリパターン
+- [ ] 結果セット制御に LIMIT/TOP を使用する
+- [ ] 効率的なページネーション戦略の実装
+- [ ] 一括データ変更にバッチ操作を使用する
+- [ ] N+1 クエリの問題を回避する
+- [ ] 繰り返しのクエリに準備済みステートメントを使用する
 
-### Query Patterns
-- [ ] Using LIMIT/TOP for result set control
-- [ ] Implementing efficient pagination strategies
-- [ ] Using batch operations for bulk data changes
-- [ ] Avoiding N+1 query problems
-- [ ] Using prepared statements for repeated queries
+### パフォーマンステスト
+- [ ] 現実的なデータ量でクエリをテストする
+- [ ] クエリ実行プランの分析
+- [ ] 時間の経過に伴うクエリ パフォーマンスの監視
+- [ ] 遅いクエリに対するアラートの設定
+- [ ] 通常のインデックス使用状況の分析
 
-### Performance Testing
-- [ ] Testing queries with realistic data volumes
-- [ ] Analyzing query execution plans
-- [ ] Monitoring query performance over time
-- [ ] Setting up alerts for slow queries
-- [ ] Regular index usage analysis
+## 📝 最適化手法
 
-## 📝 Optimization Methodology
+1. **特定**: データベース固有のツールを使用して遅いクエリを見つける
+2. **分析**: 実行計画を調査し、ボトルネックを特定します。
+3. **最適化**: 適切な最適化手法を適用します。
+4. **テスト**: パフォーマンスの向上を確認します。
+5. **監視**: パフォーマンス指標を継続的に追跡します。
+6. **反復**: 定期的なパフォーマンスのレビューと最適化
 
-1. **Identify**: Use database-specific tools to find slow queries
-2. **Analyze**: Examine execution plans and identify bottlenecks
-3. **Optimize**: Apply appropriate optimization techniques
-4. **Test**: Verify performance improvements
-5. **Monitor**: Continuously track performance metrics
-6. **Iterate**: Regular performance review and optimization
-
-Focus on measurable performance improvements and always test optimizations with realistic data volumes and query patterns.
+測定可能なパフォーマンスの向上に焦点を当て、現実的なデータ量とクエリ パターンを使用して最適化を常にテストします。

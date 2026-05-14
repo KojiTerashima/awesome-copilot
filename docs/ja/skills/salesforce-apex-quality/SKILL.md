@@ -2,18 +2,15 @@
 name: salesforce-apex-quality
 description: 'Apex code quality guardrails for Salesforce development. Enforces bulk-safety rules (no SOQL/DML in loops), sharing model requirements, CRUD/FLS security, SOQL injection prevention, PNB test coverage (Positive / Negative / Bulk), and modern Apex idioms. Use this skill when reviewing or generating Apex classes, trigger handlers, batch jobs, or test classes to catch governor limit risks, security gaps, and quality issues before deployment.'
 ---
+# Salesforce Apex 品質のガードレール
 
-# Salesforce Apex Quality Guardrails
+これらのチェックを、作成またはレビューするすべての Apex クラス、トリガ、テストファイルに適用します。
 
-Apply these checks to every Apex class, trigger, and test file you write or review.
+## ステップ 1 — ガバナ制限の安全性チェック
 
-## Step 1 — Governor Limit Safety Check
+Apex ファイルが受け入れ可能であると宣言する前に、次のパターンをスキャンしてください。
 
-Scan for these patterns before declaring any Apex file acceptable:
-
-### SOQL and DML in Loops — Automatic Fail
-
-```apex
+### SOQL と DML のループ - 自動失敗```apex
 // ❌ NEVER — causes LimitException at scale
 for (Account a : accounts) {
     List<Contact> contacts = [SELECT Id FROM Contact WHERE AccountId = :a.Id]; // SOQL in loop
@@ -30,27 +27,23 @@ for (Contact c : [SELECT Id, AccountId FROM Contact WHERE AccountId IN :accountI
     contactsByAccount.get(c.AccountId).add(c);
 }
 update accounts; // DML once, outside the loop
-```
+```ルール: `for` ループ本体内に `[SELECT` または `Database.query`、`insert`、`update`、`delete`、`upsert`、`merge` が含まれている場合は、続行する前に停止してリファクタリングします。
 
-Rule: if you see `[SELECT` or `Database.query`, `insert`, `update`, `delete`, `upsert`, `merge` inside a `for` loop body — stop and refactor before proceeding.
+## ステップ 2 — 共有モデルの検証
 
-## Step 2 — Sharing Model Verification
+すべてのクラスは、その共有意図を明示的に宣言する必要があります。宣言されていない共有は呼び出し元から継承され、予測できない動作が発生します。
 
-Every class must declare its sharing intent explicitly. Undeclared sharing inherits from the caller — unpredictable behaviour.
-
-| Declaration | When to use |
+|宣言 |いつ使用するか |
 |---|---|
-| `public with sharing class Foo` | Default for all service, handler, selector, and controller classes |
-| `public without sharing class Foo` | Only when the class must run elevated (e.g. system-level logging, trigger bypass). Requires a code comment explaining why. |
-| `public inherited sharing class Foo` | Framework entry points that should respect the caller's sharing context |
+| `public with sharing class Foo` |すべてのサービス、ハンドラー、セレクター、コントローラー クラスのデフォルト |
+| `public without sharing class Foo` |クラスを昇格して実行する必要がある場合のみ (システムレベルのロギング、トリガーのバイパスなど)。理由を説明するコード コメントが必要です。 |
+| `public inherited sharing class Foo` |呼び出し元の共有コンテキストを尊重する必要があるフレームワーク エントリ ポイント |
 
-If a class does not have one of these three declarations, **add it before writing anything else**.
+クラスにこれら 3 つの宣言のいずれかがない場合は、**他に何かを記述する前に宣言を追加してください**。
 
-## Step 3 — CRUD / FLS Enforcement
+## ステップ 3 — CRUD / FLS の適用
 
-Apex code that reads or writes records on behalf of a user must verify object and field access. The platform does **not** enforce FLS or CRUD automatically in Apex.
-
-```apex
+ユーザに代わってレコードを読み書きする Apex コードは、オブジェクトと項目のアクセスを検証する必要があります。プラットフォームは、Apex で FLS または CRUD を自動的に強制しません**。```apex
 // Check before querying a field
 if (!Schema.sObjectType.Contact.fields.Email.isAccessible()) {
     throw new System.NoAccessException();
@@ -61,13 +54,9 @@ List<Contact> contacts = [SELECT Id, Email FROM Contact WHERE AccountId = :accId
 
 // Or use Database.query with AccessLevel
 List<Contact> contacts = Database.query('SELECT Id, Email FROM Contact', AccessLevel.USER_MODE);
-```
+```ルール: UI コンポーネント、REST エンドポイント、または `@InvocableMethod` から呼び出し可能な Apex メソッドは CRUD/FLS を強制する必要があります。信頼されたコンテキストからのみ呼び出される内部サービス メソッドは、代わりに `with sharing` を使用する場合があります。
 
-Rule: any Apex method callable from a UI component, REST endpoint, or `@InvocableMethod` **must** enforce CRUD/FLS. Internal service methods called only from trusted contexts may use `with sharing` instead.
-
-## Step 4 — SOQL Injection Prevention
-
-```apex
+## ステップ 4 — SOQL インジェクションの防止```apex
 // ❌ NEVER — concatenates user input into SOQL string
 String soql = 'SELECT Id FROM Account WHERE Name = \'' + userInput + '\'';
 
@@ -79,40 +68,37 @@ Set<String> allowedFields = new Set<String>{'Name', 'Industry', 'AnnualRevenue'}
 if (!allowedFields.contains(userInput)) {
     throw new IllegalArgumentException('Field not permitted: ' + userInput);
 }
-```
+```## ステップ 5 — 現代の Apex イディオム
 
-## Step 5 — Modern Apex Idioms
+現在の言語機能を優先します (API 62.0 / Winter '25+):
 
-Prefer current language features (API 62.0 / Winter '25+):
-
-| Old pattern | Modern replacement |
+|古いパターン |最新の代替品 |
 |---|---|
 | `if (obj != null) { x = obj.Field__c; }` | `x = obj?.Field__c;` |
 | `x = (y != null) ? y : defaultVal;` | `x = y ?? defaultVal;` |
 | `System.assertEquals(expected, actual)` | `Assert.areEqual(expected, actual)` |
 | `System.assert(condition)` | `Assert.isTrue(condition)` |
-| `[SELECT ... WHERE ...]` with no sharing context | `[SELECT ... WHERE ... WITH USER_MODE]` |
+| `[SELECT ... WHERE ...]` 共有コンテキストなし | `[SELECT ... WHERE ... WITH USER_MODE]` |
 
-## Step 6 — PNB Test Coverage Checklist
+## ステップ 6 — PNB テスト カバレッジ チェックリスト
 
-Every feature must be tested across all three paths. Missing any one of these is a quality failure:
+すべての機能は 3 つのパスすべてにわたってテストする必要があります。これらのいずれかが欠けていると、品質が低下します。
 
-### Positive Path
-- Expected input → expected output.
-- Assert the exact field values, record counts, or return values — not just that no exception was thrown.
+### ポジティブパス
+- 期待される入力→期待される出力。
+- 例外がスローされなかったことだけでなく、正確なフィールド値、レコード数、または戻り値をアサートします。
 
-### Negative Path
-- Invalid input, null values, empty collections, and error conditions.
-- Assert that exceptions are thrown with the correct type and message.
-- Assert that no records were mutated when the operation should have failed cleanly.
+### ネガティブパス
+- 無効な入力、NULL 値、空のコレクション、およびエラー状態。
+- 例外が正しいタイプとメッセージでスローされることをアサートします。
+- 操作が正常に失敗するはずのときに、レコードが変更されていないことをアサートします。
 
-### Bulk Path
-- Insert/update/delete **200–251 records** in a single test transaction.
-- Assert that all records processed correctly — no partial failures from governor limits.
-- Use `Test.startTest()` / `Test.stopTest()` to isolate governor limit counters for async work.
+### バルクパス
+- 単一のテスト トランザクションで **200 ～ 251 レコード** を挿入/更新/削除します。
+- すべてのレコードが正しく処理されたことをアサートします。ガバナ制限による部分的なエラーはありません。
+- `Test.startTest()` / `Test.stopTest()` を使用して、非同期作業用のガバナー制限カウンターを分離します。
 
-### Test Class Rules
-```apex
+### テストクラスのルール```apex
 @isTest(SeeAllData=false)   // Required — no exceptions without a documented reason
 private class AccountServiceTest {
 
@@ -133,26 +119,24 @@ private class AccountServiceTest {
         Assert.areEqual('Processed', updated[0].Status__c, 'Status should be Processed');
     }
 }
-```
+```## ステップ 7 — トリガー アーキテクチャのチェックリスト
 
-## Step 7 — Trigger Architecture Checklist
+- [ ] オブジェクトごとに 1 つのトリガー。 2 番目のトリガーが存在する場合は、ハンドラーに統合します。
+- [ ] トリガー本体には、コンテキスト チェック、ハンドラー呼び出し、およびルーティング ロジックのみが含まれます。
+- [ ] トリガー本体にビジネス ロジック、SOQL、または DML を直接組み込むことはできません。
+- [ ] トリガー フレームワーク (トリガー アクション フレームワーク、ff-apex-common、カスタム基本クラス) がすでに使用されている場合は、それを拡張します。平行パターンを作成しないでください。
+- [ ] ハンドラー クラスは、トリガーに昇格されたアクセスが必要でない限り `with sharing` です。
 
-- [ ] One trigger per object. If a second trigger exists, consolidate into the handler.
-- [ ] Trigger body contains only: context checks, handler invocation, and routing logic.
-- [ ] No business logic, SOQL, or DML directly in the trigger body.
-- [ ] If a trigger framework (Trigger Actions Framework, ff-apex-common, custom base class) is already in use — extend it. Do not create a parallel pattern.
-- [ ] Handler class is `with sharing` unless the trigger requires elevated access.
+## クイック リファレンス — ハードコードされたアンチパターンの概要
 
-## Quick Reference — Hardcoded Anti-Patterns Summary
-
-| Pattern | Action |
+|パターン |アクション |
 |---|---|
-| SOQL inside `for` loop | Refactor: query before the loop, operate on collections |
-| DML inside `for` loop | Refactor: collect mutations, DML once after the loop |
-| Class missing sharing declaration | Add `with sharing` (or document why `without sharing`) |
-| `escape="false"` on user data (VF) | Remove — auto-escaping enforces XSS prevention |
-| Empty `catch` block | Add logging and appropriate re-throw or error handling |
-| String-concatenated SOQL with user input | Replace with bind variable or whitelist validation |
-| Test with no assertion | Add a meaningful `Assert.*` call |
-| `System.assert` / `System.assertEquals` style | Upgrade to `Assert.isTrue` / `Assert.areEqual` |
-| Hardcoded record ID (`'001...'`) | Replace with queried or inserted test record ID |
+| `for` ループ内の SOQL |リファクタリング: ループの前にクエリを実行し、コレクションを操作します。
+| `for` ループ内の DML |リファクタリング: ミューテーションを収集し、ループ後に DML を 1 回実行します。
+|クラスに共有宣言がありません | `with sharing` を追加 (または `without sharing` の理由を文書化) |
+|ユーザー データ (VF) に関する `escape="false"` |削除 — 自動エスケープにより XSS 防止が強制されます。
+|空の `catch` ブロック |ログ記録と適切な再スローまたはエラー処理を追加します。
+|ユーザー入力を使用した文字列連結 SOQL |バインド変数またはホワイトリスト検証で置き換える |
+|アサーションなしでテストする |意味のある `Assert.*` 呼び出しを追加します。
+| `System.assert` / `System.assertEquals` スタイル | `Assert.isTrue` / `Assert.areEqual` にアップグレード |
+|ハードコードされたレコード ID (`'001...'`) |クエリまたは挿入されたテスト レコード ID に置き換えます |

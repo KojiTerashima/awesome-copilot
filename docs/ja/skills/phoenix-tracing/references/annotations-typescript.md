@@ -1,137 +1,113 @@
-# TypeScript SDK Annotation Patterns
+# TypeScript SDK アノテーション パターン
 
-Add feedback to spans, traces, documents, and sessions using the TypeScript client.
+TypeScript クライアントを使用して、スパン、トレース、ドキュメント、セッションにフィードバックを追加します。
 
-## Client Setup
+## クライアントのセットアップ```タイプスクリプト
+import { createClient } から "phoenix-client";
+const client = createClient();  // デフォルト: http://localhost:6006
+「」## スパン注釈
 
-```typescript
-import { createClient } from "phoenix-client";
-const client = createClient();  // Default: http://localhost:6006
-```
-
-## Span Annotations
-
-Add feedback to individual spans:
-
-```typescript
-import { addSpanAnnotation } from "phoenix-client";
+個々のスパンにフィードバックを追加します。```タイプスクリプト
+import { addSpanAnnotation } から "phoenix-client";
 
 await addSpanAnnotation({
-  client,
-  spanAnnotation: {
-    spanId: "abc123",
-    name: "quality",
-    annotatorKind: "HUMAN",
-    label: "high_quality",
-    score: 0.95,
-    explanation: "Accurate and well-formatted",
-    metadata: { reviewer: "alice" }
-  },
-  sync: true
+  クライアント、
+  スパンアノテーション: {
+    スパンID: "abc123",
+    名前：「品質」、
+    アノテーターの種類: "人間"、
+    ラベル: "高品質"、
+    スコア: 0.95、
+    説明: "正確で適切にフォーマットされています",
+    メタデータ: { レビュアー: "アリス" }
+  }、
+  同期: true
 });
-```
+「」## ドキュメントの注釈
 
-## Document Annotations
-
-Rate individual documents in RETRIEVER spans:
-
-```typescript
+RETRIEVER スパンで個々のドキュメントを評価します。```タイプスクリプト
 import { addDocumentAnnotation } from "phoenix-client";
 
 await addDocumentAnnotation({
-  client,
-  documentAnnotation: {
-    spanId: "retriever_span",
-    documentPosition: 0,  // 0-based index
-    name: "relevance",
-    annotatorKind: "LLM",
-    label: "relevant",
-    score: 0.95
+  クライアント、
+  ドキュメントの注釈: {
+    スパンID: "retriever_span",
+    documentPosition: 0, // 0 から始まるインデックス
+    名前: "関連性"、
+    アノテーターの種類: "LLM",
+    ラベル: "関連"、
+    スコア: 0.95
   }
 });
-```
+「」## トレース注釈
 
-## Trace Annotations
-
-Feedback on entire traces:
-
-```typescript
-import { addTraceAnnotation } from "phoenix-client";
+トレース全体に関するフィードバック:```タイプスクリプト
+import { addTraceAnnotation } から "phoenix-client";
 
 await addTraceAnnotation({
-  client,
-  traceAnnotation: {
-    traceId: "trace_abc",
-    name: "correctness",
-    annotatorKind: "HUMAN",
-    label: "correct",
-    score: 1.0
+  クライアント、
+  トレースアノテーション: {
+    トレースID: "trace_abc",
+    名前：「正しさ」、
+    アノテーターの種類: "人間"、
+    ラベル: "正しい"、
+    スコア: 1.0
   }
 });
-```
+「」## セッションの注釈
 
-## Session Annotations
-
-Feedback on multi-turn conversations:
-
-```typescript
-import { addSessionAnnotation } from "phoenix-client";
+マルチターン会話に関するフィードバック:```タイプスクリプト
+import { addSessionAnnotation } から "phoenix-client";
 
 await addSessionAnnotation({
-  client,
-  sessionAnnotation: {
-    sessionId: "session_xyz",
-    name: "user_satisfaction",
-    annotatorKind: "HUMAN",
-    label: "satisfied",
-    score: 0.85
+  クライアント、
+  セッションアノテーション: {
+    セッションID: "session_xyz",
+    名前: "user_satisfaction",
+    アノテーターの種類: "人間"、
+    ラベル: 「満足」、
+    スコア: 0.85
   }
 });
-```
-
-## RAG Pipeline Example
-
-```typescript
+「」## RAG パイプラインの例```タイプスクリプト
 import { createClient, logDocumentAnnotations, addSpanAnnotation, addTraceAnnotation } from "phoenix-client";
 
 const client = createClient();
 
-// Document relevance (batch)
+// ドキュメントの関連性 (バッチ)
 await logDocumentAnnotations({
-  client,
-  documentAnnotations: [
-    { spanId: "retriever_span", documentPosition: 0, name: "relevance",
-      annotatorKind: "LLM", label: "relevant", score: 0.95 },
-    { spanId: "retriever_span", documentPosition: 1, name: "relevance",
-      annotatorKind: "LLM", label: "relevant", score: 0.80 }
-  ]
+  クライアント、
+  ドキュメントの注釈: [
+    {spanId: "retriever_span"、documentPosition: 0、name: "relevance"、
+      アノテーター種類: "LLM"、ラベル: "関連"、スコア: 0.95 }、
+    {spanId: "retriever_span"、documentPosition: 1、name: "relevance"、
+      アノテーターの種類: "LLM"、ラベル: "関連"、スコア: 0.80 }
+  】
 });
 
-// LLM response quality
+// LLM 応答品質
 await addSpanAnnotation({
-  client,
-  spanAnnotation: {
-    spanId: "llm_span",
-    name: "faithfulness",
-    annotatorKind: "LLM",
-    label: "faithful",
-    score: 0.90
+  クライアント、
+  スパンアノテーション: {
+    スパンID: "llm_span",
+    名前：「忠実」、
+    アノテーターの種類: "LLM",
+    ラベル: 「忠実」、
+    スコア: 0.90
   }
 });
 
-// Overall trace quality
+// 全体的なトレース品質
 await addTraceAnnotation({
-  client,
-  traceAnnotation: {
-    traceId: "trace_123",
-    name: "correctness",
-    annotatorKind: "HUMAN",
-    label: "correct",
-    score: 1.0
+  クライアント、
+  トレースアノテーション: {
+    トレースID: "trace_123",
+    名前：「正しさ」、
+    アノテーターの種類: "人間"、
+    ラベル: "正しい"、
+    スコア: 1.0
   }
 });
-```
+「」## API リファレンス
 
-## API Reference
-
-- [TypeScript Client API](https://arize-ai.github.io/phoenix/)
+- [TypeScript クライアント API](https://arize-ai.github.io/phoenix/)

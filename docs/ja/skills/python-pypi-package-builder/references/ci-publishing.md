@@ -1,315 +1,291 @@
-# CI/CD, Publishing, and Changelog
+# CI/CD、公開、および変更ログ
 
-## Table of Contents
-1. [Changelog format](#1-changelog-format)
-2. [ci.yml — lint, type-check, test matrix](#2-ciyml)
-3. [publish.yml — triggered on version tags](#3-publishyml)
-4. [PyPI Trusted Publishing (no API tokens)](#4-pypi-trusted-publishing)
-5. [Manual publish fallback](#5-manual-publish-fallback)
-6. [Release checklist](#6-release-checklist)
-7. [Verify py.typed ships in the wheel](#7-verify-pytyped-ships-in-the-wheel)
-8. [Semver change-type guide](#8-semver-change-type-guide)
-
----
-
-## 1. Changelog Format
-
-Keep a `CHANGELOG.md` following [Keep a Changelog](https://keepachangelog.com/) conventions.
-Every PR should update the `[Unreleased]` section. Before releasing, move those entries to a
-new version section with the date.
-
-```markdown
-# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## 目次
+1. [変更ログ形式](#1-変更ログ形式)
+2. [ci.yml — lint、型チェック、テストマトリックス](#2-ciyml)
+3. [publish.yml — バージョンタグでトリガー](#3-publishyml)
+4. [PyPI Trusted Publishing (API トークンなし)](#4-pypi-trusted-publishing)
+5. [手動公開フォールバック](#5-manual-publish-fallback)
+6. [リリースチェックリスト](#6-リリースチェックリスト)
+7. [py.typed の船が操舵室にあることを確認](#7-verify-pytyped-ships-in-the-wheel)
+8. [サーバー変更タイプガイド](#8-semver-change-type-guide)
 
 ---
 
-## [Unreleased]
+## 1. 変更ログの形式
 
-### Added
-- (in-progress features go here)
+[変更ログを保持する](https://keepachangelog.com/) の規則に従って `CHANGELOG.md` を保持します。
+すべての PR は `[Unreleased]` セクションを更新する必要があります。リリースする前に、これらのエントリを
+新しいバージョンのセクションに日付が記載されています。```マークダウン
+# 変更履歴
+
+このプロジェクトに対するすべての重要な変更は、このファイルに文書化されます。
+
+形式は[変更ログを保持する](https://keepachangelog.com/ja/1.1.0/)に基づいています。
+そしてこのプロジェクトは [セマンティック バージョニング](https://semver.org/spec/v2.0.0.html) に準拠しています。
+
+---
+
+## [未公開]
+
+### 追加
+- (進行中の機能はここにあります)
 
 ---
 
 ## [1.0.0] - 2026-04-02
 
-### Added
-- Initial stable release
-- `YourMiddleware` with gradual, strict, and combined modes
-- In-memory backend (no extra deps)
-- Optional Redis backend (`pip install pkg[redis]`)
-- Per-route override via `Depends(RouteThrottle(...))`
-- `py.typed` marker — PEP 561 typed package
-- GitHub Actions CI: lint, mypy, test matrix, Trusted Publishing
+### 追加
+- 初期の安定版リリース
+- `YourMiddleware` 段階的モード、厳密モード、複合モード
+- インメモリ バックエンド (追加の DEP なし)
+- オプションの Redis バックエンド (`pip install pkg[redis]`)
+- `Depends(RouteThrottle(...))` によるルートごとのオーバーライド
+- `py.typed` マーカー — PEP 561 型付きパッケージ
+- GitHub アクション CI: lint、mypy、テスト マトリックス、信頼できる公開
 
-### Changed
-### Fixed
-### Removed
+### 変更されました
+### 修正済み
+### 削除されました
 
 ---
 
 ## [0.1.0] - 2026-03-01
 
-### Added
-- Initial project scaffold
+### 追加
+- 初期プロジェクトの足場
 
-[Unreleased]: https://github.com/you/your-package/compare/v1.0.0...HEAD
+[未リリース]: https://github.com/you/your-package/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/you/your-package/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/you/your-package/releases/tag/v0.1.0
-```
+「」### Semver — 何が何を衝突させるのか
 
-### Semver — what bumps what
-
-| Change type | Bump | Example |
+|タイプの変更 |バンプ |例 |
 |---|---|---|
-| Breaking API change | MAJOR | `1.0.0 → 2.0.0` |
-| New feature, backward-compatible | MINOR | `1.0.0 → 1.1.0` |
-| Bug fix | PATCH | `1.0.0 → 1.0.1` |
+| API の重大な変更 |メジャー | `1.0.0 → 2.0.0` |
+|新機能、下位互換性 |マイナー | `1.0.0 → 1.1.0` |
+|バグ修正 |パッチ | `1.0.0 → 1.0.1` |
 
 ---
 
 ## 2. `ci.yml`
 
-Runs on every push and pull request. Tests across all supported Python versions.
-
-```yaml
+すべてのプッシュおよびプル リクエストで実行されます。サポートされているすべての Python バージョンにわたってテストします。```ヤムル
 # .github/workflows/ci.yml
-name: CI
+名前：CI
 
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+に:
+  プッシュ：
+    ブランチ: [メイン、マスター]
+  プルリクエスト:
+    ブランチ: [メイン、マスター]
 
-jobs:
-  lint:
-    name: Lint, Format & Type Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - name: Install dev dependencies
-        run: pip install -e ".[dev]"
-      - name: ruff lint
-        run: ruff check .
-      - name: ruff format check
-        run: ruff format --check .
-      - name: mypy
-        run: |
-          if [ -d "src" ]; then
+仕事:
+  糸くず:
+    名前: lint、フォーマットと型のチェック
+    実行: ubuntu-最新
+    手順:
+      - 使用:actions/checkout@v4
+      - 使用:actions/setup-python@v5
+        と:
+          Python バージョン: "3.11"
+      - 名前: 開発依存関係のインストール
+        実行: pip install -e ".[dev]"
+      - 名前：ラフ・リント
+        実行：ラフチェック。
+      - 名前: ruff フォーマットチェック
+        実行: ruff 形式 --check 。
+      - 名前：マイピー
+        実行: |
+          if [ -d "src" ];それから
               mypy src/
-          else
+          それ以外の場合
               mypy {mod}/
-          fi
+          フィ
 
-  test:
-    name: Test (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+  テスト:
+    名前: テスト (Python ${{ math.python-version }})
+    実行: ubuntu-最新
+    戦略:
+      マトリックス:
+        Python バージョン: ["3.10"、"3.11"、"3.12"、"3.13"]
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0    # REQUIRED for setuptools_scm to read git tags
+    手順:
+      - 使用:actions/checkout@v4
+        と:
+          fetch- Depth: 0 # setuptools_scm が git タグを読み取るために必要です
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      - 使用:actions/setup-python@v5
+        と:
+          Python バージョン: ${{ マトリックス.python バージョン }}
 
-      - name: Install dependencies
-        run: pip install -e ".[dev]"
+      - 名前: 依存関係をインストールします。
+        実行: pip install -e ".[dev]"
 
-      - name: Run tests with coverage
-        run: pytest --cov --cov-report=xml
+      - 名前: カバレッジを指定してテストを実行します。
+        実行: pytest --cov --cov-report=xml
 
-      - name: Upload coverage
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: false
+      - 名前: カバレッジのアップロード
+        使用: codecov/codecov-action@v4
+        と:
+          トークン: ${{ Secrets.CODECOV_TOKEN }}
+          失敗_ci_if_error: false
 
-  test-redis:
-    name: Test Redis backend
-    runs-on: ubuntu-latest
-    services:
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  テスト-redis:
+    名前: Redis バックエンドのテスト
+    実行: ubuntu-最新
+    サービス:
+      レディス:
+        画像: redis:7-alpine
+        ポート: ["6379:6379"]
+    手順:
+      - 使用:actions/checkout@v4
+        と:
+          フェッチ深度: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - 使用:actions/setup-python@v5
+        と:
+          Python バージョン: "3.11"
 
-      - name: Install with Redis extra
-        run: pip install -e ".[dev,redis]"
+      - 名前: Redis エクストラでインストール
+        実行: pip install -e ".[dev,redis]"
 
-      - name: Run Redis tests
-        run: pytest tests/test_redis_backend.py -v
-```
-
-> **Always add `fetch-depth: 0`** to every checkout step when using `setuptools_scm`.
-> Without full git history, `setuptools_scm` can't find tags and the build fails with a version
-> detection error.
+      - 名前: Redis テストの実行
+        実行: pytest テスト/test_redis_backend.py -v
+「」> **`setuptools_scm` を使用する場合は、すべてのチェックアウト ステップに常に `fetch-depth: 0`** を追加してください。
+> 完全な git 履歴がないと、`setuptools_scm` はタグを見つけることができず、あるバージョンでビルドが失敗します
+> 検出エラーです。
 
 ---
 
 ## 3. `publish.yml`
 
-Triggered automatically when you push a tag matching `v*.*.*`. Uses Trusted Publishing (OIDC) —
-no API tokens in repository secrets.
-
-```yaml
+`v*.*.*` に一致するタグをプッシュすると自動的にトリガーされます。信頼された発行 (OIDC) を使用します —
+リポジトリ シークレットに API トークンがありません。```ヤムル
 # .github/workflows/publish.yml
-name: Publish to PyPI
+名前: PyPI に公開
 
-on:
-  push:
-    tags:
-      - "v*.*.*"
+に:
+  プッシュ：
+    タグ:
+      - 「v*.*.*」
 
-jobs:
-  build:
-    name: Build distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0      # Critical for setuptools_scm
+仕事:
+  ビルド:
+    名前: ビルドディストリビューション
+    実行: ubuntu-最新
+    手順:
+      - 使用:actions/checkout@v4
+        と:
+          fetch- Depth: 0 # setuptools_scm にとって重要
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - 使用:actions/setup-python@v5
+        と:
+          Python バージョン: "3.11"
 
-      - name: Install build tools
-        run: pip install build twine
+      - 名前: ビルド ツールのインストール
+        実行: pip install build Twine
 
-      - name: Build package
-        run: python -m build
+      - 名前: ビルドパッケージ
+        実行: python -m build
 
-      - name: Check distribution
-        run: twine check dist/*
+      - 名前: チェック配布
+        実行: 撚り線チェック dist/*
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
+      - 使用:actions/upload-artifact@v4
+        と:
+          名前: ディスト
+          パス: dist/
 
-  publish:
-    name: Publish to PyPI
-    needs: build
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write     # Required for Trusted Publishing (OIDC)
+  公開:
+    名前: PyPI に公開
+    ニーズ: 構築
+    実行: ubuntu-最新
+    環境: pypi
+    権限:
+      id-token: write # Trusted Publishing (OIDC) に必要
 
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
+    手順:
+      - 使用:actions/download-artifact@v4
+        と:
+          名前: ディスト
+          パス: dist/
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-```
+      - 名前: PyPI に公開
+        使用: pypa/gh-action-pypi-publish@release/v1
+「」---
 
----
+## 4. PyPI 信頼できる公開
 
-## 4. PyPI Trusted Publishing
+信頼できる公開は OpenID Connect (OIDC) を使用するため、PyPI は公開がユーザーからのものであることを確認できます。
+特定の GitHub Actions ワークフロー - 有効期間の長い API トークンは必要なく、ローテーションの負担もありません。
 
-Trusted Publishing uses OpenID Connect (OIDC) so PyPI can verify that a publish came from your
-specific GitHub Actions workflow — no long-lived API tokens required, no rotation burden.
+### ワンタイムセットアップ
 
-### One-time setup
+1. https://pypi.org でアカウントを作成します
+2. **「アカウント」→「公開」→「新しい保留中の発行元を追加」** に移動します。
+3. 以下を入力します。
+   - GitHub 所有者 (ユーザー名または組織)
+   - リポジトリ名
+   - ワークフローファイル名: `publish.yml`
+   - 環境名：`pypi`
+4. GitHub に `pypi` 環境を作成します。
+   **リポジトリ → 設定 → 環境 → 新しい環境 → `pypi`** という名前を付けます
 
-1. Create an account at https://pypi.org
-2. Go to **Account → Publishing → Add a new pending publisher**
-3. Fill in:
-   - GitHub owner (your username or org)
-   - Repository name
-   - Workflow filename: `publish.yml`
-   - Environment name: `pypi`
-4. Create the `pypi` environment in GitHub:
-   **repo → Settings → Environments → New environment → name it `pypi`**
-
-That's it. The next time you push a `v*.*.*` tag, the workflow authenticates automatically.
+それだけです。次回 `v*.*.*` タグをプッシュすると、ワークフローは自動的に認証します。
 
 ---
 
-## 5. Manual Publish Fallback
+## 5. 手動パブリッシュフォールバック
 
-If CI isn't set up yet or you need to publish from your machine:
+CI がまだ設定されていない場合、またはマシンから公開する必要がある場合:「」バッシュ
+pip インストール ビルド ツイン
 
-```bash
-pip install build twine
+# ビルドホイール + SDIST
+Python -m ビルド
 
-# Build wheel + sdist
-python -m build
+# アップロードする前に検証する
+麻ひものチェック距離/*
 
-# Validate before uploading
-twine check dist/*
+# PyPIにアップロードする
+麻紐アップロード dist/*
 
-# Upload to PyPI
-twine upload dist/*
-
-# OR test on TestPyPI first (recommended for first release)
-twine upload --repository testpypi dist/*
+# OR を最初に TestPyPI でテストします (最初のリリースに推奨)
+ひもアップロード --repository testpypi dist/*
 pip install --index-url https://test.pypi.org/simple/ your-package
-python -c "import your_package; print(your_package.__version__)"
-```
+python -c "your_packageをインポート; print(your_package.__version__)"
+「」---
+
+## 6. リリースチェックリスト「」
+[ ] すべてのテストはメイン/マスターで合格します
+[ ] CHANGELOG.md が更新されました — [未リリース] 項目を日付付きの新しいバージョンのセクションに移動します
+[ ] CHANGELOG の下部にある差分比較リンクを更新します
+[ ] git タグ vX.Y.Z
+[ ] git Push Origin master --tags
+[ ] GitHubアクションのpublish.yml実行の監視
+[ ] PyPI で確認します: pip install your-package==X.Y.Z
+[ ] インストールされているバージョンをテストします。
+    python -c "your_packageをインポート; print(your_package.__version__)"
+「」---
+
+## 7. py.typed Ships in the Wheelを確認する
+
+ビルドするたびに、入力されたマーカーが含まれていることを確認します。「」バッシュ
+Python -m ビルド
+unzip -l dist/your_package-*.whl | unzip -l dist/your_package-*.whl | unzip -l dist/your_package-*.whl grep py.typed
+# 印刷する必要があります: your_package/py.typed
+# 見つからない場合は、pyproject.toml の [tool.setuptools.package-data] を確認してください
+「」ホイールから欠落している場合、コードが正しくても、ユーザーは型情報を取得できません。
+完全に入力されています。これはサイレントエラーです。リリースする前に必ず確認してください。
 
 ---
 
-## 6. Release Checklist
+## 8. Semver 変更タイプのガイド
 
-```
-[ ] All tests pass on main/master
-[ ] CHANGELOG.md updated — move [Unreleased] items to new version section with date
-[ ] Update diff comparison links at bottom of CHANGELOG
-[ ] git tag vX.Y.Z
-[ ] git push origin master --tags
-[ ] Monitor GitHub Actions publish.yml run
-[ ] Verify on PyPI: pip install your-package==X.Y.Z
-[ ] Test the installed version:
-    python -c "import your_package; print(your_package.__version__)"
-```
-
----
-
-## 7. Verify py.typed Ships in the Wheel
-
-After every build, confirm the typed marker is included:
-
-```bash
-python -m build
-unzip -l dist/your_package-*.whl | grep py.typed
-# Must print: your_package/py.typed
-# If missing, check [tool.setuptools.package-data] in pyproject.toml
-```
-
-If it's missing from the wheel, users won't get type information even though your code is
-fully typed. This is a silent failure — always verify before releasing.
-
----
-
-## 8. Semver Change-Type Guide
-
-| Change | Version bump | Example |
+|変更 |バージョンバンプ |例 |
 |---|---|---|
-| Breaking API change (remove/rename public symbol) | MAJOR | `1.2.3 → 2.0.0` |
-| New feature, fully backward-compatible | MINOR | `1.2.3 → 1.3.0` |
-| Bug fix, no API change | PATCH | `1.2.3 → 1.2.4` |
-| Pre-release | suffix | `2.0.0a1 → 2.0.0rc1 → 2.0.0` |
-| Packaging-only fix (no code change) | post-release | `1.2.3 → 1.2.3.post1` |
+| API の重大な変更 (パブリック シンボルの削除/名前変更) |メジャー | `1.2.3 → 2.0.0` |
+|新機能、完全な下位互換性 |マイナー | `1.2.3 → 1.3.0` |
+|バグ修正、API 変更なし |パッチ | `1.2.3 → 1.2.4` |
+|プレリリース |接尾辞 | `2.0.0a1 → 2.0.0rc1 → 2.0.0` |
+|パッケージングのみの修正 (コード変更なし) |リリース後 | `1.2.3 → 1.2.3.post1` |

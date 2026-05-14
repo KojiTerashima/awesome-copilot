@@ -1,10 +1,8 @@
-# Pinia Testing Snippets (Cookbook-Aligned)
+# Pinia テスト スニペット (クックブックに合わせた)
 
-Use these patterns directly when writing tests with `@pinia/testing`.
+`@pinia/testing` を使用してテストを作成する場合は、これらのパターンを直接使用します。
 
-## Component mount with `createTestingPinia`
-
-```ts
+## `createTestingPinia` を使用したコンポーネントのマウント```ts
 import { mount } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { vi } from "vitest";
@@ -18,14 +16,10 @@ const wrapper = mount(ComponentUnderTest, {
     ],
   },
 });
-```
+```## 実際のアクションを実行する
 
-## Execute real actions
-
-Use this only when behavior inside the action must run.
-If the test only checks call/no-call expectations, keep default stubbing (`stubActions: true`).
-
-```ts
+これは、アクション内の動作を実行する必要がある場合にのみ使用します。
+テストで通話/非通話の予測のみをチェックする場合は、デフォルトのスタブ (`stubActions: true`) を維持します。```ts
 const wrapper = mount(ComponentUnderTest, {
   global: {
     plugins: [
@@ -36,11 +30,7 @@ const wrapper = mount(ComponentUnderTest, {
     ],
   },
 });
-```
-
-## Seed starting state
-
-```ts
+```## シード開始状態```ts
 const wrapper = mount(ComponentUnderTest, {
   global: {
     plugins: [
@@ -54,21 +44,13 @@ const wrapper = mount(ComponentUnderTest, {
     ],
   },
 });
-```
-
-## Use store in test and assert action call
-
-```ts
+```## テストでストアを使用し、アクション呼び出しをアサートします```ts
 const pinia = createTestingPinia({ createSpy: vi.fn });
 const store = useCounterStore(pinia);
 
 store.increment();
 expect(store.increment).toHaveBeenCalledTimes(1);
-```
-
-## Add plugin under test
-
-```ts
+```## テスト対象のプラグインを追加```ts
 const wrapper = mount(ComponentUnderTest, {
   global: {
     plugins: [
@@ -79,11 +61,7 @@ const wrapper = mount(ComponentUnderTest, {
     ],
   },
 });
-```
-
-## Override and reset getters for edge tests
-
-```ts
+```## エッジ テストのゲッターをオーバーライドしてリセットする```ts
 const pinia = createTestingPinia({ createSpy: vi.fn });
 const store = useCounterStore(pinia);
 

@@ -1,13 +1,11 @@
-# Skeleton: 2-stride-analysis.md
+# スケルトン: 2-stride-analysis.md
 
-> **⛔ Copy the template content below VERBATIM (excluding the outer code fence). Replace `[FILL]` placeholders. The "A" in STRIDE-A is ALWAYS "Abuse" — NEVER "Authorization".**
-> **⛔ Exploitability Tiers table MUST have EXACTLY 4 columns: `Tier | Label | Prerequisites | Assignment Rule`. DO NOT merge into 3 columns. DO NOT rename `Assignment Rule` to `Description`.**
-> **⛔ Summary table MUST include a `Link` column: `Component | Link | S | T | R | I | D | E | A | Total | T1 | T2 | T3 | Risk`**
-> **⛔ N/A Categories MUST use a table (`| Category | Justification |`), NOT prose/bullet points.**
+> **⛔ テンプレートの内容を VERBATIM の下にコピーします (外側のコード フェンスを除く)。 `[FILL]` プレースホルダーを置き換えます。 STRIDE-A の「A」は常に「悪用」であり、決して「承認」ではありません。**
+> **⛔ Exploitability Tiers テーブルには、正確に 4 つの列が必要です: `Tier | Label | Prerequisites | Assignment Rule`。 3 つの列に結合しないでください。 `Assignment Rule` の名前を `Description`.** に変更しないでください。
+> **⛔ 概要テーブルには `Link` 列が含まれている必要があります: `Component | Link | S | T | R | I | D | E | A | Total | T1 | T2 | T3 | Risk`**
+> **⛔ N/A カテゴリでは散文や箇条書きではなく、表 (`| Category | Justification |`) を使用する必要があります。**
 
----
-
-```markdown
+---```markdown
 # STRIDE + Abuse Cases — Threat Analysis
 
 > This analysis uses the standard **STRIDE** methodology (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) extended with **Abuse Cases** (business logic abuse, workflow manipulation, feature misuse). The "A" column in tables below represents Abuse — a supplementary category covering threats where legitimate features are misused for unintended purposes. This is distinct from Elevation of Privilege (E), which covers authorization bypass.
@@ -96,11 +94,9 @@ Threats are classified into three exploitability tiers based on the prerequisite
   If ANY check fails → FIX NOW before moving to next component. -->
 
 [END-REPEAT]
-```
+```**STRIDE + 虐待ケース — 7 つのカテゴリは正確に次のとおりです:**
+スプーフィング |改ざん |否認 |情報開示 |サービス拒否 |特権の昇格 |虐待
 
-**STRIDE + Abuse Cases — the 7 categories are EXACTLY:**
-Spoofing | Tampering | Repudiation | Information Disclosure | Denial of Service | Elevation of Privilege | Abuse
+**注:** 最初の 6 つは標準の STRIDE です。 「悪用」は、ビジネス ロジックの悪用 (ワークフロー操作、機能悪用、API 悪用) の補足カテゴリです。これは「承認」ではありません。承認の問題は特権の昇格 (E) に属します。
 
-**Note:** The first 6 are standard STRIDE. "Abuse" is a supplementary category for business logic misuse (workflow manipulation, feature exploitation, API abuse). It is NOT "Authorization" — authorization issues belong under Elevation of Privilege (E).
-
-**Valid Status values:** `Open` | `Mitigated` | `Platform` — NO other values permitted.
+**有効なステータス値:** `Open` | `Mitigated` | `Platform` — 他の値は許可されません。

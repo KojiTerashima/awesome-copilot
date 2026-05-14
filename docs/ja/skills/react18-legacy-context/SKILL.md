@@ -2,46 +2,37 @@
 name: react18-legacy-context
 description: 'Provides the complete migration pattern for React legacy context API (contextTypes, childContextTypes, getChildContext) to the modern createContext API. Use this skill whenever migrating legacy context in class components - this is always a cross-file migration requiring the provider AND all consumers to be updated together. Use it before touching any contextTypes or childContextTypes code, because migrating only the provider without the consumers (or vice versa) will cause a runtime failure. Always read this skill before writing any context migration - the cross-file coordination steps here prevent the most common context migration bugs.'
 ---
+# React 18 レガシーコンテキストの移行
 
-# React 18 Legacy Context Migration
+レガシー コンテキスト (`contextTypes`、`childContextTypes`、`getChildContext`) は React 16.3 で非推奨となり、React 18.3.1 で警告します。 **React 19 では削除されました**。
 
-Legacy context (`contextTypes`, `childContextTypes`, `getChildContext`) was deprecated in React 16.3 and warns in React 18.3.1. It is **removed in React 19**.
+## これは常にファイル間の移行です
 
-## This Is Always a Cross-File Migration
+一度に 1 つのファイルを処理する他のほとんどの移行とは異なり、コンテキストの移行では次の調整が必要です。
+1. コンテキスト オブジェクト (通常は新しいファイル) を作成します。
+2. **プロバイダ** コンポーネントを更新します
+3. **すべてのコンシューマ** コンポーネントを更新する
 
-Unlike most other migrations that touch one file at a time, context migration requires coordinating:
-1. Create the context object (usually a new file)
-2. Update the **provider** component
-3. Update **every consumer** component
+コンシューマーが欠けていると、アプリが壊れたままになります。間違ったコンテキストから読み取られるか、`undefined` が取得されます。
 
-Missing any consumer leaves the app broken - it will read from the wrong context or get `undefined`.
-
-## Migration Steps (Always Follow This Order)
-
-```
-Step 1: Find the provider (childContextTypes + getChildContext)
-Step 2: Find ALL consumers (contextTypes)
-Step 3: Create the context file
-Step 4: Update the provider
-Step 5: Update each consumer (class components → contextType, function components → useContext)
-Step 6: Verify - run the app, check no legacy context warnings remain
-```
-
-## Scan Commands
-
-```bash
-# Find all providers
+## 移行手順 (常にこの順序に従ってください)「」
+ステップ 1: プロバイダーを見つける (childContextTypes + getChildContext)
+ステップ 2: すべてのコンシューマー (contextTypes) を検索する
+ステップ 3: コンテキスト ファイルを作成する
+ステップ 4: プロバイダーを更新する
+ステップ 5: 各コンシューマーを更新します (クラス コンポーネント → contextType、関数コンポーネント → useContext)
+ステップ 6: 確認 - アプリを実行し、従来のコンテキスト警告が残っていないことを確認します。
+「」## スキャンコマンド「」バッシュ
+# すべてのプロバイダーを検索
 grep -rn "childContextTypes\|getChildContext" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
 
-# Find all consumers
+# すべての消費者を検索
 grep -rn "contextTypes\s*=" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
 
-# Find this.context usage (may be legacy or modern - check which)
-grep -rn "this\.context\." src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
-```
+# this.context の使用法を検索します (レガシーまたはモダンである可能性があります - どちらかを確認してください)
+grep -rn "この\.context\." src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
+「」## 参照ファイル
 
-## Reference Files
-
-- **`references/single-context.md`** - complete migration for one context (theme, auth, etc.) with provider + class consumer + function consumer
-- **`references/multi-context.md`** - apps with multiple legacy contexts (nested providers, multiple consumers of different contexts)
-- **`references/context-file-template.md`** - the standard file structure for a new context module
+- **`references/single-context.md`** - プロバイダー + クラス コンシューマー + 関数コンシューマーによる 1 つのコンテキスト (テーマ、認証など) の移行を完了する
+- **`references/multi-context.md`** - 複数のレガシー コンテキスト (ネストされたプロバイダー、異なるコンテキストの複数のコンシューマー) を持つアプリ
+- **`references/context-file-template.md`** - 新しいコンテキスト モジュールの標準ファイル構造

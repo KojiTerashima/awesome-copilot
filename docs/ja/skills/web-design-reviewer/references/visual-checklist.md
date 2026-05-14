@@ -1,236 +1,232 @@
-# Visual Inspection Checklist
+# 目視検査チェックリスト
 
-This document is a comprehensive checklist of items to verify during web design visual inspection.
-
----
-
-## 1. Layout Verification
-
-### Structural Integrity
-
-- [ ] Header is correctly fixed/positioned at the top of the screen
-- [ ] Footer is positioned at the bottom of the screen or end of content
-- [ ] Main content area is center-aligned with appropriate width
-- [ ] Sidebar (if present) is positioned correctly
-- [ ] Navigation is displayed in the intended position
-
-### Overflow
-
-- [ ] Horizontal scrollbar is not unintentionally displayed
-- [ ] Content does not overflow from parent elements
-- [ ] Images fit within parent containers
-- [ ] Tables do not exceed container width
-- [ ] Code blocks wrap or scroll appropriately
-
-### Alignment
-
-- [ ] Grid items are evenly distributed
-- [ ] Flex item alignment is correct
-- [ ] Text alignment (left/center/right) is consistent
-- [ ] Icons and text are vertically aligned
-- [ ] Form labels and input fields are correctly positioned
+この文書は、Web デザインの外観検査時に検証する項目の包括的なチェックリストです。
 
 ---
 
-## 2. Typography Verification
+## 1. レイアウトの検証
 
-### Readability
+### 構造的完全性
 
-- [ ] Body text font size is sufficient (minimum 16px recommended)
-- [ ] Line height is appropriate (1.5-1.8 recommended)
-- [ ] Characters per line is appropriate (40-80 characters recommended)
-- [ ] Spacing between paragraphs is sufficient
-- [ ] Heading size hierarchy is clear
+- [ ] ヘッダーは画面上部に正しく固定/配置されます。
+- [ ] フッターは画面の下部またはコンテンツの最後に配置されます
+- [ ] メインコンテンツ領域は適切な幅で中央揃えになります。
+- [ ] サイドバー (存在する場合) は正しく配置されています
+- [ ] ナビゲーションが意図した位置に表示されます
 
-### Text Handling
+### オーバーフロー
 
-- [ ] Long words wrap appropriately
-- [ ] URLs and code are handled properly
-- [ ] No text clipping occurs
-- [ ] Ellipsis (...) displays correctly
-- [ ] Language-specific line breaking rules work correctly
+- [ ] 水平スクロールバーが意図せず表示されることはありません
+- [ ] コンテンツが親要素からオーバーフローしない
+- [ ] 画像は親コンテナ内に収まります
+- [ ] テーブルはコンテナの幅を超えません
+- [ ] コードブロックは適切にラップまたはスクロールします
 
-### Fonts
+### 位置合わせ
 
-- [ ] Web fonts load correctly
-- [ ] Fallback fonts are appropriate
-- [ ] Font weights are as intended
-- [ ] Special characters and emoji display correctly
-
----
-
-## 3. Color & Contrast Verification
-
-### Accessibility (WCAG Standards)
-
-- [ ] Body text: Contrast ratio 4.5:1 or higher (AA)
-- [ ] Large text (18px+ bold or 24px+): 3:1 or higher
-- [ ] Interactive element borders: 3:1 or higher
-- [ ] Focus indicators: Sufficient contrast with background
-
-### Color Consistency
-
-- [ ] Brand colors are unified
-- [ ] Link colors are consistent
-- [ ] Error state red is unified
-- [ ] Success state green is unified
-- [ ] Hover/active state colors are appropriate
-
-### Color Vision Diversity
-
-- [ ] Information conveyed by shape and text, not just color
-- [ ] Charts and diagrams consider color vision diversity
-- [ ] Error messages don't rely solely on color
+- [ ] グリッド項目は均等に配置されます
+- [ ] フレックス項目の配置は正しいです
+- [ ] テキストの配置 (左/中央/右) は一貫しています
+- [ ] アイコンとテキストが縦に揃えられます
+- [ ] フォームのラベルと入力フィールドは正しく配置されています
 
 ---
 
-## 4. Responsive Verification
+## 2. タイポグラフィの検証
 
-### Mobile (~640px)
+### 可読性
 
-- [ ] Content fits within screen width
-- [ ] Touch targets are 44x44px or larger
-- [ ] Text is readable size
-- [ ] No horizontal scrolling occurs
-- [ ] Navigation is mobile-friendly (hamburger menu, etc.)
-- [ ] Form inputs are easy to use
+- [ ] 本文テキストのフォント サイズは十分です (最小 16px を推奨)
+- [ ] 行の高さは適切です (1.5 ～ 1.8 を推奨)
+- [ ] 1 行の文字数は適切です (40 ～ 80 文字を推奨)
+- [ ] 段落間のスペースは十分です
+- [ ] 見出しサイズの階層が明確です
 
-### Tablet (641px~1024px)
+### テキストの処理
 
-- [ ] Layout is optimized for tablet
-- [ ] Two-column layouts display appropriately
-- [ ] Image sizes are appropriate
-- [ ] Sidebar show/hide is appropriate
+- [ ] 長い単語は適切に折り返されます
+- [ ] URL とコードは適切に処理されます
+- [ ] テキストクリッピングは発生しません
+- [ ] 省略記号 (...) は正しく表示されます
+- [ ] 言語固有の改行ルールが正しく機能する
 
-### Desktop (1025px~)
+### フォント
 
-- [ ] Maximum width is set and doesn't break on extra-large screens
-- [ ] Spacing is sufficient
-- [ ] Multi-column layouts function correctly
-- [ ] Hover states are implemented
-
-### Breakpoint Transitions
-
-- [ ] Layout transitions smoothly when screen size changes
-- [ ] Layout doesn't break at intermediate sizes
-- [ ] No content disappears or duplicates
+- [ ] Web フォントは正しくロードされます
+- [ ] フォールバック フォントが適切です
+- [ ] フォントの太さは意図どおりです
+- [ ] 特殊文字と絵文字が正しく表示される
 
 ---
 
-## 5. Interactive Element Verification
+## 3. 色とコントラストの検証
 
-### Buttons
+### アクセシビリティ (WCAG 標準)
 
-- [ ] Default state is clear
-- [ ] Hover state exists (desktop)
-- [ ] Focus state is visually clear
-- [ ] Active (pressed) state exists
-- [ ] Disabled state is distinguishable
-- [ ] Loading state (if applicable)
+- [ ]本文：コントラスト比4.5:1以上（AA）
+- [ ] 大きなテキスト (18px+ 太字または 24px+): 3:1 以上
+- [ ] インタラクティブ要素の境界線: 3:1 以上
+- [ ] フォーカスインジケーター: 背景との十分なコントラスト
 
-### Links
+### 色の一貫性
 
-- [ ] Links are visually identifiable
-- [ ] Visited links are distinguishable (if needed)
-- [ ] Hover state exists
-- [ ] Focus state is clear
+- [ ] ブランドカラーを統一
+- [ ] リンクの色は一貫しています
+- [ ] エラー状態は赤色で統一
+- [ ] 成功状態は緑色で統一
+- [ ] ホバー/アクティブ状態の色は適切です
 
-### Form Elements
-
-- [ ] Input field boundaries are clear
-- [ ] Placeholder text contrast is appropriate
-- [ ] Visual feedback on focus
-- [ ] Error state display
-- [ ] Required field indication
-- [ ] Dropdowns function correctly
+### 色覚の多様性- [ ] 色だけでなく形や文字でも情報を伝える
+- [ ] 色覚の多様性を考慮した図表
+- [ ] エラー メッセージは色だけに依存しません
 
 ---
 
-## 6. Images & Media Verification
+## 4. 応答性の検証
 
-### Images
+### モバイル (~640px)
 
-- [ ] Images display at appropriate size
-- [ ] Aspect ratio is maintained
-- [ ] High resolution display support (@2x)
-- [ ] Display when image fails to load
-- [ ] Lazy loading behavior works
+- [ ] コンテンツが画面幅内に収まります
+- [ ] タッチターゲットは 44x44px 以上です
+- [ ] 文字は読めるサイズです
+- [ ] 横スクロールは行われません
+- [ ] ナビゲーションはモバイル対応です (ハンバーガー メニューなど)
+- [ ] フォーム入力が使いやすい
 
-### Video & Embeds
+### タブレット (641px~1024px)
 
-- [ ] Videos fit within containers
-- [ ] Aspect ratio is maintained
-- [ ] Embedded content is responsive
-- [ ] iframes don't overflow
+- [ ] レイアウトはタブレットに最適化されています
+- [ ] 2 列レイアウトが適切に表示されるようになりました。
+- [ ] 画像サイズは適切です
+- [ ] サイドバーの表示/非表示は適切です
 
----
+### デスクトップ (1025px~)
 
-## 7. Accessibility Verification
+- [ ] 最大幅が設定されており、特大画面でも壊れません
+- [ ] の間隔は十分です
+- [ ] 複数列レイアウトが正しく機能する
+- [ ] ホバー状態が実装されています
 
-### Keyboard Navigation
+### ブレークポイントの遷移
 
-- [ ] All interactive elements accessible via Tab key
-- [ ] Focus order is logical
-- [ ] Focus traps are appropriate (modals, etc.)
-- [ ] Skip to content link exists
-
-### Screen Reader Support
-
-- [ ] Images have alt text
-- [ ] Forms have labels
-- [ ] ARIA labels are appropriately set
-- [ ] Heading hierarchy is correct (h1→h2→h3...)
-
-### Motion
-
-- [ ] Animations are not excessive
-- [ ] prefers-reduced-motion is supported (if possible)
+- [ ] 画面サイズが変わってもレイアウトがスムーズに切り替わります
+- [ ] 中間サイズでレイアウトが崩れない
+- [ ] コンテンツが消えたり重複したりすることはありません
 
 ---
 
-## 8. Performance-related Visual Issues
+## 5. インタラクティブな要素の検証
 
-### Loading
+### ボタン
 
-- [ ] Font FOUT/FOIT is minimal
-- [ ] No layout shift (CLS) occurs
-- [ ] No jumping when images load
-- [ ] Skeleton screens are appropriate (if applicable)
+- [ ] デフォルト状態はクリアです
+- [ ] ホバー状態あり (デスクトップ)
+- [ ] フォーカス状態が視覚的に明確です
+- [ ] アクティブ (押された) 状態が存在します
+- [ ] 無効状態が識別可能
+- [ ] 読み込み状態 (該当する場合)
 
-### Animation
+### リンク
 
-- [ ] Animations are smooth (60fps)
-- [ ] No performance issues when scrolling
-- [ ] Transitions are natural
+- [ ] リンクは視覚的に識別可能です
+- [ ] 訪問したリンクは区別可能です (必要な場合)
+- [ ] ホバー状態が存在します
+- [ ] フォーカス状態がクリアです
+
+### フォーム要素
+
+- [ ] 入力フィールドの境界は明確です
+- [ ] プレースホルダーのテキストのコントラストは適切です
+- [ ] フォーカスに関する視覚的なフィードバック
+- [ ] エラー状態表示
+- [ ] 必須フィールドの表示
+- [ ] ドロップダウンが正しく機能する
 
 ---
 
-## Priority Matrix
+## 6. 画像とメディアの検証
 
-| Priority | Category | Examples |
+### 画像
+
+- [ ] 画像が適切なサイズで表示されます
+- [ ] アスペクト比は維持されます
+- [ ] 高解像度ディスプレイのサポート (@2x)
+- [ ] 画像の読み込みに失敗した場合に表示
+- [ ] 遅延読み込み動作が機能する
+
+### ビデオと埋め込み
+
+- [ ] ビデオはコンテナ内に収まります
+- [ ] アスペクト比は維持されます
+- [ ] 埋め込みコンテンツは応答性があります
+- [ ] iframe はオーバーフローしません
+
+---
+
+## 7. アクセシビリティの検証
+
+### キーボードナビゲーション
+
+- [ ] Tab キーでアクセスできるすべてのインタラクティブ要素
+- [ ] フォーカス順序は論理的です
+- [ ] フォーカス トラップは適切です (モーダルなど)
+- [ ] コンテンツへスキップのリンクが存在します
+
+### スクリーン リーダーのサポート- [ ] 画像には代替テキストが含まれています
+- [ ] フォームにはラベルが付いています
+- [ ] ARIA ラベルが適切に設定されている
+- [ ] 見出し階層は正しい (h1→h2→h3...)
+
+### モーション
+
+- [ ] アニメーションは過剰ではありません
+- [ ] 優先モーションがサポートされます (可能な場合)
+
+---
+
+## 8. パフォーマンス関連の視覚的な問題
+
+### 読み込み中
+
+- [ ] フォント FOUT/FOIT は最小限です
+- [ ] レイアウトシフト (CLS) は発生しません
+- [ ] 画像ロード時にジャンプしません
+- [ ] スケルトン画面が適切です (該当する場合)
+
+### アニメーション
+
+- [ ] アニメーションは滑らかです (60fps)
+- [ ] スクロール時のパフォーマンスの問題はありません
+- [ ] 遷移は自然です
+
+---
+
+## 優先順位マトリックス
+
+|優先順位 |カテゴリー |例 |
 |----------|----------|----------|
-| P0 (Critical) | Functionality breaking | Complete element overlap, content disappearance |
-| P1 (High) | Serious UX issues | Unreadable text, inoperable buttons |
-| P2 (Medium) | Moderate issues | Alignment issues, spacing inconsistencies |
-| P3 (Low) | Minor issues | Slight positioning differences, minor color variations |
+| P0 (クリティカル) |機能の破壊 |完全な要素の重複、コンテンツの消失 |
+| P1 (高) |深刻な UX の問題 |読めないテキスト、操作できないボタン |
+| P2 (中) |中程度の問題 |配置の問題、間隔の不一致 |
+| P3 (低) |マイナーな問題 |わずかな位置の違い、わずかな色の違い |
 
 ---
 
-## Verification Tools
+## 検証ツール
 
-### Browser DevTools
+### ブラウザ開発ツール
 
-- Elements panel: DOM and style inspection
-- Lighthouse: Performance and accessibility audits
-- Device toolbar: Responsive testing
+- 要素パネル: DOM とスタイルの検査
+- Lighthouse: パフォーマンスとアクセシビリティの監査
+- デバイスツールバー: レスポンシブテスト
 
-### Accessibility Tools
+### アクセシビリティツール
 
-- axe DevTools
-- WAVE
-- Color Contrast Analyzer
+- ax 開発ツール
+- ウェーブ
+- カラーコントラストアナライザー
 
-### Automation Tools
+### 自動化ツール
 
-- Playwright (screenshot comparison)
-- Percy / Chromatic (Visual Regression Testing)
+- Playwright (スクリーンショットの比較)
+- パーシー / クロマチック (視覚回帰テスト)

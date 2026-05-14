@@ -8,132 +8,125 @@ metadata:
   version: "1.0.0"
   languages: "Python, TypeScript"
 ---
+# フェニックス・トレース
 
-# Phoenix Tracing
+Phoenix で OpenInference トレースを使用して LLM アプリケーションをインストルメントするための包括的なガイド。セットアップ、インスツルメンテーション、スパン タイプ、実稼働展開をカバーする参照ファイルが含まれています。
 
-Comprehensive guide for instrumenting LLM applications with OpenInference tracing in Phoenix. Contains reference files covering setup, instrumentation, span types, and production deployment.
+## いつ適用するか
 
-## When to Apply
+次の場合にこれらのガイドラインを参照してください。
 
-Reference these guidelines when:
+- Phoenix トレースのセットアップ (Python または TypeScript)
+- LLM 操作用のカスタム スパンの作成
+- OpenInference の規則に従って属性を追加する
+- トレースを本番環境に展開する
+- トレースデータのクエリと分析
 
-- Setting up Phoenix tracing (Python or TypeScript)
-- Creating custom spans for LLM operations
-- Adding attributes following OpenInference conventions
-- Deploying tracing to production
-- Querying and analyzing trace data
+## 参照カテゴリ
 
-## Reference Categories
+|優先順位 |カテゴリー |説明 |プレフィックス |
+| -------- | --------------- | ------------------------------ | ------------------------ |
+| 1 |セットアップ |インストールと構成 | `setup-*` |
+| 2 |計装 |自動および手動トレース | `instrumentation-*` |
+| 3 |スパンの種類 | 9 種類のスパンと属性 | `span-*` |
+| 4 |組織 |プロジェクトとセッション | `projects-*`、`sessions-*` |
+| 5 |エンリッチメント |カスタムメタデータ | `metadata-*` |
+| 6 |制作 |バッチ処理、マスキング | `production-*` |
+| 7 |フィードバック |注釈と評価 | `annotations-*` |
 
-| Priority | Category        | Description                    | Prefix                     |
-| -------- | --------------- | ------------------------------ | -------------------------- |
-| 1        | Setup           | Installation and configuration | `setup-*`                  |
-| 2        | Instrumentation | Auto and manual tracing        | `instrumentation-*`        |
-| 3        | Span Types      | 9 span kinds with attributes   | `span-*`                   |
-| 4        | Organization    | Projects and sessions          | `projects-*`, `sessions-*` |
-| 5        | Enrichment      | Custom metadata                | `metadata-*`               |
-| 6        | Production      | Batch processing, masking      | `production-*`             |
-| 7        | Feedback        | Annotations and evaluation     | `annotations-*`            |
+## クイックリファレンス
 
-## Quick Reference
+### 1. セットアップ (ここから始めてください)
 
-### 1. Setup (START HERE)
+- [setup-python](references/setup-python.md) - arize-phoenix-otelをインストールし、エンドポイントを設定します
+- [setup-typescript](references/setup-typescript.md) - @arizeai/phoenix-otel をインストールし、エンドポイントを構成します
 
-- [setup-python](references/setup-python.md) - Install arize-phoenix-otel, configure endpoint
-- [setup-typescript](references/setup-typescript.md) - Install @arizeai/phoenix-otel, configure endpoint
+### 2. 計測器
 
-### 2. Instrumentation
+- [instrumentation-auto-python](references/instrumentation-auto-python.md) - OpenAI、LangChain などの自動インストゥルメント
+- [instrumentation-auto-typescript](references/instrumentation-auto-typescript.md) - 自動インストゥルメントがサポートするフレームワーク
+- [instrumentation-manual-python](references/instrumentation-manual-python.md) - デコレータを使用したカスタム スパン
+- [instrumentation-manual-typescript](references/instrumentation-manual-typescript.md) - ラッパーを使用したカスタム スパン
 
-- [instrumentation-auto-python](references/instrumentation-auto-python.md) - Auto-instrument OpenAI, LangChain, etc.
-- [instrumentation-auto-typescript](references/instrumentation-auto-typescript.md) - Auto-instrument supported frameworks
-- [instrumentation-manual-python](references/instrumentation-manual-python.md) - Custom spans with decorators
-- [instrumentation-manual-typescript](references/instrumentation-manual-typescript.md) - Custom spans with wrappers
+### 3. スパン タイプ (完全な属性スキーマを含む)
 
-### 3. Span Types (with full attribute schemas)
+- [span-llm](references/span-llm.md) - LLM API 呼び出し (モデル、トークン、メッセージ、コスト)
+- [span-chain](references/span-chain.md) - マルチステップのワークフローとパイプライン
+- [span-retriever](references/span-retriever.md) - 文書検索 (文書、スコア)
+- [span-tool](references/span-tool.md) - 関数/API 呼び出し (名前、パラメータ)
+- [span-agent](references/span-agent.md) - 複数ステップの推論エージェント
+- [span-embedding](references/span-embedding.md) - ベクトル生成
+- [span-reranker](references/span-reranker.md) - ドキュメントの再ランキング
+- [span-guardrail](references/span-guardrail.md) - 安全チェック
+- [span-evaluator](references/span-evaluator.md) - LLM 評価
 
-- [span-llm](references/span-llm.md) - LLM API calls (model, tokens, messages, cost)
-- [span-chain](references/span-chain.md) - Multi-step workflows and pipelines
-- [span-retriever](references/span-retriever.md) - Document retrieval (documents, scores)
-- [span-tool](references/span-tool.md) - Function/API calls (name, parameters)
-- [span-agent](references/span-agent.md) - Multi-step reasoning agents
-- [span-embedding](references/span-embedding.md) - Vector generation
-- [span-reranker](references/span-reranker.md) - Document re-ranking
-- [span-guardrail](references/span-guardrail.md) - Safety checks
-- [span-evaluator](references/span-evaluator.md) - LLM evaluation
+### 4. 組織- [projects-python](references/projects-python.md) / [projects-typescript](references/projects-typescript.md) - アプリケーションごとにトレースをグループ化
+- [sessions-python](references/sessions-python.md) / [sessions-typescript](references/sessions-typescript.md) - 会話を追跡する
 
-### 4. Organization
+### 5. 充実
 
-- [projects-python](references/projects-python.md) / [projects-typescript](references/projects-typescript.md) - Group traces by application
-- [sessions-python](references/sessions-python.md) / [sessions-typescript](references/sessions-typescript.md) - Track conversations
+- [metadata-python](references/metadata-python.md) / [metadata-typescript](references/metadata-typescript.md) - カスタム属性
 
-### 5. Enrichment
+### 6. 本番環境 (重要)
 
-- [metadata-python](references/metadata-python.md) / [metadata-typescript](references/metadata-typescript.md) - Custom attributes
+- [production-python](references/production-python.md) / [production-typescript](references/production-typescript.md) - バッチ処理、PII マスキング
 
-### 6. Production (CRITICAL)
+### 7. フィードバック
 
-- [production-python](references/production-python.md) / [production-typescript](references/production-typescript.md) - Batch processing, PII masking
+- [annotations-overview](references/annotations-overview.md) - フィードバックの概念
+- [annotations-python](references/annotations-python.md) / [annotations-typescript](references/annotations-typescript.md) - スパンにフィードバックを追加します
 
-### 7. Feedback
+### 参照ファイル
 
-- [annotations-overview](references/annotations-overview.md) - Feedback concepts
-- [annotations-python](references/annotations-python.md) / [annotations-typescript](references/annotations-typescript.md) - Add feedback to spans
+- [fundamentals-overview](references/fundamentals-overview.md) - トレース、スパン、属性の基本
+- [fundamentals-required-attributes](references/fundamentals-required-attributes.md) - スパン タイプごとの必須フィールド
+- [fundamentals-universal-attributes](references/fundamentals-universal-attributes.md) - 共通属性 (user.id、session.id)
+- [fundamentals- flattening](references/fundamentals- flattening.md) - JSON フラット化ルール
+- [attributes-messages](references/attributes-messages.md) - チャットメッセージのフォーマット
+- [attributes-metadata](references/attributes-metadata.md) - カスタム メタデータ スキーマ
+- [attributes-graph](references/attributes-graph.md) - エージェント ワークフロー属性
+- [属性-例外](references/attributes-Exceptions.md) - エラー追跡
 
-### Reference Files
+## 一般的なワークフロー
 
-- [fundamentals-overview](references/fundamentals-overview.md) - Traces, spans, attributes basics
-- [fundamentals-required-attributes](references/fundamentals-required-attributes.md) - Required fields per span type
-- [fundamentals-universal-attributes](references/fundamentals-universal-attributes.md) - Common attributes (user.id, session.id)
-- [fundamentals-flattening](references/fundamentals-flattening.md) - JSON flattening rules
-- [attributes-messages](references/attributes-messages.md) - Chat message format
-- [attributes-metadata](references/attributes-metadata.md) - Custom metadata schema
-- [attributes-graph](references/attributes-graph.md) - Agent workflow attributes
-- [attributes-exceptions](references/attributes-exceptions.md) - Error tracking
+- **クイックスタート**: setup-{lang} →instrumentation-auto-{lang} → Check Phoenix
+- **カスタム スパン**: setup-{lang} →instrumentation-manual-{lang} →span-{type}
+- **セッション トラッキング**: 会話グループ化パターン用のsessions-{lang}
+- **Production**: バッチ処理、マスキング、およびデプロイメント用のproduction-{lang}
 
-## Common Workflows
+## このスキルの使用方法
 
-- **Quick Start**: setup-{lang} → instrumentation-auto-{lang} → Check Phoenix
-- **Custom Spans**: setup-{lang} → instrumentation-manual-{lang} → span-{type}
-- **Session Tracking**: sessions-{lang} for conversation grouping patterns
-- **Production**: production-{lang} for batching, masking, and deployment
+**ナビゲーション パターン:**「」バッシュ
+# カテゴリプレフィックス別
+references/setup-* # インストールと設定
+References/instrumentation-* # 自動および手動トレース
+References/span-* # スパンタイプの仕様
+References/sessions-* # セッション追跡
+References/production-* # 実稼働デプロイメント
+参考/基礎-* # 中心となる概念
+References/attributes-* # 属性の仕様
 
-## How to Use This Skill
+# 言語別
+References/*-python.md # Python 実装
+References/*-typescript.md # TypeScript の実装
+「」**読む順序:**
+1. 使用する言語の setup-{lang} から始めます
+2.instrumentation-auto-{lang} またはinstrumentation-manual-{lang}を選択します。
+3. 特定の操作に必要な、span-{type} ファイルの参照
+4. 属性の仕様については、fundamentals-* ファイルを参照してください。
 
-**Navigation Patterns:**
+## 参考文献
 
-```bash
-# By category prefix
-references/setup-*              # Installation and configuration
-references/instrumentation-*    # Auto and manual tracing
-references/span-*               # Span type specifications
-references/sessions-*           # Session tracking
-references/production-*         # Production deployment
-references/fundamentals-*       # Core concepts
-references/attributes-*         # Attribute specifications
+**Phoenix ドキュメント:**
 
-# By language
-references/*-python.md          # Python implementations
-references/*-typescript.md      # TypeScript implementations
-```
+- [Phoenix ドキュメント](https://docs.arize.com/phoenix)
+- [OpenInference 仕様](https://github.com/Arize-ai/openinference/tree/main/spec)
 
-**Reading Order:**
-1. Start with setup-{lang} for your language
-2. Choose instrumentation-auto-{lang} OR instrumentation-manual-{lang}
-3. Reference span-{type} files as needed for specific operations
-4. See fundamentals-* files for attribute specifications
+**Python API ドキュメント:**
 
-## References
+- [Python OTEL パッケージ](https://arize-phoenix.readthedocs.io/projects/otel/en/latest/) - `arize-phoenix-otel` API リファレンス
+- [Python クライアント パッケージ](https://arize-phoenix.readthedocs.io/projects/client/en/latest/) - `arize-phoenix-client` API リファレンス
 
-**Phoenix Documentation:**
+**TypeScript API ドキュメント:**
 
-- [Phoenix Documentation](https://docs.arize.com/phoenix)
-- [OpenInference Spec](https://github.com/Arize-ai/openinference/tree/main/spec)
-
-**Python API Documentation:**
-
-- [Python OTEL Package](https://arize-phoenix.readthedocs.io/projects/otel/en/latest/) - `arize-phoenix-otel` API reference
-- [Python Client Package](https://arize-phoenix.readthedocs.io/projects/client/en/latest/) - `arize-phoenix-client` API reference
-
-**TypeScript API Documentation:**
-
-- [TypeScript Packages](https://arize-ai.github.io/phoenix/) - `@arizeai/phoenix-otel`, `@arizeai/phoenix-client`, and other TypeScript packages
+- [TypeScript パッケージ](https://arize-ai.github.io/phoenix/) - `@arizeai/phoenix-otel`、`@arizeai/phoenix-client`、およびその他の TypeScript パッケージ

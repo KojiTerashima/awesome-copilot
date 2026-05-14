@@ -1,555 +1,493 @@
-# Architecture Patterns — Backend System, Config, Transport, CLI
+# アーキテクチャ パターン — バックエンド システム、構成、トランスポート、CLI
 
-## Table of Contents
-1. [Backend System (Plugin/Strategy Pattern)](#1-backend-system-pluginstrategy-pattern)
-2. [Config Layer (Settings Dataclass)](#2-config-layer-settings-dataclass)
-3. [Transport Layer (HTTP Client Abstraction)](#3-transport-layer-http-client-abstraction)
-4. [CLI Support](#4-cli-support)
-5. [Backend Injection in Core Client](#5-backend-injection-in-core-client)
-6. [Decision Rules](#6-decision-rules)
+## 目次
+1. [バックエンド システム (プラグイン/戦略パターン)](#1-backend-system-pluginstrategy-pattern)
+2. [構成レイヤー (設定データクラス)](#2-config-layer-settings-dataclass)
+3. [トランスポート層 (HTTP クライアント抽象化)](#3-transport-layer-http-client-abstraction)
+4. [CLI サポート](#4-cli-support)
+5. [コアクライアントでのバックエンドインジェクション](#5-backend-injection-in-core-client)
+6. [決定ルール](#6-決定ルール)
 
 ---
 
-## 1. Backend System (Plugin/Strategy Pattern)
+## 1. バックエンド システム (プラグイン/戦略パターン)
 
-Structure your `backends/` sub-package with a clear base protocol, a zero-dependency default
-implementation, and optional heavy implementations behind extras.
+明確な基本プロトコル、依存関係のないデフォルトを使用して `backends/` サブパッケージを構造化します。
+実装、および追加の背後にあるオプションの重い実装。
 
-### Directory Layout
-
-```
-your_package/
-  backends/
-    __init__.py    # Exports BaseBackend + factory; holds the Protocol/ABC
-    base.py        # Abstract base class (ABC) or Protocol definition
-    memory.py      # Default, zero-dependency in-memory implementation
-    redis.py       # Optional, heavier implementation (guarded by extras)
-```
-
-### `backends/base.py` — Abstract Interface
-
-```python
+### ディレクトリのレイアウト「」
+あなたのパッケージ/
+  バックエンド/
+    __init__.py # BaseBackend + ファクトリをエクスポートします。プロトコル/ABCを保持します
+    base.py # 抽象基本クラス (ABC) またはプロトコル定義
+    Memory.py # デフォルトの依存性ゼロのメモリ内実装
+    redis.py # オプションのより重い実装 (追加機能によって保護されています)
+「」### `backends/base.py` — 抽象インターフェイス「」パイソン
 # your_package/backends/base.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from abc import ABC, abstractmethod
+from abc import ABC、abstractmethod
 
 
-class BaseBackend(ABC):
-    """Abstract storage/processing backend.
+クラスBaseBackend(ABC):
+    """抽象的なストレージ/処理バックエンド。
 
-    All concrete backends must implement these methods.
-    Never import heavy dependencies at module level — guard them inside the class.
-    """
+    すべての具体的なバックエンドはこれらのメソッドを実装する必要があります。
+    モジュール レベルで重い依存関係をインポートしないでください。依存関係はクラス内で保護してください。
+    「」
 
     @abstractmethod
-    def get(self, key: str) -> str | None:
-        """Retrieve a value by key. Return None when the key does not exist."""
+    def get(self, key: str) -> str |なし:
+        """キーによって値を取得します。キーが存在しない場合は None を返します。"""
         ...
 
     @abstractmethod
-    def set(self, key: str, value: str, ttl: int | None = None) -> None:
-        """Store a value with an optional TTL (seconds)."""
+    def set(self, key: str, value: str, ttl: int | None = None) -> なし:
+        """オプションの TTL (秒) を使用して値を保存します。"""
         ...
 
     @abstractmethod
-    def delete(self, key: str) -> None:
-        """Remove a key. No-op when the key does not exist."""
+    def delete(self, key: str) -> なし:
+        """キーを削除します。キーが存在しない場合は何もしません。"""
         ...
 
-    def close(self) -> None:  # noqa: B027  (intentionally non-abstract)
-        """Optional cleanup hook. Override in backends that hold connections."""
-```
-
-### `backends/memory.py` — Default Zero-Dep Implementation
-
-```python
+    def close(self) -> なし: # noqa: B027 (意図的に非抽象化)
+        """オプションのクリーンアップ フック。接続を保持するバックエンドでオーバーライドします。"""
+「」### `backends/memory.py` — デフォルトの Zero-Dep 実装「」パイソン
 # your_package/backends/memory.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-import time
-from collections.abc import Iterator
-from contextlib import contextmanager
-from threading import Lock
+インポート時間
+from collections.abc import イテレータ
+contextlibからcontextmanagerをインポートします
+スレッドインポートロックから
 
-from .base import BaseBackend
+.base インポート BaseBackend から
 
 
-class MemoryBackend(BaseBackend):
-    """Thread-safe in-memory backend. No external dependencies required."""
+クラスMemoryBackend(BaseBackend):
+    """スレッドセーフなメモリ内バックエンド。外部依存関係は必要ありません。"""
 
-    def __init__(self) -> None:
-        self._store: dict[str, tuple[str, float | None]] = {}
-        self._lock = Lock()
+    def __init__(self) -> なし:
+        self._store: dict[str, tuple[str, float |なし]] = {}
+        self._lock = ロック()
 
-    def get(self, key: str) -> str | None:
-        with self._lock:
-            entry = self._store.get(key)
-            if entry is None:
-                return None
-            value, expires_at = entry
-            if expires_at is not None and time.monotonic() > expires_at:
-                del self._store[key]
-                return None
-            return value
+    def get(self, key: str) -> str |なし:
+        self._lock を使用:
+            エントリ = self._store.get(キー)
+            エントリが「なし」の場合:
+                なしを返す
+            値、expires_at = エントリ
+            expires_at が None ではなく、time.monotonic() >expires_at の場合:
+                del self._store[キー]
+                なしを返す
+            戻り値
 
-    def set(self, key: str, value: str, ttl: int | None = None) -> None:
-        expires_at = time.monotonic() + ttl if ttl is not None else None
-        with self._lock:
-            self._store[key] = (value, expires_at)
+    def set(self, key: str, value: str, ttl: int | None = None) -> なし:
+        expires_at = time.monotonic() + ttl でない場合は ttl それ以外は なし
+        self._lock を使用:
+            self._store[key] = (値、expires_at)
 
-    def delete(self, key: str) -> None:
-        with self._lock:
-            self._store.pop(key, None)
-```
-
-### `backends/redis.py` — Optional Heavy Implementation
-
-```python
+    def delete(self, key: str) -> なし:
+        self._lock を使用:
+            self._store.pop(キー、なし)
+「」### `backends/redis.py` — オプションの強力な実装「」パイソン
 # your_package/backends/redis.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from .base import BaseBackend
+.base インポート BaseBackend から
 
 
-class RedisBackend(BaseBackend):
-    """Redis-backed implementation. Requires: pip install your-package[redis]"""
+クラスRedisBackend(BaseBackend):
+    """Redis による実装。必要なもの: pip install your-package[redis]"""
 
-    def __init__(self, url: str = "redis://localhost:6379/0") -> None:
-        try:
-            import redis as _redis
-        except ImportError as exc:
-            raise ImportError(
-                "RedisBackend requires redis. "
-                "Install it with: pip install your-package[redis]"
-            ) from exc
+    def __init__(self, url: str = "redis://localhost:6379/0") -> なし:
+        試してみてください:
+            Redis を _redis としてインポートします
+        ImportError を exc として除く:
+            インポートエラーを発生させる(
+                「RedisBackend には redis が必要です。」
+                「次のようにインストールします: pip install your-package[redis]」
+            ）excから
         self._client = _redis.from_url(url, decode_responses=True)
 
-    def get(self, key: str) -> str | None:
-        return self._client.get(key)  # type: ignore[return-value]
+    def get(self, key: str) -> str |なし:
+        return self._client.get(key) # type:ignore[戻り値]
 
-    def set(self, key: str, value: str, ttl: int | None = None) -> None:
-        if ttl is not None:
-            self._client.setex(key, ttl, value)
-        else:
-            self._client.set(key, value)
+    def set(self, key: str, value: str, ttl: int | None = None) -> なし:
+        ttl が None でない場合:
+            self._client.setex(キー、ttl、値)
+        それ以外の場合:
+            self._client.set(キー, 値)
 
-    def delete(self, key: str) -> None:
-        self._client.delete(key)
+    def delete(self, key: str) -> なし:
+        self._client.delete(キー)
 
-    def close(self) -> None:
+    def close(self) -> なし:
         self._client.close()
-```
-
-### `backends/__init__.py` — Public API + Factory
-
-```python
+「」### `backends/__init__.py` — パブリック API + ファクトリ「」パイソン
 # your_package/backends/__init__.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from .base import BaseBackend
-from .memory import MemoryBackend
+.base インポート BaseBackend から
+.memoryインポートからMemoryBackend
 
 __all__ = ["BaseBackend", "MemoryBackend", "get_backend"]
 
 
-def get_backend(backend_type: str = "memory", **kwargs: object) -> BaseBackend:
-    """Factory: return the requested backend instance.
+def get_backend(backend_type: str = "メモリ", **kwargs: object) -> BaseBackend:
+    """ファクトリ: 要求されたバックエンド インスタンスを返します。
 
-    Args:
-        backend_type: "memory" (default) or "redis".
-        **kwargs: Forwarded to the backend constructor.
-    """
-    if backend_type == "memory":
-        return MemoryBackend()
-    if backend_type == "redis":
-        from .redis import RedisBackend  # Late import — redis is optional
-        return RedisBackend(**kwargs)  # type: ignore[arg-type]
-    raise ValueError(f"Unknown backend type: {backend_type!r}")
-```
+    引数:
+        backend_type: "memory" (デフォルト) または "redis"。
+        **kwargs: バックエンド コンストラクターに転送されます。
+    「」
+    backend_type == "メモリ"の場合:
+        戻りメモリバックエンド()
+    backend_type == "redis"の場合:
+        from .redis import RedisBackend # 遅いインポート — redis はオプションです
+        return RedisBackend(**kwargs) # type:ignore[arg-type]
+    raise ValueError(f"不明なバックエンド タイプ: {backend_type!r}")
+「」---
 
----
+## 2. 構成レイヤー (設定データクラス)
 
-## 2. Config Layer (Settings Dataclass)
+すべての設定を 1 つの `config.py` モジュールに集中させます。魔法値の分散を避け、
+`os.environ` はコードベース全体で呼び出します。
 
-Centralise all configuration in one `config.py` module. Avoid scattering magic values and
-`os.environ` calls across the codebase.
-
-### `config.py`
-
-```python
+### `config.py`「」パイソン
 # your_package/config.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-import os
-from dataclasses import dataclass, field
+OSをインポートする
+データクラスからインポートデータクラス、フィールド
 
 
-@dataclass
-class Settings:
-    """All runtime configuration for your package.
+@データクラス
+クラス設定:
+    """パッケージのすべてのランタイム構成。
 
-    Attributes:
-        api_key:  Authentication credential. Never log or expose this.
-        timeout:  HTTP request timeout in seconds.
-        retries:  Maximum number of retry attempts on transient failures.
-        base_url: API base URL. Override in tests with a local server.
-    """
+    属性:
+        api_key: 認証資格情報。これを決して記録したり公開したりしないでください。
+        timeout: HTTP リクエストのタイムアウト (秒単位)。
+        retries: 一時的な失敗に対する再試行の最大数。
+        base_url: API ベース URL。ローカルサーバーを使用したテストでオーバーライドします。
+    「」
 
-    api_key: str
-    timeout: int = 30
-    retries: int = 3
-    base_url: str = "https://api.example.com/v1"
+    API_キー: str
+    タイムアウト: int = 30
+    再試行: int = 3
+    Base_url: str = "https://api.example.com/v1"
 
-    def __post_init__(self) -> None:
-        if not self.api_key:
-            raise ValueError("api_key must not be empty")
-        if self.timeout < 1:
-            raise ValueError("timeout must be >= 1")
-        if self.retries < 0:
-            raise ValueError("retries must be >= 0")
+    def __post_init__(self) -> なし:
+        self.api_key でない場合:
+            raise ValueError("api_key を空にすることはできません")
+        self.timeout < 1 の場合:
+            raise ValueError("タイムアウトは 1 以上である必要があります")
+        self.retries < 0 の場合:
+            raise ValueError("再試行は 0 以上である必要があります")
 
-    @classmethod
-    def from_env(cls) -> "Settings":
-        """Construct Settings from environment variables.
+    @クラスメソッド
+    def from_env(cls) -> 「設定」:
+        """環境変数から設定を構築します。
 
-        Required env var: YOUR_PACKAGE_API_KEY
-        Optional env vars: YOUR_PACKAGE_TIMEOUT, YOUR_PACKAGE_RETRIES
-        """
+        必要な環境変数: YOUR_PACKAGE_API_KEY
+        オプションの環境変数: YOUR_PACKAGE_TIMEOUT、YOUR_PACKAGE_RETRIES
+        「」
         api_key = os.environ.get("YOUR_PACKAGE_API_KEY", "")
-        timeout = int(os.environ.get("YOUR_PACKAGE_TIMEOUT", "30"))
+        タイムアウト = int(os.environ.get("YOUR_PACKAGE_TIMEOUT", "30"))
         retries = int(os.environ.get("YOUR_PACKAGE_RETRIES", "3"))
-        return cls(api_key=api_key, timeout=timeout, retries=retries)
-```
+        return cls(api_key=api_key、timeout=タイムアウト、retries=再試行)
+「」### Pydantic の使用 (オプション、大規模プロジェクトの場合)「」パイソン
+# your_package/config.py — Pydantic v2 バリアント
+__future__ からアノテーションをインポート
 
-### Using Pydantic (optional, for larger projects)
-
-```python
-# your_package/config.py  — Pydantic v2 variant
-from __future__ import annotations
-
-from pydantic import Field
-from pydantic_settings import BaseSettings
+pydanticインポートフィールドから
+pydantic_settings から BaseSettings をインポート
 
 
-class Settings(BaseSettings):
-    api_key: str = Field(..., min_length=1)
-    timeout: int = Field(30, ge=1)
-    retries: int = Field(3, ge=0)
-    base_url: str = "https://api.example.com/v1"
+クラス設定(BaseSettings):
+    api_key: str = フィールド(..., min_length=1)
+    タイムアウト: int = フィールド(30, ge=1)
+    再試行: int = フィールド(3, ge=0)
+    Base_url: str = "https://api.example.com/v1"
 
     model_config = {"env_prefix": "YOUR_PACKAGE_"}
-```
+「」---
 
----
+## 3. トランスポート層 (HTTP クライアントの抽象化)
 
-## 3. Transport Layer (HTTP Client Abstraction)
+HTTP に関するすべての懸念事項 (ヘッダー、再試行、タイムアウト、エラー解析) を専用のツールで分離します。
+`transport/` サブパッケージ。コア クライアントは、`httpx` ではなく、トランスポート抽象化に依存します。
+または `requests` を直接実行します。
 
-Isolate all HTTP concerns — headers, retries, timeouts, error parsing — in a dedicated
-`transport/` sub-package. The core client depends on the transport abstraction, not on `httpx`
-or `requests` directly.
-
-### Directory Layout
-
-```
-your_package/
-  transport/
-    __init__.py    # Re-exports HttpTransport
-    http.py        # Concrete httpx-based transport
-```
-
-### `transport/http.py`
-
-```python
+### ディレクトリのレイアウト「」
+あなたのパッケージ/
+  輸送/
+    __init__.py # HttpTransport を再エクスポートする
+    http.py # 具体的な httpx ベースのトランスポート
+「」### `transport/http.py`「」パイソン
 # your_package/transport/http.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from typing import Any
+import Any と入力してから
 
-import httpx
+httpx をインポートする
 
-from ..config import Settings
-from ..exceptions import YourPackageError, RateLimitError, AuthenticationError
+..config インポート設定から
+from ..Exceptions import YourPackageError、RateLimitError、AuthenticationError
 
 
-class HttpTransport:
-    """Thin httpx wrapper that centralises auth, retries, and error mapping."""
+クラスHttpTransport：
+    """認証、再試行、エラー マッピングを一元化する薄い httpx ラッパー。"""
 
-    def __init__(self, settings: Settings) -> None:
-        self._settings = settings
+    def __init__(self, settings: 設定) -> なし:
+        self._settings = 設定
         self._client = httpx.Client(
-            base_url=settings.base_url,
-            timeout=settings.timeout,
-            headers={"Authorization": f"Bearer {settings.api_key}"},
-        )
+            Base_url=設定.base_url,
+            タイムアウト=設定.タイムアウト、
+            headers={"認可": f"ベアラー {settings.api_key}"},
+        ）
 
-    def request(
-        self,
-        method: str,
-        path: str,
-        *,
-        json: dict[str, Any] | None = None,
-        params: dict[str, Any] | None = None,
+    デフォルトリクエスト(
+        自分自身、
+        メソッド: str、
+        パス: str、
+        *、
+        json: dict[str, Any] |なし = なし、
+        パラメータ: dict[str, Any] |なし = なし、
     ) -> dict[str, Any]:
-        """Send an HTTP request and return the parsed JSON body.
+        """HTTP リクエストを送信し、解析された JSON 本文を返します。
 
-        Raises:
-            AuthenticationError: on 401.
-            RateLimitError: on 429.
-            YourPackageError: on all other non-2xx responses.
-        """
-        response = self._client.request(method, path, json=json, params=params)
-        self._raise_for_status(response)
-        return response.json()
+        発生するもの:
+            認証エラー: 401。
+            RateLimitError: 429 上。
+            YourPackageError: 他のすべての 2xx 以外の応答。
+        「」
+        応答 = self._client.request(メソッド、パス、json=json、params=params)
+        self._raise_for_status(応答)
+        応答.json() を返す
 
-    def _raise_for_status(self, response: httpx.Response) -> None:
-        if response.status_code == 401:
-            raise AuthenticationError("Invalid or expired API key.")
-        if response.status_code == 429:
-            raise RateLimitError("Rate limit exceeded. Back off and retry.")
-        if response.is_error:
-            raise YourPackageError(
-                f"API error {response.status_code}: {response.text[:200]}"
-            )
+    def _raise_for_status(self, 応答: httpx.Response) -> なし:
+        応答ステータスコード == 401 の場合:
+            raise AuthenticationError("API キーが無効か期限切れです。")
+        応答ステータスコード == 429 の場合:
+            raise RateLimitError("レート制限を超えました。バックオフして再試行してください。")
+        応答がエラーの場合:
+            YourPackageError(
+                f「API エラー {response.status_code}: {response.text[:200]}」
+            ）
 
-    def close(self) -> None:
+    def close(self) -> なし:
         self._client.close()
 
     def __enter__(self) -> "HttpTransport":
-        return self
+        自分を返す
 
-    def __exit__(self, *args: object) -> None:
+    def __exit__(self, *args: object) -> なし:
         self.close()
-```
-
-### Async variant
-
-```python
+「」### 非同期バリアント「」パイソン
 # your_package/transport/async_http.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from typing import Any
+import Any と入力してから
 
-import httpx
+httpx をインポートする
 
-from ..config import Settings
-from ..exceptions import YourPackageError, RateLimitError, AuthenticationError
+..config インポート設定から
+from ..Exceptions import YourPackageError、RateLimitError、AuthenticationError
 
 
-class AsyncHttpTransport:
-    """Async httpx wrapper. Use with `async with AsyncHttpTransport(...) as t:`."""
+クラスAsyncHttpTransport:
+    """非同期 httpx ラッパー。`async with AsyncHttpTransport(...) as t:` とともに使用します。"""
 
-    def __init__(self, settings: Settings) -> None:
-        self._settings = settings
+    def __init__(self, settings: 設定) -> なし:
+        self._settings = 設定
         self._client = httpx.AsyncClient(
-            base_url=settings.base_url,
-            timeout=settings.timeout,
-            headers={"Authorization": f"Bearer {settings.api_key}"},
-        )
+            Base_url=設定.base_url,
+            タイムアウト=設定.タイムアウト、
+            headers={"認可": f"ベアラー {settings.api_key}"},
+        ）
 
-    async def request(
-        self,
-        method: str,
-        path: str,
-        *,
-        json: dict[str, Any] | None = None,
-        params: dict[str, Any] | None = None,
+    非同期定義リクエスト(
+        自分自身、
+        メソッド: str、
+        パス: str、
+        *、
+        json: dict[str, Any] |なし = なし、
+        パラメータ: dict[str, Any] |なし = なし、
     ) -> dict[str, Any]:
-        response = await self._client.request(method, path, json=json, params=params)
-        self._raise_for_status(response)
-        return response.json()
+        response = await self._client.request(メソッド, パス, json=json, params=params)
+        self._raise_for_status(応答)
+        応答.json() を返す
 
-    def _raise_for_status(self, response: httpx.Response) -> None:
-        if response.status_code == 401:
-            raise AuthenticationError("Invalid or expired API key.")
-        if response.status_code == 429:
-            raise RateLimitError("Rate limit exceeded. Back off and retry.")
-        if response.is_error:
-            raise YourPackageError(
-                f"API error {response.status_code}: {response.text[:200]}"
-            )
+    def _raise_for_status(self, 応答: httpx.Response) -> なし:
+        応答ステータスコード == 401 の場合:
+            raise AuthenticationError("API キーが無効か期限切れです。")
+        応答ステータスコード == 429 の場合:
+            raise RateLimitError("レート制限を超えました。バックオフして再試行してください。")
+        応答がエラーの場合:
+            YourPackageError(
+                f「API エラー {response.status_code}: {response.text[:200]}」
+            ）
 
-    async def aclose(self) -> None:
-        await self._client.aclose()
+    async def aclose(self) -> なし:
+        self._client.aclose() を待つ
 
     async def __aenter__(self) -> "AsyncHttpTransport":
-        return self
+        自分を返す
 
-    async def __aexit__(self, *args: object) -> None:
-        await self.aclose()
-```
+    async def __aexit__(self, *args: object) -> なし:
+        self.aclose() を待つ
+「」---
 
----
+## 4. CLI のサポート
 
-## 4. CLI Support
+`pyproject.toml` の `[project.scripts]` を介して CLI エントリ ポイントを追加します。
 
-Add a CLI entry point via `[project.scripts]` in `pyproject.toml`.
-
-### `pyproject.toml` entry
-
-```toml
-[project.scripts]
+### `pyproject.toml` エントリ```トムル
+[プロジェクト.スクリプト]
 your-cli = "your_package.cli:main"
-```
+「」インストール後、ユーザーは端末から直接 `your-cli --help` を実行できます。
 
-After installation, the user can run `your-cli --help` directly from the terminal.
-
-### `cli.py` — Using Click
-
-```python
+### `cli.py` — クリックの使用「」パイソン
 # your_package/cli.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-import sys
+インポートシステム
 
-import click
+インポートをクリック
 
-from .config import Settings
-from .core import YourClient
+.configインポート設定から
+.core インポート YourClient から
 
 
 @click.group()
 @click.version_option()
-def main() -> None:
-    """your-package CLI — interact with the API from the command line."""
+def main() -> なし:
+    """パッケージ CLI — コマンド ラインから API と対話します。"""
 
 
 @main.command()
-@click.option("--api-key", envvar="YOUR_PACKAGE_API_KEY", required=True, help="API key.")
-@click.option("--timeout", default=30, show_default=True, help="Request timeout (s).")
-@click.argument("query")
-def search(api_key: str, timeout: int, query: str) -> None:
-    """Search the API and print results."""
-    settings = Settings(api_key=api_key, timeout=timeout)
-    client = YourClient(settings=settings)
-    try:
-        results = client.search(query)
-        for item in results:
-            click.echo(item)
-    except Exception as exc:
-        click.echo(f"Error: {exc}", err=True)
+@click.option("--api-key", envvar="YOUR_PACKAGE_API_KEY", required=True, help="API キー。")
+@click.option("--timeout"、default=30、show_default=True、help="リクエストタイムアウト(秒)。")
+@click.argument("クエリ")
+def search(api_key: str、タイムアウト: int、クエリ: str) -> なし:
+    """API を検索し、結果を出力します。"""
+    設定 = 設定(api_key=api_key, timeout=タイムアウト)
+    client = YourClient(設定=設定)
+    試してみてください:
+        結果 = client.search(クエリ)
+        結果内のアイテムの場合:
+            click.echo(アイテム)
+    exc としての例外を除く:
+        click.echo(f"エラー: {exc}", err=True)
         sys.exit(1)
-```
-
-### `cli.py` — Using Typer (modern alternative)
-
-```python
+「」### `cli.py` — Typer の使用 (最新の代替手段)「」パイソン
 # your_package/cli.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-import typer
+インポートタイパー
 
-from .config import Settings
-from .core import YourClient
+.configインポート設定から
+.core インポート YourClient から
 
-app = typer.Typer(help="your-package CLI.")
+app = typer.Typer(help="あなたのパッケージ CLI.")
 
 
 @app.command()
-def search(
-    query: str = typer.Argument(..., help="Search query."),
+デフォルト検索(
+    クエリ: str = typer.Argument(..., help="検索クエリ。"),
     api_key: str = typer.Option(..., envvar="YOUR_PACKAGE_API_KEY"),
-    timeout: int = typer.Option(30, help="Request timeout (s)."),
-) -> None:
-    """Search the API and print results."""
-    settings = Settings(api_key=api_key, timeout=timeout)
-    client = YourClient(settings=settings)
-    results = client.search(query)
-    for item in results:
-        typer.echo(item)
+    タイムアウト: int = typer.Option(30, help="リクエストのタイムアウト (秒)。"),
+) -> なし:
+    """API を検索し、結果を出力します。"""
+    設定 = 設定(api_key=api_key, timeout=タイムアウト)
+    client = YourClient(設定=設定)
+    結果 = client.search(クエリ)
+    結果内のアイテムの場合:
+        typer.echo(アイテム)
 
 
-def main() -> None:
-    app()
-```
+def main() -> なし:
+    アプリ()
+「」---
 
----
+## 5. コアクライアントでのバックエンドインジェクション
 
-## 5. Backend Injection in Core Client
-
-**Critical:** always accept `backend` as a constructor argument. Never instantiate the backend
-inside the constructor without a fallback parameter — that makes testing impossible.
-
-```python
+**重要:** は常に `backend` をコンストラクター引数として受け入れます。バックエンドをインスタンス化しないでください
+コンストラクター内でフォールバック パラメーターを使用しないと、テストが不可能になります。「」パイソン
 # your_package/core.py
-from __future__ import annotations
+__future__ からアノテーションをインポート
 
-from .backends.base import BaseBackend
+.backends.base から BaseBackend をインポート
 from .backends.memory import MemoryBackend
-from .config import Settings
+.configインポート設定から
 
 
-class YourClient:
-    """Primary client. Accepts an injected backend for testability.
+クラス YourClient:
+    """プライマリ クライアント。テストを容易にするために、挿入されたバックエンドを受け入れます。
 
-    Args:
-        settings: Resolved configuration. Use Settings.from_env() for production.
-        backend:  Storage/processing backend. Defaults to MemoryBackend when None.
-        timeout:  Deprecated — pass a Settings object instead.
-        retries:  Deprecated — pass a Settings object instead.
-    """
+    引数:
+        設定: 解決された構成。実稼働環境には、Settings.from_env() を使用します。
+        バックエンド: ストレージ/処理バックエンド。 None の場合、デフォルトは MemoryBackend です。
+        タイムアウト: 非推奨 — 代わりに設定オブジェクトを渡します。
+        再試行: 非推奨 — 代わりに設定オブジェクトを渡します。
+    「」
 
     def __init__(
-        self,
-        api_key: str | None = None,
-        *,
-        settings: Settings | None = None,
-        backend: BaseBackend | None = None,
-        timeout: int = 30,
-        retries: int = 3,
-    ) -> None:
-        if settings is None:
-            if api_key is None:
-                raise ValueError("Provide either 'api_key' or 'settings'.")
-            settings = Settings(api_key=api_key, timeout=timeout, retries=retries)
-        self._settings = settings
-        # CORRECT — default injected, not hardcoded
-        self.backend: BaseBackend = backend if backend is not None else MemoryBackend()
+        自分自身、
+        API キー: str |なし = なし、
+        *、
+        設定: 設定 |なし = なし、
+        バックエンド: BaseBackend |なし = なし、
+        タイムアウト: int = 30、
+        再試行: int = 3、
+    ) -> なし:
+        設定が「なし」の場合:
+            api_key が None の場合:
+                raise ValueError("「api_key」または「settings」のいずれかを指定してください。")
+            settings = 設定(api_key=api_key、timeout=タイムアウト、retries=再試行)
+        self._settings = 設定
+        # CORRECT — ハードコードではなく、デフォルトで挿入されます
+        self.backend: BaseBackend = バックエンドが None でない場合はバックエンド、それ以外の場合は MemoryBackend()
 
-    # ... methods
-```
+    # ...メソッド
+「」### アンチパターン — 絶対にやってはいけないこと「」パイソン
+# BAD: バックエンドをハードコーディングします。テスト中に交換することは不可能
+クラス YourClient:
+    def __init__(self, api_key: str) -> なし:
+        self.backend = MemoryBackend() # ← インジェクションは不可能
 
-### Anti-Pattern — Never Do This
+# BAD: インポート内のパッケージ名リテラルをハードコードします。
+from your_package.backends.memory import MemoryBackend # your_package 自体でのみ問題ありません
+# パッケージ内で相対インポートを使用します。
+from .backends.memory import MemoryBackend # ← 正しい
+「」---
 
-```python
-# BAD: hardcodes the backend; impossible to swap in tests
-class YourClient:
-    def __init__(self, api_key: str) -> None:
-        self.backend = MemoryBackend()          # ← no injection possible
-
-# BAD: hardcodes the package name literal in imports
-from your_package.backends.memory import MemoryBackend   # only fine in your_package itself
-# use relative imports inside the package:
-from .backends.memory import MemoryBackend               # ← correct
-```
-
----
-
-## 6. Decision Rules
-
-```
-Does the package interact with external state (cache, DB, queue)?
-├── YES → Add backends/ with BaseBackend + MemoryBackend
-│         Add optional heavy backends behind extras_require
+## 6. 決定ルール「」
+パッケージは外部状態 (キャッシュ、DB、キュー) と対話しますか?
+§── YES → バックエンドを追加/ BaseBackend + MemoryBackend で
+│ extras_require の後ろにオプションの重いバックエンドを追加します
 │
-└── NO → Skip backends/ entirely; keep core.py simple
+└── いいえ → バックエンド/完全にスキップします。 core.py をシンプルにする
 
-Does the package call an external HTTP API?
-├── YES → Add transport/http.py; inject via Settings
+パッケージは外部 HTTP API を呼び出しますか?
+§── はい → Transport/http.py を追加します。設定経由で挿入
 │
-└── NO → Skip transport/
+└── NO → 輸送をスキップ/
 
-Does the package need a command-line interface?
-├── YES, simple (1–3 commands) → Use argparse or click
-│   Add [project.scripts] in pyproject.toml
+パッケージにはコマンドライン インターフェイスが必要ですか?
+§── はい、簡単 (1 ～ 3 コマンド) → argparse を使用するか、
+│ pyproject.tomlに[project.scripts]を追加
 │
-├── YES, complex (sub-commands, plugins) → Use click or typer
+§── はい、複雑（サブコマンド、プラグイン） → クリックまたはタイパーを使用
 │
-└── NO → Skip cli.py
+└── いいえ → cli.py をスキップ
 
-Does runtime behaviour depend on user-supplied config?
-├── YES → Add config.py with Settings dataclass
-│   Expose Settings.from_env() for production use
+実行時の動作はユーザー指定の構成に依存しますか?
+§── YES → 設定データクラスを使用して config.py を追加
+│ 本番環境での使用のために、Settings.from_env() を公開する
 │
-└── NO → Accept params directly in the constructor
-```
+└── NO → コンストラクタ内でパラメータを直接受け入れる
+「」

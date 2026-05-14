@@ -1,11 +1,9 @@
-# Skeleton: 0-assessment.md
+# スケルトン: 0-assesment.md
 
-> **⛔ Copy the template content below VERBATIM (excluding the outer code fence). Replace `[FILL]` placeholders. Do NOT add/rename/reorder sections.**
-> `[FILL]` = single value | `[FILL-PROSE]` = paragraphs | `[REPEAT]...[END-REPEAT]` = N copies | `[CONDITIONAL]...[END-CONDITIONAL]` = include if condition met
+> **⛔ テンプレートの内容を VERBATIM の下にコピーします (外側のコード フェンスを除く)。 `[FILL]` プレースホルダーを置き換えます。セクションを追加/名前変更/並べ替えないでください。**
+> `[FILL]` = 単一の値 | `[FILL-PROSE]` = 段落 | `[REPEAT]...[END-REPEAT]` = N 部 | `[CONDITIONAL]...[END-CONDITIONAL]` = 条件が満たされた場合に含めます
 
----
-
-```markdown
+---```markdown
 # Security Assessment
 
 ---
@@ -257,17 +255,15 @@
 | **CVSS** | CVSS 4.0 vector with `CVSS:4.0/` prefix |
 | **CWE** | Hyperlinked CWE ID (e.g., [CWE-306](https://cwe.mitre.org/data/definitions/306.html)) |
 | **OWASP** | OWASP Top 10:2025 mapping (e.g., A01:2025 – Broken Access Control) |
-```
-
-**Critical format rules baked into this skeleton:**
-- `0-assessment.md` is the FIRST row in Report Files (not `0.1-architecture.md`)
-- `## Analysis Context & Assumptions` uses `&` (never word "and")
-- `---` horizontal rules between EVERY pair of `## ` sections (minimum 6)
-- `### Quick Wins` always present (with fallback note if no low-effort findings)
-- `### Needs Verification` and `### Finding Overrides` always present (even if empty with `—`)
-- References has TWO subsections with THREE-column tables (never flat 2-column)
-- ALL metadata values wrapped in backticks
-- ALL metadata fields present (Model, Analysis Started, Analysis Completed, Duration)
-- Risk Rating heading has NO emojis
-- Action Summary has EXACTLY 4 data rows: Tier 1, Tier 2, Tier 3, Total — NO "Mitigated" or "Platform" rows
-- Git Commit rows include commit date in parentheses: `SHA` (`date`)
+```**このスケルトンに組み込まれた重要な形式ルール:**
+- `0-assessment.md` はレポート ファイルの最初の行です (`0.1-architecture.md` ではありません)
+- `## Analysis Context & Assumptions` は `&` を使用します (「and」という単語は使用しないでください)
+- `## ` セクションのすべてのペア間の `---` 水平ルール (最低 6)
+- `### Quick Wins` は常に存在します (低労力の結果が見つからない場合はフォールバック メモが含まれます)
+- `### Needs Verification` と `### Finding Overrides` は常に存在します (`—` が空の場合でも)
+- 参考文献には 3 列の表を含む 2 つのサブセクションがあります (フラットな 2 列ではありません)。
+- すべてのメタデータ値がバッククォートで囲まれています
+- すべてのメタデータ フィールドが存在します (モデル、分析開始、分析完了、期間)
+- リスク評価の見出しには絵文字がありません
+- アクションの概要には、正確に 4 つのデータ行があります: Tier 1、Tier 2、Tier 3、Total — 「緩和された」行や「プラットフォーム」行はありません
+- Git コミット行には括弧内にコミット日付が含まれます: `SHA` (`date`)

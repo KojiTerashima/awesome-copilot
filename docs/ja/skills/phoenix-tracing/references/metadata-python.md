@@ -1,87 +1,57 @@
-# Phoenix Tracing: Custom Metadata (Python)
+# Phoenix トレース: カスタム メタデータ (Python)
 
-Add custom attributes to spans for richer observability.
+より豊かな可観測性を実現するために、カスタム属性をスパンに追加します。
 
-## Install
-
-```bash
+＃＃ インストール「」バッシュ
 pip install openinference-instrumentation
-```
+「」## セッション「」パイソン
+openinference.instrumentation からのインポート using_session
 
-## Session
-
-```python
-from openinference.instrumentation import using_session
-
-with using_session(session_id="my-session-id"):
-    # Spans get: "session.id" = "my-session-id"
+using_session(session_id="my-session-id") を使用:
+    # スパン取得: "session.id" = "my-session-id"
     ...
-```
+「」## ユーザー「」パイソン
+openinference.instrumentation インポート using_user から
 
-## User
-
-```python
-from openinference.instrumentation import using_user
-
-with using_user("my-user-id"):
-    # Spans get: "user.id" = "my-user-id"
+using_user("my-user-id") を使用:
+    # スパン取得: "user.id" = "my-user-id"
     ...
-```
+「」## メタデータ「」パイソン
+openinference.instrumentation からのインポート using_metadata
 
-## Metadata
-
-```python
-from openinference.instrumentation import using_metadata
-
-with using_metadata({"key": "value", "experiment_id": "exp_123"}):
-    # Spans get: "metadata" = '{"key": "value", "experiment_id": "exp_123"}'
+using_metadata({"key": "value", "experiment_id": "exp_123"}) を使用:
+    # スパン get: "metadata" = '{"key": "value", "experiment_id": "exp_123"}'
     ...
-```
+「」## タグ「」パイソン
+openinference.instrumentation インポート using_tags から
 
-## Tags
-
-```python
-from openinference.instrumentation import using_tags
-
-with using_tags(["tag_1", "tag_2"]):
-    # Spans get: "tag.tags" = '["tag_1", "tag_2"]'
+using_tags(["tag_1", "tag_2"]) を使用:
+    # スパン取得: "tag.tags" = '["tag_1", "tag_2"]'
     ...
-```
+「」## 結合 (using_attributes)「」パイソン
+openinference.instrumentation から import using_attributes
 
-## Combined (using_attributes)
-
-```python
-from openinference.instrumentation import using_attributes
-
-with using_attributes(
-    session_id="my-session-id",
-    user_id="my-user-id",
-    metadata={"environment": "production"},
-    tags=["prod", "v2"],
-    prompt_template="Answer: {question}",
-    prompt_template_version="v1.0",
-    prompt_template_variables={"question": "What is Phoenix?"},
+using_attributes(
+    session_id="私のセッションID",
+    user_id="私のユーザーID",
+    メタデータ={"環境": "本番環境"},
+    タグ=["製品", "v2"],
+    プロンプト_テンプレート="回答: {質問}",
+    プロンプト_テンプレート_バージョン = "v1.0",
+    prompt_template_variables={"質問": "フェニックスとは何ですか?"},
 ):
-    # All attributes applied to spans in this context
+    # このコンテキストでスパンに適用されるすべての属性
     ...
-```
-
-## On a Single Span
-
-```python
-span.set_attribute("metadata", json.dumps({"key": "value"}))
+「」## 単一スパン上「」パイソン
+span.set_attribute("メタデータ", json.dumps({"キー": "値"}))
 span.set_attribute("user.id", "user_123")
 span.set_attribute("session.id", "session_456")
-```
+「」## デコレータとして
 
-## As Decorators
-
-All context managers can be used as decorators:
-
-```python
+すべてのコンテキスト マネージャーはデコレータとして使用できます。「」パイソン
 @using_session(session_id="my-session-id")
-@using_user("my-user-id")
+@using_user("私のユーザーID")
 @using_metadata({"env": "prod"})
 def my_function():
     ...
-```
+「」

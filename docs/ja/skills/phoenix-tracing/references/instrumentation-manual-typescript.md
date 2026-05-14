@@ -1,172 +1,144 @@
-# Manual Instrumentation (TypeScript)
+# 手動インストルメンテーション (TypeScript)
 
-Add custom spans using convenience wrappers or withSpan for fine-grained tracing control.
+コンビニエンス ラッパーまたは withSpan を使用してカスタム スパンを追加し、きめ細かいトレース制御を実現します。
 
-## Setup
-
-```bash
+＃＃ 設定「」バッシュ
 npm install @arizeai/phoenix-otel @arizeai/openinference-core
-```
+「」
 
-```typescript
+```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
-register({ projectName: "my-app" });
-```
+register({ プロジェクト名: "my-app" });
+「」## クイックリファレンス
 
-## Quick Reference
+|スパンの種類 |方法 |使用例 |
+|----------|----------|----------|
+|チェーン | `traceChain` |ワークフロー、パイプライン、オーケストレーション |
+|エージェント | `traceAgent` |多段階の推論、計画 |
+|ツール | `traceTool` |外部 API、関数呼び出し |
+|レトリバー | `withSpan` |ベクトル検索、文書検索 |
+| LLM | `withSpan` | LLM API 呼び出し (自動インストルメンテーションを優先) |
+|埋め込み | `withSpan` |埋め込み生成 |
+|リランカー | `withSpan` |ドキュメントの再ランキング |
+|ガードレール | `withSpan` |安全性チェック、コンテンツ管理 |
+|評価者 | `withSpan` | LLM評価 |
 
-| Span Kind | Method | Use Case |
-|-----------|--------|----------|
-| CHAIN | `traceChain` | Workflows, pipelines, orchestration |
-| AGENT | `traceAgent` | Multi-step reasoning, planning |
-| TOOL | `traceTool` | External APIs, function calls |
-| RETRIEVER | `withSpan` | Vector search, document retrieval |
-| LLM | `withSpan` | LLM API calls (prefer auto-instrumentation) |
-| EMBEDDING | `withSpan` | Embedding generation |
-| RERANKER | `withSpan` | Document re-ranking |
-| GUARDRAIL | `withSpan` | Safety checks, content moderation |
-| EVALUATOR | `withSpan` | LLM evaluation |
+## 便利なラッパー```タイプスクリプト
+import {traceChain、traceAgent、traceTool } from "@arizeai/openinference-core";
 
-## Convenience Wrappers
-
-```typescript
-import { traceChain, traceAgent, traceTool } from "@arizeai/openinference-core";
-
-// CHAIN - workflows
-const pipeline = traceChain(
-  async (query: string) => {
-    const docs = await retrieve(query);
-    return await generate(docs, query);
-  },
-  { name: "rag-pipeline" }
+// CHAIN - ワークフロー
+const パイプライン =traceChain(
+  async (クエリ: 文字列) => {
+    const docs = await 取得(クエリ);
+    return await generated(docs, query);
+  }、
+  { 名前: "ラグパイプライン" }
 );
 
-// AGENT - reasoning
-const agent = traceAgent(
-  async (question: string) => {
+// エージェント - 推論
+const エージェント = トレースエージェント(
+  async (質問: 文字列) => {
     const thought = await llm.generate(`Think: ${question}`);
-    return await processThought(thought);
-  },
-  { name: "my-agent" }
+    return await processThought(思考);
+  }、
+  { 名前: "私のエージェント" }
 );
 
-// TOOL - function calls
-const getWeather = traceTool(
+// TOOL - 関数呼び出し
+const getWeather = トレースツール(
   async (city: string) => fetch(`/api/weather/${city}`).then(r => r.json()),
-  { name: "get-weather" }
+  { 名前: "天気予報" }
 );
-```
-
-## withSpan for Other Kinds
-
-```typescript
+「」## 他の種類の withSpan```タイプスクリプト
 import { withSpan, getInputAttributes, getRetrieverAttributes } from "@arizeai/openinference-core";
 
-// RETRIEVER with custom attributes
-const retrieve = withSpan(
-  async (query: string) => {
-    const results = await vectorDb.search(query, { topK: 5 });
-    return results.map(doc => ({ content: doc.text, score: doc.score }));
-  },
+// カスタム属性を持つ RETRIEVER
+const 取得 = withSpan(
+  async (クエリ: 文字列) => {
+    const results = await VectorDb.search(query, { topK: 5 });
+    return results.map(doc => ({ コンテンツ: doc.text, スコア: doc.score }));
+  }、
   {
-    kind: "RETRIEVER",
-    name: "vector-search",
-    processInput: (query) => getInputAttributes(query),
-    processOutput: (docs) => getRetrieverAttributes({ documents: docs })
+    種類：「レトリバー」、
+    名前: "ベクトル検索"、
+    processInput: (クエリ) => getInputAttributes(クエリ)、
+    processOutput: (docs) => getRetrieverAttributes({ ドキュメント: docs })
   }
 );
-```
-
-**Options:**
-
-```typescript
+「」**オプション:**```タイプスクリプト
 withSpan(fn, {
-  kind: "RETRIEVER",              // OpenInference span kind
-  name: "span-name",              // Span name (defaults to function name)
-  processInput: (args) => {},     // Transform input to attributes
-  processOutput: (result) => {},  // Transform output to attributes
-  attributes: { key: "value" }    // Static attributes
+  kind: "RETRIEVER", // OpenInference スパンの種類
+  name: "span-name", // スパン名 (デフォルトは関数名)
+  processInput: (args) => {}, // 入力を属性に変換します
+  processOutput: (result) => {}, // 出力を属性に変換します
+  属性: { key: "value" } // 静的属性
 });
-```
+「」## 入力/出力のキャプチャ
 
-## Capturing Input/Output
-
-**Always capture I/O for evaluation-ready spans.** Use `getInputAttributes` and `getOutputAttributes` helpers for automatic MIME type detection:
-
-```typescript
-import {
-  getInputAttributes,
-  getOutputAttributes,
-  withSpan,
-} from "@arizeai/openinference-core";
+**評価可能なスパンの I/O を常にキャプチャします。** 自動 MIME タイプ検出には `getInputAttributes` ヘルパーと `getOutputAttributes` ヘルパーを使用します。```タイプスクリプト
+インポート {
+  getInputAttributes、
+  getOutputAttributes、
+  スパン付き、
+「@arizeai/openinference-core」から;
 
 const handleQuery = withSpan(
-  async (userInput: string) => {
-    const result = await agent.generate({ prompt: userInput });
-    return result;
-  },
+  async (userInput: 文字列) => {
+    const result = await Agent.generate({ プロンプト: userInput });
+    結果を返します。
+  }、
   {
-    name: "query.handler",
-    kind: "CHAIN",
-    // Use helpers - automatic MIME type detection
-    processInput: (input) => getInputAttributes(input),
+    名前: "クエリ.ハンドラー"、
+    種類：「チェーン」、
+    // ヘルパーを使用する - 自動 MIME タイプ検出
+    processInput: (入力) => getInputAttributes(入力)、
     processOutput: (result) => getOutputAttributes(result.text),
   }
 );
 
-await handleQuery("What is 2+2?");
-```
-
-**What gets captured:**
-
-```json
+await handleQuery("2+2 とは何ですか?");
+「」**何がキャプチャされるか:**```json
 {
-  "input.value": "What is 2+2?",
-  "input.mime_type": "text/plain",
-  "output.value": "2+2 equals 4.",
-  "output.mime_type": "text/plain"
+  "input.value": "2+2 とは何ですか?",
+  "input.mime_type": "テキスト/プレーン",
+  "output.value": "2+2 は 4 に等しい。",
+  "output.mime_type": "テキスト/プレーン"
 }
-```
+「」**ヘルパーの動作:**
+- 文字列 → `text/plain`
+- オブジェクト/配列 → `application/json` (自動シリアル化)
+- `undefined`/`null` → 属性が設定されていません
 
-**Helper behavior:**
-- Strings → `text/plain`
-- Objects/Arrays → `application/json` (automatically serialized)
-- `undefined`/`null` → No attributes set
+**これが重要な理由:**
+- Phoenix 評価者には `input.value` と `output.value` が必要です
+- Phoenix UI はデバッグ用に I/O を目立つように表示します
+- データセットを微調整するためのデータのエクスポートを可能にします
 
-**Why this matters:**
-- Phoenix evaluators require `input.value` and `output.value`
-- Phoenix UI displays I/O prominently for debugging
-- Enables exporting data for fine-tuning datasets
+### カスタム I/O 処理
 
-### Custom I/O Processing
-
-Add custom metadata alongside standard I/O attributes:
-
-```typescript
+標準 I/O 属性と一緒にカスタム メタデータを追加します。```タイプスクリプト
 const processWithMetadata = withSpan(
-  async (query: string) => {
+  async (クエリ: 文字列) => {
     const result = await llm.generate(query);
-    return result;
-  },
+    結果を返します。
+  }、
   {
-    name: "query.process",
-    kind: "CHAIN",
-    processInput: (query) => ({
-      "input.value": query,
-      "input.mime_type": "text/plain",
-      "input.length": query.length,  // Custom attribute
-    }),
-    processOutput: (result) => ({
-      "output.value": result.text,
-      "output.mime_type": "text/plain",
-      "output.tokens": result.usage?.totalTokens,  // Custom attribute
-    }),
+    名前: "クエリ.プロセス"、
+    種類：「チェーン」、
+    processInput: (クエリ) => ({
+      "input.value": クエリ、
+      "input.mime_type": "テキスト/プレーン",
+      "input.length": query.length, // カスタム属性
+    })、
+    processOutput: (結果) => ({
+      "出力.値": 結果.テキスト、
+      "output.mime_type": "テキスト/プレーン",
+      "output.tokens": result.usage?.totalTokens, // カスタム属性
+    })、
   }
 );
-```
+「」## 関連項目
 
-## See Also
-
-- **Span attributes:** `span-chain.md`, `span-retriever.md`, `span-tool.md`, etc.
-- **Attribute helpers:** https://docs.arize.com/phoenix/tracing/manual-instrumentation-typescript#attribute-helpers
-- **Auto-instrumentation:** `instrumentation-auto-typescript.md` for framework integrations
+- **スパン属性:** `span-chain.md`、`span-retriever.md`、`span-tool.md` など。
+- **属性ヘルパー:** https://docs.arize.com/phoenix/tracing/manual-instrumentation-typescript#attribute-helpers
+- **自動インスツルメンテーション:** `instrumentation-auto-typescript.md` (フレームワーク統合用)

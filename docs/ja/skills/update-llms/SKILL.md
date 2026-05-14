@@ -2,174 +2,167 @@
 name: update-llms
 description: 'Update the llms.txt file in the root folder to reflect changes in documentation or specifications following the llms.txt specification at https://llmstxt.org/'
 ---
+# LLMs.txt ファイルを更新する
 
-# Update LLMs.txt File
+リポジトリのルートにある既存の `llms.txt` ファイルを更新して、ドキュメント、仕様、またはリポジトリ構造の変更を反映します。このファイルは、大規模言語モデル (LLM) に対して、リポジトリの目的と仕様を理解するために関連するコンテンツを見つける場所に関する高度なガイダンスを提供します。
 
-Update the existing `llms.txt` file in the root of the repository to reflect changes in documentation, specifications, or repository structure. This file provides high-level guidance to large language models (LLMs) on where to find relevant content for understanding the repository's purpose and specifications.
+## 主なディレクティブ
 
-## Primary Directive
+現在のリポジトリ構造とコンテンツを反映しながら、精度と llms.txt 仕様への準拠を維持するために、既存の `llms.txt` ファイルを更新します。ファイルは人間が判読できる状態を保ちながら、LLM の使用に合わせて最適化された状態を維持する必要があります。
 
-Update the existing `llms.txt` file to maintain accuracy and compliance with the llms.txt specification while reflecting current repository structure and content. The file must remain optimized for LLM consumption while staying human-readable.
+## 分析と計画フェーズ
 
-## Analysis and Planning Phase
+`llms.txt` ファイルを更新する前に、徹底的な分析を完了する必要があります。
 
-Before updating the `llms.txt` file, you must complete a thorough analysis:
+### ステップ 1: 現在のファイルと仕様を確認する
+- 既存の `llms.txt` ファイルを読んで現在の構造を理解する
+- https://llmstxt.org/ で公式仕様を確認して、継続的なコンプライアンスを確保します。
+- リポジトリの変更に基づいて更新が必要な領域を特定します
 
-### Step 1: Review Current File and Specification
-- Read the existing `llms.txt` file to understand current structure
-- Review the official specification at https://llmstxt.org/ to ensure continued compliance
-- Identify areas that may need updates based on repository changes
+### ステップ 2: リポジトリ構造の分析
+- 適切なツールを使用して現在のリポジトリ構造を調査します。
+- 現在の構造を既存の `llms.txt` に記載されているものと比較します。
+- 含める必要がある新しいディレクトリ、ファイル、またはドキュメントを特定します。
+- 削除または再配置されたファイルを更新する必要があることに注意してください。
 
-### Step 2: Repository Structure Analysis
-- Examine the current repository structure using appropriate tools
-- Compare current structure with what's documented in existing `llms.txt`
-- Identify new directories, files, or documentation that should be included
-- Note any removed or relocated files that need to be updated
+### ステップ 3: コンテンツの検出と変更の検出
+- 新しい README ファイルとその場所を特定する
+- 新しいドキュメント ファイルを検索します (`/docs/`、`/spec/` の `.md` ファイルなど)
+- 新しい仕様ファイルとその目的を見つける
+- 新しい構成ファイルとその関連性を発見する
+- 新しいサンプル ファイルとコード サンプルを見つける
+- 既存のドキュメント構造への変更を特定する
 
-### Step 3: Content Discovery and Change Detection
-- Identify new README files and their locations
-- Find new documentation files (`.md` files in `/docs/`, `/spec/`, etc.)
-- Locate new specification files and their purposes
-- Discover new configuration files and their relevance
-- Find new example files and code samples
-- Identify any changes to existing documentation structure
+### ステップ 4: 更新計画の作成
+分析に基づいて、以下を含む構造化された計画を作成します。
+- 精度を維持するために必要な変更
+- llms.txt に追加される新しいファイル
+- 古い参照は削除または更新されます
+- 明確さを維持するための組織の改善
 
-### Step 4: Create Update Plan
-Based on your analysis, create a structured plan that includes:
-- Changes needed to maintain accuracy
-- New files to be added to the llms.txt
-- Outdated references to be removed or updated
-- Organizational improvements to maintain clarity
+## 実装要件
 
-## Implementation Requirements
+### フォーマットの準拠
+更新された `llms.txt` ファイルは、仕様に従って次の正確な構造を維持する必要があります。1. **H1 ヘッダー**: リポジトリ/プロジェクト名を含む単一行 (必須)
+2. **ブロック引用の概要**: ブロック引用形式での簡単な説明 (オプションですが推奨)
+3. **追加詳細**: コンテキストの見出しのないゼロ個以上のマークダウン セクション
+4. **ファイル リスト セクション**: リンクのマークダウン リストを含む 0 個以上の H2 セクション
 
-### Format Compliance
-The updated `llms.txt` file must maintain this exact structure per the specification:
+### コンテンツ要件
 
-1. **H1 Header**: Single line with repository/project name (required)
-2. **Blockquote Summary**: Brief description in blockquote format (optional but recommended)
-3. **Additional Details**: Zero or more markdown sections without headings for context
-4. **File List Sections**: Zero or more H2 sections containing markdown lists of links
+#### 必須要素
+- **プロジェクト名**: H1 のような明確で説明的なタイトル
+- **概要**: リポジトリの目的を説明する簡潔な引用文
+- **主要ファイル**: カテゴリ別に整理された重要なファイル (H2 セクション)
 
-### Content Requirements
+#### ファイルリンク形式
+各ファイルのリンクは次のとおりにする必要があります: `[descriptive-name](relative-url): optional description`
 
-#### Required Elements
-- **Project Name**: Clear, descriptive title as H1
-- **Summary**: Concise blockquote explaining the repository's purpose
-- **Key Files**: Essential files organized by category (H2 sections)
+#### セクションの組織
+ファイルを次のような論理 H2 セクションに編成します。
+- **ドキュメント**: コアドキュメントファイル
+- **仕様**: 技術仕様と要件
+- **例**: サンプルコードと使用例
+- **構成**: セットアップおよび構成ファイル
+- **オプション**: セカンダリ ファイル (特別な意味 - コンテキストを短くするためにスキップできます)
 
-#### File Link Format
-Each file link must follow: `[descriptive-name](relative-url): optional description`
+### コンテンツガイドライン
 
-#### Section Organization
-Organize files into logical H2 sections such as:
-- **Documentation**: Core documentation files
-- **Specifications**: Technical specifications and requirements
-- **Examples**: Sample code and usage examples
-- **Configuration**: Setup and configuration files
-- **Optional**: Secondary files (special meaning - can be skipped for shorter context)
+#### 言語とスタイル
+- 簡潔、明確、曖昧さのない言葉を使用する
+- 説明のない専門用語は避ける
+- 人間の読者と LLM 読者の両方に向けて書く
+- 説明は具体的かつ有益なものにしてください
 
-### Content Guidelines
+#### ファイル選択基準
+次のようなファイルが含まれます。
+- リポジトリの目的と範囲を説明する
+- 重要な技術文書を提供する
+- 使用例とパターンを示す
+- インターフェースと仕様の定義
+- 構成とセットアップの手順が含まれています
 
-#### Language and Style
-- Use concise, clear, unambiguous language
-- Avoid jargon without explanation
-- Write for both human and LLM readers
-- Be specific and informative in descriptions
+次のようなファイルを除外します。
+- 純粋に実装の詳細です
+- 冗長な情報が含まれている
+- ビルド成果物または生成されたコンテンツである
+- プロジェクトの理解には関係ありません
 
-#### File Selection Criteria
-Include files that:
-- Explain the repository's purpose and scope
-- Provide essential technical documentation
-- Show usage examples and patterns
-- Define interfaces and specifications
-- Contain configuration and setup instructions
+## 実行ステップ
 
-Exclude files that:
-- Are purely implementation details
-- Contain redundant information
-- Are build artifacts or generated content
-- Are not relevant to understanding the project
+### ステップ 1: 現状分析
+1. 既存の `llms.txt` ファイルをよく読んでください。
+2. 現在のリポジトリ構造を完全に調査する
+3. 既存のファイル参照と実際のリポジトリのコンテンツを比較する
+4. 古い参照、欠落している参照、または不正確な参照を特定する
+5. 現在のファイルの構造上の問題に注意してください。
 
-## Execution Steps
+### ステップ 2: コンテンツの計画
+1. 主な目的ステートメントを更新する必要があるかどうかを判断する
+2. 必要に応じて、要約ブロッククォートを確認して更新します
+3. 新しいファイルとディレクトリの追加を計画する
+4. 古くなったコンテンツまたは移動されたコンテンツの削除を計画する
+5. わかりやすくするために、必要に応じてセクションを再編成します。### ステップ 3: ファイルの更新
+1. リポジトリルートにある既存の `llms.txt` ファイルを更新します
+2. 正確な形式仕様への準拠を維持する
+3. 適切な説明を含む新しいファイル参照を追加します。
+4. 古い参照を削除または更新する
+5. すべてのリンクが有効な相対パスであることを確認します。
 
-### Step 1: Current State Analysis
-1. Read the existing `llms.txt` file thoroughly
-2. Examine the current repository structure completely
-3. Compare existing file references with actual repository content
-4. Identify outdated, missing, or incorrect references
-5. Note any structural issues with the current file
+### ステップ 4: 検証
+1. https://llmstxt.org/ 仕様への継続的な準拠を確認します。
+2. すべてのリンクが有効でアクセス可能であることを確認します
+3. ファイルが引き続き有効な LLM ナビゲーション ツールとして機能することを確認します。
+4. ファイルが人間と機械の両方で読み取り可能な状態であることを確認します。
 
-### Step 2: Content Planning
-1. Determine if the primary purpose statement needs updates
-2. Review and update the summary blockquote if needed
-3. Plan additions for new files and directories
-4. Plan removals for outdated or moved content
-5. Reorganize sections if needed for better clarity
+## 品質保証
 
-### Step 3: File Updates
-1. Update the existing `llms.txt` file in the repository root
-2. Maintain compliance with the exact format specification
-3. Add new file references with appropriate descriptions
-4. Remove or update outdated references
-5. Ensure all links are valid relative paths
+### フォーマットの検証
+- ✅ プロジェクト名を含む H1 ヘッダー
+- ✅ ブロッククオートの概要 (含まれている場合)
+- ✅ ファイルリスト用の H2 セクション
+- ✅ 適切なマークダウンリンク形式
+- ✅ 壊れたリンクや無効なリンクはありません
+- ✅ 全体を通して一貫した書式設定
 
-### Step 4: Validation
-1. Verify continued compliance with https://llmstxt.org/ specification
-2. Check that all links are valid and accessible
-3. Ensure the file still serves as an effective LLM navigation tool
-4. Confirm the file remains both human and machine readable
+### コンテンツの検証
+- ✅ 明確で曖昧さのない言語
+- ✅ 重要なファイルを包括的にカバー
+- ✅ コンテンツの論理的な構成
+- ✅ 適切なファイルの説明
+- ✅ 効果的な LLM ナビゲーション ツールとして機能します
 
-## Quality Assurance
+### 仕様への準拠
+- ✅ https://llmstxt.org/ 形式に正確に従います
+- ✅ 必要なマークダウン構造を使用
+- ✅ オプションのセクションを適切に実装します
+- ✅ リポジトリルートにあるファイル (`/llms.txt`)
 
-### Format Validation
-- ✅ H1 header with project name
-- ✅ Blockquote summary (if included)
-- ✅ H2 sections for file lists
-- ✅ Proper markdown link format
-- ✅ No broken or invalid links
-- ✅ Consistent formatting throughout
+## 戦略を更新する
 
-### Content Validation
-- ✅ Clear, unambiguous language
-- ✅ Comprehensive coverage of essential files
-- ✅ Logical organization of content
-- ✅ Appropriate file descriptions
-- ✅ Serves as effective LLM navigation tool
+### 追加プロセス
+新しいコンテンツを追加する場合:
+1. 新しいファイルに適切なセクションを特定します。
+2. リンクに明確でわかりやすい名前を付ける
+3. 簡潔だが有益な説明を書く
+4. セクション内でアルファベット順または論理的な順序を維持する
+5. 新しいコンテンツタイプに新しいセクションが必要かどうかを検討する
 
-### Specification Compliance
-- ✅ Follows https://llmstxt.org/ format exactly
-- ✅ Uses required markdown structure
-- ✅ Implements optional sections appropriately
-- ✅ File located at repository root (`/llms.txt`)
+### 削除プロセス
+古いコンテンツを削除する場合:
+1. ファイルが実際に削除または再配置されていることを確認します
+2. 再配置されたファイルを削除するのではなく更新する必要があるかどうかを確認する
+3. セクションが空になった場合はセクション全体を削除します。
+4. 必要に応じて相互参照を更新します。
 
-## Update Strategy
+### 再編プロセス
+コンテンツを再構築する場合:
+1. 一般的なものから具体的なものへの論理的な流れを維持する
+2. 重要な文書を主要なセクションに保管する
+3. 必要に応じて、二次コンテンツを「オプション」セクションに移動します。
+4. 新しい組織によって LLM ナビゲーションが改善されるようにする
 
-### Addition Process
-When adding new content:
-1. Identify the appropriate section for new files
-2. Create clear, descriptive names for links
-3. Write concise but informative descriptions
-4. Maintain alphabetical or logical ordering within sections
-5. Consider if new sections are needed for new content types
-
-### Removal Process
-When removing outdated content:
-1. Verify files are actually removed or relocated
-2. Check if relocated files should be updated rather than removed
-3. Remove entire sections if they become empty
-4. Update cross-references if needed
-
-### Reorganization Process
-When restructuring content:
-1. Maintain logical flow from general to specific
-2. Keep essential documentation in primary sections
-3. Move secondary content to "Optional" section if appropriate
-4. Ensure new organization improves LLM navigation
-
-Example structure for `llms.txt`:
-
-```txt
+`llms.txt` の構造例:```txt
 # [Repository Name]
 
 > [Concise description of the repository's purpose and scope]
@@ -201,16 +194,14 @@ Example structure for `llms.txt`:
 
 - [Architecture Documentation](docs/architecture.md): Detailed system architecture
 - [Design Decisions](docs/decisions.md): Historical design decision records
-```
+```## 成功基準
 
-## Success Criteria
-
-The updated `llms.txt` file should:
-1. Accurately reflect the current repository structure and content
-2. Maintain compliance with the llms.txt specification
-3. Provide clear navigation to essential documentation
-4. Remove outdated or incorrect references
-5. Include new important files and documentation
-6. Maintain logical organization for easy LLM consumption
-7. Use clear, unambiguous language throughout
-8. Continue to serve both human and machine readers effectively
+更新された `llms.txt` ファイルは次のようになります。
+1. 現在のリポジトリ構造とコンテンツを正確に反映する
+2. llms.txt仕様への準拠を維持する
+3. 重要なドキュメントへの明確なナビゲーションを提供する
+4. 古いまたは間違った参照を削除する
+5. 新しい重要なファイルとドキュメントを含める
+6. LLM を簡単に使用できるように論理構成を維持する
+7. 全体を通して明確で曖昧さのない言葉を使用する
+8.人間と機械の読者の両方に効果的にサービスを提供し続ける

@@ -18,133 +18,126 @@ metadata:
     primaryEnv: FLOWSTUDIO_MCP_TOKEN
     homepage: https://mcp.flowstudio.app
 ---
+# FlowStudio MCP を介した Power Automate
 
-# Power Automate via FlowStudio MCP
+このスキルにより、AI エージェントは Microsoft Power Automate を読み取り、監視し、操作できるようになります。
+クラウド フローは **FlowStudio MCP サーバー** を介してプログラム的にフローします。ブラウザーは必要ありません。
+UI も手動の手順もありません。
 
-This skill lets AI agents read, monitor, and operate Microsoft Power Automate
-cloud flows programmatically through a **FlowStudio MCP server** — no browser,
-no UI, no manual steps.
+> **実際のデバッグ例**: [子フローの式エラー](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/fix-expression-error.md) |
+> [フローのバグではなくデータ入力](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/data-not-flow.md) |
+> [Null 値により子フローがクラッシュする](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/null-child-flow.md)
 
-> **Real debugging examples**: [Expression error in child flow](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/fix-expression-error.md) |
-> [Data entry, not a flow bug](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/data-not-flow.md) |
-> [Null value crashes child flow](https://github.com/ninihen1/power-automate-mcp-skills/blob/main/examples/null-child-flow.md)
-
-> **Requires:** A [FlowStudio](https://mcp.flowstudio.app) MCP subscription (or
-> compatible Power Automate MCP server). You will need:
-> - MCP endpoint: `https://mcp.flowstudio.app/mcp` (same for all subscribers)
-> - API key / JWT token (`x-api-key` header — NOT Bearer)
-> - Power Platform environment name (e.g. `Default-<tenant-guid>`)
+> **必要なもの:** [FlowStudio](https://mcp.flowstudio.app) MCP サブスクリプション (または
+> 互換性のある Power Automate MCP サーバー)。必要なものは次のとおりです。
+> - MCP エンドポイント: `https://mcp.flowstudio.app/mcp` (すべてのサブスクライバで同じ)
+> - API キー / JWT トークン (`x-api-key` ヘッダー — ベアラーではありません)
+> - Power Platform 環境名 (例: `Default-<tenant-guid>`)
 
 ---
 
-## Source of Truth
+## 真実の情報源
 
-| Priority | Source | Covers |
-|----------|--------|--------|
-| 1 | **Real API response** | Always trust what the server actually returns |
-| 2 | **`tools/list`** | Tool names, parameter names, types, required flags |
-| 3 | **SKILL docs & reference files** | Response shapes, behavioral notes, workflow recipes |
+|優先順位 |出典 |カバー |
+|----------|----------|----------|
+| 1 | **実際の API レスポンス** |サーバーが実際に返すものを常に信頼してください。
+| 2 | **@@コード3@@** |ツール名、パラメータ名、タイプ、必要なフラグ |
+| 3 | **SKILL ドキュメントとリファレンス ファイル** |応答形状、動作メモ、ワークフロー レシピ |
 
-> **Start every new session with `tools/list`.**
-> It returns the authoritative, up-to-date schema for every tool — parameter names,
-> types, and required flags. The SKILL docs cover what `tools/list` cannot tell you:
-> response shapes, non-obvious behaviors, and end-to-end workflow patterns.
+> **新しいセッションはすべて `tools/list`.** で開始します
+> すべてのツールの信頼できる最新のスキーマ (パラメーター名、
+> タイプと必要なフラグ。 SKILL ドキュメントでは、`tools/list` が教えてくれないことについて説明しています。
+> 応答形状、非自明な動作、エンドツーエンドのワークフロー パターン。
 >
-> If any documentation disagrees with `tools/list` or a real API response,
-> the API wins.
+> `tools/list` または実際の API 応答と一致しないドキュメントがある場合は、
+> API が勝ちます。
 
 ---
 
-## Recommended Language: Python or Node.js
+## 推奨言語: Python または Node.js
 
-All examples in this skill and the companion build / debug skills use **Python
-with `urllib.request`** (stdlib — no `pip install` needed). **Node.js** is an
-equally valid choice: `fetch` is built-in from Node 18+, JSON handling is
-native, and the async/await model maps cleanly onto the request-response pattern
-of MCP tool calls — making it a natural fit for teams already working in a
-JavaScript/TypeScript stack.
+このスキルと関連するビルド/デバッグ スキルのすべての例では **Python を使用します
+`urllib.request`** を使用します (stdlib — `pip install` は必要ありません)。 **Node.js** は
+同様に有効な選択肢: `fetch` は Node 18 以降から組み込まれており、JSON 処理は
+ネイティブであり、非同期/待機モデルは要求と応答のパターンにきれいにマップされます。
+の MCP ツール呼び出し - すでに作業しているチームに自然に適合します。
+JavaScript/TypeScript スタック。
 
-| Language | Verdict | Notes |
+|言語 |評決 |メモ |
 |---|---|---|
-| **Python** | ✅ Recommended | Clean JSON handling, no escaping issues, all skill examples use it |
-| **Node.js (≥ 18)** | ✅ Recommended | Native `fetch` + `JSON.stringify`/`JSON.parse`; async/await fits MCP call patterns well; no extra packages needed |
-| PowerShell | ⚠️ Avoid for flow operations | `ConvertTo-Json -Depth` silently truncates nested definitions; quoting and escaping break complex payloads. Acceptable for a quick `tools/list` discovery call but not for building or updating flows. |
-| cURL / Bash | ⚠️ Possible but fragile | Shell-escaping nested JSON is error-prone; no native JSON parser |
+| **Python** | ✅ おすすめ |クリーンな JSON 処理、エスケープの問題なし、すべてのスキル例でそれを使用 |
+| **Node.js (≥ 18)** | ✅ おすすめ |ネイティブ `fetch` + `JSON.stringify`/`JSON.parse`; async/await は MCP 呼び出しパターンによく適合します。追加のパッケージは必要ありません |
+|パワーシェル | ⚠️ フロー操作では避ける | `ConvertTo-Json -Depth` は、ネストされた定義を暗黙的に切り捨てます。引用符を付けてエスケープすると、複雑なペイロードが壊れます。 `tools/list` の簡単な検出呼び出しには使用できますが、フローの構築または更新には使用できません。 |
+| cURL / バッシュ | ⚠️ 可能だが壊れやすい |シェルエスケープのネストされた JSON はエラーが発生しやすくなります。ネイティブ JSON パーサーはありません |
 
-> **TL;DR — use the Core MCP Helper (Python or Node.js) below.** Both handle
-> JSON-RPC framing, auth, and response parsing in a single reusable function.
-
----
-
-## What You Can Do
-
-FlowStudio MCP has two access tiers. **FlowStudio for Teams** subscribers get
-both the fast Azure-table store (cached snapshot data + governance metadata) and
-full live Power Automate API access. **MCP-only subscribers** get the live tools —
-more than enough to build, debug, and operate flows.
-
-### Live Tools — Available to All MCP Subscribers
-
-| Tool | What it does |
-|---|---|
-| `list_live_flows` | List flows in an environment directly from the PA API (always current) |
-| `list_live_environments` | List all Power Platform environments visible to the service account |
-| `list_live_connections` | List all connections in an environment from the PA API |
-| `get_live_flow` | Fetch the complete flow definition (triggers, actions, parameters) |
-| `get_live_flow_http_schema` | Inspect the JSON body schema and response schemas of an HTTP-triggered flow |
-| `get_live_flow_trigger_url` | Get the current signed callback URL for an HTTP-triggered flow |
-| `trigger_live_flow` | POST to an HTTP-triggered flow's callback URL (AAD auth handled automatically) |
-| `update_live_flow` | Create a new flow or patch an existing definition in one call |
-| `add_live_flow_to_solution` | Migrate a non-solution flow into a solution |
-| `get_live_flow_runs` | List recent run history with status, start/end times, and errors |
-| `get_live_flow_run_error` | Get structured error details (per-action) for a failed run |
-| `get_live_flow_run_action_outputs` | Inspect inputs/outputs of any action (or every foreach iteration) in a run |
-| `resubmit_live_flow_run` | Re-run a failed or cancelled run using its original trigger payload |
-| `cancel_live_flow_run` | Cancel a currently running flow execution |
-
-### Store Tools — FlowStudio for Teams Subscribers Only
-
-These tools read from (and write to) the FlowStudio Azure table — a monitored
-snapshot of your tenant's flows enriched with governance metadata and run statistics.
-
-| Tool | What it does |
-|---|---|
-| `list_store_flows` | Search flows from the cache with governance flags, run failure rates, and owner metadata |
-| `get_store_flow` | Get full cached details for a single flow including run stats and governance fields |
-| `get_store_flow_trigger_url` | Get the trigger URL from the cache (instant, no PA API call) |
-| `get_store_flow_runs` | Cached run history for the last N days with duration and remediation hints |
-| `get_store_flow_errors` | Cached failed-only runs with failed action names and remediation hints |
-| `get_store_flow_summary` | Aggregated stats: success rate, failure count, avg/max duration |
-| `set_store_flow_state` | Start or stop a flow via the PA API and sync the result back to the store |
-| `update_store_flow` | Update governance metadata (description, tags, monitor flag, notification rules, business impact) |
-| `list_store_environments` | List all environments from the cache |
-| `list_store_makers` | List all makers (citizen developers) from the cache |
-| `get_store_maker` | Get a maker's flow/app counts and account status |
-| `list_store_power_apps` | List all Power Apps canvas apps from the cache |
-| `list_store_connections` | List all Power Platform connections from the cache |
+> **TL;DR — 以下のコア MCP ヘルパー (Python または Node.js) を使用します。** 両方のハンドル
+> 単一の再利用可能な関数での JSON-RPC フレーミング、認証、および応答の解析。
 
 ---
 
-## Which Tool Tier to Call First
+## あなたにできることFlowStudio MCP には 2 つのアクセス層があります。 **FlowStudio for Teams** サブスクライバーは次の特典を獲得できます
+高速な Azure テーブル ストア (キャッシュされたスナップショット データ + ガバナンス メタデータ) と
+完全なライブ Power Automate API アクセス。 **MCP のみのサブスクライバー** はライブ ツールを入手できます —
+フローの構築、デバッグ、操作には十分です。
 
-| Task | Tool | Notes |
+### ライブ ツール — すべての MCP 加入者が利用可能
+
+|ツール |何をするのか |
+|---|---|
+| `list_live_flows` | PA API から直接環境内のフローを一覧表示します (常に最新) |
+| `list_live_environments` |サービス アカウントに表示されるすべての Power Platform 環境を一覧表示します。
+| `list_live_connections` | PA API から環境内のすべての接続をリストする |
+| `get_live_flow` |完全なフロー定義 (トリガー、アクション、パラメーター) を取得します。
+| `get_live_flow_http_schema` | HTTP によってトリガーされるフローの JSON 本文スキーマと応答スキーマを検査する |
+| `get_live_flow_trigger_url` | HTTP によってトリガーされるフローの現在の署名付きコールバック URL を取得します。
+| `trigger_live_flow` | HTTP によってトリガーされるフローのコールバック URL への POST (AAD 認証は自動的に処理されます) |
+| `update_live_flow` | 1 回の呼び出しで新しいフローを作成するか、既存の定義にパッチを適用します。
+| `add_live_flow_to_solution` |非ソリューション フローをソリューションに移行する |
+| `get_live_flow_runs` |最近の実行履歴をステータス、開始/終了時刻、エラーとともに一覧表示します。
+| `get_live_flow_run_error` |失敗した実行の構造化されたエラーの詳細 (アクションごと) を取得する |
+| `get_live_flow_run_action_outputs` |実行中の任意のアクション (またはすべての foreach 反復) の入力/出力を検査します。
+| `resubmit_live_flow_run` |元のトリガー ペイロードを使用して、失敗した実行またはキャンセルされた実行を再実行します。
+| `cancel_live_flow_run` |現在実行中のフロー実行をキャンセルする |
+
+### ストア ツール — Teams サブスクライバー専用の FlowStudio
+
+これらのツールは、FlowStudio Azure テーブル (監視対象テーブル) から読み取り (および書き込み) します。
+ガバナンス メタデータと実行統計で強化されたテナントのフローのスナップショット。
+
+|ツール |何をするのか |
+|---|---|
+| `list_store_flows` |ガバナンス フラグ、実行失敗率、所有者のメタデータを使用してキャッシュからフローを検索します。
+| `get_store_flow` |実行統計やガバナンス フィールドを含む、単一フローのキャッシュされた完全な詳細を取得します。
+| `get_store_flow_trigger_url` |キャッシュからトリガー URL を取得します (即時、PA API 呼び出しなし)。
+| `get_store_flow_runs` |過去 N 日間のキャッシュされた実行履歴 (期間と修復のヒント付き) |
+| `get_store_flow_errors` |キャッシュされた失敗時のみの実行。失敗したアクション名と修復ヒントが含まれます。
+| `get_store_flow_summary` |集計された統計: 成功率、失敗回数、平均/最大継続時間 |
+| `set_store_flow_state` | PA API 経由でフローを開始または停止し、結果をストアに同期します。
+| `update_store_flow` |ガバナンス メタデータの更新 (説明、タグ、監視フラグ、通知ルール、ビジネスへの影響) |
+| `list_store_environments` |キャッシュからすべての環境をリストする |
+| `list_store_makers` |キャッシュからすべてのメーカー (シチズン開発者) をリストします。
+| `get_store_maker` |メーカーのフロー/アプリ数とアカウントのステータスを取得する |
+| `list_store_power_apps` |キャッシュからすべての Power Apps キャンバス アプリを一覧表示する |
+| `list_store_connections` |キャッシュからすべての Power Platform 接続を一覧表示する |
+
+---
+
+## 最初に呼び出すツール層|タスク |ツール |メモ |
 |---|---|---|
-| List flows | `list_live_flows` | Always current — calls PA API directly |
-| Read a definition | `get_live_flow` | Always fetched live — not cached |
-| Debug a failure | `get_live_flow_runs` → `get_live_flow_run_error` | Use live run data |
+|フローのリスト | `list_live_flows` |常に最新 — PA API を直接呼び出します。
+|定義を読む | `get_live_flow` |常にライブでフェッチされます - キャッシュされません |
+|障害をデバッグする | `get_live_flow_runs` → `get_live_flow_run_error` |ライブ実行データを使用する |
 
-> ⚠️ **`list_live_flows` returns a wrapper object** with a `flows` array — access via `result["flows"]`.
+> ⚠️ **`list_live_flows` は、`flows` 配列を含むラッパー オブジェクト**を返します — `result["flows"]` 経由でアクセスします。
 
-> Store tools (`list_store_flows`, `get_store_flow`, etc.) are available to **FlowStudio for Teams** subscribers and provide cached governance metadata. Use live tools when in doubt — they work for all subscription tiers.
+> **FlowStudio for Teams** サブスクライバーはストア ツール (`list_store_flows`、`get_store_flow` など) を利用でき、キャッシュされたガバナンス メタデータを提供します。疑わしい場合はライブ ツールを使用してください。ライブ ツールはすべてのサブスクリプション層で機能します。
 
 ---
 
-## Step 0 — Discover Available Tools
+## ステップ 0 — 利用可能なツールを見つける
 
-Always start by calling `tools/list` to confirm the server is reachable and see
-exactly which tool names are available (names may vary by server version):
-
-```python
+必ず `tools/list` を呼び出してサーバーにアクセスできることを確認してから始めてください。
+使用可能なツール名を正確に示します (名前はサーバーのバージョンによって異なる場合があります)。```python
 import json, urllib.request
 
 TOKEN = "<YOUR_JWT_TOKEN>"
@@ -168,15 +161,11 @@ if "error" in raw:
     print("ERROR:", raw["error"]); raise SystemExit(1)
 for t in raw["result"]["tools"]:
     print(t["name"], "—", t["description"][:60])
-```
+```---
 
----
+## コア MCP ヘルパー (Python)
 
-## Core MCP Helper (Python)
-
-Use this helper throughout all subsequent operations:
-
-```python
+後続のすべての操作を通じてこのヘルパーを使用します。```python
 import json, urllib.request
 
 TOKEN = "<YOUR_JWT_TOKEN>"
@@ -198,20 +187,16 @@ def mcp(tool, args, cid=1):
         raise RuntimeError(f"MCP error: {json.dumps(raw['error'])}")
     text = raw["result"]["content"][0]["text"]
     return json.loads(text)
-```
-
-> **Common auth errors:**
-> - HTTP 401/403 → token is missing, expired, or malformed. Get a fresh JWT from [mcp.flowstudio.app](https://mcp.flowstudio.app).
-> - HTTP 400 → malformed JSON-RPC payload. Check `Content-Type: application/json` and body structure.
-> - `MCP error: {"code": -32602, ...}` → wrong or missing tool arguments.
+```> **一般的な認証エラー:**
+> - HTTP 401/403 → トークンが見つからないか、有効期限が切れているか、形式が不正です。 [mcp.flowstudio.app](https://mcp.flowstudio.app) から新しい JWT を取得します。
+> - HTTP 400 → 不正な形式の JSON-RPC ペイロード。 `Content-Type: application/json` と本文の構造を確認してください。
+> - `MCP error: {"code": -32602, ...}` → ツール引数が間違っているか欠落しています。
 
 ---
 
-## Core MCP Helper (Node.js)
+## コア MCP ヘルパー (Node.js)
 
-Equivalent helper for Node.js 18+ (built-in `fetch` — no packages required):
-
-```js
+Node.js 18 以降の同等のヘルパー (組み込み `fetch` — パッケージは必要ありません):```js
 const TOKEN = "<YOUR_JWT_TOKEN>";
 const MCP   = "https://mcp.flowstudio.app/mcp";
 
@@ -239,16 +224,12 @@ async function mcp(tool, args, cid = 1) {
   if (raw.error) throw new Error(`MCP error: ${JSON.stringify(raw.error)}`);
   return JSON.parse(raw.result.content[0].text);
 }
-```
-
-> Requires Node.js 18+. For older Node, replace `fetch` with `https.request`
-> from the stdlib or install `node-fetch`.
+```> Node.js 18 以降が必要です。古いノードの場合は、`fetch` を `https.request` に置き換えます。
+> stdlib からダウンロードするか、`node-fetch` をインストールします。
 
 ---
 
-## List Flows
-
-```python
+## フローのリストを表示する```python
 ENV = "Default-<tenant-guid>"
 
 result = mcp("list_live_flows", {"environmentName": ENV})
@@ -258,13 +239,9 @@ result = mcp("list_live_flows", {"environmentName": ENV})
 for f in result["flows"]:
     FLOW_ID = f["id"]   # plain UUID — use directly as flowName
     print(FLOW_ID, "|", f["displayName"], "|", f["state"])
-```
+```---
 
----
-
-## Read a Flow Definition
-
-```python
+## フロー定義を読み取る```python
 FLOW = "<flow-uuid>"
 
 flow = mcp("get_live_flow", {"environmentName": ENV, "flowName": FLOW})
@@ -279,13 +256,9 @@ print("Actions:", list(actions.keys()))
 
 # Inspect one action's expression
 print(actions["Compose_Filter"]["inputs"])
-```
+```---
 
----
-
-## Check Run History
-
-```python
+## 実行履歴を確認する```python
 # Most recent runs (newest first)
 runs = mcp("get_live_flow_runs", {"environmentName": ENV, "flowName": FLOW, "top": 5})
 # Returns direct array:
@@ -303,13 +276,9 @@ for r in runs:
 
 # Get the name of the first failed run
 run_id = next((r["name"] for r in runs if r["status"] == "Failed"), None)
-```
+```---
 
----
-
-## Inspect an Action's Output
-
-```python
+## アクションの出力を検査する```python
 run_id = runs[0]["name"]
 
 out = mcp("get_live_flow_run_action_outputs", {
@@ -319,13 +288,9 @@ out = mcp("get_live_flow_run_action_outputs", {
     "actionName": "Get_Customer_Record"   # exact action name from the definition
 })
 print(json.dumps(out, indent=2))
-```
+```---
 
----
-
-## Get a Run's Error
-
-```python
+## 実行エラーを取得する```python
 err = mcp("get_live_flow_run_error", {
     "environmentName": ENV,
     "flowName": FLOW,
@@ -348,42 +313,30 @@ err = mcp("get_live_flow_run_error", {
 # The ROOT cause is usually the deepest entry in failedActions:
 root = err["failedActions"][-1]
 print(f"Root failure: {root['actionName']} → {root['code']}")
-```
+```---
 
----
-
-## Resubmit a Run
-
-```python
+## 実行を再送信する```python
 result = mcp("resubmit_live_flow_run", {
     "environmentName": ENV,
     "flowName": FLOW,
     "runName": run_id
 })
 print(result)   # {"resubmitted": true, "triggerName": "..."}
-```
+```---
 
----
-
-## Cancel a Running Run
-
-```python
+## 実行中の実行をキャンセルする```python
 mcp("cancel_live_flow_run", {
     "environmentName": ENV,
     "flowName": FLOW,
     "runName": run_id
 })
-```
-
-> ⚠️ **Do NOT cancel a run that shows `Running` because it is waiting for an
-> adaptive card response.** That status is normal — the flow is paused waiting
-> for a human to respond in Teams. Cancelling it will discard the pending card.
+```> ⚠️ **`Running` が表示される実行はキャンセルしないでください。
+> アダプティブ カード レスポンス。** そのステータスは正常です。フローは待機中です。
+> 人間が Teams で応答するため。キャンセルすると保留中のカードは破棄されます。
 
 ---
 
-## Full Round-Trip Example — Debug and Fix a Failing Flow
-
-```python
+## 完全なラウンドトリップの例 — 失敗したフローのデバッグと修正```python
 # ── 1. Find the flow ─────────────────────────────────────────────────────
 result = mcp("list_live_flows", {"environmentName": ENV})
 target = next(f for f in result["flows"] if "My Flow Name" in f["displayName"])
@@ -432,32 +385,30 @@ mcp("resubmit_live_flow_run", {"environmentName": ENV, "flowName": FLOW_ID, "run
 import time; time.sleep(30)
 new_runs = mcp("get_live_flow_runs", {"environmentName": ENV, "flowName": FLOW_ID, "top": 1})
 print(new_runs[0]["status"])   # Succeeded = done
-```
+```---
 
----
+## 認証と接続に関する注意事項
 
-## Auth & Connection Notes
-
-| Field | Value |
+|フィールド |値 |
 |---|---|
-| Auth header | `x-api-key: <JWT>` — **not** `Authorization: Bearer` |
-| Token format | Plain JWT — do not strip, alter, or prefix it |
-| Timeout | Use ≥ 120 s for `get_live_flow_run_action_outputs` (large outputs) |
-| Environment name | `Default-<tenant-guid>` (find it via `list_live_environments` or `list_live_flows` response) |
+|認証ヘッダー | `x-api-key: <JWT>` — **違います** `Authorization: Bearer` |
+|トークンの形式 |プレーン JWT — 削除、変更、プレフィックスを付けないでください。
+|タイムアウト | `get_live_flow_run_action_outputs` (大きな出力) には 120 秒以上を使用します。
+|環境名 | `Default-<tenant-guid>` (`list_live_environments` または `list_live_flows` 応答で検索) |
 
 ---
 
-## Reference Files
+## 参照ファイル
 
-- [MCP-BOOTSTRAP.md](references/MCP-BOOTSTRAP.md) — endpoint, auth, request/response format (read this first)
-- [tool-reference.md](references/tool-reference.md) — response shapes and behavioral notes (parameters are in `tools/list`)
-- [action-types.md](references/action-types.md) — Power Automate action type patterns
-- [connection-references.md](references/connection-references.md) — connector reference guide
+- [MCP-BOOTSTRAP.md](references/MCP-BOOTSTRAP.md) — エンドポイント、認証、リクエスト/レスポンスの形式 (最初にお読みください)
+- [tool-reference.md](references/tool-reference.md) — 応答形状と動作メモ (パラメータは `tools/list` にあります)
+- [action-types.md](references/action-types.md) — Power Automate アクション タイプ パターン
+- [connection-references.md](references/connection-references.md) — コネクタ リファレンス ガイド
 
 ---
 
-## More Capabilities
+## さらなる機能
 
-For **diagnosing failing flows** end-to-end → load the `flowstudio-power-automate-debug` skill.
+**失敗したフローを診断**する場合、エンドツーエンド → `flowstudio-power-automate-debug` スキルをロードします。
 
-For **building and deploying new flows** → load the `flowstudio-power-automate-build` skill.
+**新しいフローの構築とデプロイ**の場合 → `flowstudio-power-automate-build` スキルをロードします。

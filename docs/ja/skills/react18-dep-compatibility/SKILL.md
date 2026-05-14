@@ -2,101 +2,94 @@
 name: react18-dep-compatibility
 description: 'React 18.3.1 and React 19 dependency compatibility matrix.'
 ---
+# React の依存関係互換性マトリックス
 
-# React Dependency Compatibility Matrix
+React 18.3.1 および React 19 との互換性に必要な最小バージョン。
 
-Minimum versions required for React 18.3.1 and React 19 compatibility.
+このスキルは、依存関係がターゲットの React バージョンをサポートしているかどうかを確認する場合、ピアの依存関係の競合を解決する場合、`legacy-peer-deps` をアップグレードするか使用するかを決定する場合、または `react-router` v5 から v6 への移行のリスクを評価する場合に使用します。
 
-Use this skill whenever checking whether a dependency supports a target React version, resolving peer dependency conflicts, deciding whether to upgrade or use `legacy-peer-deps`, or assessing the risk of a `react-router` v5 to v6 migration.
+React のアップグレード中に `npm install` を実行する前、および特に同時モードの互換性が影響を受ける可能性がある場合に、npm 依存関係の競合解決を受け入れる前に、このマトリックスを確認してください。
+## コア アップグレード ターゲット
 
-Review this matrix before running `npm install` during a React upgrade and before accepting an npm dependency conflict resolution, especially where concurrent mode compatibility may be affected.
-## Core Upgrade Targets
-
-| Package | React 17 (current) | React 18.3.1 (min) | React 19 (min) | Notes |
+|パッケージ | React 17 (現在) |反応 18.3.1 (分) |反応 19 (分) |メモ |
 |---|---|---|---|---|
-| `react` | 17.x | **18.3.1** | **19.0.0** | Pin exactly to 18.3.1 for the R18 orchestra |
-| `react-dom` | 17.x | **18.3.1** | **19.0.0** | Must match react version exactly |
+| `react` | 17.x | **18.3.1** | **19.0.0** | R18 オーケストラの場合は 18.3.1 に正確にピンを付けます。
+| `react-dom` | 17.x | **18.3.1** | **19.0.0** |反応バージョンと正確に一致する必要があります |
 
-## Testing Libraries
+## ライブラリのテスト
 
-| Package | React 18 Min | React 19 Min | Notes |
+|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `@testing-library/react` | **14.0.0** | **16.0.0** | RTL 13 uses ReactDOM.render internally - broken in R18 |
-| `@testing-library/jest-dom` | **6.0.0** | **6.0.0** | v5 works but v6 has React 18 matcher updates |
-| `@testing-library/user-event` | **14.0.0** | **14.0.0** | v13 is sync, v14 is async - API change required |
-| `jest` | **27.x** | **27.x** | jest 27+ with jsdom 16+ for React 18 |
-| `jest-environment-jsdom` | **27.x** | **27.x** | Must match jest version |
+| `@testing-library/react` | **14.0.0** | **16.0.0** | RTL 13 は内部で ReactDOM.render を使用します - R18 では壊れています |
+| `@testing-library/jest-dom` | **6.0.0** | **6.0.0** | v5 は動作しますが、v6 には React 18 マッチャーのアップデートがあります。
+| `@testing-library/user-event` | **14.0.0** | **14.0.0** | v13 は同期、v14 は非同期 - API の変更が必要 |
+| `jest` | **27.x** | **27.x** | React 18 の jest 27+ と jsdom 16+
+| `jest-environment-jsdom` | **27.x** | **27.x** | jest のバージョンと一致する必要があります |
 
-## Apollo Client
+## アポロクライアント
 
-| Package | React 18 Min | React 19 Min | Notes |
+|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `@apollo/client` | **3.8.0** | **3.11.0** | 3.8 adds `useSyncExternalStore` for concurrent mode |
-| `graphql` | **15.x** | **16.x** | Apollo 3.8+ peer requires graphql 15 or 16 |
+| `@apollo/client` | **3.8.0** | **3.11.0** | 3.8 では、同時モード用に `useSyncExternalStore` が追加されました。
+| `graphql` | **15.x** | **16.x** | Apollo 3.8 以降のピアには、graphql 15 または 16 が必要です。
 
-Read **`references/apollo-details.md`** for concurrent mode issues and MockedProvider changes.
+同時モードの問題と MockedProvider の変更については、**`references/apollo-details.md`** を参照してください。
 
-## Emotion
+## 感情
 
-| Package | React 18 Min | React 19 Min | Notes |
+|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `@emotion/react` | **11.10.0** | **11.13.0** | 11.10 adds React 18 concurrent mode support |
-| `@emotion/styled` | **11.10.0** | **11.13.0** | Must match @emotion/react version |
-| `@emotion/cache` | **11.10.0** | **11.13.0** | If used directly |
+| `@emotion/react` | **11.10.0** | **11.13.0** | 11.10 は React 18 同時モードのサポートを追加します |
+| `@emotion/styled` | **11.10.0** | **11.13.0** | @emotion/react バージョンと一致する必要があります |
+| `@emotion/cache` | **11.10.0** | **11.13.0** |直接使用する場合 |
 
-## React Router
+## 反応ルーター
 
-| Package | React 18 Min | React 19 Min | Notes |
+|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `react-router-dom` | **v6.0.0** | **v6.8.0** | v5 → v6 is a breaking migration - see details below |
-| `react-router-dom` v5 | 5.3.4 (workaround) | ❌ Not supported | See legacy peer deps note |
+| `react-router-dom` | **v6.0.0** | **v6.8.0** | v5 → v6 は重大な移行です - 詳細については以下を参照してください。
+| `react-router-dom` v5 | 5.3.4 (回避策) | ❌ サポートされていません |従来のピアの deps ノート | を参照してください。
 
-**react-router v5 → v6 is a SEPARATE migration sprint.** Read `references/router-migration.md`.
+**react-router v5 → v6 は別個の移行スプリントです。** `references/router-migration.md` を参照してください。
 
-## Redux
+## リダックス
 
-| Package | React 18 Min | React 19 Min | Notes |
+|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `react-redux` | **8.0.0** | **9.0.0** | v7 works on R18 legacy root only - breaks on concurrent mode |
-| `redux` | **4.x** | **5.x** | Redux itself is framework-agnostic - react-redux version matters |
-| `@reduxjs/toolkit` | **1.9.0** | **2.0.0** | RTK 1.9 tested against React 18 |
+| `react-redux` | **8.0.0** | **9.0.0** | v7 は R18 レガシー ルートでのみ動作します - 同時モードでは中断します |
+| `redux` | **4.x** | **5.x** | Redux 自体はフレームワークに依存しません。react-redux のバージョンは重要です。
+| `@reduxjs/toolkit` | **1.9.0** | **2.0.0** | RTK 1.9 は React 18 に対してテスト済み |
 
-## Other Common Packages
-
-| Package | React 18 Min | React 19 Min | Notes |
+## その他の一般的なパッケージ|パッケージ | 18 分で反応 |反応 19 分 |メモ |
 |---|---|---|---|
-| `react-query` / `@tanstack/react-query` | **4.0.0** | **5.0.0** | v3 doesn't support concurrent mode |
-| `react-hook-form` | **7.0.0** | **7.43.0** | v6 has concurrent mode issues |
-| `formik` | **2.2.9** | **2.4.0** | v2.2.9 patched for React 18 |
-| `react-select` | **5.0.0** | **5.8.0** | v4 has peer dep conflicts with R18 |
-| `react-datepicker` | **4.8.0** | **6.0.0** | v4.8+ added React 18 support |
-| `react-dnd` | **16.0.0** | **16.0.0** | v15 and below have R18 concurrent mode issues |
-| `prop-types` | any | any | Standalone - unaffected by React version |
+| `react-query` / `@tanstack/react-query` | **4.0.0** | **5.0.0** | v3 は同時モードをサポートしていません。
+| `react-hook-form` | **7.0.0** | **7.43.0** | v6 には同時モードの問題があります。
+| `formik` | **2.2.9** | **2.4.0** | React 18 用にパッチを適用した v2.2.9 |
+| `react-select` | **5.0.0** | **5.8.0** | v4 には R18 とピア デプロイメントの競合があります。
+| `react-datepicker` | **4.8.0** | **6.0.0** | v4.8+ では React 18 のサポートが追加されました |
+| `react-dnd` | **16.0.0** | **16.0.0** | v15 以前には R18 同時モードの問題があります。
+| `prop-types` |任意 |任意 |スタンドアロン - React バージョンの影響を受けません。
 
 ---
 
-## Conflict Resolution Decision Tree
-
-```
-npm ls shows peer conflict for package X
+## 競合解決デシジョン ツリー「」
+npm ls はパッケージ X のピア競合を示します
          │
          ▼
-Does package X have a version that supports React 18?
-  YES → npm install X@[min-compatible-version]
-  NO  ↓
+パッケージ X には React 18 をサポートするバージョンがありますか?
+  YES → npm install X@[最小互換バージョン]
+  いいえ ↓
          │
-Is the package critical to the app?
-  YES → check GitHub issues for React 18 branch/fork
-      → check if maintainer has a PR open
-      → last resort: --legacy-peer-deps (document why)
-  NO  → consider removing the package
-```
+パッケージはアプリにとって重要ですか?
+  はい → React 18 ブランチ/フォークの GitHub の問題を確認してください
+      → メンテナが PR をオープンしているかどうかを確認する
+      → 最後の手段: --legacy-peer-deps (理由を文書化)
+  いいえ → パッケージの削除を検討してください
+「」## --legacy-peer-deps ルール
 
-## --legacy-peer-deps Rules
+`--legacy-peer-deps` は、次の場合にのみ使用します。
+- パッケージには React 18 と互換性のあるリリースがありません
+- パッケージは積極的に保守されています (放棄されていません)。
+- 競合はpeer dep宣言の不一致のみです(実際のAPIの非互換性ではありません)。
 
-Only use `--legacy-peer-deps` when:
-- The package has no React 18 compatible release
-- The package is actively maintained (not abandoned)
-- The conflict is only a peer dep declaration mismatch (not actual API incompatibility)
-
-**Document every `--legacy-peer-deps` usage** in a comment at the top of package.json or in a MIGRATION.md file explaining why it was necessary.
+**すべての `--legacy-peer-deps` の使用法**を、package.json の先頭にあるコメントまたは MIGRATION.md ファイルに記述して、その必要性を説明します。

@@ -1,11 +1,9 @@
-# Skeleton: threat-inventory.json
+# スケルトン：threat-inventory.json
 
-> **⛔ Use EXACT field names shown below. Common errors: `display_name` (wrong→`display`), `category` (wrong→`stride_category`), `name` (wrong→`title`).**
-> **⛔ The template below is shown inside a code fence for readability only — do NOT include the fence in the output file. The `.json` file must start with `{` on line 1.**
+> **⛔ 以下に示す正確なフィールド名を使用してください。一般的なエラー: `display_name` (誤→`display`)、`category` (誤→`stride_category`)、`name` (誤→`title`)**
+> **⛔ 以下のテンプレートは、読みやすさを目的としてコード フェンス内に示されています。出力ファイルにはフェンスを含めないでください。 `.json` ファイルは、1 行目の `{` で始まる必要があります。**
 
----
-
-```json
+---```json
 {
   "schema_version": "[FILL: 1.0 for standalone, 1.1 for incremental]",
   "report_folder": "[FILL: threat-model-YYYYMMDD-HHmmss]",
@@ -129,11 +127,9 @@
     "findings_by_severity": { "Critical": [FILL], "Important": [FILL], "Moderate": [FILL], "Low": [FILL] }
   }
 }
-```
-
-**MANDATORY field name compliance:**
-- `"display"` — NOT `"display_name"`, `"name"`
-- `"stride_category"` — NOT `"category"` — SINGLE LETTER (S/T/R/I/D/E/A)
-- `"title"` AND `"description"` — both required on every threat
-- `identity_key.component_id` — component link INSIDE identity_key, NOT top-level
-- Sort all arrays deterministically before writing
+```**フィールド名の準拠は必須です:**
+- `"display"` — `"display_name"`、`"name"` ではありません
+- `"stride_category"` — `"category"` ではありません — 単一の文字 (S/T/R/I/D/E/A)
+- `"title"` および `"description"` — すべての脅威で両方が必要です
+- `identity_key.component_id` — 最上位ではなく、identity_key 内のコンポーネント リンク
+- 書き込む前にすべての配列を決定的にソートします

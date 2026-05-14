@@ -1,115 +1,97 @@
-# Single Context Migration - Complete Before/After
+# 単一コンテキストの移行 - 前後の完了
 
-## Full Example: ThemeContext
+## 完全な例: ThemeContext
 
-This covers the most common pattern - one context with one provider and multiple consumers.
+これは、1 つのプロバイダーと複数のコンシューマーを持つ 1 つのコンテキストという、最も一般的なパターンをカバーしています。
 
 ---
 
-### Step 1 - Before State (Legacy)
+### ステップ 1 - 前の状態 (レガシー)
 
-**ThemeProvider.js (provider):**
-
-```jsx
-import PropTypes from 'prop-types';
+**ThemeProvider.js (プロバイダー):**```jsx
+'prop-types' から PropTypes をインポートします。
 
 class ThemeProvider extends React.Component {
-  static childContextTypes = {
-    theme: PropTypes.string,
-    toggleTheme: PropTypes.func,
+  静的 childContextTypes = {
+    テーマ: PropTypes.string、
+    トグルテーマ: PropTypes.func、
   };
 
-  state = { theme: 'light' };
+  状態 = { テーマ: 'ライト' };
 
   toggleTheme = () => {
-    this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+    this.setState(s => ({ テーマ: s.theme === 'ライト' ? 'ダーク' : 'ライト' }));
   };
 
   getChildContext() {
-    return {
-      theme: this.state.theme,
-      toggleTheme: this.toggleTheme,
+    戻り値 {
+      テーマ: this.state.theme、
+      トグルテーマ: this.toggleTheme、
     };
   }
 
   render() {
-    return this.props.children;
+    this.props.children を返します。
   }
 }
-```
-
-**ThemedButton.js (class consumer):**
-
-```jsx
-import PropTypes from 'prop-types';
+「」**ThemedButton.js (クラスコンシューマ):**```jsx
+'prop-types' から PropTypes をインポートします。
 
 class ThemedButton extends React.Component {
-  static contextTypes = {
-    theme: PropTypes.string,
-    toggleTheme: PropTypes.func,
+  静的 contextTypes = {
+    テーマ: PropTypes.string、
+    トグルテーマ: PropTypes.func、
   };
 
   render() {
-    const { theme, toggleTheme } = this.context;
-    return (
+    const {テーマ、toggleTheme } = this.context;
+    戻る (
       <button className={`btn btn-${theme}`} onClick={toggleTheme}>
-        Toggle Theme
-      </button>
+        テーマの切り替え
+      </ボタン>
     );
   }
 }
-```
+「」**ThemedHeader.js (関数コンシューマー - 存在する場合):**```jsx
+// 関数コンポーネントはレガシーコンテキストをきれいに使用できませんでした
+// クラスラッパーを使用するか、プロップをレンダリングする必要がありました
+「」---
 
-**ThemedHeader.js (function consumer - if any):**
+### ステップ 2 - コンテキスト ファイルの作成
 
-```jsx
-// Function components couldn't use legacy context cleanly
-// They had to use a class wrapper or render prop
-```
+**src/contexts/ThemeContext.js (新しいファイル):**```jsx
+「react」から React をインポートします。
 
----
-
-### Step 2 - Create Context File
-
-**src/contexts/ThemeContext.js (new file):**
-
-```jsx
-import React from 'react';
-
-// Default value matches the shape of getChildContext() return
-export const ThemeContext = React.createContext({
-  theme: 'light',
-  toggleTheme: () => {},
+// デフォルト値は getChildContext() の形状と一致します。
+エクスポート const ThemeContext = React.createContext({
+  テーマ：「光」、
+  トグルテーマ: () => {},
 });
 
-// Named export for the context - both provider and consumers import from here
-```
+// コンテキストの名前付きエクスポート - プロバイダーとコンシューマーの両方がここからインポートします
+「」---
 
----
+### ステップ 3 - プロバイダーの更新
 
-### Step 3 - Update Provider
-
-**ThemeProvider.js (after):**
-
-```jsx
-import React from 'react';
-import { ThemeContext } from '../contexts/ThemeContext';
+**ThemeProvider.js (後):**```jsx
+「react」から React をインポートします。
+import { ThemeContext } から '../contexts/ThemeContext';
 
 class ThemeProvider extends React.Component {
-  state = { theme: 'light' };
+  状態 = { テーマ: 'ライト' };
 
   toggleTheme = () => {
-    this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+    this.setState(s => ({ テーマ: s.theme === 'ライト' ? 'ダーク' : 'ライト' }));
   };
 
   render() {
-    // React 19 JSX shorthand: <ThemeContext value={...}>
+    // React 19 JSX の略記: <ThemeContext value={...}>
     // React 18: <ThemeContext.Provider value={...}>
-    return (
+    戻る (
       <ThemeContext.Provider
-        value={{
-          theme: this.state.theme,
-          toggleTheme: this.toggleTheme,
+        値={{
+          テーマ: this.state.theme、
+          トグルテーマ: this.toggleTheme、
         }}
       >
         {this.props.children}
@@ -118,80 +100,68 @@ class ThemeProvider extends React.Component {
   }
 }
 
-export default ThemeProvider;
-```
-
-> **React 19 note:** In React 19 you can write `<ThemeContext value={...}>` directly (no `.Provider`). For React 18.3.1 use `<ThemeContext.Provider value={...}>`.
+デフォルトのThemeProviderをエクスポートします。
+「」> **React 19 の注意:** React 19 では、`<ThemeContext value={...}>` を直接書くことができます (`.Provider` は不可)。 React 18.3.1 の場合は `<ThemeContext.Provider value={...}>` を使用します。
 
 ---
 
-### Step 4 - Update Class Consumer
+### ステップ 4 - クラス コンシューマを更新する
 
-**ThemedButton.js (after):**
-
-```jsx
-import React from 'react';
-import { ThemeContext } from '../contexts/ThemeContext';
+**ThemedButton.js (後):**```jsx
+「react」から React をインポートします。
+import { ThemeContext } から '../contexts/ThemeContext';
 
 class ThemedButton extends React.Component {
-  // singular contextType (not contextTypes)
-  static contextType = ThemeContext;
+  // 単数の contextType (contextTypes ではありません)
+  静的 contextType = ThemeContext;
 
   render() {
-    const { theme, toggleTheme } = this.context;
-    return (
+    const {テーマ、toggleTheme } = this.context;
+    戻る (
       <button className={`btn btn-${theme}`} onClick={toggleTheme}>
-        Toggle Theme
-      </button>
+        テーマの切り替え
+      </ボタン>
     );
   }
 }
 
-export default ThemedButton;
-```
+デフォルトのテーマボタンをエクスポートします。
+「」**レガシーとの主な違い:**
 
-**Key differences from legacy:**
-
-- `static contextType` (singular) not `contextTypes` (plural)
-- No PropTypes declaration needed
-- `this.context` is the full value object (not a partial - whatever you passed to `value`)
-- Only ONE context per class component via `contextType` - use `Context.Consumer` render prop for multiple
+- `contextTypes` (複数形) ではなく `static contextType` (単数形)
+- PropTypes 宣言は必要ありません
+- `this.context` は完全な値オブジェクトです (`value` に渡したものは部分的なものではありません)。
+- `contextType` を介してクラス コンポーネントごとに 1 つのコンテキストのみ - 複数の場合は `Context.Consumer` レンダー プロップを使用
 
 ---
 
-### Step 5 - Update Function Consumer
+### ステップ 5 - 関数コンシューマを更新する
 
-**ThemedHeader.js (after - now straightforward with hooks):**
+**ThemedHeader.js (後 - フックを使用して簡単になりました):**```jsx
+import { useContext } から 'react';
+import { ThemeContext } から '../contexts/ThemeContext';
 
-```jsx
-import { useContext } from 'react';
-import { ThemeContext } from '../contexts/ThemeContext';
-
-function ThemedHeader({ title }) {
-  const { theme } = useContext(ThemeContext);
-  return <h1 className={`header-${theme}`}>{title}</h1>;
+function ThemedHeader({ タイトル }) {
+  const {テーマ} = useContext(ThemeContext);
+  <h1 className={`header-${theme}`}>{title}</h1> を返します。
 }
-```
+「」---
 
----
+### ステップ 6 - 1 つのクラス コンポーネント内の複数のコンテキスト
 
-### Step 6 - Multiple Contexts in One Class Component
-
-If a class component consumed more than one legacy context, it gets complex. Class components can only have one `static contextType`. For multiple contexts, use the render prop form:
-
-```jsx
-import { ThemeContext } from '../contexts/ThemeContext';
-import { AuthContext } from '../contexts/AuthContext';
+クラス コンポーネントが複数のレガシー コンテキストを消費する場合、クラス コンポーネントは複雑になります。クラス コンポーネントには `static contextType` を 1 つだけ含めることができます。複数のコンテキストの場合は、render prop フォームを使用します。```jsx
+import { ThemeContext } から '../contexts/ThemeContext';
+import { AuthContext } から '../contexts/AuthContext';
 
 class Dashboard extends React.Component {
   render() {
-    return (
+    戻る (
       <ThemeContext.Consumer>
-        {({ theme }) => (
+        {({ テーマ }) => (
           <AuthContext.Consumer>
-            {({ user }) => (
+            {({ ユーザー }) => (
               <div className={`dashboard-${theme}`}>
-                Welcome, {user.name}
+                ようこそ、{user.name}
               </div>
             )}
           </AuthContext.Consumer>
@@ -200,25 +170,19 @@ class Dashboard extends React.Component {
     );
   }
 }
-```
-
-Or consider migrating the class component to a function component to use `useContext` cleanly.
+「」または、`useContext` をクリーンに使用するために、クラス コンポーネントを関数コンポーネントに移行することを検討してください。
 
 ---
 
-### Verification Checklist
+### 検証チェックリスト
 
-After migrating one context:
-
-```bash
-# Provider - no legacy context exports remain
+1 つのコンテキストを移行した後:「」バッシュ
+# プロバイダー - 従来のコンテキストのエクスポートは残りません
 grep -n "childContextTypes\|getChildContext" src/ThemeProvider.js
 
-# Consumers - no legacy context consumption remains
+# Consumers - レガシーコンテキストの消費は残りません
 grep -rn "contextTypes\s*=" src/ --include="*.js" --include="*.jsx" | grep -v "ThemeContext\|\.test\."
 
-# this.context usage - confirm it reads from contextType not legacy
-grep -rn "this\.context\." src/ --include="*.js" | grep -v "\.test\."
-```
-
-Each should return zero hits for the migrated context.
+# this.context の使用法 - レガシーではなく contextType から読み取られていることを確認します
+grep -rn "この\.context\." src/ --include="*.js" | grep -v "\.test\."
+「」それぞれが、移行されたコンテキストに対してゼロのヒットを返す必要があります。

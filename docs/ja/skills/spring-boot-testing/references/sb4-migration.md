@@ -1,84 +1,54 @@
-# Spring Boot 4.0 Migration
+# Spring Boot 4.0 への移行
 
-Key testing changes when migrating from Spring Boot 3.x to 4.0.
+Spring Boot 3.x から 4.0 に移行する際の主要なテストの変更。
 
-## Dependency Changes
+## 依存関係の変更
 
-### Modular Test Starters
+### モジュール式テストスターター
 
-Spring Boot 4.0 introduces modular test starters:
+Spring Boot 4.0 では、モジュラー テスト スターターが導入されています。
 
-**Before (3.x):**
-
-```xml
+**以前 (3.x):**```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-test</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-**After (4.0) - WebMvc Testing:**
-
-```xml
+```**(4.0) 以降 - WebMvc テスト:**```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-webmvc-test</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-**After (4.0) - REST Client Testing:**
-
-```xml
+```**(4.0) 後 - REST クライアント テスト:**```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-restclient-test</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-## Annotation Migration
+```## アノテーションの移行
 
 ### @MockBean → @MockitoBean
 
-**Deprecated (3.x):**
-
-```java
+**非推奨 (3.x):**```java
 @MockBean
 private OrderService orderService;
-```
-
-**New (4.0):**
-
-```java
+```**新機能 (4.0):**```java
 @MockitoBean
 private OrderService orderService;
-```
+```### @SpyBean → @MockitoSpyBean
 
-### @SpyBean → @MockitoSpyBean
-
-**Deprecated (3.x):**
-
-```java
+**非推奨 (3.x):**```java
 @SpyBean
 private PaymentGatewayClient paymentClient;
-```
-
-**New (4.0):**
-
-```java
+```**新機能 (4.0):**```java
 @MockitoSpyBean
 private PaymentGatewayClient paymentClient;
-```
-
-## New Testing Features
+```## 新しいテスト機能
 
 ### RestTestClient
 
-Replaces TestRestTemplate (deprecated):
-
-```java
+TestRestTemplate を置き換えます (非推奨):```java
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class OrderIntegrationTest {
@@ -99,37 +69,25 @@ class OrderIntegrationTest {
       .location("/orders/1");
   }
 }
-```
+```## JUnit 6 のサポート
 
-## JUnit 6 Support
+Spring Boot 4.0 はデフォルトで JUnit 6 を使用します。
 
-Spring Boot 4.0 uses JUnit 6 by default:
+- JUnit 4 は非推奨になりました (一時的に JUnit Vintage を使用してください)
+- JUnit 5 のすべての機能は引き続き動作します
+- クリーンな移行のために JUnit 4 の依存関係を削除
 
-- JUnit 4 is deprecated (use JUnit Vintage temporarily)
-- All JUnit 5 features still work
-- Remove JUnit 4 dependencies for clean migration
+## テストコンテナ 2.0
 
-## Testcontainers 2.0
+モジュールの名前が変更されました:
 
-Module naming changed:
-
-**Before (1.x):**
-
-```xml
+**以前 (1.x):**```xml
 <artifactId>postgresql</artifactId>
-```
-
-**After (2.0):**
-
-```xml
+```**(2.0) 以降:**```xml
 <artifactId>testcontainers-postgresql</artifactId>
-```
+```## 非シングルトン Bean モッキング
 
-## Non-Singleton Bean Mocking
-
-Spring Framework 7 allows mocking prototype-scoped beans:
-
-```java
+Spring Framework 7 では、プロトタイプ スコープの Bean のモックが可能です。```java
 @Component
 @Scope("prototype")
 public class OrderProcessor { }
@@ -139,43 +97,33 @@ class OrderServiceTest {
   @MockitoBean
   private OrderProcessor orderProcessor; // Now works!
 }
-```
+```## SpringExtension コンテキストの変更
 
-## SpringExtension Context Changes
+拡張コンテキストはデフォルトでテストメソッドスコープになりました。
 
-Extension context is now test-method scoped by default.
-
-If tests fail with @Nested classes:
-
-```java
+@Nested クラスでテストが失敗した場合:```java
 @SpringExtensionConfig(useTestClassScopedExtensionContext = true)
 @SpringBootTest
 class OrderTest {
   // Use old behavior
 }
-```
+```## 移行チェックリスト
 
-## Migration Checklist
+- [ ] @MockBean を @MockitoBean に置き換えます
+- [ ] @SpyBean を @MockitoSpyBean に置き換えます
+- [ ] Testcontainers の依存関係を 2.0 の名前付けに更新します
+- [ ] 必要に応じてモジュラー テスト スターターを追加します
+- [ ] TestRestTemplate を RestTestClient に移行する
+- [ ] JUnit 4 の依存関係を削除します。
+- [ ] カスタム TestExecutionListener 実装を更新します
+- [ ] @Nested クラスの動作をテストする
 
-- [ ] Replace @MockBean with @MockitoBean
-- [ ] Replace @SpyBean with @MockitoSpyBean
-- [ ] Update Testcontainers dependencies to 2.0 naming
-- [ ] Add modular test starters as needed
-- [ ] Migrate TestRestTemplate to RestTestClient
-- [ ] Remove JUnit 4 dependencies
-- [ ] Update custom TestExecutionListener implementations
-- [ ] Test @Nested class behavior
+## 下位互換性
 
-## Backward Compatibility
-
-Use "classic" starters for gradual migration:
-
-```xml
+段階的な移行には「クラシック」スターターを使用します。```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-test-classic</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-This provides old behavior while you migrate incrementally.
+```これにより、段階的に移行する際に古い動作が提供されます。

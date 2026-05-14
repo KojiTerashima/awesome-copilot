@@ -1,56 +1,50 @@
-# Push Protection Reference
+# プッシュ保護リファレンス
 
-Detailed reference for GitHub push protection — preventing secrets from reaching repositories, bypass workflows, and delegated bypass configuration.
+GitHub プッシュ保護の詳細なリファレンス — シークレットがリポジトリに到達するのを防ぎ、ワークフローをバイパスし、委任されたバイパス構成を防止します。
 
-## How Push Protection Works
+## プッシュ保護の仕組み
 
-Push protection scans for secrets during the push process and blocks pushes containing detected secrets. It operates as a preventative control, unlike standard secret scanning which detects secrets after commit.
+プッシュ保護は、プッシュ プロセス中にシークレットをスキャンし、検出されたシークレットを含むプッシュをブロックします。これは、コミット後にシークレットを検出する標準のシークレット スキャンとは異なり、予防的な制御として機能します。
 
-### What Gets Scanned
+### スキャンされるもの
 
-| Surface | Scanned |
+|表面 |スキャン済み |
 |---|---|
-| Command line pushes | ✅ |
-| GitHub UI commits | ✅ |
-| File uploads to repo | ✅ |
-| REST API content creation requests | ✅ |
+|コマンドラインで | をプッシュします。 ✅ |
+| GitHub UI コミット | ✅ |
+|リポジトリへのファイルのアップロード | ✅ |
+| REST API コンテンツ作成リクエスト | ✅ |
 
-### Types of Push Protection
+### プッシュ保護の種類
 
-**Repository push protection:**
-- Requires GitHub Secret Protection enabled
-- Disabled by default; enabled by repo admin, org owner, or security manager
-- Generates alerts for bypasses in the Security tab
-- Can be enabled at repository, organization, or enterprise level
+**リポジトリ プッシュ保護:**
+- GitHub Secret Protection を有効にする必要があります
+- デフォルトでは無効になっています。リポジトリ管理者、組織所有者、またはセキュリティマネージャーによって有効化されます
+- [セキュリティ]タブでバイパスに関するアラートを生成します
+- リポジトリ、組織、またはエンタープライズ レベルで有効化可能
 
-**User push protection:**
-- Enabled by default for all GitHub.com accounts
-- Blocks pushes to public repositories containing supported secrets
-- Does NOT generate alerts when bypassed (unless repo also has push protection enabled)
-- Managed via personal account settings
+**ユーザープッシュ保護:**
+- すべての GitHub.com アカウントに対してデフォルトで有効になります
+- サポートされているシークレットを含むパブリック リポジトリへのプッシュをブロックします
+- バイパス時にアラートは生成されません (リポジトリでもプッシュ保護が有効になっていない限り)
+- 個人アカウント設定で管理
 
-## Resolving Blocked Pushes — Command Line
+## ブロックされたプッシュの解決 — コマンドライン
 
-When push protection blocks a push, the error message includes:
-- The secret type detected
-- Commit SHAs containing the secret
-- File paths and line numbers
-- A URL to bypass (if permitted)
+プッシュ保護がプッシュをブロックすると、次のようなエラー メッセージが表示されます。
+- 検出されたシークレットのタイプ
+- シークレットを含む SHA をコミットします
+- ファイルパスと行番号
+- バイパスする URL (許可されている場合)
 
-### Remove Secret from Latest Commit
-
-```bash
+### 最新のコミットからシークレットを削除```bash
 # Edit the file to remove the secret
 # Amend the commit
 git commit --amend --all
 
 # Push again
 git push
-```
-
-### Remove Secret from Earlier Commits
-
-```bash
+```### 以前のコミットからシークレットを削除する```bash
 # 1. Review the push error for all commits containing the secret
 # 2. Find the earliest commit with the secret
 git log
@@ -69,96 +63,92 @@ git rebase --continue
 
 # 8. Push
 git push
-```
+```### プッシュ保護のバイパス
 
-### Bypass Push Protection
+1. エラー メッセージにある URL にアクセスします (プッシュしたユーザーと同じである必要があります)
+2. 理由を選択します。
+   - **テストで使用されています** → クローズ済みアラートを作成します (「テストで使用されている」として解決されます)
+   - **これは誤検知です** → クローズ済みアラートを作成します (「誤検知」として解決されます)
+   - **後で修正します** → 未解決アラートを作成します
+3. [**このシークレットのプッシュを許可します**] をクリックします。
+4. **3 時間**以内に再プッシュします (その後、バイパスプロセスを繰り返します)
 
-1. Visit the URL from the error message (must be the same user who pushed)
-2. Select a reason:
-   - **It's used in tests** → creates a closed alert (resolved as "used in tests")
-   - **It's a false positive** → creates a closed alert (resolved as "false positive")
-   - **I'll fix it later** → creates an open alert
-3. Click **Allow me to push this secret**
-4. Re-push within **3 hours** (after that, repeat the bypass process)
+> リポジトリでシークレット スキャンが有効になっている場合は、バイパス理由が必要です。ユーザー プッシュ保護のみ (リポジトリ プッシュ保護なし) を持つパブリック リポジトリの場合、理由は必要なく、アラートは生成されません。
 
-> A bypass reason is required when the repo has secret scanning enabled. For public repos with only user push protection (no repo push protection), no reason is needed and no alert is generated.
+## ブロックされたプッシュの解決 — GitHub UI
 
-## Resolving Blocked Pushes — GitHub UI
+GitHub UI でファイルを作成または編集する場合:
+1. 検出されたシークレットについて警告するバナーが表示されます
+2. シークレットを削除するかバイパスするオプションがインラインで表示されます
+3. コマンドラインと同じバイパス理由が適用されます。
 
-When creating or editing a file in the GitHub UI:
-1. A banner appears warning about the detected secret
-2. Options to remove the secret or bypass are presented inline
-3. Same bypass reasons apply as command line
+## ブロックされたプッシュの解決 — REST API
 
-## Resolving Blocked Pushes — REST API
+プッシュ保護は、REST API コンテンツ作成エンドポイントにも適用されます。ブロックされた場合:
+- API は、検出されたシークレットに関する詳細を含むエラー応答を返します。
+- 続行するリクエストにバイパスの理由を含めます
 
-Push protection also applies to REST API content creation endpoints. When blocked:
-- The API returns an error response with details about the detected secret
-- Include the bypass reason in the request to proceed
+## 委任されたバイパス
 
-## Delegated Bypass
+委任されたバイパスにより、組織は誰がプッシュ保護をバイパスできるかをきめ細かく制御できます。
 
-Delegated bypass gives organizations fine-grained control over who can bypass push protection.
+### 仕組み
 
-### How It Works
+1. 組織の所有者/リポジトリ管理者は、ユーザー、ロール、またはチームの **バイパス リスト**を作成します
+2. バイパス リストにあるユーザーは、プッシュ保護を直接バイパスできます (理由があれば)
+3. 他のすべての投稿者は、審査のために **バイパス リクエストを送信**する必要があります
+4. バイパスリクエストが「セキュリティ」タブ→「プッシュ保護バイパス」ページに表示されます。
+5. 審査されない場合、リクエストは **7 日**後に期限切れになります
 
-1. Organization owners/repo admins create a **bypass list** of users, roles, or teams
-2. Users on the bypass list can bypass push protection directly (with a reason)
-3. All other contributors must **submit a bypass request** for review
-4. Bypass requests appear in the Security tab → "Push protection bypass" page
-5. Requests expire after **7 days** if not reviewed
+### いつでもバイパスできるのは誰ですか (リクエストなし)
 
-### Who Can Always Bypass (Without Request)
+- 組織の所有者
+- セキュリティマネージャー
+- チーム/ロール内のユーザーがバイパス リストに追加されました
+- 「シークレット スキャン バイパス リクエストの確認と管理」権限を持つカスタム ロールを持つユーザー
 
-- Organization owners
-- Security managers
-- Users in teams/roles added to the bypass list
-- Users with custom role having "review and manage secret scanning bypass requests" permission
+### 委任バイパスの有効化
 
-### Enabling Delegated Bypass
+**リポジトリ レベル:**
+1. 設定 → 高度なセキュリティ → プッシュ保護
+2.「プッシュ保護をバイパスできるユーザーを制限する」を有効にします。
+3. ユーザー、チーム、またはロールをバイパス リストに追加します**組織レベル:**
+1. 組織の設定 → 高度なセキュリティ → グローバル設定
+2. セキュリティ構成で委任バイパスを構成する
 
-**Repository level:**
-1. Settings → Advanced Security → Push protection
-2. Enable "Restrict who can bypass push protection"
-3. Add users, teams, or roles to the bypass list
+### バイパスリクエストの管理
 
-**Organization level:**
-1. Organization Settings → Advanced Security → Global settings
-2. Configure delegated bypass in security configuration
+指定された査読者:
+1. リポジトリの [セキュリティ] タブ → [プッシュ保護バイパス] に移動します。
+2. 保留中のリクエストを確認します (シークレット、コミット、投稿者のコメントを含む)
+3. **承認** — 寄稿者はシークレットと、同じシークレットを使用した今後のコミットをプッシュできます。
+4. **拒否** — 投稿者はプッシュする前にシークレットを削除する必要があります
 
-### Managing Bypass Requests
+### バイパスリクエストフロー (寄稿者の視点)
 
-Designated reviewers:
-1. Navigate to repository Security tab → "Push protection bypass"
-2. Review pending requests (includes the secret, commit, and contributor's comment)
-3. **Approve** — contributor can push the secret and any future commits with the same secret
-4. **Deny** — contributor must remove the secret before pushing
+1. プッシュがブロックされます。エラーメッセージからURLにアクセスしてください
+2. シークレットを安全にプッシュできる理由を説明するコメントを追加します。
+3. [**リクエストを送信**] をクリックします。
+4. 承認/拒否の電子メール通知を待ちます
+5. 承認された場合: コミットをプッシュします
+6. 拒否された場合: シークレットを削除して再度プッシュします。
 
-### Bypass Request Flow (Contributor Perspective)
+## プッシュ保護パターン
 
-1. Push is blocked; visit the URL from the error message
-2. Add a comment explaining why the secret is safe to push
-3. Click **Submit request**
-4. Wait for email notification of approval/denial
-5. If approved: push the commit
-6. If denied: remove the secret and push again
+プッシュ保護は、シークレット スキャン パターンのサブセットをサポートします。検出されたすべてのシークレット タイプがプッシュ保護ブロックをトリガーするわけではありません。
 
-## Push Protection Patterns
+主な考慮事項:
+- 古い/レガシーのトークン形式はプッシュ保護でサポートされない可能性があります
+- 一部のパターンは誤検知率が高く、プッシュ保護から除外されます。
+- カスタム パターンは公開後にプッシュ保護を有効にすることができます
 
-Push protection supports a subset of secret scanning patterns. Not all detected secret types trigger push protection blocks.
+プッシュ保護でサポートされているパターンの完全なリストについては、[サポートされているシークレット スキャン パターン](https://docs.github.com/en/code-security/secret-scanning/introduction/supported-secret-scanning-patterns) を参照してください。
 
-Key considerations:
-- Older/legacy token formats may not be supported by push protection
-- Some patterns have higher false positive rates and are excluded from push protection
-- Custom patterns can have push protection enabled after publishing
+## カスタム パターンのプッシュ保護の構成
 
-For the full list of patterns supported by push protection, see [Supported secret scanning patterns](https://docs.github.com/en/code-security/secret-scanning/introduction/supported-secret-scanning-patterns).
+カスタム パターンを公開した後:
+1. [設定] → [高度なセキュリティ] でカスタム パターンに移動します。
+2. プッシュ保護の横にある [**有効にする**] をクリックします。
+3. パターンは、一致するシークレットを含むプッシュをブロックします。
 
-## Configuring Push Protection for Custom Patterns
-
-After publishing a custom pattern:
-1. Navigate to the custom pattern in Settings → Advanced Security
-2. Click **Enable** next to push protection
-3. The pattern will now block pushes containing matching secrets
-
-> Push protection for custom patterns only applies to repos that have push protection enabled. Enabling push protection for commonly found patterns can be disruptive to contributors.
+> カスタム パターンのプッシュ保護は、プッシュ保護が有効になっているリポジトリにのみ適用されます。よく見られるパターンに対してプッシュ保護を有効にすると、投稿者にとって混乱を招く可能性があります。

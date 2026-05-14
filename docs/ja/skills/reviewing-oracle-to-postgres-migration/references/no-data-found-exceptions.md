@@ -1,52 +1,42 @@
-# PostgreSQL Exception Handling: SELECT INTO No Data Found
+# PostgreSQL 例外処理: SELECT INTO データが見つかりません
 
-## Overview
+## 概要
 
-A common issue when migrating from Oracle to PostgreSQL involves `SELECT INTO` statements that expect to raise an exception when no rows are found. This pattern difference can cause integration tests to fail and application logic to behave incorrectly if not properly handled.
+Oracle から PostgreSQL に移行する際の一般的な問題には、行が見つからない場合に例外が発生することを期待する `SELECT INTO` ステートメントが関係します。このパターンの違いにより、適切に処理されないと統合テストが失敗し、アプリケーション ロジックが誤動作する可能性があります。
 
 ---
 
-## Problem Description
+## 問題の説明
 
-### Scenario
+### シナリオ
 
-A stored procedure performs a lookup operation using `SELECT INTO` to retrieve a required value:
-
-```sql
+ストアド プロシージャは、`SELECT INTO` を使用して検索操作を実行し、必要な値を取得します。```sql
 SELECT column_name
 INTO variable_name
 FROM table1, table2 
 WHERE table1.id = table2.id AND table1.id = parameter_value;
-```
+```### オラクルの動作
 
-### Oracle Behavior
-
-When a `SELECT INTO` statement in Oracle does **not find any rows**, it automatically raises:
-
-```
+Oracle の `SELECT INTO` ステートメントで **行が見つからない**場合、自動的に次のエラーが発生します。```
 ORA-01403: no data found
-```
+```この例外はプロシージャの例外ハンドラによってキャッチされ、呼び出し側アプリケーションに再送出されます。
 
-This exception is caught by the procedure's exception handler and re-raised to the calling application.
+### PostgreSQL の動作 (プレフィックス)
 
-### PostgreSQL Behavior (Pre-Fix)
+PostgreSQL の `SELECT INTO` ステートメントで **行が見つからない**場合、次のようになります。
 
-When a `SELECT INTO` statement in PostgreSQL does **not find any rows**, it:
+- `FOUND` 変数を `false` に設定します
+- **例外を発生させずに実行をサイレントに続行します**
 
-- Sets the `FOUND` variable to `false`
-- **Silently continues** execution without raising an exception
-
-This fundamental difference can cause tests to fail silently and logic errors in production code.
+この根本的な違いにより、テストが通知なしで失敗し、実稼働コードでロジック エラーが発生する可能性があります。
 
 ---
 
-## Root Cause Analysis
+## 根本原因の分析
 
-The PostgreSQL version was missing explicit error handling for the `NOT FOUND` condition after the `SELECT INTO` statement.
+PostgreSQL バージョンには、`SELECT INTO` ステートメントの後の `NOT FOUND` 条件に対する明示的なエラー処理がありませんでした。
 
-**Original Code (Problematic):**
-
-```plpgsql
+**元のコード (問題あり):**```plpgsql
 SELECT column_name
 INTO variable_name
 FROM table1, table2 
@@ -57,19 +47,15 @@ IF variable_name = 'X' THEN
 ELSE
  result_variable := 2;
 END IF;
-```
-
-**Problem:** No check for `NOT FOUND` condition. When an invalid parameter is passed, the SELECT returns no rows, `FOUND` becomes `false`, and execution continues with an uninitialized variable.
+```**問題:** `NOT FOUND` 条件のチェックがありません。無効なパラメータが渡されると、SELECT は行を返さず、`FOUND` は `false` になり、初期化されていない変数で実行が続行されます。
 
 ---
 
-## Key Differences: Oracle vs PostgreSQL
+## 主な違い: Oracle と PostgreSQL
 
-Add explicit `NOT FOUND` error handling to match Oracle behavior.
+Oracle の動作に合わせて明示的な `NOT FOUND` エラー処理を追加します。
 
-**Fixed Code:**
-
-```plpgsql
+**修正コード:**```plpgsql
 SELECT column_name
 INTO variable_name
 FROM table1, table2 
@@ -85,15 +71,13 @@ IF variable_name = 'X' THEN
 ELSE
  result_variable := 2;
 END IF;
-```
+```---
 
----
+## 同様の問題に関する移行メモ
 
-## Migration Notes for Similar Issues
+この問題を解決するときは、次のことを確認してください。
 
-When fixing this issue, verify:
-
-1. **Success path tests** - Confirm valid parameters still work correctly
-2. **Exception tests** - Verify exceptions are raised with invalid parameters
-3. **Transaction rollback** - Ensure proper cleanup on errors
-4. **Data integrity** - Confirm all fields are populated correctly in success cases
+1. **成功パス テスト** - 有効なパラメータが引き続き正しく機能することを確認します。
+2. **例外テスト** - 無効なパラメーターで例外が発生することを確認します。
+3. **トランザクションのロールバック** - エラーが発生した場合に適切にクリーンアップすることを保証します。
+4. **データの整合性** - 成功した場合、すべてのフィールドが正しく入力されていることを確認します

@@ -1,13 +1,11 @@
-# Skeleton: 1.1-threatmodel.mmd
+# スケルトン: 1.1-threatmodel.mmd
 
-> **⛔ This is a raw Mermaid file — NO markdown wrapper. Line 1 MUST start with `%%{init:`.**
-> **The init block, classDefs, and linkStyle are FIXED — never change colors/strokes.**
-> **Diagram direction is ALWAYS `flowchart LR` — NEVER `flowchart TB`.**
-> **⛔ The template below is shown inside a code fence for readability only — do NOT include the fence in the output file.**
+> **⛔ これは生の Mermaid ファイルです。マークダウン ラッパーはありません。 1 行目は `%%{init:`.** で始まらなければなりません
+> **init ブロック、classDefs、および linkStyle は修正されています。色やストロークは決して変更しないでください。**
+> **図の方向は常に `flowchart LR` です — 決して `flowchart TB`.**
+> **⛔ 以下のテンプレートは、読みやすさを目的としてコード フェンス内に示されています。出力ファイルにはフェンスを含めないでください。**
 
----
-
-```
+---```
 %%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'lineColor': '#666666' }}}%%
 flowchart LR
     classDef process fill:#6baed6,stroke:#2171b5,stroke-width:2px,color:#000000
@@ -40,29 +38,27 @@ flowchart LR
     [END-REPEAT]
 
     linkStyle default stroke:#666666,stroke-width:2px
-```
+```**これらの固定要素は決して変更しないでください:**
+- `%%{init:` テーマ変数: `background`、`primaryColor`、`lineColor` のみ
+- `flowchart LR` — 決してTBしないでください
+- classDef color: process=#6baed6/#2171b5、external=#fdae61/#d94701、datastore=#74c476/#238b45
+- 増分 classDefs (該当する場合): newComponent=#d4edda/#28a745 (薄緑色)、removedComponent=#e9ecef/#6c757d (灰色の破線)
+- 新しいコンポーネントは `:::newComponent` (`:::process` ではありません) を使用しなければなりません。削除されたコンポーネントでは `:::removedComponent` を使用する必要があります。
+- 信頼境界のスタイル: `fill:none,stroke:#e31a1c,stroke-width:3px,stroke-dasharray: 5 5`
+- リンクスタイル: `stroke:#666666,stroke-width:2px`
 
-**NEVER change these fixed elements:**
-- `%%{init:` themeVariables: only `background`, `primaryColor`, `lineColor`
-- `flowchart LR` — never TB
-- classDef colors: process=#6baed6/#2171b5, external=#fdae61/#d94701, datastore=#74c476/#238b45
-- Incremental classDefs (when applicable): newComponent=#d4edda/#28a745 (light green), removedComponent=#e9ecef/#6c757d (gray dashed)
-- New components MUST use `:::newComponent` (NOT `:::process`). Removed components MUST use `:::removedComponent`.
-- Trust boundary style: `fill:none,stroke:#e31a1c,stroke-width:3px,stroke-dasharray: 5 5`
-- linkStyle: `stroke:#666666,stroke-width:2px`
+**DFD 形状:**
+- 処理: `(("Name"))` (二重括弧 = 丸)
+- データ ストア: `[("Name")]` (括弧括弧 = シリンダー)
+- 外部: `["Name"]` (括弧 = 長方形)
+- すべてのラベルは `""` で引用符で囲む必要があります
+- すべてのサブグラフ ID: `subgraph ID["Title"]`
 
-**DFD shapes:**
-- Process: `(("Name"))` (double parentheses = circle)
-- Data Store: `[("Name")]` (bracket-paren = cylinder)
-- External: `["Name"]` (brackets = rectangle)
-- All labels MUST be quoted in `""`
-- All subgraph IDs: `subgraph ID["Title"]`
-
-<!-- ⛔ POST-DFD GATE — IMMEDIATELY after creating this file:
-  1. Count element nodes: lines with (("...")), [("...")], ["..."] shapes
-  2. Count boundaries: lines with 'subgraph'
-  3. If elements > 15 OR boundaries > 4:
-     → OPEN skeleton-summary-dfd.md and create 1.2-threatmodel-summary.mmd NOW
-     → Do NOT proceed to 1-threatmodel.md until summary exists
-  4. If threshold NOT met → skip summary, proceed to 1-threatmodel.md
-  This is the most frequently skipped step. The gate is MANDATORY. -->
+<!-- ⛔ POST-DFD GATE — このファイルを作成した直後:
+  1. 要素ノードを数える: (("..."))、[("...")]、["..."] の形状を持つ線
+  2. 境界を数える: 「サブグラフ」を含む行
+  3. 要素が 15 を超えるか、境界が 4 を超える場合:
+     →今すぐskeleton-summary-dfd.mdを開いて1.2-threatmodel-summary.mmdを作成します。
+     → 概要が存在するまで 1-threatmodel.md に進まないでください。
+  4. しきい値を満たしていない場合 → サマリーをスキップし、1-threatmodel.md に進みます。
+  これは最も頻繁にスキップされるステップです。ゲートは必須です。 -->

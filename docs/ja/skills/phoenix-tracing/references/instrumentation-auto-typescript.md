@@ -1,87 +1,69 @@
-# Auto-Instrumentation (TypeScript)
+# 自動インストルメンテーション (TypeScript)
 
-Automatically create spans for LLM calls without code changes.
+コードを変更せずに、LLM 呼び出しのスパンを自動的に作成します。
 
-## Supported Frameworks
+## サポートされているフレームワーク
 
-- **LLM SDKs:** OpenAI
-- **Frameworks:** LangChain
-- **Install:** `npm install @arizeai/openinference-instrumentation-{name}`
+- **LLM SDK:** OpenAI
+- **フレームワーク:** ラングチェーン
+- **インストール:** `npm install @arizeai/openinference-instrumentation-{name}`
 
-## Setup
+## セットアップ
 
-**CommonJS (automatic):**
-
-```javascript
+**CommonJS (自動):**```JavaScript
 const { register } = require("@arizeai/phoenix-otel");
 const OpenAI = require("openai");
 
-register({ projectName: "my-app" });
+register({ プロジェクト名: "my-app" });
 
 const client = new OpenAI();
-```
-
-**ESM (manual required):**
-
-```typescript
+「」**ESM (マニュアルが必要):**```タイプスクリプト
 import { register, registerInstrumentations } from "@arizeai/phoenix-otel";
 import { OpenAIInstrumentation } from "@arizeai/openinference-instrumentation-openai";
-import OpenAI from "openai";
+「openai」から OpenAI をインポートします。
 
-register({ projectName: "my-app" });
+register({ プロジェクト名: "my-app" });
 
-const instrumentation = new OpenAIInstrumentation();
-instrumentation.manuallyInstrument(OpenAI);
-registerInstrumentations({ instrumentations: [instrumentation] });
-```
+const インストルメンテーション = new OpenAIInstrumentation();
+インストルメンテーション.manuallyInstrument(OpenAI);
+registerInstrumentations({ インストルメンテーション: [インストルメンテーション] });
+「」**理由:** ESM インポートは `register()` が実行される前にホイストされます。
 
-**Why:** ESM imports are hoisted before `register()` runs.
+## 制限事項
 
-## Limitations
-
-**What auto-instrumentation does NOT capture:**
-
-```typescript
-async function myWorkflow(query: string): Promise<string> {
-  const preprocessed = await preprocess(query);        // Not traced
-  const response = await client.chat.completions.create(...);  // Traced (auto)
-  const postprocessed = await postprocess(response);   // Not traced
-  return postprocessed;
+**自動インスツルメンテーションがキャプチャしないもの:**```タイプスクリプト
+非同期関数 myWorkflow(クエリ: string): Promise<string> {
+  const 前処理 = 前処理 (クエリ) を待ちます。        // トレースされません
+  const response = await client.chat.completions.create(...);  // トレース (自動)
+  const postprocessed = 後処理 (応答) を待ちます。   // トレースされません
+  後処理を返します。
 }
-```
+「」**解決策:** カスタム ロジック用の手動インストルメンテーションを追加します。```タイプスクリプト
+import {traceChain} から "@arizeai/openinference-core";
 
-**Solution:** Add manual instrumentation for custom logic:
-
-```typescript
-import { traceChain } from "@arizeai/openinference-core";
-
-const myWorkflow = traceChain(
-  async (query: string): Promise<string> => {
-    const preprocessed = await preprocess(query);
+const myWorkflow =traceChain(
+  async (クエリ: 文字列): Promise<string> => {
+    const 前処理 = 前処理 (クエリ) を待ちます。
     const response = await client.chat.completions.create(...);
-    const postprocessed = await postprocess(response);
-    return postprocessed;
-  },
-  { name: "my-workflow" }
+    const postprocessed = 後処理 (応答) を待ちます。
+    後処理を返します。
+  }、
+  { 名前: "私のワークフロー" }
 );
-```
-
-## Combining Auto + Manual
-
-```typescript
+「」## 自動と手動の組み合わせ```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
-import { traceChain } from "@arizeai/openinference-core";
+import {traceChain} から "@arizeai/openinference-core";
 
-register({ projectName: "my-app" });
+register({ プロジェクト名: "my-app" });
 
 const client = new OpenAI();
 
-const workflow = traceChain(
-  async (query: string) => {
-    const preprocessed = await preprocess(query);
-    const response = await client.chat.completions.create(...);  // Auto-instrumented
-    return postprocess(response);
-  },
-  { name: "my-workflow" }
+const ワークフロー =traceChain(
+  async (クエリ: 文字列) => {
+    const 前処理 = 前処理 (クエリ) を待ちます。
+    const response = await client.chat.completions.create(...);  // 自動インストルメント化
+    後処理(応答)を返します。
+  }、
+  { 名前: "私のワークフロー" }
 );
-```
+「」

@@ -2,53 +2,48 @@
 name: scaffolding-oracle-to-postgres-migration-test-project
 description: 'Scaffolds an xUnit integration test project for validating Oracle-to-PostgreSQL database migration behavior in .NET solutions. Creates the test project, transaction-rollback base class, and seed data manager. Use when setting up test infrastructure before writing migration integration tests, or when a test project is needed for Oracle-to-PostgreSQL validation.'
 ---
+# Oracle から PostgreSQL への移行のための統合テスト プロジェクトのスキャフォールディング
 
-# Scaffolding an Integration Test Project for Oracle-to-PostgreSQL Migration
+単一のターゲット プロジェクトのトランザクション管理とシード データ インフラストラクチャを備えた、コンパイル可能な空の xUnit テスト プロジェクトを作成します。テストを作成する前に、プロジェクトごとに 1 回実行します。
 
-Creates a compilable, empty xUnit test project with transaction management and seed data infrastructure for a single target project. Run once per project before writing tests.
-
-## Workflow
-
-```
+## ワークフロー```
 Progress:
 - [ ] Step 1: Inspect the target project
 - [ ] Step 2: Create the xUnit test project
 - [ ] Step 3: Implement transaction-rollback base class
 - [ ] Step 4: Implement seed data manager
 - [ ] Step 5: Verify the project compiles
-```
+```**ステップ 1: 対象プロジェクトを検査する**
 
-**Step 1: Inspect the target project**
+ターゲット プロジェクトの `.csproj` を読み取り、.NET バージョンと既存のパッケージ参照を確認します。これらのバージョンは正確に一致します。アップグレードしないでください。
 
-Read the target project's `.csproj` to determine the .NET version and existing package references. Match these versions exactly — do not upgrade.
+**ステップ 2: xUnit テスト プロジェクトを作成する**
 
-**Step 2: Create the xUnit test project**
+- テスト対象のアプリケーションと同じ .NET バージョンをターゲットにします。
+- Oracle データベース接続と xUnit 用の NuGet パッケージを追加します。
+- プロジェクト参照はターゲット プロジェクトにのみ追加します。他のアプリケーション プロジェクトには追加しません。
+- Oracle データベース接続用に構成された `appsettings.json` を追加します。
 
-- Target the same .NET version as the application under test.
-- Add NuGet packages for Oracle database connectivity and xUnit.
-- Add a project reference to the target project only — no other application projects.
-- Add an `appsettings.json` configured for Oracle database connectivity.
+**ステップ 3: トランザクション ロールバック基本クラスを実装する**
 
-**Step 3: Implement transaction-rollback base class**
+- 各テストの前にトランザクションを開き、テスト後にロールバックする基本テスト クラスを作成します。
+- すべての例外をキャッチして処理し、ロールバックを保証します。
+- すべての下流のテスト クラスでパターンを継承できるようにします。
 
-- Create a base test class that opens a transaction before each test and rolls it back after.
-- Catch and handle all exceptions to guarantee rollback.
-- Make the pattern inheritable by all downstream test classes.
+**ステップ 4: シード データ マネージャーを実装する**
 
-**Step 4: Implement seed data manager**
+- トランザクション スコープ内でテスト データをロードするためのグローバル シード マネージャーを作成します。
+- シード データをコミットしないでください。トランザクションは各テスト後にロールバックされます。
+- `TRUNCATE TABLE` は使用しないでください。既存のデータベース データを保持します。
+- 利用可能な場合は、既存のシード ファイルを再利用します。
+- ダウンストリームのテスト作成時に従うシード ファイルの場所の命名規則を確立します。
 
-- Create a global seed manager for loading test data within the transaction scope.
-- Do not commit seed data — transactions roll back after each test.
-- Do not use `TRUNCATE TABLE` — preserve existing database data.
-- Reuse existing seed files if available.
-- Establish a naming convention for seed file location that downstream test creation will follow.
+**ステップ 5: プロジェクトがコンパイルされていることを確認します**
 
-**Step 5: Verify the project compiles**
+テスト プロジェクトをビルドし、完了する前にエラーなしでコンパイルされることを確認します。
 
-Build the test project and confirm it compiles with zero errors before finishing.
+## 主要な制約
 
-## Key Constraints
-
-- Oracle is the golden behavior source — scaffold for Oracle first.
-- Keep to existing .NET and C# versions; do not introduce newer language or runtime features.
-- Output is an empty test project with infrastructure only — no test cases.
+- Oracle は黄金の動作ソースです。最初に Oracle の足場を構築します。
+- 既存の .NET および C# バージョンを維持します。新しい言語やランタイム機能を導入しないでください。
+- 出力はインフラストラクチャのみを備えた空のテスト プロジェクトであり、テスト ケースはありません。

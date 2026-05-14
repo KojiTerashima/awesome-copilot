@@ -1,95 +1,75 @@
-# Axial Coding
+# アキシャルコーディング
 
-Group open-ended notes into structured failure taxonomies.
+オープンエンドのメモを構造化された障害分類にグループ化します。
 
-## Process
+## プロセス
 
-1. **Gather** - Collect open coding notes
-2. **Pattern** - Group notes with common themes
-3. **Name** - Create actionable category names
-4. **Quantify** - Count failures per category
+1. **収集** - オープンコーディングノートを収集します
+2. **パターン** - 共通のテーマを持つグループノート
+3. **名前** - 実用的なカテゴリ名を作成します
+4. **定量化** - カテゴリごとの失敗の数
 
-## Example Taxonomy
-
-```yaml
-failure_taxonomy:
-  content_quality:
-    hallucination: [invented_facts, fictional_citations]
-    incompleteness: [partial_answer, missing_key_info]
-    inaccuracy: [wrong_numbers, wrong_dates]
+## 分類例の例```ヤムル
+失敗分類:
+  コンテンツの品質:
+    幻覚: [発明された事実、フィクションの引用]
+    不完全さ: [partial_answer、missing_key_info]
+    不正確さ: [間違った番号、間違った日付]
   
-  communication:
-    tone_mismatch: [too_casual, too_formal]
-    clarity: [ambiguous, jargon_heavy]
+  コミュニケーション:
+    トーンの不一致: [カジュアルすぎる、フォーマルすぎる]
+    明確さ: [曖昧、専門用語が多い]
   
-  context:
-    user_context: [ignored_preferences, misunderstood_intent]
-    retrieved_context: [ignored_documents, wrong_context]
+  コンテキスト:
+    user_context: [無視された設定、誤解された意図]
+    取得されたコンテキスト: [無視されたドキュメント、間違ったコンテキスト]
   
-  safety:
-    missing_disclaimers: [legal, medical, financial]
-```
+  安全性:
+    missing_disclaimers: [法律、医療、財務]
+「」## アノテーションの追加 (Python)「」パイソン
+phoenix.clientインポートクライアントから
 
-## Add Annotation (Python)
-
-```python
-from phoenix.client import Client
-
-client = Client()
+client = クライアント()
 client.spans.add_span_annotation(
-    span_id="abc123",
-    annotation_name="failure_category",
-    label="hallucination",
-    explanation="invented a feature that doesn't exist",
-    annotator_kind="HUMAN",
-    sync=True,
-)
-```
-
-## Add Annotation (TypeScript)
-
-```typescript
-import { addSpanAnnotation } from "@arizeai/phoenix-client/spans";
+    スパン_id="abc123",
+    annotation_name="失敗カテゴリ",
+    ラベル="幻覚",
+    description="存在しない機能を発明しました",
+    annotator_kind="人間",
+    同期=真、
+）
+「」## 注釈の追加 (TypeScript)```タイプスクリプト
+import { addSpanAnnotation } から "@arizeai/phoenix-client/spans";
 
 await addSpanAnnotation({
-  spanAnnotation: {
-    spanId: "abc123",
-    name: "failure_category",
-    label: "hallucination",
-    explanation: "invented a feature that doesn't exist",
-    annotatorKind: "HUMAN",
+  スパンアノテーション: {
+    スパンID: "abc123",
+    名前: "失敗カテゴリ",
+    ラベル: 「幻覚」、
+    説明: "存在しない機能を発明しました",
+    アノテーターの種類: "人間"、
   }
 });
-```
+「」## エージェント障害分類法```ヤムル
+エージェントの失敗:
+  計画: [間違った計画、不完全な計画]
+  ツール選択: [間違ったツール、見逃したツール、不要な呼び出し]
+  ツール実行: [間違ったパラメータ、タイプエラー]
+  state_management: [ロストコンテキスト、スタックインループ]
+  error_recovery: [no_fallback、間違った_fallback]
+「」## 移行マトリックス (エージェント)
 
-## Agent Failure Taxonomy
-
-```yaml
-agent_failures:
-  planning: [wrong_plan, incomplete_plan]
-  tool_selection: [wrong_tool, missed_tool, unnecessary_call]
-  tool_execution: [wrong_parameters, type_error]
-  state_management: [lost_context, stuck_in_loop]
-  error_recovery: [no_fallback, wrong_fallback]
-```
-
-## Transition Matrix (Agents)
-
-Shows where failures occur between states:
-
-```python
-def build_transition_matrix(conversations, states):
-    matrix = defaultdict(lambda: defaultdict(int))
-    for conv in conversations:
-        if conv["failed"]:
+状態間で障害が発生する場所を示します。「」パイソン
+def build_transition_matrix(会話、状態):
+    行列 =defaultdict(lambda:defaultdict(int))
+    会話でのコンバージョンの場合:
+        conv["失敗"]の場合:
             last_success = find_last_success(conv)
             first_failure = find_first_failure(conv)
-            matrix[last_success][first_failure] += 1
-    return pd.DataFrame(matrix).fillna(0)
-```
+            行列[最後の成功][最初の失敗] += 1
+    pd.DataFrame(行列).fillna(0) を返す
+「」## 原則
 
-## Principles
-
-- **MECE** - Each failure fits ONE category
-- **Actionable** - Categories suggest fixes
-- **Bottom-up** - Let categories emerge from data
+- **MECE** - それぞれの失敗は 1 つのカテゴリに当てはまります
+- **実用的** - カテゴリが修正を提案します
+- **ボトムアップ** - データからカテゴリを出現させる

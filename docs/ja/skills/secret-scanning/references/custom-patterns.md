@@ -1,34 +1,32 @@
-# Custom Patterns Reference
+# カスタム パターンのリファレンス
 
-Detailed reference for defining custom secret scanning patterns using regular expressions at the repository, organization, and enterprise level.
+リポジトリ、組織、およびエンタープライズ レベルで正規表現を使用してカスタム シークレット スキャン パターンを定義するための詳細なリファレンス。
 
-## Overview
+## 概要
 
-Custom patterns extend secret scanning to detect organization-specific secrets not covered by default patterns. They are defined as regular expressions and can optionally enforce push protection.
+カスタム パターンはシークレット スキャンを拡張し、デフォルト パターンではカバーされない組織固有のシークレットを検出します。これらは正規表現として定義されており、オプションでプッシュ保護を強制できます。
 
-## Pattern Definition
+## パターン定義
 
-### Required Fields
+### 必須フィールド
 
-| Field | Description |
+|フィールド |説明 |
 |---|---|
-| **Pattern name** | Human-readable name for the pattern |
-| **Secret format** | Regular expression matching the secret |
+| **パターン名** |人間が判読できるパターンの名前 |
+| **秘密のフォーマット** |シークレットに一致する正規表現 |
 
-### Optional Fields (via "More options")
+### オプションのフィールド (「その他のオプション」経由)
 
-| Field | Description |
+|フィールド |説明 |
 |---|---|
-| **Before secret** | Regex for content that must appear before the secret |
-| **After secret** | Regex for content that must appear after the secret |
-| **Additional match requirements** | Extra constraints on the match |
-| **Sample test string** | Example string to validate the regex |
+| **秘密の前に** |シークレットの前に表示する必要があるコンテンツの正規表現 |
+| **秘密の後** |シークレットの後に表示する必要があるコンテンツの正規表現 |
+| **追加の一致要件** |一致に関する追加の制約 |
+| **テスト文字列のサンプル** |正規表現を検証する文字列の例 |
 
-### Regex Syntax
+### 正規表現構文
 
-Custom patterns use standard regular expressions. Common patterns:
-
-```
+カスタム パターンでは標準の正規表現を使用します。よくあるパターン:```
 # API key with prefix
 MYAPP_[A-Za-z0-9]{32}
 
@@ -40,119 +38,115 @@ myorg-token-[a-f0-9]{64}
 
 # JWT-like pattern
 eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+
-```
+```前/後フィールドでの glob スタイルのマッチングには、GitHub Actions ワークフロー構文に似たフィルター パターンを使用します。
 
-Use filter patterns similar to GitHub Actions workflow syntax for glob-style matching in before/after fields.
+## スコープによるパターンの定義
 
-## Defining Patterns by Scope
+### リポジトリレベル
 
-### Repository Level
+1. リポジトリ設定 → 高度なセキュリティ
+2. [秘密保護] → カスタム パターン → **新しいパターン**
+3. パターン名、正規表現、およびオプションのフィールドを入力します
+4. **保存してドライラン**してテストします
+5. 結果のレビュー (最大 1,000 件の一致)
+6. 満足したら **パターンを公開**
+7. オプションでプッシュ保護を有効にする
 
-1. Repository Settings → Advanced Security
-2. Under "Secret Protection" → Custom patterns → **New pattern**
-3. Enter pattern name, regex, and optional fields
-4. **Save and dry run** to test
-5. Review results (up to 1,000 matches)
-6. **Publish pattern** when satisfied
-7. Optionally enable push protection
+**前提条件:** リポジトリで Secret Protection が有効になっている必要があります。
 
-**Prerequisite:** Secret Protection must be enabled on the repository.
+### 組織レベル
 
-### Organization Level
+1. 組織の設定 → 高度なセキュリティ → グローバル設定
+2. [カスタム パターン] → **新しいパターン**
+3. パターンの詳細を入力します
+4. **保存して予行演習** — テスト用のリポジトリを選択します。
+   - 組織内のすべてのリポジトリ、または
+   - 最大 10 個の選択されたリポジトリ
+5. 満足したら **パターンを公開**
+6. オプションでプッシュ保護を有効にする
 
-1. Organization Settings → Advanced Security → Global settings
-2. Under "Custom patterns" → **New pattern**
-3. Enter pattern details
-4. **Save and dry run** — select repositories for testing:
-   - All repositories in the organization, or
-   - Up to 10 selected repositories
-5. **Publish pattern** when satisfied
-6. Optionally enable push protection
+**注:**
+- 組織レベルのカスタム パターンのプッシュ保護は、プッシュ保護が有効になっているリポジトリにのみ適用されます
+- 組織の所有者とリポジトリ管理者はアラートを受け取ります
 
-**Notes:**
-- Push protection for org-level custom patterns only applies to repos with push protection enabled
-- Organization owners and repo admins receive alerts
+### エンタープライズレベル
 
-### Enterprise Level
+1. エンタープライズ設定 → ポリシー → 高度なセキュリティ → セキュリティ機能
+2.「シークレットスキャンカスタムパターン」→**新規パターン**
+3. パターンの詳細を入力します
+4. **保存して予行演習** — 最大 10 個のリポジトリを選択します
+5. 満足したら **パターンを公開**
+6. オプションでプッシュ保護を有効にする
 
-1. Enterprise settings → Policies → Advanced Security → Security features
-2. Under "Secret scanning custom patterns" → **New pattern**
-3. Enter pattern details
-4. **Save and dry run** — select up to 10 repositories
-5. **Publish pattern** when satisfied
-6. Optionally enable push protection
+**注:**
+- エンタープライズレベルのパターンを編集または予行実行できるのはパターン作成者だけです
+- ドライランには、選択したリポジトリへの管理者アクセスが必要です
+- プッシュ保護には、エンタープライズ レベルのシークレット スキャン プッシュ保護を有効にする必要があります
 
-**Notes:**
-- Only the pattern creator can edit or dry-run enterprise-level patterns
-- Dry runs require admin access to the selected repositories
-- Push protection requires enterprise-level secret scanning push protection to be enabled
+## ドライランプロセス
 
-## Dry Run Process
+アラートを作成せずに、リポジトリ コンテンツに対してテスト パターンをドライランします。
 
-Dry runs test patterns against repository content without creating alerts.
+1. パターンを定義した後、[**保存して予行演習**] をクリックします。
+2. ターゲットリポジトリを選択します (組織/エンタープライズレベル)
+3. [**実行**] をクリックします。
+4. 最大 1,000 件のサンプル結果を確認する
+5. 誤検知を特定する
+6. パターンを編集し、必要に応じて再実行します。
+7. 誤検知率が許容できる場合にのみ **パターンを公開**
 
-1. Click **Save and dry run** after defining the pattern
-2. Select target repositories (org/enterprise level)
-3. Click **Run**
-4. Review up to 1,000 sample results
-5. Identify false positives
-6. Edit pattern and re-run if needed
-7. **Publish pattern** only when false positive rate is acceptable
+> 予行演習は不可欠です。アラートノイズを避けるために、公開する前に必ずテストしてください。
 
-> Dry runs are essential — always test before publishing to avoid alert noise.
+## 公開されたパターンの管理
 
-## Managing Published Patterns
+### パターンの編集公開後、パターンを編集できます。
+1. カスタム パターンに移動します
+2. 正規表現またはオプションのフィールドを変更します
+3. 保存してドライランを行い、変更を検証します
+4. 更新されたパターンを公開する
 
-### Editing Patterns
+### プッシュ保護の有効化
 
-After publishing, patterns can be edited:
-1. Navigate to the custom pattern
-2. Modify the regex or optional fields
-3. Save and dry run to validate changes
-4. Publish the updated pattern
+プッシュ保護は、パターンが公開された後にのみ有効にできます。
+1. 公開されたパターンに移動します
+2. プッシュ保護の横にある [**有効にする**] をクリックします。
 
-### Enabling Push Protection
+**注意:** よく見られるパターンに対してプッシュ保護を有効にすると、投稿者のワークフローが中断される可能性があります。
 
-Push protection can only be enabled after a pattern is published:
-1. Navigate to the published pattern
-2. Click **Enable** next to push protection
+### パターンの無効化または削除
 
-**Caution:** Enabling push protection for commonly found patterns can disrupt contributor workflows.
+- 無効にする: 新しいアラートの生成を停止しますが、既存のアラートは保持します
+- 削除: パターンを削除し、そのパターンのすべてのスキャンを停止します。
 
-### Disabling or Deleting Patterns
+## 副操縦士によるパターン生成
 
-- Disable: stops new alert generation but retains existing alerts
-- Delete: removes the pattern and stops all scanning for it
+Copilot シークレット スキャンを使用して正規表現を自動的に生成します。
 
-## Copilot-Assisted Pattern Generation
+1. カスタム パターンの作成に移動します
+2. [Copilot を使用して生成] を選択します (利用可能な場合)。
+3. シークレット タイプのテキスト説明を入力します (例: 「MYORG_ で始まり、その後に 40 個の 16 進文字が続く内部 API キー」)
+4. 必要に応じて、一致するサンプル文字列を提供します
+5. Copilot が正規表現パターンを生成します
+6. 生成された正規表現を確認して調整します。
+7. 公開前にドライランでテストする
 
-Use Copilot secret scanning to generate regex automatically:
+## パターンの継承
 
-1. Navigate to custom pattern creation
-2. Select "Generate with Copilot" (if available)
-3. Provide a text description of the secret type (e.g., "internal API key starting with MYORG_ followed by 40 hex characters")
-4. Optionally provide example strings that should match
-5. Copilot generates a regex pattern
-6. Review and refine the generated regex
-7. Test with dry run before publishing
-
-## Pattern Inheritance
-
-| Scope | Applies To |
+|範囲 |適用対象 |
 |---|---|
-| Repository | That repository only |
-| Organization | All repos in the org with secret scanning enabled |
-| Enterprise | All repos across all orgs with secret scanning enabled |
+|リポジトリ |そのリポジトリのみ |
+|組織 |シークレットスキャンが有効になっている組織内のすべてのリポジトリ |
+|エンタープライズ |シークレット スキャンが有効になっているすべての組織のすべてのリポジトリ |
 
-Organization and enterprise patterns automatically apply to new repositories when secret scanning is enabled.
+シークレット スキャンが有効になっている場合、組織およびエンタープライズ パターンは新しいリポジトリに自動的に適用されます。
 
-## Best Practices
+## ベストプラクティス
 
-1. **Always dry run** before publishing — review for false positives
-2. **Start specific** — narrow regexes reduce false positives
-3. **Use before/after context** — adds precision without overly complex regex
-4. **Test with real examples** — include sample strings that should and shouldn't match
-5. **Document patterns** — name patterns clearly so teams understand what they detect
-6. **Review periodically** — remove or update patterns that no longer apply
-7. **Be cautious with push protection** — enable only for patterns with low false positive rates
-8. **Consider Copilot** — let AI generate the initial regex, then refine manually
+1. **公開前に必ず予行演習** - 誤検知がないか確認してください
+2. **特定の開始** — 狭い正規表現により誤検知が減少します
+3. **コンテキストの前後に使用** — 過度に複雑な正規表現を使用せずに精度を追加します
+4. **実際の例でテストします** — 一致する必要があるサンプル文字列と一致しないはずのサンプル文字列を含めます
+5. **パターンを文書化** — チームが何を検出したかを理解できるように、パターンに明確に名前を付けます
+6. **定期的に確認** — 適用されなくなったパターンを削除または更新します
+7. **プッシュ保護には注意してください** — 誤検知率が低いパターンに対してのみ有効にします
+8. **Copilot を検討してください** — AI に初期正規表現を生成させ、その後手動で調整します

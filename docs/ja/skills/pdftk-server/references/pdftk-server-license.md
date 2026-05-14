@@ -1,25 +1,25 @@
-# PDFtk Server License
+# PDFtkサーバーライセンス
 
-PDFtk Server can be used at no charge under its GPL license.
+PDFtk サーバーは、GPL ライセンスに基づいて無料で使用できます。
 
-Commercial users will benefit from the comprehensive commercial support agreement.
+商用ユーザーは、包括的な商用サポート契約の恩恵を受けることができます。
 
-To distribute PDFtk Server as part of your own commercial product you will need to purchase the PDFtk Server Redistribution License.
+PDFtk サーバーを独自の商用製品の一部として配布するには、PDFtk サーバー再配布ライセンスを購入する必要があります。
 
-## PDFtk Server Redistribution License
+## PDFtk サーバー再配布ライセンス
 
-If you plan to distribute PDFtk Server as part of your own software, you will need a PDFtk Server Redistribution License. The exception to this rule is if your software is licensed to the public under the GPL or another compatible license.
+PDFtk Server を独自のソフトウェアの一部として配布する予定がある場合は、PDFtk Server 再配布ライセンスが必要になります。この規則の例外は、ソフトウェアが GPL または別の互換ライセンスに基づいて一般にライセンスされている場合です。
 
-The commercial redistribution license allows you, subject to the terms of the license, to distribute an unlimited number of PDFtk Server binaries as part of one distinct commercial product. Please read the full license:
+商用再配布ライセンスを使用すると、ライセンスの条項に従って、無制限の数の PDFtk Server バイナリを 1 つの異なる商用製品の一部として配布できます。ライセンス全文をお読みください:
 
-[PDFtk Server Redistribution License (PDF)](https://www.pdflabs.com/docs/pdftk-license/pdf_labs_pdftk_redist_lic_agreement_ver_2.0.pdf)
+[PDFtk サーバー再配布ライセンス (PDF)](https://www.pdflabs.com/docs/pdftk-license/pdf_labs_pdftk_redist_lic_agreement_ver_2.0.pdf)
 
-Now available for $995:
+現在 $995 で入手可能:
 
-[Buy the PDFtk Server Redistribution License](https://pdflabs.onfastspring.com/pdftk-server)
+[PDFtk サーバー再配布ライセンスを購入する](https://pdflabs.onfastspring.com/pdftk-server)
 
-## PDFtk Server GPL License
+## PDFtk サーバー GPL ライセンス
 
-PDFtk Server (pdftk) is not public domain software. It can be used at no charge under its GNU General Public License (GPL) Version 2. [Click here to read the complete text](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt).
+PDFtk サーバー (pdftk) はパブリック ドメイン ソフトウェアではありません。これは、GNU General Public License (GPL) バージョン 2 に基づいて無料で使用できます。[全文を読むにはここをクリックしてください](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt)。
 
-PDFtk uses third-party libraries. The licenses and source code for these libraries are described in the third-party-materials reference document.
+PDFtk はサードパーティのライブラリを使用します。これらのライブラリのライセンスとソース コードについては、サードパーティのマテリアルのリファレンス ドキュメントに記載されています。

@@ -2,55 +2,52 @@
 name: shuffle-json-data
 description: 'Shuffle repetitive JSON objects safely by validating schema consistency before randomising entries.'
 ---
+# JSON データをシャッフルする
 
-# Shuffle JSON Data
+## 概要
 
-## Overview
+データを破損したり JSON を破壊したりすることなく、反復的な JSON オブジェクトをシャッフルします
+構文。常に最初に入力ファイルを検証してください。リクエストが到着せずに届いた場合、
+データ ファイルの場合は、一時停止して要求してください。 JSON が可能であることを確認してから続行してください。
+無事にシャッフルされました。
 
-Shuffle repetitive JSON objects without corrupting the data or breaking JSON
-syntax. Always validate the input file first. If a request arrives without a
-data file, pause and ask for one. Only proceed after confirming the JSON can be
-shuffled safely.
+## 役割
 
-## Role
+あなたは、JSON データをランダム化または並べ替える方法を理解しているデータ エンジニアです。
+完全性を犠牲にすることなく。データ エンジニアリングのベスト プラクティスを組み合わせる
+データ品質を保護するためにデータをランダム化するための数学的知識。
 
-You are a data engineer who understands how to randomise or reorder JSON data
-without sacrificing integrity. Combine data-engineering best practices with
-mathematical knowledge of randomizing data to protect data quality.
+- デフォルトの場合、すべてのオブジェクトが同じプロパティ名を共有していることを確認します。
+  動作は各オブジェクトを対象とします。
+- 安全なシャッフルを妨げる構造がある場合は、拒否またはエスカレーションします（たとえば、
+  デフォルト状態で動作している間はネストされたオブジェクト)。
+- 検証が成功した後、または明示的な読み取り後にのみデータをシャッフルします。
+  変数のオーバーライド。
 
-- Confirm that every object shares the same property names when the default
-  behavior targets each object.
-- Reject or escalate when the structure prevents a safe shuffle (for example,
-  nested objects while operating in the default state).
-- Shuffle data only after validation succeeds or after reading explicit
-  variable overrides.
+## 目的
 
-## Objectives
+1. 提供された JSON が構造的に一貫していて、JSON が構造的に一貫していることを検証します。
+   無効な出力を生成せずにシャッフルされました。
+2. 変数がない場合は、デフォルトの動作 (オブジェクト レベルでシャッフル) を適用します。
+   `Variables` ヘッダーの下に表示されます。
+3. どのコレクションをシャッフルするかを調整する変数オーバーライドを尊重します。
+   プロパティが必須であるか、どのプロパティを無視する必要があるか。
 
-1. Validate that the provided JSON is structurally consistent and can be
-   shuffled without producing invalid output.
-2. Apply the default behavior—shuffle at the object level—when no variables
-   appear under the `Variables` header.
-3. Honour variable overrides that adjust which collections are shuffled, which
-   properties are required, or which properties must be ignored.
+## データ検証チェックリスト
 
-## Data Validation Checklist
+シャッフルする前:
 
-Before shuffling:
+- すべてのオブジェクトが同じプロパティ名のセットを共有していることを確認します。
+  デフォルト状態が有効です。
+- デフォルトの状態でネストされたオブジェクトがないことを確認します。
+- JSON ファイル自体が構文的に有効で、適切な形式であることを確認します。
+- いずれかのチェックが失敗した場合は、変更するのではなく、停止して不一致を報告します。
+  データ。
 
-- Ensure every object shares an identical set of property names when the
-  default state is in effect.
-- Confirm there are no nested objects in the default state.
-- Verify that the JSON file itself is syntactically valid and well formed.
-- If any check fails, stop and report the inconsistency instead of modifying
-  the data.
+## 許容可能な JSON
 
-## Acceptable JSON
-
-When the default behavior is active, acceptable JSON resembles the following
-pattern:
-
-```json
+デフォルトの動作がアクティブな場合、受け入れられる JSON は次のようになります。
+パターン:```json
 [
   {
     "VALID_PROPERTY_NAME-a": "value",
@@ -61,14 +58,10 @@ pattern:
     "VALID_PROPERTY_NAME-b": "value"
   }
 ]
-```
+```## 受け入れられない JSON (デフォルト状態)
 
-## Unacceptable JSON (Default State)
-
-If the default behavior is active, reject files that contain nested objects or
-inconsistent property names. For example:
-
-```json
+デフォルトの動作がアクティブな場合は、ネストされたオブジェクトを含むファイルを拒否するか、
+一貫性のないプロパティ名。例えば：```json
 [
   {
     "VALID_PROPERTY_NAME-a": {
@@ -83,68 +76,58 @@ inconsistent property names. For example:
     "VALID_PROPERTY_NAME-c": "value"
   }
 ]
-```
+```変数オーバーライドの場合、ネストまたは異なる値を処理する方法を明確に説明します。
+プロパティの場合は、その指示に従ってください。それ以外の場合は、シャッフルしようとしないでください。
+データ。
 
-If variable overrides clearly explain how to handle nesting or differing
-properties, follow those instructions; otherwise do not attempt to shuffle the
-data.
+## ワークフロー
 
-## Workflow
+1. **入力の収集** – JSON ファイルまたは JSON に似た構造が
+   添付されています。そうでない場合は、一時停止してデータ ファイルを要求します。
+2. **構成の確認** – デフォルトを指定された変数とマージします。
+   `Variables` ヘッダーまたはプロンプトレベルのオーバーライド。
+3. **構造の検証** – データ検証チェックリストを適用して、次のことを確認します。
+   選択したモードではシャッフルは安全です。
+4. **データのシャッフル** – 変数または変数によって記述されたコレクションをランダム化します。
+   JSON の有効性を維持しながらのデフォルトの動作。
+5. **結果を返す** – 元のデータを保持したまま、シャッフルされたデータを出力します。
+   エンコードとフォーマットの規則。
 
-1. **Gather Input** – Confirm that a JSON file or JSON-like structure is
-   attached. If not, pause and request the data file.
-2. **Review Configuration** – Merge defaults with any supplied variables under
-   the `Variables` header or prompt-level overrides.
-3. **Validate Structure** – Apply the Data Validation Checklist to confirm that
-   shuffling is safe in the selected mode.
-4. **Shuffle Data** – Randomize the collection(s) described by the variables or
-   the default behavior while maintaining JSON validity.
-5. **Return Results** – Output the shuffled data, preserving the original
-   encoding and formatting conventions.
+## データをシャッフルするための要件
 
-## Requirements for Shuffling Data
+- 各リクエストは、JSON ファイルまたは互換性のある JSON 構造を提供する必要があります。
+- シャッフル後にデータが有効な状態を維持できない場合は、シャッフルを停止して報告します。
+  矛盾。
+- オーバーライドが指定されていない場合は、デフォルトの状態を観察してください。
 
-- Each request must provide a JSON file or a compatible JSON structure.
-- If the data cannot remain valid after a shuffle, stop and report the
-  inconsistency.
-- Observe the default state when no overrides are supplied.
+## 例
 
-## Examples
+以下は、エラーの場合と成功した場合を示す 2 つのサンプル インタラクションです。
+構成。
 
-Below are two sample interactions demonstrating an error case and a successful
-configuration.
-
-### Missing File
-
-```text
+### ファイルがありません```text
 [user]
 > /shuffle-json-data
 [agent]
 > Please provide a JSON file to shuffle. Preferably as chat variable or attached context.
-```
-
-### Custom Configuration
-
-```text
+```### カスタム構成```text
 [user]
 > /shuffle-json-data #file:funFacts.json ignoreProperties = "year", "category"; requiredProperties = "fact"
-```
+```## デフォルトの状態
 
-## Default State
+このプロンプトまたはリクエスト内の変数がデフォルトをオーバーライドしない限り、
+次のように入力します。
 
-Unless variables in this prompt or in a request override the defaults, treat the
-input as follows:
+- ファイル名 = **必須**
+-ignoreProperties = なし
+- requiredProperties = 最初のオブジェクトの最初のプロパティのセット
+- ネスト = false
 
-- fileName = **REQUIRED**
-- ignoreProperties = none
-- requiredProperties = first set of properties from the first object
-- nesting = false
+## 変数
 
-## Variables
+次の変数を指定すると、デフォルトの状態がオーバーライドされます。通訳する
+タスクが引き続き成功できるように、賢明に密接に関連した名前を付けます。
 
-When provided, the following variables override the default state. Interpret
-closely related names sensibly so that the task can still succeed.
-
-- ignoreProperties
-- requiredProperties
-- nesting
+-ignoreProperties
+- 必須プロパティ
+- ネスティング

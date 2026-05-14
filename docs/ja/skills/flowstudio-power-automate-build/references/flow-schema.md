@@ -1,12 +1,10 @@
-# FlowStudio MCP — Flow Definition Schema
+# FlowStudio MCP — フロー定義スキーマ
 
-The full JSON structure expected by `update_live_flow` (and returned by `get_live_flow`).
+`update_live_flow` によって予期される完全な JSON 構造 (そして `get_live_flow` によって返される)。
 
 ---
 
-## Top-Level Shape
-
-```json
+## 最上位の形状```json
 {
   "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
   "contentVersion": "1.0.0.0",
@@ -24,126 +22,103 @@ The full JSON structure expected by `update_live_flow` (and returned by `get_liv
   },
   "outputs": {}
 }
-```
-
----
+```---
 
 ## `triggers`
 
-Exactly one trigger per flow definition. The key name is arbitrary but
-conventional names are used (e.g. `Recurrence`, `manual`, `When_a_new_email_arrives`).
+フロー定義ごとにトリガーは 1 つだけです。キー名は任意ですが、
+従来の名前が使用されます (例: `Recurrence`、`manual`、`When_a_new_email_arrives`)。
 
-See [trigger-types.md](trigger-types.md) for all trigger templates.
+すべてのトリガー テンプレートについては、[trigger-types.md](trigger-types.md) を参照してください。
 
 ---
 
-## `actions`
+## @@コード4@@
 
-Dictionary of action definitions keyed by unique action name.
-Key names may not contain spaces — use underscores.
+一意のアクション名をキーとするアクション定義のディクショナリ。
+キー名にはスペースを含めることはできません。アンダースコアを使用してください。
 
-Each action must include:
-- `type` — action type identifier
-- `runAfter` — map of upstream action names → status conditions array
-- `inputs` — action-specific input configuration
+各アクションには以下を含める必要があります。
+- `type` — アクション タイプの識別子
+- `runAfter` — 上流アクション名のマップ → ステータス条件配列
+- `inputs` — アクション固有の入力構成
 
-See [action-patterns-core.md](action-patterns-core.md), [action-patterns-data.md](action-patterns-data.md),
-and [action-patterns-connectors.md](action-patterns-connectors.md) for templates.
+[action-patterns-core.md](action-patterns-core.md)、[action-patterns-data.md](action-patterns-data.md) を参照してください。
+テンプレートの場合は [action-patterns-connectors.md](action-patterns-connectors.md) です。
 
-### Optional Action Properties
+### オプションのアクションのプロパティ
 
-Beyond the required `type`, `runAfter`, and `inputs`, actions can include:
+必須の `type`、`runAfter`、`inputs` 以外にも、次のアクションを含めることができます。
 
-| Property | Purpose |
+|プロパティ |目的 |
 |---|---|
-| `runtimeConfiguration` | Pagination, concurrency, secure data, chunked transfer |
-| `operationOptions` | `"Sequential"` for Foreach, `"DisableAsyncPattern"` for HTTP |
-| `limit` | Timeout override (e.g. `{"timeout": "PT2H"}`) |
+| `runtimeConfiguration` |ページネーション、同時実行性、安全なデータ、チャンク転送 |
+| `operationOptions` | Foreach の場合は `"Sequential"`、HTTP の場合は `"DisableAsyncPattern"` |
+| `limit` |タイムアウトオーバーライド (例: `{"timeout": "PT2H"}`) |
 
-#### `runtimeConfiguration` Variants
+#### `runtimeConfiguration` バリアント
 
-**Pagination** (SharePoint Get Items with large lists):
-```json
+**ページネーション** (大きなリストを含む SharePoint Get Items):```json
 "runtimeConfiguration": {
   "paginationPolicy": {
     "minimumItemCount": 5000
   }
 }
-```
-> Without this, Get Items silently caps at 256 results. Set `minimumItemCount`
-> to the maximum rows you expect. Required for any SharePoint list over 256 items.
+```> これを行わないと、Get Items の結果は 256 件に制限されます。 `minimumItemCount`を設定します
+> 予想される最大行数まで。 256 項目を超える SharePoint リストに必要です。
 
-**Concurrency** (parallel Foreach):
-```json
+**同時実行性** (並列 Foreach):```json
 "runtimeConfiguration": {
   "concurrency": {
     "repetitions": 20
   }
 }
-```
-
-**Secure inputs/outputs** (mask values in run history):
-```json
+```**安全な入力/出力** (実行履歴内のマスク値):```json
 "runtimeConfiguration": {
   "secureData": {
     "properties": ["inputs", "outputs"]
   }
 }
-```
-> Use on actions that handle credentials, tokens, or PII. Masked values show
-> as `"<redacted>"` in the flow run history UI and API responses.
+```> 認証情報、トークン、または PII を処理するアクションで使用します。マスクされた値が表示されます
+> フロー実行履歴 UI および API 応答内の `"<redacted>"` として。
 
-**Chunked transfer** (large HTTP payloads):
-```json
+**チャンク転送** (大きな HTTP ペイロード):```json
 "runtimeConfiguration": {
   "contentTransfer": {
     "transferMode": "Chunked"
   }
 }
-```
-> Enable on HTTP actions sending or receiving bodies >100 KB (e.g. parent→child
-> flow calls with large arrays).
+```> 100 KB を超える本文を送信または受信する HTTP アクションで有効にします (例: 親→子)
+> 大きな配列を使用したフロー呼び出し)。
 
 ---
 
-## `runAfter` Rules
+## `runAfter` ルール
 
-The first action in a branch has `"runAfter": {}` (empty — runs after trigger).
+ブランチ内の最初のアクションには `"runAfter": {}` が含まれます (空 - トリガー後に実行されます)。
 
-Subsequent actions declare their dependency:
-
-```json
+後続のアクションは依存関係を宣言します。```json
 "My_Action": {
   "runAfter": {
     "Previous_Action": ["Succeeded"]
   }
 }
-```
-
-Multiple upstream dependencies:
-```json
+```複数の上流依存関係:```json
 "runAfter": {
   "Action_A": ["Succeeded"],
   "Action_B": ["Succeeded", "Skipped"]
 }
-```
-
-Error-handling action (runs when upstream failed):
-```json
+```エラー処理アクション (アップストリームが失敗したときに実行):```json
 "Log_Error": {
   "runAfter": {
     "Risky_Action": ["Failed"]
   }
 }
-```
+```---
 
----
+## `parameters` (フローレベル入力パラメータ)
 
-## `parameters` (Flow-Level Input Parameters)
-
-Optional. Define reusable values at the flow level:
-
-```json
+オプション。フローレベルで再利用可能な値を定義します。```json
 "parameters": {
   "listName": {
     "type": "string",
@@ -154,35 +129,27 @@ Optional. Define reusable values at the flow level:
     "defaultValue": 100
   }
 }
-```
-
-Reference: `@parameters('listName')` in expression strings.
+```参照: 式文字列内の `@parameters('listName')`。
 
 ---
 
 ## `outputs`
 
-Rarely used in cloud flows. Leave as `{}` unless the flow is called
-as a child flow and needs to return values.
+クラウド フローではほとんど使用されません。フローが呼び出されない限り、`{}` のままにしておきます
+子フローとして、値を返す必要があります。
 
-For child flows that return data:
-
-```json
+データを返す子フローの場合:```json
 "outputs": {
   "resultData": {
     "type": "object",
     "value": "@outputs('Compose_Result')"
   }
 }
-```
+```---
 
----
+## スコープ付きアクション (スコープ ブロック内)
 
-## Scoped Actions (Inside Scope Block)
-
-Actions that need to be grouped for error handling or clarity:
-
-```json
+エラー処理または明確にするためにグループ化する必要があるアクション:```json
 "Scope_Main_Process": {
   "type": "Scope",
   "runAfter": {},
@@ -191,13 +158,9 @@ Actions that need to be grouped for error handling or clarity:
     "Step_Two": { "runAfter": { "Step_One": ["Succeeded"] }, ... }
   }
 }
-```
+```---
 
----
-
-## Full Minimal Example
-
-```json
+## 完全な最小限の例```json
 {
   "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
   "contentVersion": "1.0.0.0",

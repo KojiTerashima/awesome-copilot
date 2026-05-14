@@ -2,26 +2,7 @@
 name: refactor-plan
 description: 'Plan a multi-file refactor with proper sequencing and rollback steps'
 ---
-
-# Refactor Plan
-
-Create a detailed plan for this refactoring task.
-
-## Refactor Goal
-
-{{refactor_description}}
-
-## Instructions
-
-1. Search the codebase to understand current state
-2. Identify all affected files and their dependencies
-3. Plan changes in a safe sequence (types first, then implementations, then tests)
-4. Include verification steps between changes
-5. Consider rollback if something fails
-
-## Output Format
-
-```markdown
+Error 504 (Server Error)!!1504.That’s an error.There was an error. Please try again later.That’s all we know.```markdown
 ## Refactor Plan: [title]
 
 ### Current State
@@ -60,6 +41,4 @@ If something fails:
 
 ### Risks
 - [Potential issue and mitigation]
-```
-
-Shall I proceed with Phase 1?
+```フェーズ 1 に進みましょうか?

@@ -2,403 +2,344 @@
 name: postgresql-optimization
 description: 'PostgreSQL-specific development assistant focusing on unique PostgreSQL features, advanced data types, and PostgreSQL-exclusive capabilities. Covers JSONB operations, array types, custom types, range/geometric types, full-text search, window functions, and PostgreSQL extensions ecosystem.'
 ---
+# PostgreSQL 開発アシスタント
 
-# PostgreSQL Development Assistant
+${selection} (選択がない場合はプロジェクト全体) に関する専門家による PostgreSQL ガイダンス。 PostgreSQL 固有の機能、最適化パターン、高度な機能に焦点を当てます。
 
-Expert PostgreSQL guidance for ${selection} (or entire project if no selection). Focus on PostgreSQL-specific features, optimization patterns, and advanced capabilities.
+## � PostgreSQL 固有の機能
 
-## � PostgreSQL-Specific Features
-
-### JSONB Operations
-```sql
--- Advanced JSONB queries
-CREATE TABLE events (
-    id SERIAL PRIMARY KEY,
-    data JSONB NOT NULL,
+### JSONB 操作```SQL
+-- 高度な JSONB クエリ
+CREATE TABLE イベント (
+    id シリアル主キー、
+    データ JSONB NOT NULL、
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- GIN index for JSONB performance
-CREATE INDEX idx_events_data_gin ON events USING gin(data);
+-- JSONB パフォーマンスの GIN インデックス
+CREATE INDEX idx_events_data_gin ON イベント USING gin(data);
 
--- JSONB containment and path queries
-SELECT * FROM events 
-WHERE data @> '{"type": "login"}'
-  AND data #>> '{user,role}' = 'admin';
+-- JSONB の包含とパスのクエリ
+SELECT * FROM イベント 
+WHERE データ @> '{"タイプ": "ログイン"}'
+  AND データ #>> '{user,role}' = 'admin';
 
--- JSONB aggregation
-SELECT jsonb_agg(data) FROM events WHERE data ? 'user_id';
-```
-
-### Array Operations
-```sql
--- PostgreSQL arrays
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    tags TEXT[],
-    categories INTEGER[]
+-- JSONB 集約
+SELECT jsonb_agg(data) FROM events WHERE data ? 'ユーザーID';
+「」### 配列操作```SQL
+-- PostgreSQL 配列
+CREATE TABLE の投稿 (
+    id シリアル主キー、
+    タグ TEXT[]、
+    カテゴリ 整数[]
 );
 
--- Array queries and operations
-SELECT * FROM posts WHERE 'postgresql' = ANY(tags);
-SELECT * FROM posts WHERE tags && ARRAY['database', 'sql'];
-SELECT * FROM posts WHERE array_length(tags, 1) > 3;
+-- 配列のクエリと操作
+SELECT * FROM 投稿 WHERE 'postgresql' = ANY(タグ);
+SELECT * FROM 投稿 WHERE タグ && ARRAY['database', 'sql'];
+SELECT * FROM 投稿 WHERE array_length(tags, 1) > 3;
 
--- Array aggregation
-SELECT array_agg(DISTINCT category) FROM posts, unnest(categories) as category;
-```
-
-### Window Functions & Analytics
-```sql
--- Advanced window functions
-SELECT 
-    product_id,
-    sale_date,
-    amount,
-    -- Running totals
-    SUM(amount) OVER (PARTITION BY product_id ORDER BY sale_date) as running_total,
-    -- Moving averages
-    AVG(amount) OVER (PARTITION BY product_id ORDER BY sale_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) as moving_avg,
-    -- Rankings
-    DENSE_RANK() OVER (PARTITION BY EXTRACT(month FROM sale_date) ORDER BY amount DESC) as monthly_rank,
-    -- Lag/Lead for comparisons
+-- 配列の集約
+SELECT array_agg(DISTINCT category) FROM 投稿、unnest(categories) をカテゴリとして;
+「」### ウィンドウ関数と分析```SQL
+-- 高度なウィンドウ機能
+選択 
+    製品ID、
+    発売日、
+    金額、
+    -- 現在の合計
+    SUM(金額) OVER (PARTITION BY product_id ORDER BY sale_date) as running_total、
+    -- 移動平均
+    AVG(amount) OVER (PARTITION BY product_id ORDER BY sale_date ROWS BETWEEN 2 BETWEEN 先行行と現在の行) as move_avg,
+    -- ランキング
+    DENSE_RANK() OVER (PARTITION BY EXTRACT(month FROM sale_date) ORDER BY amount DESC) as month_rank,
+    -- 比較のための遅れ/進み
     LAG(amount, 1) OVER (PARTITION BY product_id ORDER BY sale_date) as prev_amount
-FROM sales;
-```
-
-### Full-Text Search
-```sql
--- PostgreSQL full-text search
-CREATE TABLE documents (
-    id SERIAL PRIMARY KEY,
-    title TEXT,
-    content TEXT,
-    search_vector tsvector
+売上から;
+「」### 全文検索```SQL
+-- PostgreSQL の全文検索
+CREATE TABLE ドキュメント (
+    id シリアル主キー、
+    タイトルテキスト、
+    コンテンツテキスト、
+    検索ベクトル tsvector
 );
 
--- Update search vector
-UPDATE documents 
-SET search_vector = to_tsvector('english', title || ' ' || content);
+-- 検索ベクトルを更新します
+ドキュメントを更新する 
+SET search_vector = to_tsvector('英語', タイトル || ' ' || コンテンツ);
 
--- GIN index for search performance
-CREATE INDEX idx_documents_search ON documents USING gin(search_vector);
+-- 検索パフォーマンスのための GIN インデックス
+CREATE INDEX idx_documents_search ON ドキュメント USING gin(search_vector);
 
--- Search queries
-SELECT * FROM documents 
-WHERE search_vector @@ plainto_tsquery('english', 'postgresql database');
+-- 検索クエリ
+SELECT * FROM ドキュメント 
+WHERE search_vector @@ plainto_tsquery('英語', 'postgresql データベース');
 
--- Ranking results
-SELECT *, ts_rank(search_vector, plainto_tsquery('postgresql')) as rank
-FROM documents 
+-- ランキング結果
+ランクとして SELECT *, ts_rank(search_vector, plainto_tsquery('postgresql'))
+ドキュメントから 
 WHERE search_vector @@ plainto_tsquery('postgresql')
-ORDER BY rank DESC;
-```
+ランク DESC で注文;
+「」## � PostgreSQL のパフォーマンス チューニング
 
-## � PostgreSQL Performance Tuning
-
-### Query Optimization
-```sql
--- EXPLAIN ANALYZE for performance analysis
-EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT) 
-SELECT u.name, COUNT(o.id) as order_count
-FROM users u
-LEFT JOIN orders o ON u.id = o.user_id
+### クエリの最適化```SQL
+-- EXPLAIN ANALYZE (パフォーマンス分析用)
+EXPLAIN (分析、バッファ、テキストのフォーマット) 
+order_count として SELECT u.name, COUNT(o.id)
+ユーザーからのあなた
+LEFT JOIN 命令 o ON u.id = o.user_id
 WHERE u.created_at > '2024-01-01'::date
-GROUP BY u.id, u.name;
+u.id、u.nameによるグループ化;
 
--- Identify slow queries from pg_stat_statements
-SELECT query, calls, total_time, mean_time, rows,
-       100.0 * shared_blks_hit / nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent
-FROM pg_stat_statements 
+-- pg_stat_statements から遅いクエリを特定する
+SELECT クエリ、呼び出し、total_time、mean_time、行、
+       100.0 *shared_blks_hit / nullif(shared_blks_hit +shared_blks_read, 0) AS hit_percent
+pg_stat_statements から 
 ORDER BY total_time DESC 
-LIMIT 10;
-```
+リミット10;
+「」### インデックス戦略```SQL
+-- 複数列クエリの複合インデックス
+CREATE INDEX idx_orders_user_date ON 注文(user_id, order_date);
 
-### Index Strategies
-```sql
--- Composite indexes for multi-column queries
-CREATE INDEX idx_orders_user_date ON orders(user_id, order_date);
-
--- Partial indexes for filtered queries
+-- フィルタリングされたクエリの部分インデックス
 CREATE INDEX idx_active_users ON users(created_at) WHERE status = 'active';
 
--- Expression indexes for computed values
-CREATE INDEX idx_users_lower_email ON users(lower(email));
+-- 計算値の式インデックス
+CREATE INDEX idx_users_ lower_email ON users( lower(email));
 
--- Covering indexes to avoid table lookups
-CREATE INDEX idx_orders_covering ON orders(user_id, status) INCLUDE (total, created_at);
-```
-
-### Connection & Memory Management
-```sql
--- Check connection usage
-SELECT count(*) as connections, state 
+-- テーブル検索を避けるためのインデックスのカバー
+CREATE INDEX idx_orders_covering ONorders(user_id, status) INCLUDE (total, created_at);
+「」### 接続とメモリの管理```SQL
+-- 接続の使用状況を確認する
+接続、状態として count(*) を選択します 
 FROM pg_stat_activity 
-GROUP BY state;
+GROUP BY 状態。
 
--- Monitor memory usage
-SELECT name, setting, unit 
-FROM pg_settings 
-WHERE name IN ('shared_buffers', 'work_mem', 'maintenance_work_mem');
-```
+-- メモリ使用量を監視する
+SELECT 名前、設定、単位 
+pg_settings から 
+WHERE 名 IN ('shared_buffers', 'work_mem', 'maintenance_work_mem');
+「」## �️ PostgreSQL の高度なデータ型
 
-## �️ PostgreSQL Advanced Data Types
-
-### Custom Types & Domains
-```sql
--- Create custom types
+### カスタムタイプとドメイン```SQL
+-- カスタム タイプを作成する
 CREATE TYPE address_type AS (
-    street TEXT,
-    city TEXT,
-    postal_code TEXT,
-    country TEXT
+    ストリートテキスト、
+    都市テキスト、
+    郵便番号テキスト、
+    国のテキスト
 );
 
-CREATE TYPE order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'cancelled');
+CREATE TYPE order_status AS ENUM ('保留中'、'処理中'、'発送済み'、'配達済み'、'キャンセル');
 
--- Use domains for data validation
-CREATE DOMAIN email_address AS TEXT 
+-- データ検証にドメインを使用する
+ドメインのメールアドレスをテキストとして作成 
 CHECK (VALUE ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
 
--- Table using custom types
-CREATE TABLE customers (
-    id SERIAL PRIMARY KEY,
-    email email_address NOT NULL,
-    address address_type,
-    status order_status DEFAULT 'pending'
+-- カスタム タイプを使用したテーブル
+CREATE TABLE の顧客 (
+    id シリアル主キー、
+    電子メール email_address が NULL ではありません。
+    アドレスのアドレスタイプ、
+    ステータス order_status DEFAULT '保留中'
 );
-```
-
-### Range Types
-```sql
--- PostgreSQL range types
-CREATE TABLE reservations (
-    id SERIAL PRIMARY KEY,
-    room_id INTEGER,
-    reservation_period tstzrange,
-    price_range numrange
+「」### 範囲の種類```SQL
+-- PostgreSQL 範囲タイプ
+CREATE TABLE 予約 (
+    id シリアル主キー、
+    room_id INTEGER、
+    予約期間 tstzrange、
+    価格範囲の数値範囲
 );
 
--- Range queries
-SELECT * FROM reservations 
-WHERE reservation_period && tstzrange('2024-07-20', '2024-07-25');
+-- 範囲クエリ
+予約から * を選択 
+WHERE 予約期間 && tstzrange('2024-07-20', '2024-07-25');
 
--- Exclude overlapping ranges
-ALTER TABLE reservations 
-ADD CONSTRAINT no_overlap 
-EXCLUDE USING gist (room_id WITH =, reservation_period WITH &&);
-```
-
-### Geometric Types
-```sql
--- PostgreSQL geometric types
-CREATE TABLE locations (
-    id SERIAL PRIMARY KEY,
-    name TEXT,
-    coordinates POINT,
-    coverage CIRCLE,
-    service_area POLYGON
+-- 重複する範囲を除外します
+ALTER TABLE 予約 
+制約を追加 no_overlap 
+EXCLUDE USING gist (room_id WITH =、reservation_period WITH &&);
+「」### 幾何学的タイプ```SQL
+-- PostgreSQL の幾何学的タイプ
+CREATE TABLE の場所 (
+    id シリアル主キー、
+    名前テキスト、
+    コーディネートポイント、
+    取材サークル、
+    サービスエリアポリゴン
 );
 
--- Geometric queries
-SELECT name FROM locations 
-WHERE coordinates <-> point(40.7128, -74.0060) < 10; -- Within 10 units
+-- 幾何学的クエリ
+場所から名前を選択 
+WHERE 座標 <-> point(40.7128, -74.0060) < 10; -- 10単位以内
 
--- GiST index for geometric data
-CREATE INDEX idx_locations_coords ON locations USING gist(coordinates);
-```
+-- 幾何学的データの GiST インデックス
+CREATE INDEX idx_locations_coords ON の場所 USING gist(座標);
+「」## 📊 PostgreSQL 拡張機能とツール
 
-## 📊 PostgreSQL Extensions & Tools
+### 便利な拡張機能```SQL
+-- よく使用される拡張機能を有効にする
+「uuid-ossp」が存在しない場合は拡張機能を作成します。    -- UUID の生成
+「pgcrypto」が存在しない場合は拡張機能を作成します。     -- 暗号化機能
+「アクセントがない」場合は拡張子を作成します。     -- テキストからアクセントを削除します。
+「pg_trgm」が存在しない場合は拡張機能を作成します。      -- トライグラムマッチング
+「btree_gin」が存在しない場合は拡張機能を作成します。    -- btree タイプの GIN インデックス
 
-### Useful Extensions
-```sql
--- Enable commonly used extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";    -- UUID generation
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";     -- Cryptographic functions
-CREATE EXTENSION IF NOT EXISTS "unaccent";     -- Remove accents from text
-CREATE EXTENSION IF NOT EXISTS "pg_trgm";      -- Trigram matching
-CREATE EXTENSION IF NOT EXISTS "btree_gin";    -- GIN indexes for btree types
+-- 拡張機能の使用
+SELECT uuid_generate_v4();                     -- UUID を生成する
+SELECT crypt('パスワード', gen_salt('bf'));      -- ハッシュパスワード
+SELECT 類似性('postgresql', 'postgersql'); -- ファジーマッチング
+「」### 監視とメンテナンス```SQL
+-- データベースのサイズと増加
+db_size として pg_size_pretty(pg_database_size(current_database())) を選択します。
 
--- Using extensions
-SELECT uuid_generate_v4();                     -- Generate UUIDs
-SELECT crypt('password', gen_salt('bf'));      -- Hash passwords
-SELECT similarity('postgresql', 'postgersql'); -- Fuzzy matching
-```
+-- テーブルとインデックスのサイズ
+SELECT スキーマ名、テーブル名、
+       pg_size_pretty(pg_total_relation_size(スキーマ名||'.'||テーブル名)) サイズとして
+pg_tables から 
+ORDER BY pg_total_relation_size(スキーマ名||'.'||テーブル名) DESC;
 
-### Monitoring & Maintenance
-```sql
--- Database size and growth
-SELECT pg_size_pretty(pg_database_size(current_database())) as db_size;
-
--- Table and index sizes
-SELECT schemaname, tablename,
-       pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables 
-ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
-
--- Index usage statistics
-SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
+-- インデックス使用統計
+SELECT スキーマ名、テーブル名、インデックス名、idx_scan、idx_tup_read、idx_tup_fetch
 FROM pg_stat_user_indexes 
-WHERE idx_scan = 0;  -- Unused indexes
-```
+WHERE idx_scan = 0;  -- 未使用のインデックス
+「」### PostgreSQL 固有の最適化のヒント
+- **詳細なクエリ分析には EXPLAIN (ANALYZE, BUFFERS)** を使用します
+- **ワークロードに合わせて postgresql.conf を構成します** (OLTP と OLAP)
+- **同時実行性の高いアプリケーションには接続プーリングを使用** (pgbouncer)
+- **定期的なVACUUMとANALYZE**による最適なパフォーマンス
+- **PostgreSQL 10+ 宣言型パーティション分割を使用して大きなテーブルをパーティション分割**
+- **クエリ パフォーマンスの監視には pg_stat_statements を使用します**
 
-### PostgreSQL-Specific Optimization Tips
-- **Use EXPLAIN (ANALYZE, BUFFERS)** for detailed query analysis
-- **Configure postgresql.conf** for your workload (OLTP vs OLAP)
-- **Use connection pooling** (pgbouncer) for high-concurrency applications
-- **Regular VACUUM and ANALYZE** for optimal performance
-- **Partition large tables** using PostgreSQL 10+ declarative partitioning
-- **Use pg_stat_statements** for query performance monitoring
+## 📊 監視とメンテナンス
 
-## 📊 Monitoring and Maintenance
-
-### Query Performance Monitoring
-```sql
--- Identify slow queries
-SELECT query, calls, total_time, mean_time, rows
-FROM pg_stat_statements 
+### クエリパフォーマンスの監視```SQL
+-- 遅いクエリを特定する
+SELECT クエリ、呼び出し、total_time、mean_time、行数
+pg_stat_statements から 
 ORDER BY total_time DESC 
-LIMIT 10;
+リミット10;
 
--- Check index usage
-SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
+-- インデックスの使用状況を確認する
+SELECT スキーマ名、テーブル名、インデックス名、idx_scan、idx_tup_read、idx_tup_fetch
 FROM pg_stat_user_indexes 
 WHERE idx_scan = 0;
-```
+「」### データベースのメンテナンス
+- **バキュームと分析**: パフォーマンスのための定期的なメンテナンス
+- **インデックスのメンテナンス**: 断片化したインデックスを監視および再構築します。
+- **統計の更新**: クエリ プランナーの統計を最新の状態に保ちます
+- **ログ分析**: PostgreSQL ログの定期的なレビュー
 
-### Database Maintenance
-- **VACUUM and ANALYZE**: Regular maintenance for performance
-- **Index Maintenance**: Monitor and rebuild fragmented indexes
-- **Statistics Updates**: Keep query planner statistics current
-- **Log Analysis**: Regular review of PostgreSQL logs
+## 🛠️ 一般的なクエリ パターン
 
-## 🛠️ Common Query Patterns
+### ページネーション```SQL
+-- ❌ 悪い: 大規模なデータセットのオフセット
+SELECT * FROM 製品 ID で注文 オフセット 10000 LIMIT 20;
 
-### Pagination
-```sql
--- ❌ BAD: OFFSET for large datasets
-SELECT * FROM products ORDER BY id OFFSET 10000 LIMIT 20;
-
--- ✅ GOOD: Cursor-based pagination
-SELECT * FROM products 
+-- ✅ 良い点: カーソルベースのページネーション
+製品から * を選択してください 
 WHERE id > $last_id 
-ORDER BY id 
-LIMIT 20;
-```
-
-### Aggregation
-```sql
--- ❌ BAD: Inefficient grouping
-SELECT user_id, COUNT(*) 
-FROM orders 
-WHERE order_date >= '2024-01-01' 
+IDで注文 
+制限 20;
+「」### 集計```SQL
+-- ❌ 悪い点: 非効率的なグループ化
+SELECT ユーザー ID、COUNT(*) 
+注文から 
+WHERE 注文日 >= '2024-01-01' 
 GROUP BY user_id;
 
--- ✅ GOOD: Optimized with partial index
-CREATE INDEX idx_orders_recent ON orders(user_id) 
-WHERE order_date >= '2024-01-01';
+-- ✅ 良い: 部分インデックスで最適化されています。
+CREATE INDEX idx_orders_recent ON 注文(user_id) 
+WHERE 注文日 >= '2024-01-01';
 
-SELECT user_id, COUNT(*) 
-FROM orders 
-WHERE order_date >= '2024-01-01' 
+SELECT ユーザー ID、COUNT(*) 
+注文から 
+WHERE 注文日 >= '2024-01-01' 
 GROUP BY user_id;
-```
-
-### JSON Queries
-```sql
--- ❌ BAD: Inefficient JSON querying
+「」### JSON クエリ```SQL
+-- ❌ 悪い点: 非効率的な JSON クエリ
 SELECT * FROM users WHERE data::text LIKE '%admin%';
 
--- ✅ GOOD: JSONB operators and GIN index
-CREATE INDEX idx_users_data_gin ON users USING gin(data);
+-- ✅ 良い点: JSONB 演算子と GIN インデックス
+CREATE INDEX idx_users_data_gin ON ユーザー USING gin(data);
 
 SELECT * FROM users WHERE data @> '{"role": "admin"}';
-```
+「」## 📋 最適化チェックリスト
 
-## 📋 Optimization Checklist
+### クエリ分析
+- [ ] 負荷の高いクエリに対して EXPLAIN ANALYZE を実行する
+- [ ] 大きなテーブルの順次スキャンをチェックします
+- [ ] 適切な結合アルゴリズムを確認します。
+- [ ] WHERE 句の選択性を確認する
+- [ ] 並べ替えおよび集計操作を分析します。
 
-### Query Analysis
-- [ ] Run EXPLAIN ANALYZE for expensive queries
-- [ ] Check for sequential scans on large tables
-- [ ] Verify appropriate join algorithms
-- [ ] Review WHERE clause selectivity
-- [ ] Analyze sort and aggregation operations
+### インデックス戦略
+- [ ] 頻繁にクエリされる列のインデックスを作成します
+- [ ] 複数列検索に複合インデックスを使用する
+- [ ] フィルタリングされたクエリの部分インデックスを考慮する
+- [ ] 未使用または重複したインデックスを削除します。
+- [ ] インデックスの肥大化と断片化を監視します
 
-### Index Strategy
-- [ ] Create indexes for frequently queried columns
-- [ ] Use composite indexes for multi-column searches
-- [ ] Consider partial indexes for filtered queries
-- [ ] Remove unused or duplicate indexes
-- [ ] Monitor index bloat and fragmentation
+### セキュリティのレビュー
+- [ ] パラメータ化されたクエリを排他的に使用します
+- [ ] 適切なアクセス制御を実装する
+- [ ] 必要に応じて行レベルのセキュリティを有効にします
+- [ ] 機密データへのアクセスを監査する
+- [ ] 安全な接続方法を使用する
 
-### Security Review
-- [ ] Use parameterized queries exclusively
-- [ ] Implement proper access controls
-- [ ] Enable row-level security where needed
-- [ ] Audit sensitive data access
-- [ ] Use secure connection methods
+### パフォーマンスの監視
+- [ ] クエリ パフォーマンス監視を設定する
+- [ ] 適切なログ設定を構成します
+- [ ] 接続プールの使用状況を監視する
+- [ ] データベースの成長とメンテナンスのニーズを追跡する
+- [ ] パフォーマンス低下のアラートを設定します
 
-### Performance Monitoring
-- [ ] Set up query performance monitoring
-- [ ] Configure appropriate log settings
-- [ ] Monitor connection pool usage
-- [ ] Track database growth and maintenance needs
-- [ ] Set up alerting for performance degradation
+## 🎯 最適化出力形式
 
-## 🎯 Optimization Output Format
+### クエリ分析結果「」
+## クエリのパフォーマンス分析
 
-### Query Analysis Results
-```
-## Query Performance Analysis
+**元のクエリ**:
+[パフォーマンス上の問題のある元の SQL]
 
-**Original Query**:
-[Original SQL with performance issues]
+**特定された問題**:
+- 大きなテーブルでの順次スキャン (コスト: 15000.00)
+- 頻繁にクエリされる列のインデックスがありません
+- 非効率的な結合順序
 
-**Issues Identified**:
-- Sequential scan on large table (Cost: 15000.00)
-- Missing index on frequently queried column
-- Inefficient join order
+**最適化されたクエリ**:
+[説明付きの改良されたSQL]
 
-**Optimized Query**:
-[Improved SQL with explanations]
+**推奨されるインデックス**:
+「」SQL
+CREATE INDEX idx_table_column ON テーブル(列);「」
 
-**Recommended Indexes**:
-```sql
-CREATE INDEX idx_table_column ON table(column);
-```
+**パフォーマンスへの影響**: 実行時間の 80% の向上が期待されます。
+「」## 🚀 高度な PostgreSQL 機能
 
-**Performance Impact**: Expected 80% improvement in execution time
-```
-
-## 🚀 Advanced PostgreSQL Features
-
-### Window Functions
-```sql
--- Running totals and rankings
-SELECT 
-    product_id,
-    order_date,
-    amount,
-    SUM(amount) OVER (PARTITION BY product_id ORDER BY order_date) as running_total,
-    ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY amount DESC) as rank
-FROM sales;
-```
-
-### Common Table Expressions (CTEs)
-```sql
--- Recursive queries for hierarchical data
+### ウィンドウ関数```SQL
+-- 現在の合計とランキング
+選択 
+    製品ID、
+    注文日、
+    金額、
+    SUM(金額) OVER (PARTITION BY product_id ORDER BY order_date) as running_total、
+    ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY amount DESC) as Rank
+売上から;
+「」### 共通テーブル式 (CTE)```SQL
+-- 階層データの再帰的クエリ
 WITH RECURSIVE category_tree AS (
-    SELECT id, name, parent_id, 1 as level
-    FROM categories 
-    WHERE parent_id IS NULL
+    ID、名前、parent_id、レベルとして 1 を選択します
+    カテゴリから 
+    ここで、parent_id は NULL です
     
-    UNION ALL
+    すべてを結合する
     
-    SELECT c.id, c.name, c.parent_id, ct.level + 1
-    FROM categories c
+    SELECT c.id、c.name、c.parent_id、ct.level + 1
+    カテゴリcから
     JOIN category_tree ct ON c.parent_id = ct.id
-)
-SELECT * FROM category_tree ORDER BY level, name;
-```
-
-Focus on providing specific, actionable PostgreSQL optimizations that improve query performance, security, and maintainability while leveraging PostgreSQL's advanced features.
+）
+SELECT * FROM category_tree ORDER BY レベル、名前;
+「」PostgreSQL の高度な機能を活用しながら、クエリのパフォーマンス、セキュリティ、保守性を向上させる、具体的で実行可能な PostgreSQL の最適化を提供することに重点を置きます。

@@ -1,29 +1,26 @@
 ---
 title: React 19 Actions Pattern Reference
 ---
+# React 19 アクション パターン リファレンス
 
-# React 19 Actions Pattern Reference
+React 19 では、読み込み状態、エラー処理、オプティミスティック更新が組み込まれた非同期操作 (フォーム送信など) を処理するためのパターンである **アクション** が導入されています。これにより、`useReducer + state` パターンがより単純な API に置き換えられます。
 
-React 19 introduces **Actions**  a pattern for handling async operations (like form submissions) with built-in loading states, error handling, and optimistic updates. This replaces the `useReducer + state` pattern with a simpler API.
+## アクションとは何ですか?
 
-## What are Actions?
+**アクション**は、次のような非同期関数です。
 
-An **Action** is an async function that:
-
-- Can be called automatically when a form submits or button clicks
-- Runs with automatic loading/pending state
-- Updates the UI automatically when done
-- Works with Server Components for direct server mutation
+- フォームの送信時またはボタンのクリック時に自動的に呼び出すことができます
+- 自動読み込み/保留状態で実行
+- 完了すると UI が自動的に更新されます
+- サーバーコンポーネントと連携して直接サーバーを変更します。
 
 ---
 
 ## useActionState()
 
-`useActionState` is the client-side Action hook. It replaces `useReducer + useEffect` for form handling.
+`useActionState` は、クライアント側のアクション フックです。フォーム処理のために `useReducer + useEffect` を置き換えます。
 
-### React 18 Pattern
-
-```jsx
+### React 18 パターン```jsx
 // React 18  form with useReducer + state:
 function Form() {
   const [state, dispatch] = useReducer(
@@ -61,11 +58,7 @@ function Form() {
     </form>
   );
 }
-```
-
-### React 19 useActionState() Pattern
-
-```jsx
+```### React 19 useActionState() パターン```jsx
 // React 19  same form with useActionState:
 import { useActionState } from 'react';
 
@@ -97,22 +90,18 @@ function Form() {
     </form>
   );
 }
-```
+```**相違点:**
 
-**Differences:**
-
-- One hook instead of `useReducer` + logic
-- `formAction` replaces `onSubmit`, form automatically collects FormData
-- `isPending` is a boolean, no dispatch calls
-- Action function receives `(prevState, formData)`
+- `useReducer` + ロジックの代わりに 1 つのフック
+- `formAction` は `onSubmit` を置き換え、フォームは自動的に FormData を収集します
+- `isPending` はブール値であり、ディスパッチ呼び出しはありません
+- アクション関数は`(prevState, formData)`を受け取ります
 
 ---
 
 ## useFormStatus()
 
-`useFormStatus` is a **child component hook** that reads the pending state from the nearest form. It acts like a built-in `isPending` signal without prop drilling.
-
-```jsx
+`useFormStatus` は、最も近いフォームから保留状態を読み取る **子コンポーネント フック**です。これは、プロップの穴あけなしで、組み込みの `isPending` 信号のように機能します。```jsx
 // React 18  must pass isPending as prop:
 function SubmitButton({ isPending }) {
   return <button disabled={isPending}>Submit</button>;
@@ -143,19 +132,15 @@ function Form() {
     </form>
   );
 }
-```
-
-**Key point:** `useFormStatus` only works inside a `<form action={...}>`  regular `<form onSubmit>` won't trigger it.
+```**重要なポイント:** `useFormStatus` は `<form action={...}>` 内でのみ機能し、通常の `<form onSubmit>` はトリガーしません。
 
 ---
 
 ## useOptimistic()
 
-`useOptimistic` updates the UI immediately while an async operation is in-flight. When the operation succeeds, the confirmed data replaces the optimistic value. If it fails, the UI reverts.
+`useOptimistic` は、非同期操作の実行中に UI をすぐに更新します。操作が成功すると、確認されたデータが楽観的な値を置き換えます。失敗すると、UI が元に戻ります。
 
-### React 18 Pattern
-
-```jsx
+### React 18 パターン```jsx
 // React 18  manual optimistic update:
 function TodoList({ todos, onAddTodo }) {
   const [optimistic, setOptimistic] = useState(todos);
@@ -187,11 +172,7 @@ function TodoList({ todos, onAddTodo }) {
     </ul>
   );
 }
-```
-
-### React 19 useOptimistic() Pattern
-
-```jsx
+```### React 19 useOptimistic() パターン```jsx
 import { useOptimistic } from 'react';
 
 async function addTodoAction(prevTodos, formData) {
@@ -230,20 +211,16 @@ function TodoList({ todos }) {
     </>
   );
 }
-```
-
-**Key points:**
+```**重要なポイント:**
 
 - `useOptimistic(currentState, updateFunction)`
-- `updateFunction` receives `(state, optimisticInput)` and returns new state
-- Call `addOptimistic(input)` to trigger the optimistic update
-- The server action's return value replaces the optimistic state when done
+- `updateFunction` は `(state, optimisticInput)` を受け取り、新しい状態を返します
+- `addOptimistic(input)` を呼び出してオプティミスティック更新をトリガーします
+- サーバー アクションの戻り値は、完了時に楽観的な状態を置き換えます。
 
 ---
 
-## Full Example: Todo List with All Hooks
-
-```jsx
+## 完全な例: すべてのフックを含む Todo リスト```jsx
 import { useActionState, useFormStatus, useOptimistic } from 'react';
 
 // Server action:
@@ -294,34 +271,26 @@ function TodoApp({ initialTodos }) {
     </>
   );
 }
-```
+```---
 
----
+## 移行戦略
 
-## Migration Strategy
+### フェーズ 1 変更は必要ありません
 
-### Phase 1  No changes required
+アクションはオプトインです。既存の `useReducer + onSubmit` パターンはすべて引き続き機能します。強制移住はありません。
 
-Actions are opt-in. All existing `useReducer + onSubmit` patterns continue to work. No forced migration.
+### フェーズ 2 リファクタリング候補を特定する
 
-### Phase 2  Identify refactor candidates
-
-After React 19 migration stabilizes, profile for `useReducer + async` patterns:
-
-```bash
+React 19 の移行が安定したら、`useReducer + async` パターンのプロファイルを作成します。```bash
 grep -rn "useReducer.*case.*'loading\|useReducer.*case.*'success" src/ --include="*.js" --include="*.jsx"
-```
+```リファクタリングする価値のあるパターン:
 
-Patterns worth refactoring:
+- 読み込み中/エラー状態のフォーム送信
+- ユーザーイベントによってトリガーされる非同期操作
+- 現在のコードは `dispatch({ type: '...' })` を使用しています
+- 単純な状態形状 (`loading`、`error`、`data` を持つオブジェクト)
 
-- Form submissions with loading/error state
-- Async operations triggered by user events
-- Current code uses `dispatch({ type: '...' })`
-- Simple state shape (object with `loading`, `error`, `data`)
-
-### Phase 3  Refactor to useActionState
-
-```jsx
+### フェーズ 3 useActionState へのリファクタリング```jsx
 // Before:
 function LoginForm() {
   const [state, dispatch] = useReducer(loginReducer, { loading: false, error: null, user: null });
@@ -355,17 +324,15 @@ function LoginForm() {
   
   return <form action={formAction}>...</form>;
 }
-```
+```---
 
----
+## 比較表
 
-## Comparison Table
-
-| Feature | React 18 | React 19 |
+|特集 |反応18 |反応19 |
 |---|---|---|
-| Form handling | `onSubmit` + useReducer | `action` + useActionState |
-| Loading state | Manual dispatch | Automatic `isPending` |
-| Child component pending state | Prop drilling | `useFormStatus` hook |
-| Optimistic updates | Manual state dance | `useOptimistic` hook |
-| Error handling | Manual in dispatch | Return from action |
-| Complexity | More boilerplate | Less boilerplate |
+|フォーム処理 | `onSubmit` + useReducer | `action` + useActionState |
+|ロード状態 |手動ディスパッチ |自動 `isPending` |
+|子コンポーネントの保留状態 |プロペラ穴あけ | `useFormStatus` フック |
+|楽観的なアップデート |マニュアルステートダンス | `useOptimistic` フック |
+|エラー処理 |マニュアル発送中 |行動から戻る |
+|複雑さ |定型文をもっと見る |定型文を減らす |

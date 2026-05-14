@@ -1,421 +1,393 @@
-# Analysis Principles — Security Analysis Methodology
+# 分析原則 — セキュリティ分析方法論
 
-This file contains ALL rules for how to analyze code for security threats. It is self-contained — everything needed to perform correct, evidence-based security analysis is here.
-
----
-
-## ⛔ CRITICAL: Verify Before Flagging
-
-**NEVER flag a security gap without confirming it exists.** Many platforms have secure defaults.
-
-### Three-Step Verification
-
-1. **Check for security infrastructure components** before claiming security is missing:
-   - Certificate authorities (Dapr Sentry, cert-manager, Vault)
-   - Service mesh control planes (Istio, Linkerd, Dapr)
-   - Policy engines (OPA, Kyverno, Gatekeeper)
-   - Secret managers (Vault, Azure Key Vault, AWS Secrets Manager)
-   - Identity providers (MISE, OAuth proxies, OIDC)
-
-2. **Understand platform defaults** — research before assuming:
-   - Dapr: mTLS enabled by default when Sentry is deployed
-   - Kubernetes: RBAC enabled by default since v1.6
-   - Istio: mTLS in PERMISSIVE mode by default, STRICT available
-   - Azure: Many services encrypted at rest by default
-
-3. **Distinguish configuration states**:
-   - **Explicitly disabled**: `enabled: false` → Flag as finding
-   - **Not configured**: No setting present → Check platform default first
-   - **Implicitly enabled**: Default behavior is secure → Document as control, not gap
-
-### Evidence Quality Requirements
-
-For every finding:
-- Show the specific config/code that proves the gap (not just absence of config)
-- For "missing security" claims, prove the default is insecure
-- Cross-reference with platform documentation when uncertain
+このファイルには、セキュリティ上の脅威についてコードを分析する方法に関するすべてのルールが含まれています。これは自己完結型であり、証拠に基づいた正しいセキュリティ分析を実行するために必要なものがすべてここにあります。
 
 ---
 
-## Security Infrastructure Inventory
+## ⛔ クリティカル: フラグを立てる前に確認してください
 
-Before STRIDE-A analysis, identify ALL security-enabling components present in the codebase:
+**セキュリティ ギャップの存在を確認せずに、セキュリティ ギャップにフラグを立てないでください。** 多くのプラットフォームには安全なデフォルトが用意されています。
 
-| Category | Components to Look For | Security They Provide |
-|----------|----------------------|----------------------|
-| Service Mesh | Dapr, Istio, Linkerd, Consul Connect | mTLS, traffic policies, observability |
-| Certificate Management | Sentry, cert-manager, Vault PKI | Automatic cert issuance/rotation |
-| Authentication | MISE, OAuth2-proxy, Dex, Keycloak | Token validation, SSO |
-| Authorization | OPA, Kyverno, Gatekeeper, RBAC | Policy enforcement |
-| Secrets | Vault, External Secrets, CSI drivers | Secret injection, rotation |
-| Network | NetworkPolicy, Calico, Cilium | Microsegmentation |
+### 3 段階の検証
 
-**If these components exist, their security features are likely active unless explicitly disabled.**
+1. セキュリティが欠落していると主張する前に、**セキュリティ インフラストラクチャ コンポーネントを確認してください**。
+   - 認証局 (Dapr Sentry、cert-manager、Vault)
+   - サービス メッシュ コントロール プレーン (Istio、Linkerd、Dapr)
+   - ポリシー エンジン (OPA、Kyverno、Gatekeeper)
+   - シークレット マネージャー (Vault、Azure Key Vault、AWS Secrets Manager)
+   - ID プロバイダー (MISE、OAuth プロキシ、OIDC)
 
----
+2. **プラットフォームのデフォルトを理解する** — 次のことを想定する前に調査してください。
+   - Dapr: Sentry の展開時に mTLS がデフォルトで有効になる
+   - Kubernetes: v1.6 以降、RBAC がデフォルトで有効になっています
+   - Istio: mTLS はデフォルトで PERMISSIVE モード、STRICT が利用可能
+   - Azure: 多くのサービスはデフォルトで保存時に暗号化されます
 
-## Security Analysis Lenses
+3. **構成状態を区別**:
+   - **明示的に無効化**: `enabled: false` → 検出済みとしてフラグを立てる
+   - **未構成**: 設定が存在しません → まずプラットフォームのデフォルトを確認してください
+   - **暗黙的に有効**: デフォルトの動作は安全です → ギャップではなくコントロールとしてドキュメント化されます
 
-Apply these frameworks during analysis:
+### 証拠の品質要件
 
-- **Zero Trust**: Verify explicitly, least privilege, assume breach
-- **Defense in Depth**: Identify missing security layers
-- **Abuse Cases**: Business logic abuse, workflow manipulation, feature misuse
-
----
-
-## Comprehensive Coverage Requirements
-
-**Do NOT truncate analysis for larger codebases.** All components must receive equal analytical depth.
-
-### Sidecar Security Analysis
-
-⚠️ **Sidecars (Dapr, MISE, Envoy, etc.) are NOT separate components in the DFD** — they are co-located in the same pod as the primary container (see diagram-conventions.md Rule 2). However, sidecar communication MUST still be analyzed for security vulnerabilities.
-
-**How to analyze sidecar threats:**
-- Sidecars with distinct threat surfaces (e.g., MISE auth bypass, Dapr mTLS) get their own `## Component` section in `2-stride-analysis.md` — but are NOT separate DFD nodes (see diagram-conventions.md Rule 2)
-- Use the format: threat title includes the sidecar name, e.g., "Dapr Sidecar Plaintext Communication"
-- Common sidecar threats:
-  - **Information Disclosure (I):** Dapr/MISE sidecar communicating with main container over plaintext HTTP within the pod
-  - **Tampering (T):** Dapr pub/sub messages not signed or encrypted
-  - **Spoofing (S):** MISE token validation bypass if sidecar is compromised
-  - **Elevation of Privilege (E):** Sidecar running with elevated privileges that the main container doesn't need
-- CWE mapping: CWE-319 (Cleartext Transmission), CWE-311 (Missing Encryption), CWE-250 (Unnecessary Privileges)
-- These threats appear in the sidecar's own STRIDE section (if it has a distinct threat surface) or under the primary component's table (if the sidecar is a simple infrastructure proxy)
-- If the sidecar vulnerability warrants a finding, list it under the sidecar component with a note: "Affects [Dapr/MISE] sidecar communication"
-
-1. **Minimum coverage:** Every component in `0.1-architecture.md` MUST have a corresponding section in `2-stride-analysis.md` with actual threat enumeration (not just "no threats found").
-2. **Finding density check:** As a guideline, expect roughly 1 finding per 2-3 significant components. If a repo has 15+ components and you have fewer than 8 findings, re-examine under-analyzed components.
-3. **Use sub-agents for scale:** For repos with 10+ components, delegate component-specific STRIDE analysis to sub-agents to maintain depth. Each sub-agent should analyze 3-5 components.
-4. **OWASP checklist sweep:** After component-level STRIDE, do a cross-cutting pass using the OWASP Top 10:2025 checklist below. This catches systemic issues (missing auth, no audit logging, no rate limiting, unsigned images) that component-level analysis may miss.
-5. **Infrastructure-layer check:** Explicitly check for: container security contexts, network policies, resource limits, image signing, secrets management, backup/DR controls, and monitoring/alerting gaps.
-6. **Exhaustive findings consolidation:** After STRIDE analysis is complete, scan the STRIDE output for ALL identified threats. Every threat MUST map to either:
-   - A finding in `3-findings.md` (consolidated with related threats)
-   - A `🔄 Mitigated by Platform` entry in the Threat Coverage Verification table (for platform-handled threats only)
-   
-   **⛔ EVERY `Open` THREAT MUST HAVE A FINDING.** The tool does NOT have authority to accept risks, defer threats, or decide that a threat is "acceptable." That is the engineering team's decision. The tool's job is to identify ALL threats and create findings for them. The Coverage table should show `✅ Covered (FIND-XX)` for every Open threat — NEVER `⚠️ Accepted Risk`.
-
-   If you have 40+ threats in STRIDE but only 10 findings, you are under-consolidating. Check for missed data store auth, operational controls, credential management, and supply chain issues.
-
-   **⛔ "ACCEPTED RISK" IS FORBIDDEN (MANDATORY):**
-   - **NEVER use `⚠️ Accepted Risk` as a Coverage table status.** This label implies the tool has accepted a risk on behalf of the engineering team. It has not. It cannot.
-   - **NEVER use `Accepted` as a STRIDE Status value.** Use `Open`, `Mitigated`, or `Platform` only.
-   - If you are tempted to write "Accepted Risk" → create a finding instead. The finding's remediation section tells the team what to do. The team decides whether to accept, fix, or defer.
-
-   **⛔ NEEDS REVIEW RESTRICTIONS (MANDATORY):**
-   - **Tier 1 threats (prerequisites = `None`) MUST NEVER be classified as "⚠️ Needs Review."** A threat exploitable by an unauthenticated external attacker cannot be deferred — it MUST become a finding.
-   - **If a threat has a mitigation listed in the STRIDE analysis, it SHOULD become a finding.** The mitigation text is the remediation — use it to write the finding. Only defer to "Needs Review" if the mitigation is genuinely not actionable.
-   - **DoS threats with `None` prerequisites are Tier 1 findings**, not hardening opportunities. An unauthenticated attacker flooding an API with no rate limiting is a directly exploitable vulnerability (CWE-770, CWE-400).
-   - **Do NOT batch-classify entire STRIDE categories as Needs Review.** Each threat must be evaluated individually based on its prerequisites and exploitability.
-   - **"⚠️ Needs Review" is reserved for:** Tier 2/3 threats where no technical mitigation is possible (e.g., social engineering), or threats requiring business context the tool doesn't have.
-   - **The automated analysis does NOT have authority to accept risks** — it only identifies them. "Needs Review" signals that a human must decide.
-   - **Maximum Needs Review ratio:** If more than 30% of threats are classified as "Needs Review", re-examine — you are likely under-reporting findings. Typical ratio: 10-20% for a well-analyzed codebase.
-7. **Minimum finding thresholds by repo size:**
-   - Small repo (< 20 source files): 8+ findings expected
-   - Medium repo (20-100 source files): 12+ findings expected
-   - Large repo (100+ source files): 18+ findings expected
-   
-   If below threshold, systematically review: auth per component, secrets in code, container security, network segmentation, logging/monitoring, input validation.
-
-8. **Context-aware Platform ratio limits (MANDATORY):**
-   
-   After completing the security infrastructure inventory (Step 1), detect the deployment pattern:
-   
-   | Pattern | Detection Signal | Platform Limit |
-   |---------|-----------------|----------------|
-   | **K8s Operator** | `controller-runtime`, `kubebuilder`, or `operator-sdk` in go.mod/go.sum; `Reconcile()` functions in source | **≤35%** |
-   | **Standalone Application** | All other repos (web apps, CLI tools, services) | **≤20%** |
-   
-   **Why K8s operators have higher Platform ratios:** Operators delegate security to the K8s platform (RBAC for CR access, etcd encryption, API server TLS, webhook cert validation, Azure AD token validation). The operator code CANNOT implement these controls — they are the platform's responsibility. Classifying them as Platform is correct.
-   
-   **Action when Platform exceeds limit:**
-   - Review each Platform-classified threat
-   - If the operator CAN take action (e.g., add input validation, add RBAC checks at startup) → reclassify as `Open` with a finding
-   - If the operator genuinely cannot act (e.g., etcd encryption is a cluster admin concern) → Platform is correct
-   - Document the detected pattern and ratio in `0-assessment.md` → Analysis Context & Assumptions
+あらゆる発見に対して:
+- ギャップを証明する特定の構成/コードを表示します (構成が存在しないだけではありません)
+- 「セキュリティが欠落している」という主張については、デフォルトが安全ではないことを証明してください
+- 不明な場合はプラットフォームのドキュメントとの相互参照
 
 ---
 
-## Technology-Specific Security Checklist
+## セキュリティ インフラストラクチャのインベントリ
 
-**After completing STRIDE analysis**, scan the codebase for each technology below. For every technology found, verify the corresponding security checks are covered in findings or documented as mitigated. This catches specific vulnerabilities that component-level STRIDE often misses.
+STRIDE-A 分析の前に、コードベースに存在するすべてのセキュリティ対応コンポーネントを特定します。
 
-| Technology Found | MUST Check For | Common Finding |
-|-----------------|---------------|----------------|
-| **Redis** | `requirepass` disabled, no TLS, no ACL | Auth disabled by default → finding |
-| **Milvus** | `authorizationEnabled: false`, no TLS, public gRPC port | Auth disabled by default → finding |
-| **PostgreSQL/SQL DB** | Superuser usage, `ssl=false`, SQL injection, connection string credentials | Input validation + auth |
-| **MongoDB** | Auth disabled, no TLS, `--noauth` flag | Auth disabled by default |
-| **NGINX/Ingress** | Missing TLS, server_info headers, snippet injection, rate limiting | Config hardening |
-| **Docker/Containers** | Running as root, no `USER` directive, host mounts, no seccomp/AppArmor, unsigned images | Container hardening |
-| **ML/AI Models** | Unauthenticated inference endpoint, model poisoning, prompt injection, no input validation | Endpoint auth + input validation |
-| **LLM/Cloud AI** | PII/secrets sent to external LLM, no content filtering, prompt injection, data exfiltration | Data exposure to cloud |
-| **Kubernetes** | No NetworkPolicy, no PodSecurityPolicy/Standards, no resource limits, RBAC gaps | Network segmentation + resource limits |
-| **Helm Charts** | Hardcoded secrets in values.yaml, no image tag pinning, no security contexts | Config + supply chain |
-| **Key Management** | Hardcoded RSA/HMAC keys, weak key generation, no rotation, keys in source | Cryptographic failures |
-| **CI/CD Pipelines** | Secrets in logs, no artifact signing, mutable dependencies, script injection | Supply chain |
-| **REST APIs** | Missing auth, no rate limiting, verbose errors, no input validation | Auth + injection |
-| **gRPC Services** | No TLS, no auth interceptor, reflection enabled in production | Auth + encryption |
-| **Message Queues** | No auth on pub/sub, no encryption, no message signing | Auth + integrity |
-| **NFS/File Shares** | Path traversal, no access control, world-readable mounts | Access control |
-| **Audit/Logging** | No security event logging, log injection, no tamper protection | Monitoring gaps |
-
-**Process:** After writing 3-findings.md, scan this table for technologies present in the repo. For each technology, evaluate its common technology-specific threat patterns based on how that technology is actually used, and ensure any relevant risks are accounted for in the assessment. Add a finding only if an actual threat or meaningful mitigation gap is identified.
+|カテゴリー |探すべきコンポーネント |彼らが提供するセキュリティ |
+|----------|----------------------|-----------|
+|サービスメッシュ | Dapr、Istio、Linkerd、Consul Connect | mTLS、トラフィック ポリシー、可観測性 |
+|証明書管理 |セントリー、証明書マネージャー、Vault PKI |証明書の自動発行/ローテーション |
+|認証 | MISE、OAuth2 プロキシ、Dex、Keycloak |トークン検証、SSO |
+|認可 | OPA、カイバーノ、ゲートキーパー、RBAC |ポリシーの施行 |
+|秘密 |ボールト、外部シークレット、CSI ドライバー |秘密の注入、回転 |
+|ネットワーク |ネットワークポリシー、Calico、Cilium |マイクロセグメンテーション |**これらのコンポーネントが存在する場合、明示的に無効にしない限り、セキュリティ機能はアクティブになっている可能性があります。**
 
 ---
 
-## OWASP Top 10:2025 Checklist
+## セキュリティ分析レンズ
 
-Check for these vulnerability categories during analysis:
+分析中に次のフレームワークを適用します。
 
-| ID | Category | Check For |
+- **ゼロトラスト**: 明示的に検証し、最小限の権限で侵害を想定します。
+- **多層防御**: 不足しているセキュリティ層を特定します
+- **悪用ケース**: ビジネス ロジックの悪用、ワークフローの操作、機能の悪用
+
+---
+
+## 包括的な補償要件
+
+**コードベースが大きい場合は分析を切り捨てないでください。** すべてのコンポーネントは同じ深さの分析を受ける必要があります。
+
+### サイドカーのセキュリティ分析
+
+⚠️ **サイドカー (Dapr、MISE、Envoy など) は DFD 内の別個のコンポーネントではありません** - プライマリ コンテナと同じポッド内に同じ場所に配置されます (diagram-conventions.md ルール 2 を参照)。ただし、サイドカー通信のセキュリティ脆弱性を分析する必要があります。
+
+**サイドカーの脅威を分析する方法:**
+- 異なる脅威サーフェスを持つサイドカー (MISE 認証バイパス、Dapr mTLS など) は `2-stride-analysis.md` 内に独自の `## Component` セクションを取得しますが、別個の DFD ノードではありません (diagram-conventions.md ルール 2 を参照)
+- 形式を使用します: 脅威のタイトルにはサイドカー名が含まれます (例: 「Dapr Sidecar Plaintext Communication」)
+- 一般的なサイドカーの脅威:
+  - **情報開示 (I):** Dapr/MISE サイドカーがポッド内のプレーンテキスト HTTP 経由でメイン コンテナと通信する
+  - **改ざん (T):** Dapr pub/sub メッセージが署名または暗号化されていません
+  - **スプーフィング (S):** サイドカーが侵害された場合の MISE トークン検証のバイパス
+  - **特権の昇格 (E):** メイン コンテナが必要としない昇格された特権で実行されるサイドカー
+- CWE マッピング: CWE-319 (平文送信)、CWE-311 (暗号化の欠落)、CWE-250 (不必要な特権)
+- これらの脅威は、サイドカー自体の STRIDE セクション (明確な脅威サーフェスがある場合)、またはプライマリ コンポーネントのテーブルの下 (サイドカーが単純なインフラストラクチャ プロキシの場合) に表示されます。
+- サイドカーの脆弱性が発見を裏付けるものである場合は、サイドカー コンポーネントの下に「[Dapr/MISE] サイドカー通信に影響を与える」という注記を付けてリストします。1. **最小範囲:** `0.1-architecture.md` のすべてのコンポーネントには、実際の脅威の列挙 (単に「脅威が見つからない」ということではありません) を含む対応するセクションが `2-stride-analysis.md` に存在しなければなりません。
+2. **検出密度チェック:** ガイドラインとして、2 ～ 3 つの重要なコンポーネントごとにおよそ 1 つの検出結果が期待されます。リポジトリに 15 個以上のコンポーネントがあり、検出結果が 8 個未満の場合は、分析が不十分なコンポーネントを再検査します。
+3. **スケールのためにサブエージェントを使用する:** 10 個以上のコンポーネントを含むリポジトリの場合、深さを維持するためにコンポーネント固有の STRIDE 分析をサブエージェントに委任します。各サブエージェントは 3 ～ 5 つのコンポーネントを分析する必要があります。
+4. **OWASP チェックリストのスイープ:** コンポーネント レベルの STRIDE の後、以下の OWASP Top 10:2025 チェックリストを使用して横断的なパスを実行します。これにより、コンポーネントレベルの分析では見逃される可能性のあるシステム上の問題 (認証の欠落、監査ログの欠如、レート制限の欠如、署名されていないイメージ) が捕捉されます。
+5. **インフラストラクチャ層のチェック:** コンテナのセキュリティ コンテキスト、ネットワーク ポリシー、リソース制限、イメージ署名、シークレット管理、バックアップ/DR 制御、モニタリング/アラート ギャップを明示的にチェックします。
+6. **徹底的な結果の統合:** STRIDE 分析が完了したら、識別されたすべての脅威について STRIDE 出力をスキャンします。すべての脅威は次のいずれかにマッピングされなければなりません。
+   - `3-findings.md` の調査結果 (関連する脅威と統合)
+   - 脅威カバレッジ検証テーブルの `🔄 Mitigated by Platform` エントリ (プラットフォームで処理される脅威のみ)
+   
+   **⛔ すべての `Open` 脅威には調査結果が必要です。** このツールには、リスクを受け入れたり、脅威を延期したり、脅威を「許容できる」と判断したりする権限はありません。それがエンジニアリングチームの決定です。このツールの仕事は、すべての脅威を特定し、それらに対する調査結果を作成することです。カバレッジ表には、すべてのオープン脅威に対して `✅ Covered (FIND-XX)` が表示される必要があります。`⚠️ Accepted Risk` は決して表示されません。
+
+   STRIDE に 40 以上の脅威があるにもかかわらず、検出結果が 10 件しかない場合は、統合が不十分です。データ ストアの認証、運用管理、認証情報の管理、サプライ チェーンの問題が欠落していないか確認します。**⛔ 「許容されたリスク」は禁止されています (必須):**
+   - **カバレッジ テーブルのステータスとして `⚠️ Accepted Risk` を決して使用しないでください。** このラベルは、ツールがエンジニアリング チームに代わってリスクを受け入れたことを意味します。そうではありません。それはできません。
+   - **`Accepted` を STRIDE ステータス値として決して使用しないでください。** `Open`、`Mitigated`、または `Platform` のみを使用してください。
+   - 「受け入れられたリスク」を書きたくなる場合は、代わりに所見を作成してください。調査結果の修復セクションは、チームに何をすべきかを指示します。チームは、受け入れるか、修正するか、延期するかを決定します。
+
+   **⛔ レビュー制限が必要 (必須):**
+   - **Tier 1 の脅威 (前提条件 = `None`) を「⚠️ 要検討」として分類してはなりません。** 認証されていない外部攻撃者によって悪用される可能性のある脅威は延期できません。それは発見されなければなりません。
+   - **STRIDE 分析に脅威の軽減策が記載されている場合、それは調査結果となるべきです。** 軽減策のテキストは修復策であり、調査結果を記述するために使用します。緩和策が本当に実行不可能な場合にのみ、「要検討」を延期してください。
+   - **`None` の前提条件を伴う DoS 脅威は、Tier 1 の調査結果であり、強化の機会ではありません**。認証されていない攻撃者がレート制限なしで API をフラッディングすることは、直接悪用可能な脆弱性です (CWE-770、CWE-400)。
+   - **STRIDE カテゴリ全体を要検討として一括分類しないでください。** 各脅威は、前提条件と悪用可能性に基づいて個別に評価する必要があります。
+   - **「⚠️要検討」は、次の場合に予約されています。** 技術的な軽減が不可能な階層 2/3 の脅威 (ソーシャル エンジニアリングなど)、またはツールにはないビジネス コンテキストを必要とする脅威。
+   - **自動分析にはリスクを受け入れる権限はありません**。リスクを特定するだけです。 「要検討」は人間が決定する必要があることを示します。
+   - **最大要検討率:** 30% 以上の脅威が「要検討」に分類されている場合は、再調査してください。調査結果が過小報告されている可能性があります。一般的な比率: よく分析されたコードベースの場合は 10 ～ 20%。
+7. **リポジトリ サイズ別の最小検出しきい値:**
+   - 小規模リポジトリ (ソース ファイル 20 個未満): 8 個以上の結果が予想されます
+   - 中規模リポジトリ (20 ～ 100 ソース ファイル): 12 以上の結果が予想されます
+   - 大規模なリポジトリ (100 以上のソース ファイル): 18 以上の結果が予想されます
+   
+   しきい値を下回っている場合は、コンポーネントごとの認証、コード内のシークレット、コンテナーのセキュリティ、ネットワークのセグメンテーション、ロギング/モニタリング、入力検証を体系的に確認します。8. **コンテキストアウェアなプラットフォーム比率制限 (必須):**
+   
+   セキュリティ インフラストラクチャのインベントリ (ステップ 1) が完了したら、展開パターンを検出します。
+   
+   |パターン |検出信号 |プラットフォームの制限 |
+   |-------|-----------------|----------------|
+   | **K8s オペレーター** | go.mod/go.sum 内の `controller-runtime`、`kubebuilder`、または `operator-sdk`。ソース内の `Reconcile()` 関数 | **≤35%** |
+   | **スタンドアロン アプリケーション** |他のすべてのリポジトリ (Web アプリ、CLI ツール、サービス) | **≤20%** |
+   
+   **K8s オペレーターのプラットフォーム比率が高い理由:** オペレーターは、K8s プラットフォームにセキュリティを委任します (CR アクセス用の RBAC、etcd 暗号化、API サーバー TLS、Webhook 証明書検証、Azure AD トークン検証)。オペレーター コードはこれらのコントロールを実装できません。これらのコントロールはプラットフォームの責任です。プラットフォームとして分類するのは正しいです。
+   
+   **プラットフォームが制限を超えた場合のアクション:**
+   - プラットフォームに分類された各脅威を確認する
+   - オペレーターがアクションを実行できる場合 (例: 入力検証の追加、起動時の RBAC チェックの追加) → 結果を伴って `Open` として再分類
+   - オペレーターが本当に行動できない場合 (例: etcd 暗号化がクラスター管理上の懸念事項である) → プラットフォームは正しい
+   - 検出されたパターンと比率を `0-assessment.md` で文書化 → 分析コンテキストと仮定
+
+---
+
+## テクノロジー固有のセキュリティ チェックリスト
+
+**STRIDE 分析が完了したら**、以下の各テクノロジーのコードベースをスキャンします。見つかったすべてのテクノロジーについて、対応するセキュリティ チェックが調査結果でカバーされているか、軽減されたものとして文書化されていることを確認します。これにより、コンポーネントレベルの STRIDE が見逃しがちな特定の脆弱性が捕捉されます。|見つかったテクノロジー |必ず確認してください |共通の発見 |
+|-----------------|--------------|--------------|
+| **Redis** | `requirepass` 無効、TLS、ACL なし |認証はデフォルトで無効になっています → 検索 |
+| **ミルバス** | `authorizationEnabled: false`、TLS なし、パブリック gRPC ポート |認証はデフォルトで無効になっています → 検索 |
+| **PostgreSQL/SQL DB** |スーパーユーザーの使用法、`ssl=false`、SQL インジェクション、接続文字列資格情報 |入力検証 + 認証 |
+| **MongoDB** |認証が無効、TLS なし、`--noauth` フラグ |認証はデフォルトで無効になっています |
+| **NGINX/Ingress** | TLS、server_info ヘッダー、スニペット インジェクション、レート制限の欠落 |構成の強化 |
+| **Docker/コンテナ** | root として実行、`USER` ディレクティブなし、ホスト マウント、seccomp/AppArmor なし、署名されていないイメージ |コンテナの硬化 |
+| **ML/AI モデル** |認証されていない推論エンドポイント、モデル ポイズニング、プロンプト インジェクション、入力検証なし |エンドポイント認証 + 入力検証 |
+| **LLM/クラウド AI** | PII/シークレットは外部 LLM に送信され、コンテンツ フィルタリングなし、プロンプト インジェクション、データ抽出 |クラウドへのデータ公開 |
+| **Kubernetes** | NetworkPolicy なし、PodSecurityPolicy/標準なし、リソース制限なし、RBAC ギャップなし |ネットワークのセグメンテーション + リソース制限 |
+| **ヘルム チャート** | value.yaml にハードコードされたシークレット、イメージ タグの固定なし、セキュリティ コンテキストなし |構成 + サプライ チェーン |
+| **キー管理** |ハードコードされた RSA/HMAC キー、弱いキー生成、ローテーションなし、ソース内のキー |暗号化の失敗 |
+| **CI/CD パイプライン** |ログ内のシークレット、アーティファクト署名なし、変更可能な依存関係、スクリプト インジェクション |サプライチェーン |
+| **REST API** |認証の欠落、レート制限なし、詳細エラー、入力検証なし |認証 + インジェクション |
+| **gRPC サービス** | TLS なし、認証インターセプターなし、本番環境でリフレクションが有効になっている |認証 + 暗号化 |
+| **メッセージ キュー** | pub/sub での認証なし、暗号化なし、メッセージ署名なし |認証 + 完全性 |
+| **NFS/ファイル共有** |パス トラバーサル、アクセス制御なし、誰でも読み取り可能なマウント |アクセス制御 |
+| **監査/ログ** |セキュリティ イベント ログ、ログ インジェクション、改ざん保護なし |ギャップの監視 |**プロセス:** 3-findings.md を作成した後、このテーブルをスキャンして、リポジトリに存在するテクノロジを探します。各テクノロジーについて、そのテクノロジーが実際にどのように使用されているかに基づいて、そのテクノロジー固有の共通の脅威パターンを評価し、関連するリスクが評価で考慮されていることを確認します。実際の脅威または意味のある緩和ギャップが特定された場合にのみ、調査結果を追加します。
+
+---
+
+## OWASP トップ 10:2025 チェックリスト
+
+分析中に次の脆弱性カテゴリを確認してください。
+
+| ID |カテゴリー |チェックする |
 |----|----------|----------|
-| A01 | Broken Access Control | Missing authZ, privilege escalation, IDOR, CORS misconfig |
-| A02 | Security Misconfiguration | Default creds, verbose errors, unnecessary features, missing hardening |
-| A03 | Software Supply Chain Failures | Vulnerable dependencies, malicious packages, compromised CI/CD |
-| A04 | Cryptographic Failures | Weak algorithms, exposed secrets, improper key management, plaintext data |
-| A05 | Injection | SQL, NoSQL, OS command, LDAP, XSS, template injection |
-| A06 | Insecure Design | Missing security controls at architecture level, threat modeling gaps |
-| A07 | Authentication Failures | Broken auth, weak sessions, credential stuffing, missing MFA |
-| A08 | Software/Data Integrity Failures | Insecure deserialization, unsigned updates, CI/CD tampering |
-| A09 | Security Logging & Alerting Failures | Missing audit logs, no alerting, log injection, insufficient monitoring |
-| A10 | Mishandling of Exceptional Conditions | Poor error handling, race conditions, resource exhaustion |
+| A01 |壊れたアクセス制御 | authZ の欠落、権限昇格、IDOR、CORS の構成ミス |
+| A02 |セキュリティの設定ミス |デフォルトの認証情報、冗長エラー、不要な機能、強化の欠落 |
+| A03 |ソフトウェア サプライ チェーンの障害 |脆弱な依存関係、悪意のあるパッケージ、侵害された CI/CD |
+| A04 |暗号化の失敗 |脆弱なアルゴリズム、漏洩した秘密、不適切な鍵管理、平文データ |
+| A05 |注射 | SQL、NoSQL、OSコマンド、LDAP、XSS、テンプレートインジェクション |
+| A06 |安全でない設計 |アーキテクチャレベルでのセキュリティ制御の欠如、脅威モデリングのギャップ |
+| A07 |認証の失敗 |壊れた認証、弱いセッション、資格情報のスタッフィング、MFA の欠落 |
+| A08 |ソフトウェア/データ整合性障害 |安全でない逆シリアル化、署名されていない更新、CI/CD の改ざん |
+| A09 |セキュリティのログとアラートの失敗 |監査ログの欠落、アラートなし、ログ挿入、不十分な監視 |
+| A10 |例外的な条件の取り扱いを誤る |不十分なエラー処理、競合状態、リソースの枯渇 |
 
-Reference: https://owasp.org/Top10/2025/
-
----
-
-## Platform Security Defaults Reference
-
-Before flagging missing security, check these common secure-by-default behaviors:
-
-| Platform | Feature | Default Behavior | How to Verify |
-|----------|---------|------------------|---------------|
-| **Dapr** | mTLS | Enabled when Sentry deployed | Check for `dapr_sentry` or `sentry` component |
-| **Dapr** | Access Control | Deny if policies defined | Look for `accessControl` in Configuration |
-| **Kubernetes** | RBAC | Enabled since v1.6 | Check `--authorization-mode` includes RBAC |
-| **Kubernetes** | Secrets | Base64 encoded (not encrypted) | Check for encryption provider config |
-| **Istio** | mTLS | PERMISSIVE by default | Check PeerAuthentication resources |
-| **Azure Storage** | Encryption at rest | Enabled by default | Always encrypted, check key management |
-| **Azure SQL** | TDE | Enabled by default | Transparent data encryption on |
-| **PostgreSQL** | SSL | Often disabled by default | Check `ssl` parameter |
-| **Redis** | Auth | Disabled by default | Check `requirepass` configuration |
-| **Milvus** | Auth | Disabled by default | Check `authorizationEnabled` |
-| **NGINX Ingress** | TLS | Not enabled by default | Check for TLS secret in Ingress |
-| **Docker** | User | Root by default | Check `USER` in Dockerfile |
-
-**Key insight**: Service meshes (Dapr, Istio, Linkerd) typically enable mTLS automatically. Databases (Redis, Milvus, MongoDB) typically have auth disabled by default.
+参考：https://owasp.org/Top10/2025/
 
 ---
 
-## Exploitability Tiers
+## プラットフォームのセキュリティのデフォルトのリファレンス
 
-Threats are classified into three exploitability tiers based on prerequisites:
+不足しているセキュリティにフラグを立てる前に、デフォルトで安全な次の一般的な動作を確認してください。|プラットフォーム |特集 |デフォルトの動作 |確認方法 |
+|----------|-----------|---------------------|--------------|
+| **ダプル** | mTLS | Sentry の展開時に有効になります | `dapr_sentry` または `sentry` コンポーネントを確認します。
+| **ダプル** |アクセス制御 |ポリシーが定義されている場合は拒否 | 「設定 | 」で `accessControl` を探します。
+| **Kubernetes** | RBAC | v1.6 以降有効 | `--authorization-mode` に RBAC が含まれていることを確認してください |
+| **Kubernetes** |秘密 | Base64 エンコード (暗号化されていない) |暗号化プロバイダーの構成を確認する |
+| **Istio** | mTLS |デフォルトでは許可 | PeerAuthentication リソースを確認する |
+| **Azure ストレージ** |保存時の暗号化 |デフォルトで有効 |常に暗号化、キー管理を確認 |
+| **Azure SQL** | TDE |デフォルトで有効 | | の透過的なデータ暗号化
+| **PostgreSQL** | SSL |多くの場合、デフォルトで無効になっています。 `ssl` パラメータを確認してください |
+| **Redis** |認証 |デフォルトでは無効になっています | `requirepass` 設定を確認してください |
+| **ミルバス** |認証 |デフォルトでは無効になっています | `authorizationEnabled` を確認してください |
+| **NGINX Ingress** | TLS |デフォルトでは有効になっていません | Ingress で TLS シークレットを確認する |
+| **ドッカー** |ユーザー |デフォルトではルート | Dockerfile の `USER` を確認してください |
 
-| Tier | Label | Prerequisites | Assignment Rule |
-|------|-------|---------------|----------------|
-| **Tier 1** | Direct Exposure | `None` | Exploitable by unauthenticated external attacker with NO prior access. |
-| **Tier 2** | Conditional Risk | Single prerequisite | Requires exactly ONE form of access: `Authenticated User`, `Privileged User`, `Internal Network`, or single `{Boundary} Access`. |
-| **Tier 3** | Defense-in-Depth | Multiple prerequisites or infrastructure access | Requires `Host/OS Access`, `Admin Credentials`, `{Component} Compromise`, `Physical Access`, or multiple prerequisites with `+`. |
-
-### Tier Assignment Rules
-
-**⛔ CANONICAL PREREQUISITE → TIER MAPPING (deterministic, no exceptions):**
-
-Prerequisites MUST use only these values (closed enum). The tier follows mechanically:
-
-| Prerequisite | Tier | Rationale |
-|-------------|------|----------|
-| `None` | **Tier 1** | Unauthenticated external attacker, no prior access |
-| `Authenticated User` | **Tier 2** | Requires valid credentials |
-| `Privileged User` | **Tier 2** | Requires admin/operator role |
-| `Internal Network` | **Tier 2** | Requires position on internal network |
-| `Local Process Access` | **Tier 2** | Requires code execution on same host (localhost listener, IPC) |
-| `Host/OS Access` | **Tier 3** | Requires filesystem, console, or debug access to the host |
-| `Admin Credentials` | **Tier 3** | Requires admin credentials + host access |
-| `Physical Access` | **Tier 3** | Requires physical presence (USB, serial) |
-| `{Component} Compromise` | **Tier 3** | Requires prior compromise of another component |
-| Any `A + B` combination | **Tier 3** | Multiple prerequisites = always Tier 3 |
-
-**⛔ FORBIDDEN prerequisite values:** `Application Access`, `Host Access` (ambiguous — use `Local Process Access` or `Host/OS Access`).
-
-**Deployment context overrides:** If Deployment Classification is `LOCALHOST_DESKTOP` or `LOCALHOST_SERVICE`, the prerequisite `None` is FORBIDDEN for all components — use `Local Process Access` or `Host/OS Access` instead. The tier then follows from the corrected prerequisite.
-
-### ⛔ Prerequisite Determination (MANDATORY — Evidence-Based, Not Judgment-Based)
-
-**Prerequisites MUST be determined from deployment configuration evidence, not from general knowledge or assumptions.** Two independent analysis runs on the same code MUST assign the same prerequisites because they are objective facts about the deployment.
-
-**Generic Decision Procedure (applies to ALL environments):**
-
-1. **Network Exposure Check — Is the component reachable from outside?**
-   - Look for evidence of external exposure in the codebase:
-     - API gateway / reverse proxy routes pointing to the component
-     - Firewall rules or security group configurations
-     - Load balancer configurations
-     - DNS records or public endpoint definitions
-   - If ANY external route exists → prerequisites = `None` for network-based threats
-   - If NO external route exists AND the component is on an internal-only network → prerequisites = `Internal Network`
-
-2. **Authentication Check — Does the endpoint require credentials?**
-   - Look for authentication middleware, decorators, or filters in the component's code:
-     - `@require_auth`, `[Authorize]`, `@login_required`, auth middleware in Express/FastAPI
-     - API key validation in request handlers
-     - OAuth/OIDC token validation
-     - mTLS certificate requirements
-   - If auth is ENFORCED on all endpoints → prerequisite = `Authenticated User`
-   - If auth is OPTIONAL or DISABLED by config flag → prerequisite = `None` (disabled auth = no barrier)
-   - If auth exists but has bypass routes (e.g., `/health`, `/metrics` without auth) → those specific routes have prerequisite = `None`
-
-3. **Authorization Check — What level of access is required?**
-   - If no RBAC/role check beyond authentication → prerequisite stays `Authenticated User`
-   - If admin/operator role required → prerequisite = `Privileged User`
-   - If specific permissions required → prerequisite names the permission (e.g., `ClusterAdmin Role`)
-
-4. **Physical/Local Access Check:**
-   - If the component only listens on `localhost`/`127.0.0.1` → prerequisite = `Local Process Access` (T2)
-   - If access requires console/SSH/filesystem → prerequisite = `Host/OS Access` (T3)
-   - If access requires physical presence (USB, serial port) → prerequisite = `Physical Access` (T3)
-   - If component has no listener (console app, library, outbound-only) → prerequisite = `Host/OS Access` (T3)
-
-5. **Default Rule:** If you cannot determine exposure from config → look up the component's `Min Prerequisite` in the Component Exposure Table. If the table is not yet filled, assume `Local Process Access` (T2) as a safe default for unknown components. **NEVER assume `None` without positive evidence of external reachability.** **NEVER assume `Internal Network` without evidence of network restriction.**
-
-**Platform-Specific Evidence Sources:**
-
-| Platform | Where to check exposure | Internal indicator | External indicator |
-|----------|------------------------|--------------------|--------------------|
-| **Kubernetes** | Service type, Ingress rules, values.yaml | `ClusterIP` service, no Ingress | `LoadBalancer`/`NodePort`, Ingress path exists |
-| **Docker Compose** | `ports:` mapping, network config | No `ports:` mapping, internal network only | `ports: "8080:8080"` maps to host |
-| **Azure App Service** | App settings, access restrictions | VNet integration, private endpoint | Public URL, no IP restrictions |
-| **VM / Bare Metal** | Firewall rules, NSG, iptables | Port blocked in firewall/NSG | Port open, public IP bound |
-| **Serverless (Functions)** | Function auth level, API Management | `authLevel: function/admin` | `authLevel: anonymous` |
-| **.NET / Java / Node** | Startup config, middleware pipeline | `app.UseAuthentication()` enforced | No auth middleware, or auth disabled |
-| **Python (FastAPI/Flask)** | Middleware, dependency injection | `Depends(get_current_user)` on routes | No auth dependency, open routes |
-
-**⛔ NEVER assign prerequisites based on "what seems reasonable" or architecture assumptions.** Check the actual deployment config. The same component MUST get the same prerequisite across runs because the config doesn't change between runs.
-
-**Common violations:**
-- Assigning `Internal Network` to a component that has an ingress route → hides real external exposure
-- Assuming databases are "internal only" without checking if they have a public endpoint or ingress route
-- Assuming ML model servers are "internal" when they may be exposed for direct inference requests
-
-### CVSS-to-Tier Consistency Check (MANDATORY)
-
-**After assigning CVSS vectors AND tiers, cross-check for contradictions:**
-
-| CVSS Metric | Value | Tier Implication |
-|-------------|-------|------------------|
-| `AV:L` (Attack Vector: Local) | Requires local access | **Cannot be Tier 1** — must be T2 or T3 |
-| `AV:A` (Attack Vector: Adjacent) | Requires adjacent network | **Cannot be Tier 1** — must be T2 or T3 |
-| `AV:P` (Attack Vector: Physical) | Requires physical access | **Must be Tier 3** |
-| `PR:H` (Privileges Required: High) | Requires admin/privileged access | **Cannot be Tier 1** — must be T2 or T3 |
-| `PR:L` (Privileges Required: Low) | Requires authenticated user | **Cannot be Tier 1** — must be T2 |
-| `PR:N` + `AV:N` | No privileges, network accessible | Tier 1 candidate (confirm no deployment override) |
-
-⚠️ **If a finding has `AV:L` and `Tier 1`, this is ALWAYS an error.** Fix by either:
-- Changing the tier to T2/T3 (correct approach for localhost-only services), OR
-- Changing the CVSS AV to `AV:N` if the service is actually network-accessible (rare)
-
-⚠️ **If a finding has `PR:H` and `Tier 1`, this is ALWAYS an error.** Admin-required findings are T2 minimum.
-
-### Deployment Context Affects Tier Classification
-
-**CRITICAL: This section OVERRIDES the default tier rules above when specific deployment conditions apply.**
-
-Before assigning tiers, determine the system's deployment model from code, docs, and architecture. Record the **Deployment Classification** and **Component Exposure Table** in `0.1-architecture.md` (see `skeleton-architecture.md`).
-
-**Deployment Classifications and their tier implications:**
-
-| Classification | Description | T1 Allowed? | Min Prerequisite |
-|----------------|-------------|-------------|------------------|
-| `LOCALHOST_DESKTOP` | Console/GUI app, no network listeners (or localhost-only), single-user workstation | ❌ **NO** — all findings T2+ | `Host/OS Access` (T3) or `Local Process Access` (T2) |
-| `LOCALHOST_SERVICE` | Daemon/service binding to 127.0.0.1 only | ❌ **NO** — all findings T2+ | `Local Process Access` (T2) |
-| `AIRGAPPED` | No internet connectivity | ❌ for network-originated attacks | `Internal Network` |
-| `K8S_SERVICE` | Kubernetes Deployment with ClusterIP/LoadBalancer | ✅ YES | Depends on Service type |
-| `NETWORK_SERVICE` | Public API, cloud endpoint, internet-facing | ✅ YES | `None` (if no auth) |
-
-**The Component Exposure Table in `0.1-architecture.md` sets the prerequisite floor per component.** No threat or finding may have a lower prerequisite than the table permits. This table is filled in Step 1 and is binding on all subsequent analysis steps.
-
-**Legacy override table (still applies as fallback):**
-
-| Deployment Indicator | Tier Override Rule |
-|---------------------|-------------------|
-| Binds to `localhost`/`127.0.0.1` only | Cannot be T1 — requires local access (T2 minimum) |
-| Air-gapped / no internet | Downgrade network-based attacks by one tier |
-| Single-admin workstation tool | Cannot be T1 unless exploitable by a non-admin local user |
-| Docker/container on single machine | Docker socket access = T2 (local admin required) |
-| Named pipe / Unix socket | Cannot be T1 — requires local process access |
-
-**How to apply:**
-1. In Step 1 (context gathering), identify deployment model and record in 0.1-architecture.md
-2. In Step 6/7 (finding verification), check each T1 candidate against the table above
-3. If ANY override applies, downgrade to T2 (or T3 if multiple)
-4. Document the override rationale in the finding’s Description
-
-**Example:** Kusto container on air-gapped workstation, listening on port 80 without auth:
-- Default classification: T1 (unauthenticated, port 80)
-- Override: localhost-only + single-admin → **T2** (attacker needs local access to an admin workstation)
-
-**Do NOT override** for:
-- Kubernetes services (any pod can reach them → lateral movement is realistic → keep T1)
-- Network-exposed APIs (any network user can reach them → keep T1)
-- Cloud endpoints (public internet → keep T1)
-- **Network-exposed APIs**: An unauthenticated API on a listening port IS Tier 1.
-
-The prerequisite for Tier 1 is `None` — meaning an **unauthenticated external attacker** with no prior access. If exploiting a vulnerability requires local admin access, OS-level access, or physical presence, it cannot be Tier 1.
+**重要な洞察**: サービス メッシュ (Dapr、Istio、Linkerd) は通常、mTLS を自動的に有効にします。データベース (Redis、Milvus、MongoDB) では通常、デフォルトで認証が無効になっています。
 
 ---
 
-## Finding Classification
+## 悪用可能性の層
 
-Before documenting each finding, verify:
+脅威は、前提条件に基づいて 3 つの悪用可能性層に分類されます。
 
-- [ ] **Positive evidence exists**: Can you show config/code that proves the vulnerability?
-- [ ] **Not a secure default**: Have you checked if the platform enables security by default?
-- [ ] **Security infrastructure checked**: Did you look for Sentry/cert-manager/Vault/etc.?
-- [ ] **Explicit vs implicit**: Is security explicitly disabled, or just not explicitly enabled?
-- [ ] **Platform documentation consulted**: When uncertain, verify against official docs
+|階層 |ラベル |前提条件 |割り当てルール |
+|------|------|---------------|--------------|
+| **ティア 1** |直接暴露 | `None` |事前にアクセスすることなく、認証されていない外部攻撃者によって悪用される可能性があります。 |
+| **ティア 2** |条件付きリスク |単一の前提条件 |必ず 1 つのアクセス形式が必要です: `Authenticated User`、`Privileged User`、`Internal Network`、または単一の `{Boundary} Access`。 |
+| **ティア 3** |多層防御 |複数の前提条件またはインフラストラクチャへのアクセス | `Host/OS Access`、`Admin Credentials`、`{Component} Compromise`、`Physical Access`、または `+` を含む複数の前提条件が必要です。 |
 
-**Classification outcomes:**
-- **Confirmed**: Positive evidence of vulnerability → Document as finding in `3-findings.md`
-- **Needs Verification**: Unable to confirm but potential risk → Add to "Needs Verification" in `0-assessment.md`
-- **Not a Finding**: Confirmed secure by default or explicitly enabled → Do not document
+### 階層割り当てルール
+
+**⛔ 正規の前提条件 → 階層マッピング (決定的、例外なし):**
+
+前提条件では、これらの値 (閉じた列挙型) のみを使用する必要があります。階層は機械的に次のようになります。|前提条件 |階層 |理論的根拠 |
+|---------------|------|----------|
+| `None` | **ティア 1** |認証されていない外部攻撃者、事前アクセスなし |
+| `Authenticated User` | **ティア 2** |有効な資格情報が必要です |
+| `Privileged User` | **ティア 2** |管理者/オペレーターの役割が必要 |
+| `Internal Network` | **ティア 2** |内部ネットワーク上の位置が必要です |
+| `Local Process Access` | **ティア 2** |同じホスト (ローカルホスト リスナー、IPC) でコードを実行する必要があります。
+| `Host/OS Access` | **ティア 3** |ファイルシステム、コンソール、またはホストへのデバッグ アクセスが必要です。
+| `Admin Credentials` | **ティア 3** |管理者の資格情報 + ホスト アクセスが必要 |
+| `Physical Access` | **ティア 3** |物理的な存在が必要です (USB、シリアル) |
+| `{Component} Compromise` | **ティア 3** |別のコンポーネントを事前に侵害する必要がある |
+|任意の `A + B` の組み合わせ | **ティア 3** |複数の前提条件 = 常に Tier 3 |
+
+**⛔ FORBIDDEN 前提条件値:** `Application Access`、`Host Access` (曖昧です - `Local Process Access` または `Host/OS Access` を使用してください)。
+
+**デプロイメントコンテキストの上書き:** デプロイメント分類が `LOCALHOST_DESKTOP` または `LOCALHOST_SERVICE` の場合、前提条件 `None` はすべてのコンポーネントに対して禁止されています。代わりに `Local Process Access` または `Host/OS Access` を使用してください。その後、層は修正された前提条件に従います。
+
+### ⛔ 前提条件の決定 (必須 — 判断に基づいたものではなく、証拠に基づいたもの)
+
+**前提条件は、一般的な知識や仮定ではなく、展開構成の証拠に基づいて決定する必要があります。** 同じコードに対する 2 つの独立した分析実行には、同じ前提条件を割り当てる必要があります。これは、展開に関する客観的な事実であるためです。
+
+**一般的な決定手順 (すべての環境に適用):**
+
+1. **ネットワーク露出チェック — コンポーネントは外部からアクセス可能ですか?**
+   - コードベースで外部暴露の証拠を探します。
+     - コンポーネントを指す API ゲートウェイ/リバース プロキシ ルート
+     - ファイアウォール ルールまたはセキュリティ グループの設定
+     - ロードバランサの構成
+     - DNS レコードまたはパブリック エンドポイント定義
+   - 外部ルートが存在する場合 → ネットワークベースの脅威の前提条件 = `None`
+   - 外部ルートが存在せず、コンポーネントが内部専用ネットワーク上にある場合 → 前提条件 = `Internal Network`2. **認証チェック — エンドポイントには認証情報が必要ですか?**
+   - コンポーネントのコードで認証ミドルウェア、デコレーター、またはフィルターを探します。
+     - `@require_auth`、`[Authorize]`、`@login_required`、Express/FastAPIの認証ミドルウェア
+     - リクエストハンドラーでの API キーの検証
+     - OAuth/OIDC トークンの検証
+     - mTLS 証明書の要件
+   - すべてのエンドポイントで認証が強制されている場合 → 前提条件 = `Authenticated User`
+   - 構成フラグによって認証がオプションまたは無効の場合 → 前提条件 = `None` (認証が無効 = バリアなし)
+   - 認証は存在するが、バイパス ルートがある場合 (例: 認証なしの `/health`、`/metrics`) → それらの特定のルートには前提条件 = `None` があります
+
+3. **認可チェック — どのレベルのアクセスが必要ですか?**
+   - 認証を超えた RBAC/ロール チェックがない場合 → 前提条件はそのまま `Authenticated User`
+   - 管理者/オペレーターの役割が必要な場合 → 前提条件 = `Privileged User`
+   - 特定の権限が必要な場合 → 前提条件として権限の名前を付けます (例: `ClusterAdmin Role`)
+
+4. **物理/ローカルアクセスチェック:**
+   - コンポーネントが `localhost`/`127.0.0.1` のみをリッスンする場合 → 前提条件 = `Local Process Access` (T2)
+   - アクセスにコンソール/SSH/ファイルシステムが必要な場合 → 前提条件 = `Host/OS Access` (T3)
+   - アクセスに物理的な存在が必要な場合 (USB、シリアル ポート) → 前提条件 = `Physical Access` (T3)
+   - コンポーネントにリスナーがない場合 (コンソール アプリ、ライブラリ、送信専用) → 前提条件 = `Host/OS Access` (T3)
+
+5. **デフォルト ルール:** 構成から露出を決定できない場合 → コンポーネント露出テーブルでコンポーネントの `Min Prerequisite` を検索します。テーブルがまだ埋められていない場合は、不明なコンポーネントの安全なデフォルトとして `Local Process Access` (T2) を想定します。 **外部からの到達可能性の明確な証拠がない限り、`None` を仮定しないでください。** **ネットワーク制限の証拠がない限り、`Internal Network` を仮定しないでください。**
+
+**プラットフォーム固有の証拠ソース:**|プラットフォーム |露出を確認する場所 |内部インジケータ |外部インジケータ |
+|----------|--------------------------|----------------------|-----------|
+| **Kubernetes** |サービス タイプ、Ingress ルール、values.yaml | `ClusterIP` サービス、Ingress なし | `LoadBalancer`/`NodePort`、イングレス パスが存在します |
+| **Docker Compose** | `ports:` マッピング、ネットワーク構成 | `ports:` マッピングなし、内部ネットワークのみ | `ports: "8080:8080"` はホスト | にマップされます。
+| **Azure App Service** |アプリの設定、アクセス制限 | VNet 統合、プライベート エンドポイント |パブリック URL、IP 制限なし |
+| **VM / ベアメタル** |ファイアウォール ルール、NSG、iptables |ポートがファイアウォール/NSG でブロックされている |ポートオープン、パブリックIPバインド |
+| **サーバーレス (機能)** |関数認証レベル、API 管理 | `authLevel: function/admin` | `authLevel: anonymous` |
+| **.NET / Java / ノード** |起動設定、ミドルウェア パイプライン | `app.UseAuthentication()` を強制 |認証ミドルウェアがないか、認証が無効になっています。
+| **Python (FastAPI/Flask)** |ミドルウェア、依存性注入 | `Depends(get_current_user)` ルート |認証依存性なし、オープンルート |
+
+**⛔ 「合理的と思われるもの」やアーキテクチャの仮定に基づいて前提条件を決して割り当てないでください。** 実際の展開構成を確認してください。構成は実行間で変更されないため、同じコンポーネントは実行間で同じ前提条件を取得する必要があります。
+
+**一般的な違反:**
+- `Internal Network` をイングレスルートを持つコンポーネントに割り当てる → 実際の外部露出を隠す
+- パブリック エンドポイントまたはイングレス ルートがあるかどうかを確認せずに、データベースが「内部専用」であると仮定します。
+- ML モデルサーバーが直接推論リクエストに公開される可能性がある場合、ML モデルサーバーが「内部」であると仮定します。
+
+### CVSS から層への一貫性チェック (必須)
+
+**CVSS ベクトルと層を割り当てた後、矛盾がないかクロスチェックします。**| CVSS メトリック |値 |階層への影響 |
+|-----------|------|------|
+| `AV:L` (攻撃ベクトル: ローカル) |ローカルアクセスが必要 | **Tier 1 は使用できません** — T2 または T3 である必要があります |
+| `AV:A` (攻撃ベクトル:隣接) |隣接するネットワークが必要です | **Tier 1 は使用できません** — T2 または T3 である必要があります |
+| `AV:P` (攻撃ベクトル:物理) |物理的なアクセスが必要 | **Tier 3 である必要があります** |
+| `PR:H` (必要な権限: 高) |管理者/特権アクセスが必要 | **Tier 1 は使用できません** — T2 または T3 である必要があります |
+| `PR:L` (必要な権限: 低) |認証されたユーザーが必要です | **Tier 1 にすることはできません** — T2 である必要があります |
+| `PR:N` + `AV:N` |特権なし、ネットワークにアクセス可能 | Tier 1 候補 (展開の上書きがないことを確認) |
+
+⚠️ **検出結果に `AV:L` と `Tier 1` がある場合、これは常にエラーです。** 次のいずれかで修正してください。
+- 層を T2/T3 に変更する (ローカルホストのみのサービスの正しいアプローチ)、または
+- サービスが実際にネットワークにアクセスできる場合は、CVSS AV を `AV:N` に変更します (まれ)
+
+⚠️ **検出結果に `PR:H` と `Tier 1` がある場合、これは常にエラーです。** 管理者が必要とする検出結果は T2 最小値です。
+
+### デプロイメントコンテキストは階層分類に影響します
+
+**重要: このセクションは、特定の展開条件が適用される場合、上記のデフォルト階層ルールを上書きします。**
+
+層を割り当てる前に、コード、ドキュメント、アーキテクチャからシステムの導入モデルを決定します。 **展開分類** と **コンポーネント公開テーブル** を `0.1-architecture.md` に記録します (`skeleton-architecture.md` を参照)。
+
+**展開分類とその階層への影響:**
+
+|分類 |説明 | T1 は許可されますか? |最小の前提条件 |
+|-----|-------------|---------------|------|
+| `LOCALHOST_DESKTOP` |コンソール/GUI アプリ、ネットワーク リスナーなし (またはローカルホストのみ)、シングル ユーザー ワークステーション | ❌ **いいえ** — すべての所見は T2+ | `Host/OS Access` (T3) または `Local Process Access` (T2) |
+| `LOCALHOST_SERVICE` |デーモン/サービスは 127.0.0.1 のみにバインドされます。 ❌ **いいえ** — すべての所見は T2+ | `Local Process Access` (T2) |
+| `AIRGAPPED` |インターネット接続なし | ❌ ネットワーク起源の攻撃の場合 | `Internal Network` |
+| `K8S_SERVICE` | ClusterIP/LoadBalancer を使用した Kubernetes デプロイメント | ✅ はい |サービスの種類に応じて異なります |
+| `NETWORK_SERVICE` |パブリック API、クラウド エンドポイント、インターネット接続 | ✅ はい | `None` (認証がない場合) |**`0.1-architecture.md` のコンポーネント エクスポージャ テーブルは、コンポーネントごとの前提条件の下限を設定します。** 表で許可されているよりも低い前提条件を持つ脅威や発見はありません。この表はステップ 1 で入力され、後続のすべての分析ステップに適用されます。
+
+**従来のオーバーライド テーブル (引き続きフォールバックとして適用されます):**
+
+|導入指標 |階層オーバーライド ルール |
+|---------------------|---------------------|
+| `localhost`/`127.0.0.1` のみにバインドします | T1 にはできません — ローカル アクセスが必要です (T2 以上) |
+|エアギャップ / インターネットなし |ネットワークベースの攻撃を 1 段階ダウングレード |
+|単一管理ワークステーション ツール |管理者以外のローカル ユーザーが悪用できない限り、T1 になることはできません。
+|単一マシン上の Docker/コンテナ | Docker ソケット アクセス = T2 (ローカル管理者が必要) |
+|名前付きパイプ / Unix ソケット | T1 にはできません - ローカル プロセス アクセスが必要です。
+
+**応募方法:**
+1. ステップ 1 (コンテキストの収集) で、展開モデルを特定し、0.1-architecture.md に記録します。
+2. ステップ 6/7 (検証の検出) で、各 T1 候補を上記の表と照合します。
+3. オーバーライドが適用される場合は、T2 (複数の場合は T3) にダウングレードします。
+4. オーバーライドの根拠を調査結果の説明に文書化する
+
+**例:** エアギャップ ワークステーション上の Kusto コンテナーは、認証なしでポート 80 をリッスンします。
+- デフォルトの分類: T1 (未認証、ポート 80)
+- オーバーライド: localhost-only + single-admin → **T2** (攻撃者は管理ワークステーションへのローカル アクセスを必要とします)
+
+**上書きしないでください**:
+- Kubernetes サービス (どのポッドでもアクセス可能 → 横方向の移動が現実的 → T1 を維持)
+- ネットワークに公開された API (ネットワーク ユーザーであれば誰でもアクセス可能 → T1 を維持)
+- クラウド エンドポイント (パブリック インターネット → T1 を維持)
+- **ネットワークに公開された API**: リスニング ポート上の認証されていない API は Tier 1 です。
+
+Tier 1 の前提条件は `None` です。これは、事前アクセス権のない **未認証の外部攻撃者** を意味します。脆弱性の悪用にローカル管理者アクセス、OS レベルのアクセス、または物理的な存在が必要な場合、それを Tier 1 にすることはできません。
 
 ---
 
-## Severity Standards
+## 分類の検索
 
-### SDL Bugbar Severity
-Classify each finding per: https://www.microsoft.com/en-us/msrc/sdlbugbar
+それぞれの結果を文書化する前に、次のことを確認してください。- [ ] **確実な証拠が存在します**: 脆弱性を証明する設定/コードを見せていただけますか?
+- [ ] **安全なデフォルトではありません**: プラットフォームがデフォルトでセキュリティを有効にしているかどうかを確認しましたか?
+- [ ] **セキュリティ インフラストラクチャをチェックしました**: Sentry/cert-manager/Vault などを探しましたか?
+- [ ] **明示的 vs 暗黙的**: セキュリティは明示的に無効になっていますか、それとも明示的に有効になっていないだけですか?
+- [ ] **プラットフォームのドキュメントを参照**: 不明な場合は、公式ドキュメントと照合して確認してください
 
-### CVSS 4.0 Score
-Use CVSS v4.0 Base score (0.0-10.0) with vector string.
-Reference: https://www.first.org/cvss/v4.0/specification-document
+**分類結果:**
+- **確認済み**: 脆弱性の明確な証拠 → `3-findings.md` で発見されたものとして文書化
+- **要検証**: 確認できないが潜在的なリスク → `0-assessment.md` の「要検証」に追加
+- **結果ではありません**: デフォルトで安全であることが確認されているか、明示的に有効になっている → 文書化しない
+
+---
+
+## 重大度の基準
+
+### SDL バグバーの重大度
+各検出結果を次のように分類します: https://www.microsoft.com/en-us/msrc/sdlbugbar
+
+### CVSS 4.0 スコア
+ベクトル文字列で CVSS v4.0 基本スコア (0.0 ～ 10.0) を使用します。
+参考: https://www.first.org/cvss/v4.0/specation-document
 
 ### CWE
-Assign Common Weakness Enumeration ID and name.
-Reference: https://cwe.mitre.org/
+Common Weakness Enumeration ID と名前を割り当てます。
+参考：https://cwe.mitre.org/
 
-### OWASP
-Map to OWASP Top 10:2025 category if applicable (A01-A10).
-**ALWAYS use `:2025` suffix** (e.g., `A01:2025`), never `:2021`.
-Reference: https://owasp.org/Top10/2025/
+### オワスプ
+該当する場合は、OWASP Top 10:2025 カテゴリにマップします (A01 ～ A10)。
+**常に `:2025` サフィックスを使用してください** (例: `A01:2025`)。`:2021` は使用しないでください。
+参考：https://owasp.org/Top10/2025/
 
-### Remediation Effort
-- **Low**: Configuration change, flag toggle, or single-file fix
-- **Medium**: Multi-file code change, new validation logic, or dependency update
-- **High**: Architecture change, new component, or cross-team coordination
+### 修復作業
+- **低**: 構成の変更、フラグの切り替え、または単一ファイルの修正
+- **中**: 複数ファイルのコード変更、新しい検証ロジック、または依存関係の更新
+- **高**: アーキテクチャの変更、新しいコンポーネント、またはチーム間の調整
 
-### STRIDE Scope Rule
-- **External services** (AzureOpenAI, AzureAD, Redis, PostgreSQL) **DO get** STRIDE sections — they are attack surfaces from your system's perspective
-- **External actors** (Operator, EndUser) **do NOT get** STRIDE sections — they are threat sources, not targets
-- If you have 20 elements and 2 are external actors, you write 18 STRIDE sections
+### STRIDE スコープ ルール
+- **外部サービス** (AzureOpenAI、AzureAD、Redis、PostgreSQL) **必ず取得してください** STRIDE セクション - これらはシステムの観点から見ると攻撃対象領域です
+- **外部アクター** (オペレーター、エンドユーザー) **STRIDE セクションを取得しないでください** - これらは脅威のソースであり、ターゲットではありません
+- 20 個の要素があり、2 個が外部アクターの場合、18 個の STRIDE セクションを作成します。
 
-**⚠️ DO NOT include time estimates.** Never add "(hours)", "(days)", "(weeks)", "~1 hour", "~2 hours", or any duration/effort-to-fix estimates anywhere in the output. The effort level (Low/Medium/High) is sufficient.
-
-### Mitigation Type (OWASP-aligned)
-- **Redesign**: Eliminate the threat by changing architecture (OWASP: Avoid)
-- **Standard Mitigation**: Apply well-known, proven security controls (OWASP: Mitigate)
-- **Custom Mitigation**: Implement a bespoke code fix specific to this system (OWASP: Mitigate)
-- **Existing Control**: Team already built a control that addresses this threat — document it (OWASP: Fix)
-- **Accept Risk**: Acknowledge and document the residual risk (requires justification) (OWASP: Accept)
-- **Transfer Risk**: Shift responsibility to user/operator/third-party (e.g., configuration choice, SLA) (OWASP: Transfer)
+**⚠️ 時間の見積もりは含めないでください。** 出力のどこにも、「(時間)」、「(日)」、「(週)」、「~1 時間」、「~2 時間」、または期間/修正作業の見積もりを追加しないでください。努力レベル (低/中/高) で十分です。### 緩和タイプ (OWASP に準拠)
+- **再設計**: アーキテクチャを変更して脅威を排除します (OWASP: 回避)
+- **標準的な軽減策**: よく知られ実績のあるセキュリティ制御を適用します (OWASP: 軽減策)
+- **カスタム緩和策**: このシステムに固有のオーダーメイドのコード修正を実装します (OWASP: 緩和策)
+- **既存のコントロール**: チームはすでにこの脅威に対処するコントロールを構築しています - それを文書化します (OWASP: 修正)
+- **リスクを受け入れる**: 残留リスクを認識し、文書化します (正当な理由が必要です) (OWASP: 受け入れる)
+- **リスクの移転**: ユーザー/オペレータ/サードパーティへの責任の移転 (構成の選択、SLA など) (OWASP: 移転)

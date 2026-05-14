@@ -1,50 +1,38 @@
-# Experiments: Overview
+# 実験: 概要
 
-Systematic testing of AI systems with datasets, tasks, and evaluators.
+データセット、タスク、評価者を使用した AI システムの体系的なテスト。
 
-## Structure
+＃＃ 構造「」
+DATASET → 例: {入力、期待出力、メタデータ}
+タスク → 関数(入力) → 出力
+評価者 → (入力、出力、期待値) → スコア
+実験 → すべての例でタスクを実行し、結果をスコアリングします
+「」## 基本的な使い方「」パイソン
+phoenix.client.experiments から run_experiment をインポート
 
-```
-DATASET     → Examples: {input, expected_output, metadata}
-TASK        → function(input) → output
-EVALUATORS  → (input, output, expected) → score
-EXPERIMENT  → Run task on all examples, score results
-```
+実験 = run_experiment(
+    データセット=my_dataset、
+    task=my_task、
+    評価者=[正確さ、忠実さ]、
+    実験名 = "改善された取得-v2",
+）
 
-## Basic Usage
+print(実験.aggregate_scores)
+# {'精度': 0.85, '忠実さ': 0.92}
+「」## ワークフロー
 
-```python
-from phoenix.client.experiments import run_experiment
+1. **データセットの作成** - トレース、合成データ、または手動キュレーションから
+2. **タスクの定義** - テストする関数 (LLM パイプライン)
+3. **評価者の選択** - コードおよび/または LLM ベース
+4. **実験の実行** - 実行してスコアを付けます
+5. **分析と反復** - タスクの確認、変更、再実行
 
-experiment = run_experiment(
-    dataset=my_dataset,
-    task=my_task,
-    evaluators=[accuracy, faithfulness],
-    experiment_name="improved-retrieval-v2",
-)
+## 予行演習
 
-print(experiment.aggregate_scores)
-# {'accuracy': 0.85, 'faithfulness': 0.92}
-```
+完全に実行する前にセットアップをテストします。「」パイソン
+Experiment = run_experiment(dataset, task, evaluators, dry_run=3) # 3 つの例だけ
+「」## ベストプラクティス
 
-## Workflow
-
-1. **Create dataset** - From traces, synthetic data, or manual curation
-2. **Define task** - The function to test (your LLM pipeline)
-3. **Select evaluators** - Code and/or LLM-based
-4. **Run experiment** - Execute and score
-5. **Analyze & iterate** - Review, modify task, re-run
-
-## Dry Runs
-
-Test setup before full execution:
-
-```python
-experiment = run_experiment(dataset, task, evaluators, dry_run=3)  # Just 3 examples
-```
-
-## Best Practices
-
-- **Name meaningfully**: `"improved-retrieval-v2-2024-01-15"` not `"test"`
-- **Version datasets**: Don't modify existing
-- **Multiple evaluators**: Combine perspectives
+- **意味のある名前を付けてください**: `"test"` ではなく `"improved-retrieval-v2-2024-01-15"`
+- **バージョン データセット**: 既存のデータセットを変更しないでください。
+- **複数の評価者**: 視点を組み合わせる

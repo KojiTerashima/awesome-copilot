@@ -1,226 +1,182 @@
-# Row-Level Security (RLS) in Power BI
+# Power BI の行レベル セキュリティ (RLS)
 
-## Overview
+## 概要
 
-Row-Level Security restricts data access at the row level based on user identity. Users see only the data they're authorized to view.
+行レベルのセキュリティは、ユーザー ID に基づいて行レベルでのデータ アクセスを制限します。ユーザーには、表示を許可されているデータのみが表示されます。
 
-## Design Principles
+## 設計原則
 
-### 1. Filter on Dimension Tables
-Apply RLS to dimensions, not fact tables:
-- More efficient (smaller tables)
-- Filters propagate through relationships
-- Easier to maintain
+### 1. ディメンション テーブルのフィルター
+RLS をファクト テーブルではなくディメンションに適用します。
+- より効率的 (テーブルが小さくなる)
+- フィルターは関係を通じて伝播します
+- メンテナンスが容易「ダックス」
+// Customer ディメンション - フィルターは Sales に伝播します
+[地域] = 「西部」
+「」### 2. 最小限の役割を作成する
+多くの役割の組み合わせは避けてください。
+- 各役割 = 個別のキャッシュ
+- 役割は加算的です (交差ではなく結合)
+- 可能な限り統合する
 
-```dax
-// On Customer dimension - filters propagate to Sales
-[Region] = "West"
-```
+### 3. 可能な場合は動的 RLS を使用する
+データ駆動型のルールはより適切に拡張できます。
+- テーブル内のユーザーマッピング
+- ID 用の USERPRINCIPALNAME()
+- ユーザーが変わっても役割は変わりません
 
-### 2. Create Minimal Roles
-Avoid many role combinations:
-- Each role = separate cache
-- Roles are additive (union, not intersection)
-- Consolidate where possible
+## 静的 RLS と動的 RLS
 
-### 3. Use Dynamic RLS When Possible
-Data-driven rules scale better:
-- User mapping in a table
-- USERPRINCIPALNAME() for identity
-- No role changes when users change
+### 静的 RLS
+役割ごとの固定ルール:「ダックス」
+// 役割: 西部地域
+[地域] = 「西部」
 
-## Static vs Dynamic RLS
+// 役割: 東地域  
+[地域] = 「東部」
+「」**長所:** シンプル、明確
+**短所:** 拡張性がなく、グループごとに役割が必要です
 
-### Static RLS
-Fixed rules per role:
-```dax
-// Role: West Region
-[Region] = "West"
-
-// Role: East Region  
-[Region] = "East"
-```
-
-**Pros:** Simple, clear
-**Cons:** Doesn't scale, requires role per group
-
-### Dynamic RLS
-User identity drives filtering:
-```dax
-// Single role filters based on logged-in user
+### 動的 RLS
+ユーザー ID によってフィルタリングが促進されます。「ダックス」
+// ログインしているユーザーに基づいて単一ロール フィルターを適用します
 [ManagerEmail] = USERPRINCIPALNAME()
-```
+「」**長所:** スケール、自動メンテナンス
+**短所:** ユーザー マッピング データが必要
 
-**Pros:** Scales, self-maintaining
-**Cons:** Requires user mapping data
+## 実装パターン
 
-## Implementation Patterns
-
-### Pattern 1: Direct User Mapping
-User email in dimension table:
-```dax
-// On Customer table
+### パターン 1: 直接ユーザー マッピング
+ディメンション テーブルのユーザーの電子メール:「ダックス」
+// Customer テーブル上
 [CustomerEmail] = USERPRINCIPALNAME()
-```
+「」### パターン 2: セキュリティ テーブル
+ユーザーをデータにマッピングする別のテーブル:「」
+セキュリティマッピングテーブル:
+|ユーザーメール |地域 |
+|----------|----------|
+|ジョー@co.com |西 |
+| sue@co.com |東 |
+「」
 
-### Pattern 2: Security Table
-Separate table mapping users to data:
-```
-SecurityMapping table:
-| UserEmail | Region |
-|-----------|--------|
-| joe@co.com | West  |
-| sue@co.com | East  |
-```
-
-```dax
-// On Region dimension
-[Region] IN 
+「ダックス」
+// 領域ディメンションについて
+【地域】インド 
     SELECTCOLUMNS(
         FILTER(SecurityMapping, [UserEmail] = USERPRINCIPALNAME()),
-        "Region", [Region]
-    )
-```
+        "地域"、[地域]
+    ）
+「」### パターン 3: マネージャー階層
+ユーザーには自分のデータと従属が表示されます。「ダックス」
+// 階層に PATH 関数を使用する
+PATHCONTAINS(従業員[マネージャーパス], 
+    LOOKUPVALUE(従業員[従業員ID], 従業員[電子メール], USERPRINCIPALNAME()))
+「」### パターン 4: 複数のルール
+条件を組み合わせる:「ダックス」
+// ユーザーは自分の地域、またはグローバル閲覧者の場合に表示されます
+[地域] = LOOKUPVALUE(ユーザー[地域], ユーザー[電子メール], USERPRINCIPALNAME())
+|| LOOKUPVALUE(ユーザー[IsGlobal]、ユーザー[電子メール]、USERPRINCIPALNAME()) = TRUE()
+「」## MCP を介したロールの作成
 
-### Pattern 3: Manager Hierarchy
-Users see their data plus subordinates:
-```dax
-// Using PATH functions for hierarchy
-PATHCONTAINS(Employee[ManagerPath], 
-    LOOKUPVALUE(Employee[EmployeeID], Employee[Email], USERPRINCIPALNAME()))
-```
-
-### Pattern 4: Multiple Rules
-Combine conditions:
-```dax
-// Users see their region OR if they're a global viewer
-[Region] = LOOKUPVALUE(Users[Region], Users[Email], USERPRINCIPALNAME())
-|| LOOKUPVALUE(Users[IsGlobal], Users[Email], USERPRINCIPALNAME()) = TRUE()
-```
-
-## Creating Roles via MCP
-
-### List Existing Roles
-```
-security_role_operations(operation: "List")
-```
-
-### Create Role with Permission
-```
+### 既存の役割をリストする「」
+security_role_operations(操作: "リスト")
+「」### 権限のあるロールを作成する「」
 security_role_operations(
-  operation: "Create",
-  definitions: [{
-    name: "Regional Sales",
-    modelPermission: "Read",
-    description: "Restricts sales data by region"
+  操作: "作成"、
+  定義: [{
+    名前: 「地域販売」、
+    モデル権限: "読み取り"、
+    説明: 「販売データを地域ごとに制限します」
   }]
-)
-```
-
-### Add Table Permission (Filter)
-```
+）
+「」### テーブル権限の追加 (フィルター)「」
 security_role_operations(
-  operation: "CreatePermissions",
-  permissionDefinitions: [{
-    roleName: "Regional Sales",
-    tableName: "Customer",
-    filterExpression: "[Region] = USERPRINCIPALNAME()"
+  操作: "CreatePermissions",
+  許可定義: [{
+    役割名: "地域営業",
+    テーブル名: "顧客",
+    filterExpression: "[リージョン] = USERPRINCIPALNAME()"
   }]
-)
-```
-
-### Get Effective Permissions
-```
+）
+「」### 有効な権限を取得する「」
 security_role_operations(
-  operation: "GetEffectivePermissions",
-  references: [{ name: "Regional Sales" }]
-)
-```
+  操作: "GetEffectivePermissions",
+  参照: [{ 名前: "地域販売" }]
+）
+「」## RLS のテスト
 
-## Testing RLS
+### Power BI Desktop の場合
+1.「モデリング」タブ > 「表示形式」
+2. テストするロールを選択します
+3. 必要に応じてユーザー ID を指定します
+4. データのフィルタリングを確認する
 
-### In Power BI Desktop
-1. Modeling tab > View As
-2. Select role(s) to test
-3. Optionally specify user identity
-4. Verify data filtering
-
-### Test Unexpected Values
-For dynamic RLS, test:
-- Valid users
-- Unknown users (should see nothing or error gracefully)
-- NULL/blank values
-
-```dax
-// Defensive pattern - returns no data for unknown users
+### 予期しない値をテストする
+動的 RLS の場合は、以下をテストします。
+- 有効なユーザー
+- 不明なユーザー (何も表示されないか、正常にエラーが表示されるはずです)
+- NULL/空白値「ダックス」
+// 防御パターン - 不明なユーザーにはデータを返しません
 IF(
     USERPRINCIPALNAME() IN VALUES(SecurityMapping[UserEmail]),
-    [Region] IN SELECTCOLUMNS(...),
+    [地域] IN SELECTCOLUMNS(...),
     FALSE()
-)
-```
+）
+「」## よくある間違い
 
-## Common Mistakes
+### 1. ファクトテーブルのみの RLS
+**問題:** 大規模なテーブル スキャン、パフォーマンスの低下
+**解決策:** ディメンション テーブルに適用し、リレーションシップを伝播させます。
 
-### 1. RLS on Fact Tables Only
-**Problem:** Large table scans, poor performance
-**Solution:** Apply to dimension tables, let relationships propagate
+### 2. リレーションシップの代わりに LOOKUPVALUE を使用する
+**問題:** 高価で拡張性がない
+**解決策:** 適切な関係を作成し、フィルターをフローさせます
 
-### 2. Using LOOKUPVALUE Instead of Relationships
-**Problem:** Expensive, doesn't scale
-**Solution:** Create proper relationships, let filters flow
+### 3. 予想される交差動作
+**問題:** 複数のロール = UNION (加算)、交差ではない
+**解決策:** 結合の動作を念頭に置いてロールを設計する
 
-### 3. Expecting Intersection Behavior
-**Problem:** Multiple roles = UNION (additive), not intersection
-**Solution:** Design roles with union behavior in mind
+### 4. DirectQuery のことを忘れる
+**問題:** RLS フィルターが WHERE 句になる
+**解決策:** ソース データベースがクエリ パターンを処理できることを確認します。
 
-### 4. Forgetting About DirectQuery
-**Problem:** RLS filters become WHERE clauses
-**Solution:** Ensure source database can handle the query patterns
+### 5. エッジケースをテストしない
+**問題:** ユーザーに予期しないデータが表示される
+**解決策:** テスト: 有効なユーザー、無効なユーザー、複数のロール
 
-### 5. Not Testing Edge Cases
-**Problem:** Users see unexpected data
-**Solution:** Test with: valid users, invalid users, multiple roles
+## 双方向 RLS
 
-## Bidirectional RLS
+RLS との双方向関係の場合:「」
+「双方向にセキュリティフィルターを適用する」を有効にする
+「」次の場合にのみ使用します。
+- RLS では多対多によるフィルタリングが必要です
+- 次元間のセキュリティが必要
 
-For bidirectional relationships with RLS:
-```
-Enable "Apply security filter in both directions"
-```
+**注意:** パスごとに許可される双方向関係は 1 つだけです。
 
-Only use when:
-- RLS requires filtering through many-to-many
-- Dimension-to-dimension security needed
+## パフォーマンスに関する考慮事項
 
-**Caution:** Only one bidirectional relationship per path allowed.
+- RLS はすべてのクエリに WHERE 句を追加します
+- フィルター内の複雑な DAX はパフォーマンスに悪影響を及ぼします
+- 現実的なユーザー数でテストする
+- 大規模なモデルの集約を検討する
 
-## Performance Considerations
+## オブジェクトレベルのセキュリティ (OLS)
 
-- RLS adds WHERE clauses to every query
-- Complex DAX in filters hurts performance
-- Test with realistic user counts
-- Consider aggregations for large models
+テーブル全体または列全体へのアクセスを制限します。「」
+// XMLA/TMSL 経由 - デスクトップ UI では使用できません
+「」用途:
+- 機密性の高い列 (給与、SSN) を非表示にする
+- テーブル全体の制限
+- RLS と組み合わせて包括的なセキュリティを実現
 
-## Object-Level Security (OLS)
+## 検証チェックリスト
 
-Restrict access to entire tables or columns:
-```
-// Via XMLA/TMSL - not available in Desktop UI
-```
-
-Use for:
-- Hiding sensitive columns (salary, SSN)
-- Restricting entire tables
-- Combined with RLS for comprehensive security
-
-## Validation Checklist
-
-- [ ] RLS applied to dimension tables (not fact tables)
-- [ ] Filters propagate correctly through relationships
-- [ ] Dynamic RLS uses USERPRINCIPALNAME()
-- [ ] Tested with valid and invalid users
-- [ ] Edge cases handled (NULL, unknown users)
-- [ ] Performance tested under load
-- [ ] Role mappings documented
-- [ ] Workspace roles understood (Admins bypass RLS)
+- [ ] RLS はディメンション テーブル (ファクト テーブルではない) に適用されます
+- [ ] フィルターはリレーションシップを通じて正しく伝播します。
+- [ ] 動的 RLS は USERPRINCIPALNAME() を使用します
+- [ ] 有効なユーザーと無効なユーザーでテスト済み
+- [ ] 処理されたエッジ ケース (NULL、不明なユーザー)
+- [ ] 負荷下でのパフォーマンステスト
+- [ ] 役割マッピングの文書化
+- [ ] ワークスペースの役割を理解しました (管理者は RLS をバイパスします)

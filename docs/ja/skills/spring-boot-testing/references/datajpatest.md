@@ -1,10 +1,8 @@
 # @DataJpaTest
 
-Testing JPA repositories with isolated data layer slice.
+分離されたデータ層スライスを使用して JPA リポジトリをテストします。
 
-## Basic Structure
-
-```java
+## 基本構造```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -20,19 +18,15 @@ class OrderRepositoryTest {
   @Autowired
   private TestEntityManager entityManager;
 }
-```
+```## ロードされるもの
 
-## What Gets Loaded
-
-- Repository beans
+- リポジトリ Bean
 - EntityManager / TestEntityManager
-- DataSource
-- Transaction manager
-- No web layer, no services, no controllers
+- データソース
+- トランザクションマネージャー
+- Web レイヤー、サービス、コントローラーなし
 
-## Testing Custom Queries
-
-```java
+## カスタムクエリのテスト```java
 @Test
 void shouldFindOrdersByStatus() {
   // Given - Using var for cleaner code
@@ -49,11 +43,7 @@ void shouldFindOrdersByStatus() {
   assertThat(pendingOrders).hasSize(1);
   assertThat(pendingOrders.getFirst().getStatus()).isEqualTo("PENDING");
 }
-```
-
-## Testing Native Queries
-
-```java
+```## ネイティブ クエリのテスト```java
 @Test
 void shouldExecuteNativeQuery() {
   entityManager.persist(new Order("PENDING", BigDecimal.valueOf(100)));
@@ -64,11 +54,7 @@ void shouldExecuteNativeQuery() {
   
   assertThat(total).isEqualTo(new BigDecimal("300.00"));
 }
-```
-
-## Testing Pagination
-
-```java
+```## ページネーションのテスト```java
 @Test
 void shouldReturnPagedResults() {
   // Insert 20 orders using IntStream
@@ -83,11 +69,7 @@ void shouldReturnPagedResults() {
   assertThat(page.getTotalElements()).isEqualTo(20);
   assertThat(page.getContent().getFirst().getStatus()).isEqualTo("PENDING");
 }
-```
-
-## Testing Lazy Loading
-
-```java
+```## 遅延読み込みのテスト```java
 @Test
 void shouldLazyLoadOrderItems() {
   var order = new Order("PENDING");
@@ -103,11 +85,7 @@ void shouldLazyLoadOrderItems() {
   assertThat(found.get().getItems()).hasSize(1);
   assertThat(found.get().getItems().getFirst().getProduct()).isEqualTo("Product");
 }
-```
-
-## Testing Cascading
-
-```java
+```## カスケードテスト```java
 @Test
 void shouldCascadeDelete() {
   var order = new Order("PENDING");
@@ -121,11 +99,7 @@ void shouldCascadeDelete() {
   assertThat(entityManager.find(OrderItem.class, order.getItems().getFirst().getId()))
     .isNull();
 }
-```
-
-## Testing @Query Methods
-
-```java
+```## @Query メソッドのテスト```java
 @Query("SELECT o FROM Order o WHERE o.createdAt > :date AND o.status = :status")
 List<Order> findRecentByStatus(@Param("date") LocalDateTime date, 
                                @Param("status") String status);
@@ -147,22 +121,14 @@ void shouldFindRecentOrders() {
   assertThat(recentOrders).hasSize(1);
   assertThat(recentOrders.getFirst().getId()).isEqualTo(recent.getId());
 }
-```
+```## H2 とリアル データベースの使用
 
-## Using H2 vs Real Database
-
-### H2 (Default - Not Recommended for Production Parity)
-
-```java
+### H2 (デフォルト - 運用パリティには推奨されません)```java
 @DataJpaTest // Uses embedded H2 by default
 class OrderRepositoryH2Test {
   // Fast but may miss DB-specific issues
 }
-```
-
-### Testcontainers (Recommended)
-
-```java
+```### テストコンテナ (推奨)```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -171,27 +137,21 @@ class OrderRepositoryPostgresTest {
   @ServiceConnection
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
 }
-```
+```## トランザクションの動作
 
-## Transaction Behavior
-
-Tests are @Transactional by default and roll back after each test.
-
-```java
+テストはデフォルトで @Transactional であり、各テスト後にロールバックされます。```java
 @Test
 @Rollback(false) // Don't roll back (rarely needed)
 void shouldPersistData() {
   orderRepository.save(new Order("PENDING"));
   // Data will remain in database after test
 }
-```
+```## 重要なポイント
 
-## Key Points
-
-1. Use TestEntityManager for setup data
-2. Always flush() after persist() to trigger SQL
-3. Clear() the entity manager to test lazy loading
-4. Use real database (Testcontainers) for accurate results
-5. Test both success and failure cases
-6. Leverage Java 25 var keyword for cleaner variable declarations
-7. Use sequenced collection methods (getFirst(), getLast(), reversed())
+1. 設定データに TestEntityManager を使用する
+2. SQL をトリガーするには、persist() の後に常に flash() を実行します
+3. エンティティ マネージャーを Clear() して遅延読み込みをテストします。
+4. 正確な結果を得るために実際のデータベース (Testcontainers) を使用する
+5. 成功ケースと失敗ケースの両方をテストする
+6. Java 25 var キーワードを活用してよりクリーンな変数宣言を行う
+7. 順序付けされたコレクション メソッド (getFirst()、getLast()、reversed()) を使用する

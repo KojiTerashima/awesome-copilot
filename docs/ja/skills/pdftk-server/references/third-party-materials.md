@@ -1,103 +1,97 @@
-# Third-Party Materials
+# サードパーティのマテリアル
 
-PDFtk Server (pdftk) uses third-party libraries. Depending on the target operating system, some of these are linked or distributed with pdftk. These are their licensing terms.
+PDFtk サーバー (pdftk) はサードパーティのライブラリを使用します。ターゲットのオペレーティング システムに応じて、これらの一部は pdftk にリンクまたは配布されます。これらはライセンス条項です。
 
 ## GCC libgcj
 
-The libgcj library is licensed under the terms of the GNU General Public License.
+libgcj ライブラリは、GNU General Public License の条件に基づいてライセンス供与されています。
 
-Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+このライブラリを他のモジュールと静的または動的にリンクすると、このライブラリに基づいて組み合わせた作品が作成されます。したがって、GNU 一般公衆利用許諾契約書の条件は、その組み合わせ全体をカバーします。
 
-As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
+特別な例外として、このライブラリの著作権所有者は、このライブラリを独立したモジュールにリンクして、これらの独立したモジュールのライセンス条項に関係なく、実行可能ファイルを作成し、リンクされた各独立モジュールについて、そのモジュールのライセンス条項と条件も満たしていることを条件として、作成された実行可能ファイルを選択した条件に従ってコピーおよび配布する許可を与えます。独立したモジュールは、このライブラリから派生したものではない、またはこのライブラリに基づいていないモジュールです。このライブラリを変更する場合、この例外をライブラリのバージョンに拡張できますが、そうする義務はありません。そうしたくない場合は、この例外ステートメントをバージョンから削除してください。
 
-[Click to read the GNU General Public License Version 2.](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt)
+[クリックして GNU General Public License バージョン 2 を読んでください。](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt)
 
-Libgcj is part of GCC, so you can find its source code in the GCC [source code](https://gcc.gnu.org/gcc-4.5/).
+Libgcj は GCC の一部であるため、そのソース コードは GCC [ソース コード](https://gcc.gnu.org/gcc-4.5/) で見つけることができます。
 
-## GCC libgcc and libstdc++
+## GCC libgcc および libstdc++
 
-GCC is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3, or (at your option) any later version.
+GCC はフリー ソフトウェアです。 Free Software Foundation によって公開されている GNU General Public License の条件に基づいて、再配布したり変更したりすることができます。バージョン 3、または (オプションで) それ以降のバージョンのいずれかです。
 
-GCC is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+GCC は役立つことを期待して配布されていますが、いかなる保証もありません。商品性や特定目的への適合性についての暗黙の保証もありません。詳細については、GNU 一般公衆利用許諾書を参照してください。
 
-Under Section 7 of GPL version 3, you are granted additional permissions described in the GCC Runtime Library Exception, version 3.1, as published by the Free Software Foundation.
+GPL バージョン 3 のセクション 7 に基づいて、Free Software Foundation によって公開されている GCC ランタイム ライブラリ例外バージョン 3.1 に記載されている追加のアクセス許可が付与されます。
 
-[Click to read the GNU General Public License Version 3](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_3.0.txt).
+[クリックして GNU General Public License バージョン 3 を読んでください](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_3.0.txt)。
 
-[Click to read the GCC Runtime Library Exception Version 3.1](https://www.pdflabs.com/docs/pdftk-license/gcc_runtime_library_exception_3.1.txt).
+[クリックして GCC ランタイム ライブラリ例外バージョン 3.1 を読んでください](https://www.pdflabs.com/docs/pdftk-license/gcc_runtime_library_Exception_3.1.txt)。
 
-Libgcc and libstdc++ are part of GCC, so you can find their source code in the GCC [source code](https://gcc.gnu.org/gcc-4.5/).
+Libgcc と libstdc++ は GCC の一部であるため、それらのソース コードは GCC [ソース コード](https://gcc.gnu.org/gcc-4.5/) で見つけることができます。
 
-## GNU Classpath
+## GNU クラスパス
 
-GNU Classpath is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 2, or (at your option) any later version.
+GNU クラスパスはフリー ソフトウェアです。 Free Software Foundation によって公開されている GNU General Public License の条件に基づいて、再配布したり変更したりすることができます。バージョン 2、または (オプションで) それ以降のバージョンのいずれかです。GNU クラスパスは役立つことを期待して配布されていますが、いかなる保証もありません。商品性や特定目的への適合性についての暗黙の保証もありません。詳細については、GNU 一般公衆利用許諾書を参照してください。
 
-GNU Classpath is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+GNU 一般公衆利用許諾書のコピーと GNU クラスパスを受け取っているはずです。 「ファイルのコピー」を参照してください。そうでない場合は、Free Software Foundation, Inc. (59 Temple Place, Suite 330, Boston, MA 02111-1307 USA) までご連絡ください。
 
-You should have received a copy of the GNU General Public License along with GNU Classpath; see the file COPYING. If not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+このライブラリを他のモジュールと静的または動的にリンクすると、このライブラリに基づいて組み合わせた作品が作成されます。したがって、GNU 一般公衆利用許諾契約書の条件は、その組み合わせ全体をカバーします。
 
-Linking this library statically or dynamically with other modules is making a combined work based on this library. Thus, the terms and conditions of the GNU General Public License cover the whole combination.
+特別な例外として、このライブラリの著作権所有者は、このライブラリを独立したモジュールにリンクして、これらの独立したモジュールのライセンス条項に関係なく、実行可能ファイルを作成し、リンクされた各独立モジュールについて、そのモジュールのライセンス条項と条件も満たしていることを条件として、作成された実行可能ファイルを選択した条件に従ってコピーおよび配布する許可を与えます。独立したモジュールは、このライブラリから派生したものではない、またはこのライブラリに基づいていないモジュールです。このライブラリを変更する場合、この例外をライブラリのバージョンに拡張できますが、そうする義務はありません。そうしたくない場合は、この例外ステートメントをバージョンから削除してください。
 
-As a special exception, the copyright holders of this library give you permission to link this library with independent modules to produce an executable, regardless of the license terms of these independent modules, and to copy and distribute the resulting executable under terms of your choice, provided that you also meet, for each linked independent module, the terms and conditions of the license of that module. An independent module is a module which is not derived from or based on this library. If you modify this library, you may extend this exception to your version of the library, but you are not obligated to do so. If you do not wish to do so, delete this exception statement from your version.
+[クリックして GNU General Public License バージョン 2 を読んでください](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt)。
 
-[Click to read the GNU General Public License Version 2](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt).
+クラスパスは GCC の一部であるため、そのソース コードは [GCC ソース コード](https://gcc.gnu.org/gcc-4.5/) で見つけることができます。
 
-Classpath is part of GCC, so you can find its source code in the [GCC source code](https://gcc.gnu.org/gcc-4.5/).
+## 弾む城
 
-## Bouncy Castle
+弾む城のライセンス
 
-The Bouncy Castle License
+著作権 (c) 2000-2008 弾む城の軍団 (http://www.bouncycastle.org)
 
-Copyright (c) 2000-2008 The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+本ソフトウェアおよび関連ドキュメント ファイル (以下「ソフトウェア」) のコピーを入手した人には、以下の条件を条件として、ソフトウェアのコピーを使用、複製、変更、結合、公開、配布、サブライセンス、および/または販売する権利を含むがこれらに限定されず、ソフトウェアを無制限に取り扱うこと、およびソフトウェアが提供される人にそうすることを許可することが、ここに無償で与えられます。
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+上記の著作権表示およびこの許可通知は、ソフトウェアのすべてのコピーまたは主要部分に含まれるものとします。
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ソフトウェアは「現状のまま」提供され、明示的か黙示的かを問わず、商品性、特定目的への適合性、および非侵害の保証を含むがこれらに限定されない、いかなる種類の保証も行われません。いかなる場合においても、作者または著作権所有者は、契約行為、不法行為、またはその他の行為であるかどうかにかかわらず、ソフトウェアまたはソフトウェアの使用またはその他の取引に起因または関連して生じる、いかなる請求、損害、またはその他の責任に対しても責任を負わないものとします。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Bouncy Castle のソース コードを http://www.bouncycastle.org/ からダウンロードします。
 
-Download the Bouncy Castle source code from: http://www.bouncycastle.org/.
+## iText (itext-paulo)このライブラリはフリー ソフトウェアです。 Free Software Foundation が発行する GNU Library General Public License の条項に基づいて、再配布したり変更したりすることができます。ライセンスのバージョン 2、または (オプションで) それ以降のバージョンのいずれか。
 
-## iText (itext-paulo)
+このライブラリは役立つことを期待して配布されていますが、いかなる保証もありません。商品性や特定目的への適合性についての暗黙の保証もありません。詳細については、GNU ライブラリの一般公衆利用許諾書を参照してください。
 
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Library General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+[クリックして GNU ライブラリ一般公衆利用許諾書バージョン 2 を読んでください](https://www.pdflabs.com/docs/pdftk-license/gnu_lgpl_license_2.txt)。
 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License for more details.
-
-[Click to read the GNU Library General Public License Version 2](https://www.pdflabs.com/docs/pdftk-license/gnu_lgpl_license_2.txt).
-
-The iText source code used in pdftk is slightly modified from its original version. This modified version is included with the [pdftk source code](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/).
+pdftk で使用される iText ソース コードは、元のバージョンからわずかに変更されています。この修正バージョンは、[pdftk ソース コード](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/) に含まれています。
 
 ## MinGW Runtimes (Windows Only)
 
-MinGW runtime: The MinGW base runtime package has been placed in the public domain, and is not governed by copyright. This basically means that you can do what you like with the code.
+MinGW ランタイム: MinGW ベース ランタイム パッケージはパブリック ドメインに置かれており、著作権によって管理されません。これは基本的に、コードで好きなことを実行できることを意味します。
 
-w32api: You are free to use, modify and copy this package. No restrictions are imposed on programs or object files linked with this library. You may not restrict the usage of this library. You may distribute this library as part of another package or as a modified package if, and only if, you do not restrict the usage of the portions consisting of this (optionally modified) library. If distributed as a modified package, then a copy of this notice must be included.
+w32api: このパッケージは自由に使用、変更、コピーできます。このライブラリにリンクされるプログラムやオブジェクトファイルには制限はありません。 You may not restrict the usage of this library.この (必要に応じて変更された) ライブラリを構成する部分の使用を制限しない場合に限り、このライブラリを別のパッケージの一部として、または変更されたパッケージとして配布できます。変更されたパッケージとして配布される場合は、この通知のコピーを含める必要があります。
 
-This library is distributed in the hope that it will be useful, but WITHOUT WARRANTY OF ANY KIND; without even the implied warranties of MERCHANTABILITY or of FITNESS FOR A PARTICULAR PURPOSE.
+このライブラリは役立つことを期待して配布されていますが、いかなる保証もありません。商品性や特定目的への適合性についての暗黙の保証もありません。
 
-Download the MinGW runtime source code from: http://mingw.org/.
+MinGW ランタイム ソース コードを http://mingw.org/ からダウンロードします。
 
-## Libiconv
+## リビコン
 
-The GNU LIBICONV Library is free software; you can redistribute it and/or modify it under the terms of the GNU Library General Public License as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+The GNU LIBICONV Library is free software; Free Software Foundation が発行する GNU Library General Public License の条項に基づいて、再配布したり変更したりすることができます。ライセンスのバージョン 2、または (オプションで) それ以降のバージョンのいずれか。
 
-The GNU LIBICONV Library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License for more details.
+GNU LIBICONV ライブラリは、役立つことを期待して配布されていますが、いかなる保証もありません。商品性や特定目的への適合性についての暗黙の保証もありません。詳細については、GNU ライブラリの一般公衆利用許諾書を参照してください。
 
-[Click to read the GNU Library General Public License](https://www.pdflabs.com/docs/pdftk-license/gnu_lgpl_license_2.txt).
+[クリックして GNU ライブラリ一般公衆利用許諾書を読んでください](https://www.pdflabs.com/docs/pdftk-license/gnu_lgpl_license_2.txt)。
 
-Download the libiconv source code from: http://www.gnu.org/software/libiconv/
+libiconv ソース コードを http://www.gnu.org/software/libiconv/ からダウンロードします。
 
-## Apache Batik
+## アパッチバティック
 
-Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+1 つ以上のコントリビューター ライセンス契約に基づいて、Apache Software Foundation (ASF) にライセンスが付与されています。著作権所有権に関する追加情報については、この作品とともに配布される NOTICE ファイルを参照してください。 ASF は、Apache License バージョン 2.0 (「ライセンス」) に基づいてこのファイルをお客様にライセンスします。ライセンスに準拠する場合を除き、このファイルを使用することはできません。ライセンスのコピーは次の場所で入手できます。
 
-http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0適用される法律で義務付けられている場合または書面による同意がない限り、ライセンスに基づいて配布されるソフトウェアは、明示または黙示を問わず、いかなる種類の保証や条件もなく、「現状のまま」で配布されます。ライセンスに基づく許可と制限を規定する特定の言語については、ライセンスを参照してください。
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+[クリックして Apache ライセンス バージョン 2.0 を読んでください](https://www.pdflabs.com/docs/pdftk-license/apache_license_2.txt)。
 
-[Click to read the Apache License Version 2.0](https://www.pdflabs.com/docs/pdftk-license/apache_license_2.txt).
+[クリックして Apache Batik NOTICE ファイルを読んでください](https://www.pdflabs.com/docs/pdftk-license/apache_batik_NOTICE.txt)。
 
-[Click to read the Apache Batik NOTICE file](https://www.pdflabs.com/docs/pdftk-license/apache_batik_NOTICE.txt).
-
-Download the Apache Batik source code from: http://xmlgraphics.apache.org/batik/.
+Apache Batik ソース コードを http://xmlgraphics.apache.org/batik/ からダウンロードします。

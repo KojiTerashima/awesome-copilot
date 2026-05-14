@@ -1,21 +1,19 @@
-# FlowStudio MCP — Action Patterns: Data Transforms
+# FlowStudio MCP — アクション パターン: データ変換
 
-Array operations, HTTP calls, parsing, and data transformation patterns.
+配列操作、HTTP 呼び出し、解析、およびデータ変換パターン。
 
-> All examples assume `"runAfter"` is set appropriately.
-> `<connectionName>` is the **key** in `connectionReferences` (e.g. `shared_sharepointonline`), not the GUID.
-> The GUID goes in the map value's `connectionName` property.
+> すべての例は、`"runAfter"` が適切に設定されていることを前提としています。
+> `<connectionName>` は、GUID ではなく、`connectionReferences` (例: `shared_sharepointonline`) の **キー** です。
+> GUID はマップ値の `connectionName` プロパティに入力されます。
 
 ---
 
-## Array Operations
+## 配列操作
 
-### Select (Reshape / Project an Array)
+### 選択 (配列の再形成/投影)
 
-Transforms each item in an array, keeping only the columns you need or renaming them.
-Avoids carrying large objects through the rest of the flow.
-
-```json
+配列内の各項目を変換し、必要な列のみを保持するか、列の名前を変更します。
+フローの残りの部分で大きなオブジェクトを運ぶことを回避します。```json
 "Select_Needed_Columns": {
   "type": "Select",
   "runAfter": {},
@@ -30,34 +28,29 @@ Avoids carrying large objects through the rest of the flow.
     }
   }
 }
-```
+```結果参照: `@body('Select_Needed_Columns')` — 再形成されたオブジェクトの直接配列を返します。
 
-Result reference: `@body('Select_Needed_Columns')` — returns a direct array of reshaped objects.
-
-> Use Select before looping or filtering to reduce payload size and simplify
-> downstream expressions. Works on any array — SP results, HTTP responses, variables.
+> ループまたはフィルタリングの前に選択を使用して、ペイロード サイズを削減し、簡素化します。
+> 下流の式。 SP 結果、HTTP 応答、変数など、あらゆる配列で動作します。
 >
-> **Tips:**
-> - **Single-to-array coercion:** When an API returns a single object but you need
->   Select (which requires an array), wrap it: `@array(body('Get_Employee')?['data'])`.
->   The output is a 1-element array — access results via `?[0]?['field']`.
-> - **Null-normalize optional fields:** Use `@if(empty(item()?['field']), null, item()?['field'])`
->   on every optional field to normalize empty strings, missing properties, and empty
->   objects to explicit `null`. Ensures consistent downstream `@equals(..., @null)` checks.
-> - **Flatten nested objects:** Project nested properties into flat fields:
->   ```
+> **ヒント:**
+> - **単一から配列への強制:** API が単一のオブジェクトを返すが、必要な場合
+> 選択 (配列が必要) してラップします: `@array(body('Get_Employee')?['data'])`。
+> 出力は 1 要素の配列です。`?[0]?['field']` 経由で結果にアクセスします。
+> - **オプションのフィールドを Null 正規化します:** `@if(empty(item()?['field']), null, item()?['field'])` を使用します
+> すべてのオプションのフィールドで、空の文字列、欠落しているプロパティ、空の文字列を正規化します。
+> 明示的な `null` へのオブジェクト。一貫したダウンストリーム `@equals(..., @null)` チェックを保証します。
+> - **ネストされたオブジェクトをフラット化する:** ネストされたプロパティをフラット フィールドに投影する:
+>```
 >   "manager_name": "@if(empty(item()?['manager']?['name']), null, item()?['manager']?['name'])"
->   ```
->   This enables direct field-level comparison with a flat schema from another source.
+>   ```> これにより、別のソースからのフラット スキーマとのフィールド レベルの直接比較が可能になります。
 
 ---
 
-### Filter Array (Query)
+### フィルター配列 (クエリ)
 
-Filters an array to items matching a condition. Use the action form (not the `filter()`
-expression) for complex multi-condition logic — it's clearer and easier to maintain.
-
-```json
+条件に一致する項目に配列をフィルターします。アクション フォームを使用します (`filter()` ではありません)
+式) は、複雑な複数条件ロジックの場合に使用します。これにより、より明確になり、保守が容易になります。```json
 "Filter_Active_Subscriptions": {
   "type": "Query",
   "runAfter": {},
@@ -66,23 +59,19 @@ expression) for complex multi-condition logic — it's clearer and easier to mai
     "where": "@and(or(equals(item().status, 'trialing'), equals(item().status, 'active')), equals(item().cancel_at, null))"
   }
 }
-```
+```結果参照: `@body('Filter_Active_Subscriptions')` — 直接フィルターされた配列。
 
-Result reference: `@body('Filter_Active_Subscriptions')` — direct filtered array.
-
-> Tip: run multiple Filter Array actions on the same source array to create
-> named buckets (e.g. active, being-canceled, fully-canceled), then use
-> `coalesce(first(body('Filter_A')), first(body('Filter_B')), ...)` to pick
-> the highest-priority match without any loops.
+> ヒント: 同じソース配列に対して複数のフィルター配列アクションを実行して作成します
+> 名前付きバケット (アクティブ、キャンセル中、完全にキャンセルなど) の場合は、次を使用します
+> `coalesce(first(body('Filter_A')), first(body('Filter_B')), ...)` を選択します
+> ループを含まない最も優先度の高い一致。
 
 ---
 
-### Create CSV Table (Array → CSV String)
+### CSV テーブルの作成 (配列 → CSV 文字列)
 
-Converts an array of objects into a CSV-formatted string — no connector call, no code.
-Use after a `Select` or `Filter Array` to export data or pass it to a file-write action.
-
-```json
+オブジェクトの配列を CSV 形式の文字列に変換します。コネクタ呼び出しやコードは必要ありません。
+`Select` または `Filter Array` の後に使用して、データをエクスポートするか、ファイル書き込みアクションに渡します。```json
 "Create_CSV": {
   "type": "Table",
   "runAfter": {},
@@ -91,11 +80,7 @@ Use after a `Select` or `Filter Array` to export data or pass it to a file-write
     "format": "CSV"
   }
 }
-```
-
-Result reference: `@body('Create_CSV')` — a plain string with header row + data rows.
-
-```json
+```結果参照: `@body('Create_CSV')` — ヘッダー行とデータ行を含むプレーン文字列。```json
 // Custom column order / renamed headers:
 "Create_CSV_Custom": {
   "type": "Table",
@@ -109,27 +94,23 @@ Result reference: `@body('Create_CSV')` — a plain string with header row + dat
     ]
   }
 }
-```
-
-> Without `columns`, headers are taken from the object property names in the source array.
-> With `columns`, you control header names and column order explicitly.
+```> `columns` を指定しないと、ヘッダーはソース配列内のオブジェクト プロパティ名から取得されます。
+> `columns` を使用すると、ヘッダー名と列の順序を明示的に制御できます。
 >
-> The output is a raw string. Write it to a file with `CreateFile` or `UpdateFile`
-> (set `body` to `@body('Create_CSV')`), or store in a variable with `SetVariable`.
+> 出力は生の文字列です。 `CreateFile` または `UpdateFile` を使用してファイルに書き込みます
+> (`body` を `@body('Create_CSV')` に設定する)、または `SetVariable` を使用して変数に格納します。
 >
-> If source data came from Power BI's `ExecuteDatasetQuery`, column names will be
-> wrapped in square brackets (e.g. `[Amount]`). Strip them before writing:
+> ソース データが Power BI の `ExecuteDatasetQuery` から取得された場合、列名は次のようになります。
+> 角括弧で囲みます (例: `[Amount]`)。書き込む前にそれらを取り除きます。
 > `@replace(replace(body('Create_CSV'),'[',''),']','')`
 
 ---
 
-### range() + Select for Array Generation
+### range() + 配列生成用の選択
 
-`range(0, N)` produces an integer sequence `[0, 1, 2, …, N-1]`. Pipe it through
-a Select action to generate date series, index grids, or any computed array
-without a loop:
-
-```json
+`range(0, N)` は整数シーケンス `[0, 1, 2, …, N-1]` を生成します。パイプで通す
+日付シリーズ、インデックス グリッド、または任意の計算配列を生成するアクションを選択します。
+ループなし:```json
 // Generate 14 consecutive dates starting from a base date
 "Generate_Date_Series": {
   "type": "Select",
@@ -138,11 +119,7 @@ without a loop:
     "select": "@addDays(outputs('Base_Date'), item(), 'yyyy-MM-dd')"
   }
 }
-```
-
-Result: `@body('Generate_Date_Series')` → `["2025-01-06", "2025-01-07", …, "2025-01-19"]`
-
-```json
+```結果: `@body('Generate_Date_Series')` → `["2025-01-06", "2025-01-07", …, "2025-01-19"]````json
 // Flatten a 2D array (rows × cols) into 1D using arithmetic indexing
 "Flatten_Grid": {
   "type": "Select",
@@ -154,21 +131,17 @@ Result: `@body('Generate_Date_Series')` → `["2025-01-06", "2025-01-07", …, "
     }
   }
 }
-```
-
-> `range()` is zero-based. The Cartesian product pattern above uses `div(i, cols)`
-> for the row index and `mod(i, cols)` for the column index — equivalent to a
-> nested for-loop flattened into a single pass. Useful for generating time-slot ×
-> date grids, shift × location assignments, etc.
+```> `range()` はゼロベースです。上記のデカルト積パターンでは `div(i, cols)` が使用されています
+> 行インデックスの場合は `mod(i, cols)` 列インデックスの場合 -
+> ネストされた for ループが 1 つのパスに平坦化されました。タイムスロット生成に便利×
+> 日付グリッド、シフト×場所の割り当てなど。
 
 ---
 
-### Dynamic Dictionary via json(concat(join()))
+### json(concat(join())) による動的辞書
 
-When you need O(1) key→value lookups at runtime and Power Automate has no native
-dictionary type, build one from an array using Select + join + json:
-
-```json
+実行時に O(1) キー→値の検索が必要で、Power Automate にネイティブがない場合
+辞書タイプの場合、Select + join + json を使用して配列から辞書を構築します。```json
 "Build_Key_Value_Pairs": {
   "type": "Select",
   "inputs": {
@@ -180,11 +153,7 @@ dictionary type, build one from an array using Select + join + json:
   "type": "Compose",
   "inputs": "@json(concat('{', join(body('Build_Key_Value_Pairs'), ','), '}'))"
 }
-```
-
-Lookup: `@outputs('Assemble_Dictionary')?['myKey']`
-
-```json
+```検索: `@outputs('Assemble_Dictionary')?['myKey']````json
 // Practical example: date → rate-code lookup for business rules
 "Build_Holiday_Rates": {
   "type": "Select",
@@ -197,24 +166,20 @@ Lookup: `@outputs('Assemble_Dictionary')?['myKey']`
   "type": "Compose",
   "inputs": "@json(concat('{', join(body('Build_Holiday_Rates'), ','), '}'))"
 }
-```
+```次にループ内: `@coalesce(outputs('Holiday_Dict')?[item()?['Date']], 'Standard')`
 
-Then inside a loop: `@coalesce(outputs('Holiday_Dict')?[item()?['Date']], 'Standard')`
-
-> The `json(concat('{', join(...), '}'))` pattern works for string values. For numeric
-> or boolean values, omit the inner escaped quotes around the value portion.
-> Keys must be unique — duplicate keys silently overwrite earlier ones.
-> This replaces deeply nested `if(equals(key,'A'),'X', if(equals(key,'B'),'Y', ...))` chains.
+> `json(concat('{', join(...), '}'))` パターンは文字列値に対して機能します。数値の場合
+> またはブール値の場合は、値部分を囲む内側のエスケープ引用符を省略します。
+> キーは一意である必要があります。重複したキーは以前のキーを警告なく上書きします。
+> これは、深くネストされた `if(equals(key,'A'),'X', if(equals(key,'B'),'Y', ...))` チェーンを置き換えます。
 
 ---
 
-### union() for Changed-Field Detection
+### 変更フィールド検出用の Union()
 
-When you need to find records where *any* of several fields has changed, run one
-`Filter Array` per field and `union()` the results. This avoids a complex
-multi-condition filter and produces a clean deduplicated set:
-
-```json
+複数のフィールドの *いずれか* が変更されたレコードを検索する必要がある場合は、次のいずれかを実行します。
+`Filter Array` フィールドごとと `union()` 結果。そうすることでコンプレックスを回避できる
+複数条件フィルターを使用して、クリーンな重複排除されたセットを生成します。```json
 "Filter_Name_Changed": {
   "type": "Query",
   "inputs": { "from": "@body('Existing_Records')",
@@ -229,23 +194,19 @@ multi-condition filter and produces a clean deduplicated set:
   "type": "Compose",
   "inputs": "@union(body('Filter_Name_Changed'), body('Filter_Status_Changed'))"
 }
-```
+```参照: `@outputs('All_Changed')` — 変更があった行の重複排除された配列。
 
-Reference: `@outputs('All_Changed')` — deduplicated array of rows where anything changed.
-
-> `union()` deduplicates by object identity, so a row that changed in both fields
-> appears once. Add more `Filter_*_Changed` inputs to `union()` as needed:
-> `@union(body('F1'), body('F2'), body('F3'))`
+> `union()` はオブジェクト ID によって重複を排除するため、両方のフィールドで変更された行
+> が 1 回表示されます。必要に応じて、`Filter_*_Changed` 入力を `union()` に追加します。
+> @@コード4@@
 
 ---
 
-### File-Content Change Gate
+### ファイルコンテンツ変更ゲート
 
-Before running expensive processing on a file or blob, compare its current content
-to a stored baseline. Skip entirely if nothing has changed — makes sync flows
-idempotent and safe to re-run or schedule aggressively.
-
-```json
+ファイルまたは BLOB に対して負荷の高い処理を実行する前に、その現在の内容を比較してください
+保存されたベースラインに。何も変更されていない場合は完全にスキップ — 同期フローを作成します
+冪等で安全に再実行したり、積極的にスケジュールしたりできます。```json
 "Get_File_From_Source": { ... },
 "Get_Stored_Baseline": { ... },
 "Condition_File_Changed": {
@@ -264,25 +225,21 @@ idempotent and safe to re-run or schedule aggressively.
   },
   "else": { "actions": {} }
 }
-```
-
-> Store the baseline as a file in SharePoint or blob storage — `base64()`-encode the
-> live content before comparing so binary and text files are handled uniformly.
-> Write the new baseline **before** processing so a re-run after a partial failure
-> does not re-process the same file again.
+```> ベースラインをファイルとして SharePoint または BLOB ストレージに保存します — `base64()` をエンコードします
+> 比較する前にライブコンテンツを実行するため、バイナリファイルとテキストファイルが均一に処理されます。
+> 部分的な失敗後に再実行できるように、新しいベースラインを処理の**前**に作成します。
+> 同じファイルを再度再処理しません。
 
 ---
 
-### Set-Join for Sync (Update Detection without Nested Loops)
+### 同期のためのセット結合 (ネストされたループを使用しない更新検出)
 
-When syncing a source collection into a destination (e.g. API response → SharePoint list,
-CSV → database), avoid nested `Apply to each` loops to find changed records.
-Instead, **project flat key arrays** and use `contains()` to perform set operations —
-zero nested loops, and the final loop only touches changed items.
+ソース コレクションを宛先に同期するとき (例: API 応答 → SharePoint リスト、
+CSV → データベース)、変更されたレコードを検索するためにネストされた `Apply to each` ループを回避します。
+代わりに、**フラット キー配列を投影**し、`contains()` を使用して集合演算を実行します。
+ネストされたループはゼロで、最後のループは変更された項目のみに触れます。
 
-**Full insert/update/delete sync pattern:**
-
-```json
+**完全な挿入/更新/削除同期パターン:**```json
 // Step 1 — Project a flat key array from the DESTINATION (e.g. SharePoint)
 "Select_Dest_Keys": {
   "type": "Select",
@@ -378,32 +335,24 @@ zero nested loops, and the final loop only touches changed items.
   }
 }
 // → Apply to each Filter_To_Delete → DeleteItem
-```
-
-> **Why this beats nested loops**: the naive approach (for each dest item, scan source)
-> is O(n × m) and hits Power Automate's 100k-action run limit fast on large lists.
-> This pattern is O(n + m): one pass to build key arrays, one pass per filter.
-> The update loop in Step 6 only iterates *changed* records — often a tiny fraction
-> of the full collection. Run Steps 2/4/7 in **parallel Scopes** for further speed.
+```> **これがネストされたループに勝る理由**: 単純なアプローチ (dest 項目ごとに、ソースをスキャン)
+> は O(n × m) であり、大きなリストでは Power Automate の 100k アクションの実行制限にすぐに達します。
+> このパターンは O(n + m) です。キー配列の構築に 1 つのパス、フィルターごとに 1 つのパス。
+> ステップ 6 の更新ループは、*変更された* レコードのみを反復します (多くの場合、ごく一部です)
+> フルコレクションの。さらに高速化するには、**並列スコープ**でステップ 2/4/7 を実行します。
 
 ---
 
-### First-or-Null Single-Row Lookup
+### 最初または Null の単一行の検索
 
-Use `first()` on the result array to extract one record without a loop.
-Then null-check the output to guard downstream actions.
-
-```json
+結果配列で `first()` を使用して、ループなしで 1 つのレコードを抽出します。
+次に、出力を null チェックして、ダウンストリームのアクションを保護します。```json
 "Get_First_Match": {
   "type": "Compose",
   "runAfter": { "Get_SP_Items": ["Succeeded"] },
   "inputs": "@first(outputs('Get_SP_Items')?['body/value'])"
 }
-```
-
-In a Condition, test for no-match with the **`@null` literal** (not `empty()`):
-
-```json
+```条件で、**`@null` リテラル** (`empty()` ではない) との不一致をテストします。```json
 "Condition": {
   "type": "If",
   "expression": {
@@ -415,21 +364,17 @@ In a Condition, test for no-match with the **`@null` literal** (not `empty()`):
     }
   }
 }
-```
+```一致した行のフィールドにアクセスします: `@outputs('Get_First_Match')?['FieldName']`
 
-Access fields on the matched row: `@outputs('Get_First_Match')?['FieldName']`
-
-> Use this instead of `Apply to each` when you only need one matching record.
-> `first()` on an empty array returns `null`; `empty()` is for arrays/strings,
-> not scalars — using it on a `first()` result causes a runtime error.
+> 一致するレコードが 1 つだけ必要な場合は、`Apply to each` の代わりにこれを使用します。
+> `first()` が空の配列の場合は `null` を返します。 `empty()` は配列/文字列用です。
+> スカラーではありません — `first()` の結果に対して使用すると、実行時エラーが発生します。
 
 ---
 
-## HTTP & Parsing
+## HTTP と解析
 
-### HTTP Action (External API)
-
-```json
+### HTTP アクション (外部 API)```json
 "Call_External_API": {
   "type": "Http",
   "runAfter": {},
@@ -450,16 +395,12 @@ Access fields on the matched row: `@outputs('Get_First_Match')?['FieldName']`
     }
   }
 }
-```
+```応答参照: `@outputs('Call_External_API')?['body']`
 
-Response reference: `@outputs('Call_External_API')?['body']`
+#### バリアント: ActiveDirectoryOAuth (サービス間)
 
-#### Variant: ActiveDirectoryOAuth (Service-to-Service)
-
-For calling APIs that require Azure AD client-credentials (e.g., Microsoft Graph),
-use in-line OAuth instead of a Bearer token variable:
-
-```json
+Azure AD クライアント資格情報を必要とする API (Microsoft Graph など) を呼び出す場合、
+Bearer トークン変数の代わりにインライン OAuth を使用します。```json
 "Call_Graph_API": {
   "type": "Http",
   "runAfter": {},
@@ -480,40 +421,35 @@ use in-line OAuth instead of a Bearer token variable:
     }
   }
 }
-```
-
-> **When to use:** Calling Microsoft Graph, Azure Resource Manager, or any
-> Azure AD-protected API from a flow without a premium connector.
+```> **使用する場合:** Microsoft Graph、Azure Resource Manager、またはその他の呼び出し
+> プレミアム コネクタを使用しないフローからの Azure AD で保護された API。
 >
-> The `authentication` block handles the entire OAuth client-credentials flow
-> transparently — no manual token acquisition step needed.
+> `authentication` ブロックは、OAuth クライアント資格情報フロー全体を処理します
+> 透過的 — 手動によるトークン取得手順は必要ありません。
 >
-> `ConsistencyLevel: eventual` is required for Graph `$search` queries.
-> Without it, `$search` returns 400.
+> `ConsistencyLevel: eventual` は、Graph `$search` クエリに必要です。
+> これがないと、`$search` は 400 を返します。
 >
-> For PATCH/PUT writes, the same `authentication` block works — just change
-> `method` and add a `body`.
+> PATCH/PUT 書き込みの場合、同じ `authentication` ブロックが機能します - 変更するだけです
+> `method` に `body` を追加します。
 >
-> ⚠️ **Never hardcode `secret` inline.** Use `@parameters('graphClientSecret')`
-> and declare it in the flow's `parameters` block (type `securestring`). This
-> prevents the secret from appearing in run history or being readable via
-> `get_live_flow`. Declare the parameter like:
-> ```json
+> ⚠️ **`secret` をインラインでハードコーディングしないでください。** `@parameters('graphClientSecret')` を使用してください
+> フローの `parameters` ブロックで宣言します (`securestring` と入力します)。これ
+> シークレットが実行履歴に表示されたり、シークレットが読み取り可能になったりすることを防ぎます。
+> `get_live_flow`。次のようにパラメータを宣言します。
+>```json
 > "parameters": {
 >   "graphClientSecret": { "type": "securestring", "defaultValue": "" }
 > }
-> ```
-> Then pass the real value via the flow's connections or environment variables
-> — never commit it to source control.
+> ```> 次に、フローの接続または環境変数を介して実際の値を渡します
+> — 決してソース管理にコミットしないでください。
 
 ---
 
-### HTTP Response (Return to Caller)
+### HTTP レスポンス (呼び出し元に戻る)
 
-Used in HTTP-triggered flows to send a structured reply back to the caller.
-Must run before the flow times out (default 2 min for synchronous HTTP).
-
-```json
+HTTP によってトリガーされるフローで使用され、構造化された応答を呼び出し元に送り返します。
+フローがタイムアウトする前に実行する必要があります (同期 HTTP のデフォルトは 2 分)。```json
 "Response": {
   "type": "Response",
   "runAfter": {},
@@ -528,25 +464,21 @@ Must run before the flow times out (default 2 min for synchronous HTTP).
     }
   }
 }
-```
-
-> **PowerApps / low-code caller pattern**: always return `statusCode: 200` with a
-> `status` field in the body (`"success"` / `"error"`). PowerApps HTTP actions
-> do not handle non-2xx responses gracefully — the caller should inspect
-> `body.status` rather than the HTTP status code.
+```> **PowerApps / ローコード呼び出し元パターン**: 常に `statusCode: 200` を返します。
+> 本文の `status` フィールド (`"success"` / `"error"`)。 PowerApps HTTP アクション
+> 非 2xx 応答を適切に処理しない - 呼び出し元は検査する必要がある
+> HTTP ステータス コードではなく `body.status`。
 >
-> Use multiple Response actions — one per branch — so each path returns
-> an appropriate message. Only one will execute per run.
+> 複数の応答アクション (ブランチごとに 1 つ) を使用して、各パスが返されるようにします。
+> 適切なメッセージ。 1 回の実行につき 1 つだけが実行されます。
 
 ---
 
-### Child Flow Call (Parent→Child via HTTP POST)
+### 子フロー呼び出し (HTTP POST 経由の親→子)
 
-Power Automate supports parent→child orchestration by calling a child flow's
-HTTP trigger URL directly. The parent sends an HTTP POST and blocks until the
-child returns a `Response` action. The child flow uses a `manual` (Request) trigger.
-
-```json
+Power Automate は、子フローの呼び出しによる親→子のオーケストレーションをサポートします。
+HTTP トリガー URL を直接指定します。親は HTTP POST を送信し、
+子は `Response` アクションを返します。子フローは `manual` (リクエスト) トリガーを使用します。```json
 // PARENT — call child flow and wait for its response
 "Call_Child_Flow": {
   "type": "Http",
@@ -596,29 +528,25 @@ child returns a `Response` action. The child flow uses a `manual` (Request) trig
     "body": { "Result": "Success", "Count": "@length(variables('processed'))" }
   }
 }
-```
-
-> **`retryPolicy: none`** — critical on the parent's HTTP call. Without it, a child
-> flow timeout triggers retries, spawning duplicate child runs.
+```> **`retryPolicy: none`** — 親の HTTP 呼び出しで重要です。それがなければ子供は
+> フロー タイムアウトにより再試行がトリガーされ、重複した子の実行が生成されます。
 >
-> **`DisableAsyncPattern`** — prevents the parent from treating a 202 Accepted as
-> completion. The parent will block until the child sends its `Response`.
+> **`DisableAsyncPattern`** — 親が 202 Accepted を次のように扱うことを防ぎます。
+> 完成です。親は、子が `Response` を送信するまでブロックします。
 >
-> **`transferMode: Chunked`** — enable when passing large arrays (>100 KB) to the child;
-> avoids request-size limits.
+> **`transferMode: Chunked`** — 大きな配列 (>100 KB) を子に渡すときに有効にします。
+> リクエストサイズの制限を回避します。
 >
-> **`limit.timeout: PT2H`** — raise the default 2-minute HTTP timeout for long-running
-> children. Max is PT24H.
+> **`limit.timeout: PT2H`** — 長時間実行する場合、デフォルトの 2 分の HTTP タイムアウトを引き上げます
+>子供たち。最大はPT24Hです。
 >
-> The child flow's trigger URL contains a SAS token (`sig=...`) that authenticates
-> the call. Copy it from the child flow's trigger properties panel. The URL changes
-> if the trigger is deleted and re-created.
+> 子フローのトリガー URL には、認証を行う SAS トークン (`sig=...`) が含まれています。
+> 電話です。子フローのトリガー プロパティ パネルからコピーします。 URLが変わります
+> トリガーが削除され、再作成された場合。
 
 ---
 
-### Parse JSON
-
-```json
+### JSON を解析する```json
 "Parse_Response": {
   "type": "ParseJson",
   "runAfter": {},
@@ -637,18 +565,14 @@ child returns a `Response` action. The child flow uses a `manual` (Request) trig
     }
   }
 }
-```
-
-Access parsed values: `@body('Parse_Response')?['name']`
+```解析された値にアクセスします: `@body('Parse_Response')?['name']`
 
 ---
 
-### Manual CSV → JSON (No Premium Action)
+### 手動 CSV → JSON (プレミアム アクションなし)
 
-Parse a raw CSV string into an array of objects using only built-in expressions.
-Avoids the premium "Parse CSV" connector action.
-
-```json
+組み込みの式のみを使用して、生の CSV 文字列をオブジェクトの配列に解析します。
+プレミアムの「CSV 解析」コネクタ アクションを回避します。```json
 "Delimiter": {
   "type": "Compose",
   "inputs": ","
@@ -687,29 +611,25 @@ Avoids the premium "Parse CSV" connector action.
     "where": "@not(equals(item()?[outputs('Headers')[0]], null))"
   }
 }
-```
+```結果: `@body('Filter_Empty_Rows')` — ヘッダー名をキーとして持つオブジェクトの配列。
 
-Result: `@body('Filter_Empty_Rows')` — array of objects with header names as keys.
-
-> **`Detect_Line_Ending`** handles CRLF (Windows), LF (Unix), and CR (old Mac) automatically
-> using `indexOf()` with `decodeUriComponent('%0D%0A' / '%0A' / '%0D')`.
+> **`Detect_Line_Ending`** は CRLF (Windows)、LF (Unix)、および CR (古い Mac) を自動的に処理します
+> `indexOf()` を `decodeUriComponent('%0D%0A' / '%0A' / '%0D')` とともに使用します。
 >
-> **Dynamic key names in `Select`**: `@{outputs('Headers')[0]}` as a JSON key in a
-> `Select` shape sets the output property name at runtime from the header row —
-> this works as long as the expression is in `@{...}` interpolation syntax.
+> **`Select`** の動的キー名: `@{outputs('Headers')[0]}` 内の JSON キーとして
+> `Select` シェイプは、実行時にヘッダー行から出力プロパティ名を設定します —
+> これは、式が `@{...}` 補間構文である限り機能します。
 >
-> **Columns with embedded commas**: if field values can contain the delimiter,
-> use `length(split(row, ','))` in a Switch to detect the column count and manually
-> reassemble the split fragments: `@concat(split(item(),',')[1],',',split(item(),',')[2])`
+> **カンマが埋め込まれた列**: フィールド値に区切り文字を含めることができる場合、
+> スイッチで `length(split(row, ','))` を使用して列数を検出し、手動で
+> 分割されたフラグメントを再構成します: `@concat(split(item(),',')[1],',',split(item(),',')[2])`
 
 ---
 
-### ConvertTimeZone (Built-in, No Connector)
+### ConvertTimeZone (組み込み、コネクタなし)
 
-Converts a timestamp between timezones with no API call or connector licence cost.
-Format string `"g"` produces short locale date+time (`M/d/yyyy h:mm tt`).
-
-```json
+API 呼び出しやコネクタ ライセンスのコストをかけずに、タイムゾーン間のタイムスタンプを変換します。
+フォーマット文字列 `"g"` は、短いロケール日付+時刻 (`M/d/yyyy h:mm tt`) を生成します。```json
 "Convert_to_Local_Time": {
   "type": "Expression",
   "kind": "ConvertTimeZone",
@@ -721,15 +641,13 @@ Format string `"g"` produces short locale date+time (`M/d/yyyy h:mm tt`).
     "formatString": "g"
   }
 }
-```
+```結果の参照: `@body('Convert_to_Local_Time')` — ほとんどのアクションとは異なり、**`outputs()` ではありません。
 
-Result reference: `@body('Convert_to_Local_Time')` — **not** `outputs()`, unlike most actions.
+一般的な `formatString` 値: `"g"` (短縮)、`"f"` (完全)、`"yyyy-MM-dd"`、`"HH:mm"`
 
-Common `formatString` values: `"g"` (short), `"f"` (full), `"yyyy-MM-dd"`, `"HH:mm"`
+一般的なタイムゾーン文字列: `"UTC"`、`"AUS Eastern Standard Time"`、`"Taipei Standard Time"`、
+`"Singapore Standard Time"`、`"GMT Standard Time"`
 
-Common timezone strings: `"UTC"`, `"AUS Eastern Standard Time"`, `"Taipei Standard Time"`,
-`"Singapore Standard Time"`, `"GMT Standard Time"`
-
-> This is `type: Expression, kind: ConvertTimeZone` — a built-in Logic Apps action,
-> not a connector. No connection reference needed. Reference the output via
-> `body()` (not `outputs()`), otherwise the expression returns null.
+> これは `type: Expression, kind: ConvertTimeZone` — 組み込みの Logic Apps アクションです。
+>コネクタではありません。接続参照は必要ありません。出力を参照するには
+> `body()` (`outputs()` ではない)、それ以外の場合、式は null を返します。

@@ -3,39 +3,36 @@ name: unit-test-vue-pinia
 category: testing
 description: 'Write and review unit tests for Vue 3 + TypeScript + Vitest + Pinia codebases. Use when creating or updating tests for components, composables, and stores; mocking Pinia with createTestingPinia; applying Vue Test Utils patterns; and enforcing black-box assertions over implementation details.'
 ---
+# 単体テスト-vue-pinia
 
-# unit-test-vue-pinia
+このスキルを使用して、Vue コンポーネント、コンポーザブル、Ponia ストアの単体テストを作成またはレビューします。テストは小さく、決定論的で、動作を第一に考えてください。
 
-Use this skill to create or review unit tests for Vue components, composables, and Pinia stores. Keep tests small, deterministic, and behavior-first.
+## ワークフロー
 
-## Workflow
+1. 最初に動作の境界を特定します (コンポーネント UI の動作、コンポーザブルの動作、またはストアの動作)。
+2. その動作を証明できる最も範囲の狭いテスト スタイルを選択します。
+3. シナリオをカバーできる最も強力でないオプションを使用して Pinia をセットアップします。
+4. 小道具、フォームの更新、ボタンのクリック、発行された子イベント、ストア API などのパブリック入力を通じてテストを実行します。
+5. インスタンス レベルのアサーションを考慮する前に、観察可能な出力と副作用をアサートします。
+6. 動作指向の明確な名前を付けてテストを返すかレビューし、残りのカバレッジ ギャップに注意します。
 
-1. Identify the behavior boundary first: component UI behavior, composable behavior, or store behavior.
-2. Choose the narrowest test style that can prove that behavior.
-3. Set up Pinia with the least powerful option that still covers the scenario.
-4. Drive the test through public inputs such as props, form updates, button clicks, emitted child events, and store APIs.
-5. Assert observable outputs and side effects before considering any instance-level assertion.
-6. Return or review tests with clear behavior-oriented names and note any remaining coverage gaps.
+## コアルール
 
-## Core Rules
+- テストごとに 1 つの動作をテストします。
+- 観察可能な入出力動作を最初にアサートします (レンダリングされたテキスト、発行されたイベント、コールバック呼び出し、ストア状態の変更)。
+- 実装に結合されたアサーションを避けます。
+- `wrapper.vm` にアクセスするのは、適切な DOM、prop、emit、またはストアレベルのアサーションがない例外的な場合に限られます。
+- `beforeEach()` での明示的なセットアップを優先し、テストごとにモックをリセットします。
+- `references/pinia-patterns.md` にチェックインされた参照資料を、標準の Pinia テスト設定の信頼できるローカル ソースとして使用します。
 
-- Test one behavior per test.
-- Assert observable input/output behavior first (rendered text, emitted events, callback calls, store state changes).
-- Avoid implementation-coupled assertions.
-- Access `wrapper.vm` only in exceptional cases when there is no reasonable DOM, prop, emit, or store-level assertion.
-- Prefer explicit setup in `beforeEach()` and reset mocks every test.
-- Use checked-in reference material in `references/pinia-patterns.md` as the local source of truth for standard Pinia test setups.
+## Pinia テストのアプローチ
 
-## Pinia Testing Approach
+最初に `references/pinia-patterns.md` を使用し、チェックインされたサンプルでケースがカバーされない場合は、Ponia のテスト クックブックに戻ります。
 
-Use `references/pinia-patterns.md` first, then fall back to Pinia's testing cookbook when the checked-in examples do not cover the case.
+### コンポーネントテストのデフォルトパターン
 
-### Default pattern for component tests
-
-Use `createTestingPinia` as a global plugin while mounting.
-Prefer `createSpy: vi.fn` as the default for consistency and easier action-spy assertions.
-
-```ts
+マウント中に `createTestingPinia` をグローバル プラグインとして使用します。
+一貫性とアクションスパイアサーションを容易にするために、`createSpy: vi.fn` をデフォルトとして推奨します。```ts
 const wrapper = mount(ComponentUnderTest, {
 	global: {
 		plugins: [
@@ -45,26 +42,22 @@ const wrapper = mount(ComponentUnderTest, {
 		],
 	},
 });
-```
+```デフォルトでは、アクションはスタブ化され監視されます。
+テストでアクションが呼び出された (または呼び出されなかった) かどうかだけを確認する必要がある場合は、`stubActions: true` (デフォルト) を使用します。
 
-By default, actions are stubbed and spied.
-Use `stubActions: true` (default) when the test only needs to verify whether an action was called (or not called).
+### 最小限の Pinia セットアップを受け入れました
 
-### Accepted minimal Pinia setups
+以下も有効であり、間違っているとフラグを立てるべきではありません。
 
-The following are also valid and should not be flagged as incorrect:
+- `createTestingPinia({})` テストで Pinia アクションのスパイ動作がアサートされない場合。
+- `createSpy` を使用しない `createTestingPinia({ initialState: ... })` または `createTestingPinia({ stubActions: ... })`。テストで必要なのは状態シードまたはアクション スタブ動作のみで、生成されたスパイを検査しない場合です。
+- `setActivePinia(createTestingPinia(...))` は、依存ストアのモック/シードが必要な場合のストア/コンポーザブルに重点を置いたテスト (コンポーネントのマウントなし) で使用します。
 
-- `createTestingPinia({})` when the test does not assert Pinia action spy behavior.
-- `createTestingPinia({ initialState: ... })` or `createTestingPinia({ stubActions: ... })` without `createSpy`, when the test only needs state seeding or action stubbing behavior and does not inspect generated spies.
-- `setActivePinia(createTestingPinia(...))` in store/composable-focused tests (without mounting a component) when mocking/seeding dependent stores is needed.
+アクション スパイ アサーションがテスト意図の一部である場合は、`createSpy: vi.fn` を使用します。
 
-Use `createSpy: vi.fn` when action spy assertions are part of the test intent.
+### 必要な場合にのみ実際のアクションを実行する
 
-### Execute real actions only when needed
-
-Use `stubActions: false` only when the test must validate the action's real behavior and side effects. Do not switch it on by default for simple "was called" assertions.
-
-```ts
+`stubActions: false` は、テストでアクションの実際の動作と副作用を検証する必要がある場合にのみ使用します。単純な「呼び出された」アサーションの場合は、デフォルトでオンにしないでください。```ts
 const wrapper = mount(ComponentUnderTest, {
 	global: {
 		plugins: [
@@ -75,11 +68,7 @@ const wrapper = mount(ComponentUnderTest, {
 		],
 	},
 });
-```
-
-### Seed store state with `initialState`
-
-```ts
+```### `initialState` を使用したシード ストアの状態```ts
 const wrapper = mount(ComponentUnderTest, {
 	global: {
 		plugins: [
@@ -93,11 +82,7 @@ const wrapper = mount(ComponentUnderTest, {
 		],
 	},
 });
-```
-
-### Add Pinia plugins through `createTestingPinia`
-
-```ts
+```### `createTestingPinia` を通じて Pinia プラグインを追加します```ts
 const wrapper = mount(ComponentUnderTest, {
 	global: {
 		plugins: [
@@ -108,24 +93,16 @@ const wrapper = mount(ComponentUnderTest, {
 		],
 	},
 });
-```
-
-### Getter override pattern for edge cases
-
-```ts
+```### エッジケースのゲッターオーバーライドパターン```ts
 const pinia = createTestingPinia({ createSpy: vi.fn });
 const store = useCounterStore(pinia);
 
 store.double = 999;
 // @ts-expect-error test-only reset of overridden getter
 store.double = undefined;
-```
+```### 純粋なストア単体テスト
 
-### Pure store unit tests
-
-Prefer pure store tests with `createPinia()` when the goal is to validate store state transitions and action behavior without component rendering. Use `createTestingPinia()` only when you need stubbed dependent stores, seeded test doubles, or action spies.
-
-```ts
+コンポーネントのレンダリングを行わずにストアの状態遷移とアクションの動作を検証することが目的の場合は、`createPinia()` を使用した純粋なストア テストを推奨します。 `createTestingPinia()` は、スタブ化された依存ストア、シードされたテスト ダブル、またはアクション スパイが必要な場合にのみ使用します。```ts
 beforeEach(() => {
 	setActivePinia(createPinia());
 });
@@ -135,64 +112,54 @@ it("increments", () => {
 	counter.increment();
 	expect(counter.n).toBe(1);
 });
-```
+```## Vue テストユーティリティのアプローチ
 
-## Vue Test Utils Approach
+Vue Test Utils のガイダンスに従ってください: <https://test-utils.vuejs.org/guide/>
 
-Follow Vue Test Utils guidance: <https://test-utils.vuejs.org/guide/>
+- 集中的な単体テストのためにデフォルトで浅くマウントします。
+- 統合動作が対象となる場合にのみ、完全なコンポーネント ツリーをマウントします。
+- 小道具、ユーザーのようなインタラクション、発行されたイベントを通じて動作を推進します。
+- 親の内部に触れる代わりに、子スタブ イベントに対して `findComponent(...).vm.$emit(...)` を優先します。
+- `nextTick` は、更新が非同期である場合にのみ使用します。
+- 発行されたイベントとペイロードを `wrapper.emitted(...)` でアサートします。
+- `wrapper.vm` にアクセスするのは、DOM アサーション、発行されたイベント アサーション、prop アサーション、またはストア レベル アサーションが動作を表現できない場合のみです。これを例外として扱い、アサーションの範囲を狭くしてください。
 
-- Mount shallow by default for focused unit tests.
-- Mount full component trees only when integration behavior is the subject.
-- Drive behavior through props, user-like interactions, and emitted events.
-- Prefer `findComponent(...).vm.$emit(...)` for child stub events instead of touching parent internals.
-- Use `nextTick` only when updates are async.
-- Assert emitted events and payloads with `wrapper.emitted(...)`.
-- Access `wrapper.vm` only when no DOM assertion, emitted event assertion, prop assertion, or store-level assertion can express the behavior. Treat it as an exception and keep the assertion narrowly scoped.
+## 主要なテストのスニペット
 
-## Key Testing Snippets
-
-Emit and assert payload:
-
-```ts
+ペイロードを発行してアサートします。```ts
 await wrapper.find("button").trigger("click");
 expect(wrapper.emitted("submit")?.[0]?.[0]).toBe("Mango Mission");
-```
-
-Update input and assert output:
-
-```ts
+```入力を更新し、出力をアサートします。```ts
 await wrapper.find("input").setValue("Agent Violet");
 await wrapper.find("form").trigger("submit");
 expect(wrapper.emitted("save")?.[0]?.[0]).toBe("Agent Violet");
-```
+```## テスト作成のワークフロー
 
-## Test Writing Workflow
+1. テストする動作の境界を特定します。
+2. 最小限のフィクスチャ データ (その動作に必要なフィールドのみ) を構築します。
+3. Pinia と必要なテスト ダブルを構成します。
+4. パブリック入力を通じて動作をトリガーします。
+5. 公開された成果と副作用を主張します。
+6. 実装ではなく動作を説明するためにテスト名をリファクタリングします。
 
-1. Identify the behavior boundary to test.
-2. Build minimal fixture data (only fields needed by that behavior).
-3. Configure Pinia and required test doubles.
-4. Trigger behavior through public inputs.
-5. Assert public outputs and side effects.
-6. Refactor test names to describe behavior, not implementation.
+## 制約と安全性
 
-## Constraints and Safety
+- プライベート/内部実装の詳細をテストしないでください。
+- 動的 UI 動作のためにスナップショットを過度に使用しないでください。
+- 1 つの動作だけが重要な場合は、大きなオブジェクトのすべてのフィールドをアサートしないでください。
+- 偽のデータを決定論的に保ちます。ランダムな値は避けてください。
+- 上記の許容される最小限のセットアップの 1 つである Pinia セットアップが間違っていると主張しないでください。
+- テスト対象の動作に追加の表面積が必要な場合を除き、動作テストをより深い実装や実際の動作に向けて書き直さないでください。
+- レビュー中に、欠落しているテスト カバレッジ、脆弱なセレクター、および実装に結合されたアサーションに明示的にフラグを立てます。
 
-- Do not test private/internal implementation details.
-- Do not overuse snapshots for dynamic UI behavior.
-- Do not assert every field in large objects if only one behavior matters.
-- Keep fake data deterministic; avoid random values.
-- Do not claim a Pinia setup is wrong when it is one of the accepted minimal setups above.
-- Do not rewrite working tests toward deeper mounting or real actions unless the behavior under test requires that extra surface area.
-- Flag missing test coverage, brittle selectors, and implementation-coupled assertions explicitly during review.
+## 出力コントラクト
 
-## Output Contract
+- `create` または `update` の場合は、完成したテスト コードと、選択した Pinia 戦略を説明する短いメモを返します。
+- `review` の場合は、最初に具体的な結果を返し、次にカバレッジの欠落または脆弱性のリスクを返します。
+- 最も安全な選択があいまいな場合は、選択したテスト設定を推進した仮定を述べてください。
 
-- For `create` or `update`, return the finished test code plus a short note describing the selected Pinia strategy.
-- For `review`, return concrete findings first, then missing coverage or brittleness risks.
-- When the safest choice is ambiguous, state the assumption that drove the chosen test setup.
+## 参考文献
 
-## References
-
-- `references/pinia-patterns.md`
-- Pinia testing cookbook: <https://pinia.vuejs.org/cookbook/testing.html>
-- Vue Test Utils guide: <https://test-utils.vuejs.org/guide/>
+- @@コード3@@
+- Pinia テスト クックブック: <https://pinia.vuejs.org/cookbook/testing.html>
+- Vue テスト ユーティリティ ガイド: <https://test-utils.vuejs.org/guide/>

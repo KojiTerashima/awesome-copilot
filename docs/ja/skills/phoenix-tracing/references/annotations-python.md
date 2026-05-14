@@ -1,114 +1,90 @@
-# Python SDK Annotation Patterns
+# Python SDK アノテーション パターン
 
-Add feedback to spans, traces, documents, and sessions using the Python client.
+Python クライアントを使用して、スパン、トレース、ドキュメント、セッションにフィードバックを追加します。
 
-## Client Setup
+## クライアントのセットアップ「」パイソン
+phoenix.clientインポートクライアントから
+client = Client() # デフォルト: http://localhost:6006
+「」## スパン注釈
 
-```python
-from phoenix.client import Client
-client = Client()  # Default: http://localhost:6006
-```
-
-## Span Annotations
-
-Add feedback to individual spans:
-
-```python
+個々のスパンにフィードバックを追加します。「」パイソン
 client.spans.add_span_annotation(
-    span_id="abc123",
-    annotation_name="quality",
-    annotator_kind="HUMAN",
-    label="high_quality",
-    score=0.95,
-    explanation="Accurate and well-formatted",
-    metadata={"reviewer": "alice"},
-    sync=True
-)
-```
+    スパン_id="abc123",
+    annotation_name="品質",
+    annotator_kind="人間",
+    ラベル="高品質",
+    スコア=0.95、
+    description="正確で適切にフォーマットされています",
+    メタデータ={"レビュアー": "アリス"},
+    同期=真
+）
+「」## ドキュメントの注釈
 
-## Document Annotations
-
-Rate individual documents in RETRIEVER spans:
-
-```python
+RETRIEVER スパンで個々のドキュメントを評価します。「」パイソン
 client.spans.add_document_annotation(
-    span_id="retriever_span",
-    document_position=0,  # 0-based index
-    annotation_name="relevance",
+    span_id="レトリバー_スパン",
+    document_position=0, # 0 から始まるインデックス
+    annotation_name="関連性",
     annotator_kind="LLM",
-    label="relevant",
-    score=0.95
-)
-```
+    ラベル="関連",
+    スコア=0.95
+）
+「」## トレース注釈
 
-## Trace Annotations
-
-Feedback on entire traces:
-
-```python
+トレース全体に関するフィードバック:「」パイソン
 client.traces.add_trace_annotation(
-    trace_id="trace_abc",
-    annotation_name="correctness",
-    annotator_kind="HUMAN",
-    label="correct",
-    score=1.0
-)
-```
+    トレース_id="トレース_abc",
+    annotation_name="正しさ",
+    annotator_kind="人間",
+    ラベル="正しい",
+    スコア=1.0
+）
+「」## セッションの注釈
 
-## Session Annotations
-
-Feedback on multi-turn conversations:
-
-```python
+マルチターン会話に関するフィードバック:「」パイソン
 client.sessions.add_session_annotation(
-    session_id="session_xyz",
-    annotation_name="user_satisfaction",
-    annotator_kind="HUMAN",
-    label="satisfied",
-    score=0.85
-)
-```
+    session_id="セッション_xyz",
+    annotation_name="ユーザー満足度",
+    annotator_kind="人間",
+    ラベル="満足",
+    スコア=0.85
+）
+「」## RAG パイプラインの例「」パイソン
+phoenix.clientインポートクライアントから
+phoenix.client.resources.spans から SpanDocumentAnnotationData をインポート
 
-## RAG Pipeline Example
+client = クライアント()
 
-```python
-from phoenix.client import Client
-from phoenix.client.resources.spans import SpanDocumentAnnotationData
-
-client = Client()
-
-# Document relevance (batch)
+# ドキュメントの関連性 (バッチ)
 client.spans.log_document_annotations(
     document_annotations=[
         SpanDocumentAnnotationData(
-            name="relevance", span_id="retriever_span", document_position=i,
-            annotator_kind="LLM", result={"label": label, "score": score}
-        )
-        for i, (label, score) in enumerate([
-            ("relevant", 0.95), ("relevant", 0.80), ("irrelevant", 0.10)
+            name="関連性"、span_id="retriever_span"、document_position=i、
+            annotator_kind="LLM"、result={"ラベル": ラベル、"スコア": スコア}
+        ）
+        for i, (ラベル, スコア) in enumerate([
+            (「関連性」、0.95)、(「関連性」、0.80)、(「無関係」、0.10)
         ])
-    ]
-)
+    】
+）
 
-# LLM response quality
+# LLM 応答品質
 client.spans.add_span_annotation(
-    span_id="llm_span",
-    annotation_name="faithfulness",
+    スパン_id="llm_span",
+    annotation_name="誠実さ",
     annotator_kind="LLM",
-    label="faithful",
-    score=0.90
-)
+    ラベル="忠実",
+    スコア=0.90
+）
 
-# Overall trace quality
+# 全体的なトレース品質
 client.traces.add_trace_annotation(
-    trace_id="trace_123",
-    annotation_name="correctness",
-    annotator_kind="HUMAN",
-    label="correct",
-    score=1.0
-)
-```
+    トレースID="トレース_123",
+    annotation_name="正しさ",
+    annotator_kind="人間",
+    ラベル="正しい",
+    スコア=1.0
+）
+「」## API リファレンス
 
-## API Reference
-
-- [Python Client API](https://arize-phoenix.readthedocs.io/projects/client/en/latest/)
+- [Python クライアント API](https://arize-phoenix.readthedocs.io/projects/client/en/latest/)

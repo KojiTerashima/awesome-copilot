@@ -1,19 +1,17 @@
-# MockMvc Classic
+#MockMvc クラシック
 
-Traditional MockMvc API for Spring MVC controller tests (pre-Spring Boot 3.2 or legacy codebases).
+Spring MVC コントローラー テスト用の従来の MockMvc API (Spring Boot 3.2 以前または従来のコードベース)。
 
-## When to Use This Reference
+## このリファレンスを使用する場合
 
-- The project uses Spring Boot < 3.2 (no `MockMvcTester` available)
-- Existing tests use `mvc.perform(...)` and you are maintaining or extending them
-- You need to migrate classic MockMvc tests to `MockMvcTester` (see migration section below)
-- The user explicitly asks about `ResultActions`, `andExpect()`, or Hamcrest-style web assertions
+- プロジェクトは Spring Boot < 3.2 を使用しています (`MockMvcTester` は利用できません)
+- 既存のテストは `mvc.perform(...)` を使用しており、それらを維持または拡張しています
+- クラシック MockMvc テストを `MockMvcTester` に移行する必要があります (下記の移行セクションを参照)
+- ユーザーが `ResultActions`、`andExpect()`、または Hamcrest スタイルの Web アサーションについて明示的に質問する
 
-For new tests on Spring Boot 3.2+, prefer [mockmvc-tester.md](mockmvc-tester.md) instead.
+Spring Boot 3.2 以降の新しいテストの場合は、代わりに [mockmvc-tester.md](mockmvc-tester.md) を優先してください。
 
-## Setup
-
-```java
+＃＃ 設定```java
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
 
@@ -23,11 +21,7 @@ class OrderControllerTest {
   @MockBean
   private OrderService orderService;
 }
-```
-
-## Basic GET Request
-
-```java
+```## 基本的な GET リクエスト```java
 @Test
 void shouldReturnOrder() throws Exception {
   given(orderService.findById(1L)).willReturn(new Order(1L, "PENDING", 99.99));
@@ -39,11 +33,7 @@ void shouldReturnOrder() throws Exception {
     .andExpect(jsonPath("$.status").value("PENDING"))
     .andExpect(jsonPath("$.totalToPay").value(99.99));
 }
-```
-
-## POST with Request Body
-
-```java
+```## リクエスト本文を含む POST```java
 @Test
 void shouldCreateOrder() throws Exception {
   given(orderService.create(any(OrderRequest.class))).willReturn(1L);
@@ -54,11 +44,7 @@ void shouldCreateOrder() throws Exception {
     .andExpect(status().isCreated())
     .andExpect(header().string("Location", "/orders/1"));
 }
-```
-
-## PUT Request
-
-```java
+```## PUT リクエスト```java
 @Test
 void shouldUpdateOrder() throws Exception {
   mvc.perform(put("/orders/1")
@@ -66,21 +52,13 @@ void shouldUpdateOrder() throws Exception {
       .content("{\"status\": \"COMPLETED\"}"))
     .andExpect(status().isOk());
 }
-```
-
-## DELETE Request
-
-```java
+```## 削除リクエスト```java
 @Test
 void shouldDeleteOrder() throws Exception {
   mvc.perform(delete("/orders/1"))
     .andExpect(status().isNoContent());
 }
-```
-
-## Status Matchers
-
-```java
+```## ステータスマッチャー```java
 .andExpect(status().isOk())           // 200
 .andExpect(status().isCreated())      // 201
 .andExpect(status().isNoContent())    // 204
@@ -89,11 +67,7 @@ void shouldDeleteOrder() throws Exception {
 .andExpect(status().isForbidden())    // 403
 .andExpect(status().isNotFound())     // 404
 .andExpect(status().is(422))          // arbitrary code
-```
-
-## JSON Path Assertions
-
-```java
+```## JSON パス アサーション```java
 // Exact value
 .andExpect(jsonPath("$.status").value("PENDING"))
 
@@ -112,29 +86,17 @@ void shouldDeleteOrder() throws Exception {
 // With Hamcrest matchers
 .andExpect(jsonPath("$.total", greaterThan(0.0)))
 .andExpect(jsonPath("$.description", containsString("order")))
-```
-
-## Content Assertions
-
-```java
+```## コンテンツ アサーション```java
 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
 .andExpect(content().string(containsString("PENDING")))
 .andExpect(content().json("{\"status\":\"PENDING\"}"))
-```
-
-## Header Assertions
-
-```java
+```## ヘッダー アサーション```java
 .andExpect(header().string("Location", "/orders/1"))
 .andExpect(header().string("Content-Type", containsString("application/json")))
 .andExpect(header().exists("X-Request-Id"))
 .andExpect(header().doesNotExist("X-Deprecated"))
-```
-
-## Request Parameters and Headers
-
-```java
+```## リクエストのパラメータとヘッダー```java
 // Query parameters
 mvc.perform(get("/orders").param("status", "PENDING").param("page", "0"))
   .andExpect(status().isOk());
@@ -146,11 +108,7 @@ mvc.perform(get("/orders/{id}", 1L))
 // Request headers
 mvc.perform(get("/orders/1").header("X-Api-Key", "secret"))
   .andExpect(status().isOk());
-```
-
-## Capturing the Response
-
-```java
+```## 応答のキャプチャ```java
 @Test
 void shouldReturnCreatedId() throws Exception {
   given(orderService.create(any())).willReturn(42L);
@@ -164,43 +122,33 @@ void shouldReturnCreatedId() throws Exception {
   String location = result.getResponse().getHeader("Location");
   assertThat(location).isEqualTo("/orders/42");
 }
-```
-
-## Chaining with andDo
-
-```java
+```## andDo によるチェーン```java
 mvc.perform(get("/orders/1"))
   .andDo(print())              // prints request/response to console (debug)
   .andExpect(status().isOk());
-```
-
-## Static Imports
-
-```java
+```## 静的インポート```java
 import org.springframework.boot.test.mock.mockito.MockBean;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.hamcrest.Matchers.*;
-```
+```## MockMvcTester への移行
 
-## Migration to MockMvcTester
-
-| Classic MockMvc | MockMvcTester (recommended) |
+|クラシックモックMVC | MockMvcTester (推奨) |
 | --- | --- |
 | `@Autowired MockMvc mvc` | `@Autowired MockMvcTester mvc` |
 | `mvc.perform(get("/orders/1"))` | `mvc.get().uri("/orders/1")` |
 | `.andExpect(status().isOk())` | `.hasStatusOk()` |
 | `.andExpect(jsonPath("$.status").value("X"))` | `.bodyJson().convertTo(T.class)` + AssertJ |
-| `throws Exception` on every method | No checked exception |
-| Hamcrest matchers | AssertJ fluent assertions |
+|すべてのメソッドの `throws Exception` |チェックされた例外はありません |
+|ハムクレストマッチャー | AssertJ の流暢なアサーション |
 
-See [mockmvc-tester.md](mockmvc-tester.md) for the full modern API.
+完全な最新 API については、[mockmvc-tester.md](mockmvc-tester.md) を参照してください。
 
-## Key Points
+## 重要なポイント
 
-1. **Every test method must declare `throws Exception`** — `perform()` throws checked exceptions
-2. **Use `andDo(print())` during debugging** — remove before committing
-3. **Prefer `jsonPath()` over `content().string()`** — more precise field-level assertions
-4. **Static imports are required** — IDE can auto-add them
-5. **Migrate to MockMvcTester** when upgrading to Spring Boot 3.2+ for better readability
+1. **すべてのテスト メソッドは `throws Exception`** を宣言する必要があります — `perform()` はチェックされた例外をスローします
+2. **デバッグ中に `andDo(print())` を使用します** — コミットする前に削除してください
+3. **`content().string()`** よりも `jsonPath()` を優先します — より正確なフィールドレベルのアサーション
+4. **静的インポートが必要です** — IDE は静的インポートを自動追加できます
+5. Spring Boot 3.2 以降にアップグレードする場合は、可読性を高めるために **MockMvcTester** に移行してください。

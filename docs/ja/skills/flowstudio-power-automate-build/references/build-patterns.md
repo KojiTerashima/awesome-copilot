@@ -1,12 +1,10 @@
-# Common Build Patterns
+# 一般的なビルド パターン
 
-Complete flow definition templates ready to copy and customize.
+完全なフロー定義テンプレートをコピーしてカスタマイズできます。
 
 ---
 
-## Pattern: Recurrence + SharePoint list read + Teams notification
-
-```json
+## パターン: 繰り返し + SharePoint リストの読み取り + Teams 通知```json
 {
   "triggers": {
     "Recurrence": {
@@ -64,13 +62,9 @@ Complete flow definition templates ready to copy and customize.
     }
   }
 }
-```
+```---
 
----
-
-## Pattern: HTTP trigger (webhook / Power App call)
-
-```json
+## パターン: HTTP トリガー (Webhook / Power App 呼び出し)```json
 {
   "triggers": {
     "manual": {
@@ -103,6 +97,4 @@ Complete flow definition templates ready to copy and customize.
     }
   }
 }
-```
-
-Access body values: `@triggerBody()?['name']`
+```アクセス本文の値: `@triggerBody()?['name']`

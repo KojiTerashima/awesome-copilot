@@ -2,129 +2,119 @@
 name: suggest-awesome-github-copilot-skills
 description: 'Suggest relevant GitHub Copilot skills from the awesome-copilot repository based on current repository context and chat history, avoiding duplicates with existing skills in this repository, and identifying outdated skills that need updates.'
 ---
+# 素晴らしい GitHub コパイロット スキルを提案する
 
-# Suggest Awesome GitHub Copilot Skills
+現在のリポジトリ コンテキストを分析し、このリポジトリではまだ利用できない、[GitHub awesome-copilot リポジトリ](https://github.com/github/awesome-copilot/blob/main/docs/README.skills.md) から関連するエージェント スキルを提案します。エージェント スキルは、awesome-copilot リポジトリの [skills](https://github.com/github/awesome-copilot/tree/main/skills) フォルダーにある自己完結型フォルダーで、それぞれに手順とオプションのバンドル アセットを含む `SKILL.md` ファイルが含まれています。
 
-Analyze current repository context and suggest relevant Agent Skills from the [GitHub awesome-copilot repository](https://github.com/github/awesome-copilot/blob/main/docs/README.skills.md) that are not already available in this repository. Agent Skills are self-contained folders located in the [skills](https://github.com/github/awesome-copilot/tree/main/skills) folder of the awesome-copilot repository, each containing a `SKILL.md` file with instructions and optional bundled assets.
+＃＃ プロセス1. **利用可能なスキルを取得**: [awesome-copilot README.skills.md](https://github.com/github/awesome-copilot/blob/main/docs/README.skills.md) からスキルのリストと説明を抽出します。 `#fetch` ツールを使用する必要があります。
+2. **ローカル スキルのスキャン**: `.github/skills/` フォルダー内の既存のスキル フォルダーを検出します。
+3. **説明の抽出**: ローカルの `SKILL.md` ファイルから前付を読み取り、`name` と `description` を取得します。
+4. **リモート バージョンの取得**: ローカル スキルごとに、生の GitHub URL (例: `https://raw.githubusercontent.com/github/awesome-copilot/main/skills/<skill-name>/SKILL.md`) を使用して、awesome-copilot リポジトリから対応する `SKILL.md` を取得します。
+5. **バージョンの比較**: ローカル スキル コンテンツとリモート バージョンを比較して、以下を特定します。
+   - 最新のスキル (完全一致)
+   ・古いスキル（内容は異なります）
+   - 古いスキルの主な違い (説明、手順、バンドルされたアセット)
+6. **コンテキストの分析**: チャット履歴、リポジトリ ファイル、および現在のプロジェクトのニーズを確認します。
+7. **既存の比較**: このリポジトリですでに利用可能なスキルと比較して確認します
+8. **関連性の一致**: 利用可能なスキルを特定されたパターンおよび要件と比較します。
+9. **現在のオプション**: 説明、根拠、古いスキルを含む利用可能ステータスを含む関連スキルを表示します。
+10. **検証**: 提案されたスキルが、既存のスキルではカバーされていない付加価値をもたらすことを確認します。
+11. **出力**: 提案、説明、awesome-copilot スキルと同様のローカル スキルの両方へのリンクを含む構造化された表を提供します。
+    特定のスキルのインストールまたは更新を続行するというユーザーのリクエストを **お待ちください**。指示がない限り、インストールまたはアップデートを行わないでください。
+12. **アセットのダウンロード/更新**: 要求されたスキルについては、次のことが自動的に行われます。
+    - 新しいスキルを `.github/skills/` フォルダーにダウンロードし、フォルダー構造を維持します
+    - 古いスキルを、awesome-copilot の最新バージョンに置き換えて更新します
+    - `SKILL.md` とバンドルされたアセット (スクリプト、テンプレート、データ ファイル) の両方をダウンロードします。
+    - ファイルの内容を調整しないでください
+    - アセットをダウンロードするには `#fetch` ツールを使用しますが、すべてのコンテンツが確実に取得されるように `#runInTerminal` ツールを使用して `curl` を使用することもできます
+    - `#todos` ツールを使用して進行状況を追跡する
 
-## Process
+## コンテキスト分析基準🔍 **リポジトリ パターン**:
+- 使用するプログラミング言語 (.cs、.js、.py、.ts など)
+- フレームワーク指標 (ASP.NET、React、Azure、Next.js など)
+- プロジェクトの種類 (Web アプリ、API、ライブラリ、ツール、インフラストラクチャ)
+- 開発ワークフロー要件 (テスト、CI/CD、デプロイメント)
+- インフラストラクチャおよびクラウド プロバイダー (Azure、AWS、GCP)
 
-1. **Fetch Available Skills**: Extract skills list and descriptions from [awesome-copilot README.skills.md](https://github.com/github/awesome-copilot/blob/main/docs/README.skills.md). Must use `#fetch` tool.
-2. **Scan Local Skills**: Discover existing skill folders in `.github/skills/` folder
-3. **Extract Descriptions**: Read front matter from local `SKILL.md` files to get `name` and `description`
-4. **Fetch Remote Versions**: For each local skill, fetch the corresponding `SKILL.md` from awesome-copilot repository using raw GitHub URLs (e.g., `https://raw.githubusercontent.com/github/awesome-copilot/main/skills/<skill-name>/SKILL.md`)
-5. **Compare Versions**: Compare local skill content with remote versions to identify:
-   - Skills that are up-to-date (exact match)
-   - Skills that are outdated (content differs)
-   - Key differences in outdated skills (description, instructions, bundled assets)
-6. **Analyze Context**: Review chat history, repository files, and current project needs
-7. **Compare Existing**: Check against skills already available in this repository
-8. **Match Relevance**: Compare available skills against identified patterns and requirements
-9. **Present Options**: Display relevant skills with descriptions, rationale, and availability status including outdated skills
-10. **Validate**: Ensure suggested skills would add value not already covered by existing skills
-11. **Output**: Provide structured table with suggestions, descriptions, and links to both awesome-copilot skills and similar local skills
-    **AWAIT** user request to proceed with installation or updates of specific skills. DO NOT INSTALL OR UPDATE UNLESS DIRECTED TO DO SO.
-12. **Download/Update Assets**: For requested skills, automatically:
-    - Download new skills to `.github/skills/` folder, preserving the folder structure
-    - Update outdated skills by replacing with latest version from awesome-copilot
-    - Download both `SKILL.md` and any bundled assets (scripts, templates, data files)
-    - Do NOT adjust content of the files
-    - Use `#fetch` tool to download assets, but may use `curl` using `#runInTerminal` tool to ensure all content is retrieved
-    - Use `#todos` tool to track progress
+🗨️ **チャット履歴コンテキスト**:
+- 最近の議論と問題点
+- 機能のリクエストまたは実装のニーズ
+- コードレビューのパターン
+- 開発ワークフローの要件
+- 特殊なタスクのニーズ (図作成、評価、展開)
 
-## Context Analysis Criteria
+## 出力フォーマット
 
-🔍 **Repository Patterns**:
-- Programming languages used (.cs, .js, .py, .ts, etc.)
-- Framework indicators (ASP.NET, React, Azure, Next.js, etc.)
-- Project types (web apps, APIs, libraries, tools, infrastructure)
-- Development workflow requirements (testing, CI/CD, deployment)
-- Infrastructure and cloud providers (Azure, AWS, GCP)
+awesome-copilot スキルと既存のリポジトリ スキルを比較する構造化テーブルで分析結果を表示します。
 
-🗨️ **Chat History Context**:
-- Recent discussions and pain points
-- Feature requests or implementation needs
-- Code review patterns
-- Development workflow requirements
-- Specialized task needs (diagramming, evaluation, deployment)
+|素晴らしい副操縦士のスキ​​ル |説明 |バンドルされたアセット |すでにインストールされています |類似のローカル スキル |提案の根拠 |
+|----------------------|---------------|----------------|---------------------|---------------------|---------------------|
+| [gh-cli](https://github.com/github/awesome-copilot/tree/main/skills/gh-cli) |リポジトリとワークフローを管理するための GitHub CLI スキル |なし | ❌ いいえ |なし | GitHub ワークフロー自動化機能を強化します |
+| [aspire](https://github.com/github/awesome-copilot/tree/main/skills/aspire) |分散アプリケーション開発のための Aspire スキル | 9 参照ファイル | ✅ はい |志す |既存の Aspire スキルですでにカバーされています |
+| [terraform-azurerm-set-diff-analyzer](https://github.com/github/awesome-copilot/tree/main/skills/terraform-azurerm-set-diff-analyzer) | Terraform AzureRM プロバイダーの変更を分析する |参考ファイル | ⚠️ 古い | terraform-azurerm-set-diff-analyzer |新しい検証パターンで手順が更新されました - 更新を推奨 |
 
-## Output Format
+## ローカルスキル発見プロセス
 
-Display analysis results in structured table comparing awesome-copilot skills with existing repository skills:
+1. `.github/skills/` ディレクトリ内のすべてのフォルダーを一覧表示します。
+2. フォルダーごとに、`SKILL.md` の前付を読み、`name` と `description` を抽出します。
+3. 各スキルフォルダー内のバンドルされたアセットをリストします。
+4. 既存のスキルとその機能の包括的な目録を作成する
+5. 重複の提案を避けるためにこのインベントリを使用します
 
-| Awesome-Copilot Skill | Description | Bundled Assets | Already Installed | Similar Local Skill | Suggestion Rationale |
-|-----------------------|-------------|----------------|-------------------|---------------------|---------------------|
-| [gh-cli](https://github.com/github/awesome-copilot/tree/main/skills/gh-cli) | GitHub CLI skill for managing repositories and workflows | None | ❌ No | None | Would enhance GitHub workflow automation capabilities |
-| [aspire](https://github.com/github/awesome-copilot/tree/main/skills/aspire) | Aspire skill for distributed application development | 9 reference files | ✅ Yes | aspire | Already covered by existing Aspire skill |
-| [terraform-azurerm-set-diff-analyzer](https://github.com/github/awesome-copilot/tree/main/skills/terraform-azurerm-set-diff-analyzer) | Analyze Terraform AzureRM provider changes | Reference files | ⚠️ Outdated | terraform-azurerm-set-diff-analyzer | Instructions updated with new validation patterns - Update recommended |
+## バージョン比較プロセス1. ローカル スキル フォルダーごとに、生の GitHub URL を構築してリモート `SKILL.md` を取得します。
+   - パターン：`https://raw.githubusercontent.com/github/awesome-copilot/main/skills/<skill-name>/SKILL.md`
+2. `#fetch` ツールを使用してリモート バージョンを取得します
+3. ファイルの内容全体 (前付と本文を含む) を比較します。
+4. 具体的な違いを特定します。
+   - **前付の変更** (名前、説明)
+   - **手順の更新** (ガイドライン、例、ベストプラクティス)
+   - **バンドルされたアセットの変更** (新規、削除、または変更されたアセット)
+5. 古いスキルの主な違いを文書化する
+6. 類似性を計算して更新が必要かどうかを判断します
 
-## Local Skills Discovery Process
+## スキル構造の要件
 
-1. List all folders in `.github/skills/` directory
-2. For each folder, read `SKILL.md` front matter to extract `name` and `description`
-3. List any bundled assets within each skill folder
-4. Build comprehensive inventory of existing skills with their capabilities
-5. Use this inventory to avoid suggesting duplicates
+エージェント スキルの仕様に基づいて、各スキルは以下を含むフォルダーです。
+- **`SKILL.md`**: 前付付きのメイン命令ファイル (`name`、`description`) および詳細な命令
+- **オプションのバンドル アセット**: `SKILL.md` から参照されるスクリプト、テンプレート、参照データ、およびその他のファイル
+- **フォルダー名**: 小文字とハイフン (例: `azure-deployment-preflight`)
+- **名前の一致**: `SKILL.md` 前付の `name` フィールドはフォルダー名と一致する必要があります
 
-## Version Comparison Process
+## フロントマター構造
 
-1. For each local skill folder, construct the raw GitHub URL to fetch the remote `SKILL.md`:
-   - Pattern: `https://raw.githubusercontent.com/github/awesome-copilot/main/skills/<skill-name>/SKILL.md`
-2. Fetch the remote version using the `#fetch` tool
-3. Compare entire file content (including front matter and body)
-4. Identify specific differences:
-   - **Front matter changes** (name, description)
-   - **Instruction updates** (guidelines, examples, best practices)
-   - **Bundled asset changes** (new, removed, or modified assets)
-5. Document key differences for outdated skills
-6. Calculate similarity to determine if update is needed
-
-## Skill Structure Requirements
-
-Based on the Agent Skills specification, each skill is a folder containing:
-- **`SKILL.md`**: Main instruction file with front matter (`name`, `description`) and detailed instructions
-- **Optional bundled assets**: Scripts, templates, reference data, and other files referenced from `SKILL.md`
-- **Folder naming**: Lowercase with hyphens (e.g., `azure-deployment-preflight`)
-- **Name matching**: The `name` field in `SKILL.md` front matter must match the folder name
-
-## Front Matter Structure
-
-Skills in awesome-copilot use this front matter format in `SKILL.md`:
-```markdown
+awesome-copilot のスキルは、`SKILL.md` で次の前付形式を使用します。```markdown
 ---
 name: 'skill-name'
 description: 'Brief description of what this skill provides and when to use it'
 ---
-```
+```## 要件
 
-## Requirements
+- `fetch` ツールを使用して、awesome-copilot リポジトリのスキル ドキュメントからコンテンツを取得します
+- `githubRepo` ツールを使用して、ダウンロード用の個々のスキル コンテンツを取得します
+- `.github/skills/` ディレクトリ内の既存のスキルについてローカル ファイル システムをスキャンします
+- ローカルの `SKILL.md` ファイルから YAML 前付を読み取り、名前と説明を抽出します
+- ローカル スキルとリモート バージョンを比較して、古いスキルを検出します
+- 重複を避けるために、このリポジトリ内の既存のスキルと比較します。
+- 現在のスキル ライブラリの範囲のギャップに焦点を当てる
+- 提案されたスキルがリポジトリの目的およびテクノロジースタックと一致していることを検証します。
+- それぞれの提案に対して明確な根拠を提供する
+- 素晴らしい副操縦士のスキルと同様のローカル スキルの両方へのリンクを含めます
+- 特定の相違点が記載されている古いスキルを明確に識別します
+- バンドルされたアセットの要件と互換性を考慮する
+- 表と分析以外の追加情報やコンテキストを提供しないでください。
 
-- Use `fetch` tool to get content from awesome-copilot repository skills documentation
-- Use `githubRepo` tool to get individual skill content for download
-- Scan local file system for existing skills in `.github/skills/` directory
-- Read YAML front matter from local `SKILL.md` files to extract names and descriptions
-- Compare local skills with remote versions to detect outdated skills
-- Compare against existing skills in this repository to avoid duplicates
-- Focus on gaps in current skill library coverage
-- Validate that suggested skills align with repository's purpose and technology stack
-- Provide clear rationale for each suggestion
-- Include links to both awesome-copilot skills and similar local skills
-- Clearly identify outdated skills with specific differences noted
-- Consider bundled asset requirements and compatibility
-- Don't provide any additional information or context beyond the table and the analysis
+## アイコンのリファレンス
 
-## Icons Reference
+- ✅ すでにインストールされており、最新の状態です
+- ⚠️ インストールされているが古い (アップデートが利用可能)
+- ❌ リポジトリにインストールされていません
 
-- ✅ Already installed and up-to-date
-- ⚠️ Installed but outdated (update available)
-- ❌ Not installed in repo
+## 更新処理
 
-## Update Handling
-
-When outdated skills are identified:
-1. Include them in the output table with ⚠️ status
-2. Document specific differences in the "Suggestion Rationale" column
-3. Provide recommendation to update with key changes noted
-4. When user requests update, replace entire local skill folder with remote version
-5. Preserve folder location in `.github/skills/` directory
-6. Ensure all bundled assets are downloaded alongside the updated `SKILL.md`
+古いスキルが特定された場合:
+1. ⚠️ ステータスを含む出力テーブルにそれらを含めます。
+2.「提案の根拠」列に具体的な相違点を文書化します。
+3. 重要な変更を記録して更新するよう推奨する
+4. ユーザーが更新を要求すると、ローカル スキル フォルダー全体をリモート バージョンに置き換えます。
+5. フォルダーの場所を `.github/skills/` ディレクトリに保存します
+6. バンドルされているすべてのアセットが、更新された `SKILL.md` と一緒にダウンロードされていることを確認します。

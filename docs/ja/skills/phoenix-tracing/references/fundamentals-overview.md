@@ -1,53 +1,49 @@
-# Overview and Traces & Spans
+# 概要とトレースとスパン
 
-This document covers the fundamental concepts of OpenInference traces and spans in Phoenix.
+このドキュメントでは、Phoenix の OpenInference トレースとスパンの基本概念について説明します。
 
-## Overview
+## 概要
 
-OpenInference is a set of semantic conventions for AI and LLM applications based on OpenTelemetry. Phoenix uses these conventions to capture, store, and analyze traces from AI applications.
+OpenInference は、OpenTelemetry に基づく AI および LLM アプリケーションの一連のセマンティック規則です。 Phoenix は、これらの規則を使用して、AI アプリケーションからのトレースをキャプチャ、保存、分析します。
 
-**Key Concepts:**
+**主要な概念:**
 
-- **Traces** represent end-to-end requests through your application
-- **Spans** represent individual operations within a trace (LLM calls, retrievals, tool invocations)
-- **Attributes** are key-value pairs attached to spans using flattened, dot-notation paths
-- **Span Kinds** categorize the type of operation (LLM, RETRIEVER, TOOL, etc.)
+- **トレース**は、アプリケーションを介したエンドツーエンドのリクエストを表します
+- **スパン**は、トレース内の個々の操作 (LLM 呼び出し、取得、ツールの呼び出し) を表します。
+- **属性**は、フラット化されたドット表記パスを使用してスパンにアタッチされたキーと値のペアです。
+- **スパンの種類** 操作のタイプを分類します (LLM、RETRIEVER、TOOL など)。
 
-## Traces and Spans
+## トレースとスパン
 
-### Trace Hierarchy
+### トレース階層
 
-A **trace** is a tree of **spans** representing a complete request:
+**トレース**は、完全なリクエストを表す**スパン**のツリーです。「」
+トレースID: abc123
+§─ スパン 1: CHAIN (ルート スパン、parent_id = null)
+│ §─ スパン 2: RETRIEVER (parent_id = span_1_id)
+│ │ └─ スパン 3: EMBEDDING (parent_id = span_2_id)
+│ └─ スパン 4: LLM (parent_id = span_1_id)
+│ └─ スパン 5: TOOL (parent_id = span_4_id)
+「」### コンテキストの伝播
 
-```
-Trace ID: abc123
-├─ Span 1: CHAIN (root span, parent_id = null)
-│  ├─ Span 2: RETRIEVER (parent_id = span_1_id)
-│  │  └─ Span 3: EMBEDDING (parent_id = span_2_id)
-│  └─ Span 4: LLM (parent_id = span_1_id)
-│     └─ Span 5: TOOL (parent_id = span_4_id)
-```
+スパンは以下を通じて親子関係を維持します。
 
-### Context Propagation
+- `trace_id` - トレース内のすべてのスパンで同じ
+- `span_id` - このスパンの一意の識別子
+- `parent_id` - 親スパンの `span_id` を参照します (ルート スパンの場合は null)
 
-Spans maintain parent-child relationships via:
+フェニックスはこれらの関係を次の目的で使用します。
 
-- `trace_id` - Same for all spans in a trace
-- `span_id` - Unique identifier for this span
-- `parent_id` - References parent span's `span_id` (null for root spans)
+- UI でスパン ツリー ビジュアライゼーションを構築する
+- ツリーの上の累積メトリクス (トークン、エラー) を計算します。
+- ネストされたクエリを有効にする (例: 「エラーのある LLM スパンを含む CHAIN スパンを検索する」)
 
-Phoenix uses these relationships to:
+### スパンのライフサイクル
 
-- Build the span tree visualization in the UI
-- Calculate cumulative metrics (tokens, errors) up the tree
-- Enable nested querying (e.g., "find CHAIN spans containing LLM spans with errors")
+各スパンには次のものがあります。
 
-### Span Lifecycle
-
-Each span has:
-
-- `start_time` - When the operation began (Unix timestamp in nanoseconds)
-- `end_time` - When the operation completed
-- `status_code` - OK, ERROR, or UNSET
-- `status_message` - Optional error message
-- `attributes` - object with all semantic convention attributes
+- `start_time` - 操作が開始されたとき (ナノ秒単位の Unix タイムスタンプ)
+- `end_time` - 操作が完了したとき
+- `status_code` - OK、エラー、または設定解除
+- `status_message` - オプションのエラー メッセージ
+- `attributes` - すべての意味規則属性を持つオブジェクト

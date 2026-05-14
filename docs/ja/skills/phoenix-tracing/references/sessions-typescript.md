@@ -1,199 +1,162 @@
-# Sessions (TypeScript)
+セッション数 (TypeScript)
 
-Track multi-turn conversations by grouping traces with session IDs. **Use `withSpan` directly from `@arizeai/openinference-core`** - no wrappers or custom utilities needed.
+トレースをセッション ID でグループ化することで、複数ターンの会話を追跡します。 **`withSpan` を `@arizeai/openinference-core`** から直接使用します。ラッパーやカスタム ユーティリティは必要ありません。
 
-## Core Concept
+## コアコンセプト
 
-**Session Pattern:**
-1. Generate a unique `session.id` once at application startup
-2. Export SESSION_ID, import `withSpan` where needed
-3. Use `withSpan` to create a parent CHAIN span with `session.id` for each interaction
-4. All child spans (LLM, TOOL, AGENT, etc.) automatically group under the parent
-5. Query traces by `session.id` in Phoenix to see all interactions
+**セッション パターン:**
+1. アプリケーションの起動時に一意の `session.id` を 1 回生成します
+2. SESSION_ID をエクスポートし、必要に応じて `withSpan` をインポートします
+3. `withSpan` を使用して、インタラクションごとに `session.id` を持つ親 CHAIN スパンを作成します
+4. すべての子スパン (LLM、TOOL、AGENT など) は自動的に親の下にグループ化されます。
+5. Phoenix で `session.id` によってトレースをクエリして、すべてのインタラクションを確認します
 
-## Implementation (Best Practice)
+## 実装 (ベスト プラクティス)
 
-### 1. Setup (instrumentation.ts)
-
-```typescript
+### 1. セットアップ (instrumentation.ts)```タイプスクリプト
 import { register } from "@arizeai/phoenix-otel";
-import { randomUUID } from "node:crypto";
+「node:crypto」から {randomUUID} をインポートします。
 
-// Initialize Phoenix
-register({
-  projectName: "your-app",
-  url: process.env.PHOENIX_COLLECTOR_ENDPOINT || "http://localhost:6006",
-  apiKey: process.env.PHOENIX_API_KEY,
-  batch: true,
+// フェニックスを初期化する
+登録({
+  プロジェクト名: "あなたのアプリ",
+  URL: process.env.PHOENIX_COLLECTOR_ENDPOINT || "http://localhost:6006",
+  apiKey: process.env.PHOENIX_API_KEY、
+  バッチ: true、
 });
 
-// Generate and export session ID
-export const SESSION_ID = randomUUID();
-```
+// セッション ID を生成してエクスポートする
+エクスポート const SESSION_ID = ランダムUUID();
+「」### 2. 使い方（アプリコード）```タイプスクリプト
+import { withSpan } から "@arizeai/openinference-core";
+import { SESSION_ID } から "./instrumentation";
 
-### 2. Usage (app code)
-
-```typescript
-import { withSpan } from "@arizeai/openinference-core";
-import { SESSION_ID } from "./instrumentation";
-
-// Use withSpan directly - no wrapper needed
+// withSpan を直接使用します - ラッパーは必要ありません
 const handleInteraction = withSpan(
-  async () => {
-    const result = await agent.generate({ prompt: userInput });
-    return result;
-  },
+  非同期() => {
+    const result = await Agent.generate({ プロンプト: userInput });
+    結果を返します。
+  }、
   {
-    name: "cli.interaction",
-    kind: "CHAIN",
-    attributes: { "session.id": SESSION_ID },
+    名前: "cli.interaction"、
+    種類：「チェーン」、
+    属性: { "session.id": SESSION_ID },
   }
 );
 
-// Call it
+// それを呼び出します
 const result = await handleInteraction();
-```
-
-### With Input Parameters
-
-```typescript
+「」### 入力パラメータあり```タイプスクリプト
 const processQuery = withSpan(
-  async (query: string) => {
-    return await agent.generate({ prompt: query });
-  },
+  async (クエリ: 文字列) => {
+    return await Agent.generate({ プロンプト: クエリ });
+  }、
   {
-    name: "process.query",
-    kind: "CHAIN",
-    attributes: { "session.id": SESSION_ID },
+    名前: "プロセス.クエリ"、
+    種類：「チェーン」、
+    属性: { "session.id": SESSION_ID },
   }
 );
 
-await processQuery("What is 2+2?");
-```
+await processQuery("2+2 とは何ですか?");
+「」## 重要なポイント
 
-## Key Points
+### セッション ID のスコープ
+- **CLI/デスクトップ アプリ**: プロセスの起動時に 1 回生成します
+- **Web サーバー**: ユーザーごとのセッションを生成します (例: ログイン時、セッション ストレージに保存)
+- **ステートレス API**: クライアントからのパラメータとして session.id を受け入れます
 
-### Session ID Scope
-- **CLI/Desktop Apps**: Generate once at process startup
-- **Web Servers**: Generate per-user session (e.g., on login, store in session storage)
-- **Stateless APIs**: Accept session.id as a parameter from client
+### スパン階層「」
+cli.interaction (CHAIN) ← ここに session.id
+§── ai.generateText (AGENT)
+│ §── ai.generateText.doGenerate (LLM)
+│ └── ai.toolCall (TOOL)
+━── ai.generateText.doGenerate (LLM)
+「」`session.id` は **ルート スパン** にのみ設定されます。子スパンはトレース階層ごとに自動的にグループ化されます。
 
-### Span Hierarchy
-```
-cli.interaction (CHAIN) ← session.id here
-├── ai.generateText (AGENT)
-│   ├── ai.generateText.doGenerate (LLM)
-│   └── ai.toolCall (TOOL)
-└── ai.generateText.doGenerate (LLM)
-```
-
-The `session.id` is only set on the **root span**. Child spans are automatically grouped by the trace hierarchy.
-
-### Querying Sessions
-
-```bash
-# Get all traces for a session
-npx @arizeai/phoenix-cli traces \
-  --endpoint http://localhost:6006 \
-  --project your-app \
-  --format raw \
-  --no-progress | \
-  jq '.[] | select(.spans[0].attributes["session.id"] == "YOUR-SESSION-ID")'
-```
-
-## Dependencies
-
-```json
+### セッションのクエリ「」バッシュ
+# セッションのすべてのトレースを取得する
+npx @arizeai/phoenix-cli トレース \
+  --エンドポイント http://localhost:6006 \
+  --アプリをプロジェクト \
+  --raw 形式でフォーマットする \
+  --進捗なし | \
+  jq '.[] | select(.spans[0].attributes["session.id"] == "あなたのセッションID")'
+「」## 依存関係```json
 {
-  "dependencies": {
+  "依存関係": {
     "@arizeai/openinference-core": "^2.0.5",
     "@arizeai/phoenix-otel": "^0.4.1"
   }
 }
-```
+「」**注意:** `@opentelemetry/api` は必要ありません。手動でのスパン管理のみに使用されます。
 
-**Note:** `@opentelemetry/api` is NOT needed - it's only for manual span management.
+## なぜこのパターンなのか?
 
-## Why This Pattern?
+1. **シンプル**: SESSION_ID をエクスポートするだけで、withSpan を直接使用します - ラッパーは使用しません
+2. **組み込み**: `@arizeai/openinference-core` から `withSpan` がすべてを処理します
+3. **タイプセーフ**: 関数の署名と型情報を保持します。
+4. **自動ライフサイクル**: スパンの作成、エラー追跡、クリーンアップを処理します。
+5. **フレームワークに依存しない**: あらゆる LLM フレームワーク (AI SDK、LangChain など) で動作します。
+6. **追加の deps は不要**: `@opentelemetry/api` やカスタム ユーティリティは必要ありません
 
-1. **Simple**: Just export SESSION_ID, use withSpan directly - no wrappers
-2. **Built-in**: `withSpan` from `@arizeai/openinference-core` handles everything
-3. **Type-safe**: Preserves function signatures and type information
-4. **Automatic lifecycle**: Handles span creation, error tracking, and cleanup
-5. **Framework-agnostic**: Works with any LLM framework (AI SDK, LangChain, etc.)
-6. **No extra deps**: Don't need `@opentelemetry/api` or custom utilities
-
-## Adding More Attributes
-
-```typescript
-import { withSpan } from "@arizeai/openinference-core";
-import { SESSION_ID } from "./instrumentation";
+## さらに属性を追加する```タイプスクリプト
+import { withSpan } から "@arizeai/openinference-core";
+import { SESSION_ID } から "./instrumentation";
 
 const handleWithContext = withSpan(
-  async (userInput: string) => {
-    return await agent.generate({ prompt: userInput });
-  },
+  async (userInput: 文字列) => {
+    return await Agent.generate({ プロンプト: userInput });
+  }、
   {
-    name: "cli.interaction",
-    kind: "CHAIN",
-    attributes: {
-      "session.id": SESSION_ID,
-      "user.id": userId,              // Track user
-      "metadata.environment": "prod",  // Custom metadata
-    },
+    名前: "cli.interaction"、
+    種類：「チェーン」、
+    属性: {
+      "session.id": SESSION_ID、
+      "user.id": userId, // ユーザーを追跡する
+      "metadata.environment": "prod", // カスタムメタデータ
+    }、
   }
 );
-```
+「」## アンチパターン: ラッパーを作成しない
 
-## Anti-Pattern: Don't Create Wrappers
-
-❌ **Don't do this:**
-```typescript
-// Unnecessary wrapper
-export function withSessionTracking(fn) {
-  return withSpan(fn, { attributes: { "session.id": SESSION_ID } });
+❌ **これは行わないでください:**```タイプスクリプト
+// 不要なラッパー
+エクスポート関数 withSessionTracking(fn) {
+  return withSpan(fn, { 属性: { "session.id": SESSION_ID } });
 }
-```
+「」✅ **代わりにこれを実行してください:**```タイプスクリプト
+// withSpan を直接使用する
+import { withSpan } から "@arizeai/openinference-core";
+import { SESSION_ID } から "./instrumentation";
 
-✅ **Do this instead:**
-```typescript
-// Use withSpan directly
-import { withSpan } from "@arizeai/openinference-core";
-import { SESSION_ID } from "./instrumentation";
-
-const handler = withSpan(fn, {
-  attributes: { "session.id": SESSION_ID }
+const ハンドラー = withSpan(fn, {
+  属性: { "session.id": SESSION_ID }
 });
-```
+「」## 代替: コンテキスト API パターン
 
-## Alternative: Context API Pattern
+ミドルウェアを通じてセッション ID を伝達する必要がある Web サーバーまたは複雑な非同期フローの場合は、Context API を使用できます。```タイプスクリプト
+import { context } から "@opentelemetry/api";
+import { setSession } から "@arizeai/openinference-core";
 
-For web servers or complex async flows where you need to propagate session IDs through middleware, you can use the Context API:
-
-```typescript
-import { context } from "@opentelemetry/api";
-import { setSession } from "@arizeai/openinference-core";
-
-await context.with(
+コンテキストを待ちます。with(
   setSession(context.active(), { sessionId: "user_123_conv_456" }),
-  async () => {
-    const response = await llm.invoke(prompt);
+  非同期() => {
+    const 応答 = await llm.invoke(prompt);
   }
 );
-```
+「」**次の場合にコンテキスト API を使用します。**
+- ミドルウェア チェーンを使用した Web サーバーの構築
+- セッション ID は多くの非同期境界を通過する必要がある
+- 呼び出しスタック (フレームワークが提供するハンドラーなど) を制御しない
 
-**Use Context API when:**
-- Building web servers with middleware chains
-- Session ID needs to flow through many async boundaries
-- You don't control the call stack (e.g., framework-provided handlers)
+**次の場合に withSpan を使用します。**
+- CLI アプリまたはスクリプトの構築
+- 関数呼び出しポイントを制御します
+- より単純で、より明示的なコードが好まれます
 
-**Use withSpan when:**
-- Building CLI apps or scripts
-- You control the function call points
-- Simpler, more explicit code is preferred
+## 関連
 
-## Related
-
-- `fundamentals-universal-attributes.md` - Other universal attributes (user.id, metadata)
-- `span-chain.md` - CHAIN span specification
-- `sessions-python.md` - Python session tracking patterns
+- `fundamentals-universal-attributes.md` - その他の汎用属性 (user.id、メタデータ)
+- `span-chain.md` - CHAINスパン指定
+- `sessions-python.md` - Python セッション追跡パターン

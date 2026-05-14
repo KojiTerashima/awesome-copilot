@@ -1,328 +1,256 @@
-# Penpot MCP Server Setup & Troubleshooting
+# Penpot MCP サーバーのセットアップとトラブルシューティング
 
-Complete guide for installing, configuring, and troubleshooting the Penpot MCP Server.
+Penpot MCP サーバーのインストール、構成、トラブルシューティングに関する完全なガイド。
 
-## Architecture Overview
+## アーキテクチャの概要
 
-The Penpot MCP integration requires **three components** working together:
+Penpot MCP の統合には、**3 つのコンポーネント**が連携して動作する必要があります。「」
+┌─────────┐ ┌─────────┐ ┌─────────┐
+│ MCP クライアント │───▶│ MCP サーバー │◀───▶│ ペンポットプラグイン │
+│ (VS コード/クロード)│ │ (ポート 4401) │ │ (ブラウザ内) │
+━━━━━━━━━━━━━━━━━━━┘ ━━━━━━┬─┘
+                                 │ │
+                                 │ ウェブソケット │
+                                 │ (ポート 4402) │
+                                 ━━━━━━━━━━┘
+「」1. **MCP サーバー** - AI クライアントにツールを公開します (ポート 4401 の HTTP)
+2. **プラグイン サーバー** - Penpot プラグイン ファイルを提供します (ポート 4400 の HTTP)
+3. **Penpot MCP プラグイン** - Penpot ブラウザ内で実行され、デザイン コマンドを実行します。
 
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   MCP Client    │────▶│   MCP Server    │◀───▶│  Penpot Plugin  │
-│ (VS Code/Claude)│     │  (port 4401)    │     │ (in browser)    │
-└─────────────────┘     └────────┬────────┘     └────────┬────────┘
-                                 │                       │
-                                 │    WebSocket          │
-                                 │    (port 4402)        │
-                                 └───────────────────────┘
-```
+## 前提条件
 
-1. **MCP Server** - Exposes tools to your AI client (HTTP on port 4401)
-2. **Plugin Server** - Serves the Penpot plugin files (HTTP on port 4400)
-3. **Penpot MCP Plugin** - Runs inside Penpot browser, executes design commands
+- **Node.js v22+** - [ダウンロード](https://nodejs.org/)
+- **Git** - リポジトリのクローン作成用
+- **最新のブラウザ** - Chrome、Firefox、または Chromium ベースのブラウザ
 
-## Prerequisites
+Node.js のインストールを確認します。「」バッシュ
+ノード --version # v22.x 以降である必要があります
+npm --バージョン
+npx --バージョン
+「」## インストール
 
-- **Node.js v22+** - [Download](https://nodejs.org/)
-- **Git** - For cloning the repository
-- **Modern browser** - Chrome, Firefox, or Chromium-based browser
-
-Verify Node.js installation:
-```bash
-node --version  # Should be v22.x or higher
-npm --version
-npx --version
-```
-
-## Installation
-
-### Step 1: Clone and Install
-
-```bash
-# Clone the repository
+### ステップ 1: クローンを作成してインストールする「」バッシュ
+# リポジトリのクローンを作成します
 git clone https://github.com/penpot/penpot-mcp.git
-cd penpot-mcp
+cd ペンポット-mcp
 
-# Install dependencies
-npm install
-```
+# 依存関係をインストールする
+npmインストール
+「」### ステップ 2: サーバーの構築と起動「」バッシュ
+# すべてのコンポーネントをビルドしてサーバーを起動する
+npm ブートストラップを実行する
+「」このコマンド:
 
-### Step 2: Build and Start Servers
+- すべてのコンポーネントの依存関係をインストールします
+- MCP サーバーとプラグインを構築します
+- 両方のサーバーを起動します (MCP は 4401、プラグインは 4400)
 
-```bash
-# Build all components and start servers
-npm run bootstrap
-```
+**期待される出力:**```txt
+http://localhost:4401 でリッスンする MCP サーバー
+http://localhost:4400 でリッスンするプラグイン サーバー
+ポート 4402 でリッスンする WebSocket サーバー
+「」### ステップ 3: ペンポットにプラグインをロードする
 
-This command:
+1.ブラウザで[Penpot](https://design.penpot.app/)を開く
+2. デザインファイルを開くか作成します
+3. **プラグイン** メニューに移動します (またはプラグイン アイコンを押します)。
+4. [**URL からプラグインをロード**] をクリックします。
+5.「`http://localhost:4400/manifest.json`」と入力します。
+6. プラグイン UI が表示されます。**「MCP サーバーに接続」** をクリックします。
+7. ステータスは **「MCP サーバーに接続しました」** に変わります。
 
-- Installs dependencies for all components
-- Builds the MCP server and plugin
-- Starts both servers (MCP on 4401, Plugin on 4400)
+> **重要**: MCP ツールの使用中はプラグイン UI を開いたままにしてください。これを閉じるとサーバーが切断されます。
 
-**Expected output:**
+### ステップ 4: MCP クライアントを構成する
 
-```txt
-MCP Server listening on http://localhost:4401
-Plugin server listening on http://localhost:4400
-WebSocket server listening on port 4402
-```
+#### GitHub Copilot を使用した VS Code
 
-### Step 3: Load Plugin in Penpot
-
-1. Open [Penpot](https://design.penpot.app/) in your browser
-2. Open or create a design file
-3. Go to **Plugins** menu (or press the plugins icon)
-4. Click **Load plugin from URL**
-5. Enter: `http://localhost:4400/manifest.json`
-6. The plugin UI will appear - click **"Connect to MCP server"**
-7. Status should change to **"Connected to MCP server"**
-
-> **Important**: Keep the plugin UI open while using MCP tools. Closing it disconnects the server.
-
-### Step 4: Configure Your MCP Client
-
-#### VS Code with GitHub Copilot
-
-Add to your VS Code `settings.json`:
-
-```json
+VS コード `settings.json` に追加します。```json
 {
   "mcp": {
-    "servers": {
-      "penpot": {
+    「サーバー」: {
+      「ペンポット」: {
         "url": "http://localhost:4401/sse"
       }
     }
   }
 }
-```
-
-Or use the HTTP endpoint:
-
-```json
+「」または、HTTP エンドポイントを使用します。```json
 {
   "mcp": {
-    "servers": {
-      "penpot": {
+    「サーバー」: {
+      「ペンポット」: {
         "url": "http://localhost:4401/mcp"
       }
     }
   }
 }
-```
+「」#### クロード デスクトップ
 
-#### Claude Desktop
+Claude Desktop には `mcp-remote` プロキシ (stdio のみのトランスポート) が必要です。
 
-Claude Desktop requires the `mcp-remote` proxy (stdio-only transport):
-
-1. Install the proxy:
-
-   ```bash
+1. プロキシをインストールします。「」バッシュ
    npm install -g mcp-remote
-   ```
-
-2. Edit Claude Desktop config:
+   「」2. Claude デスクトップ構成を編集します。
    - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
    - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
    - **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
-3. Add the Penpot server:
-
-   ```json
+3. Penpot サーバーを追加します。```json
    {
-     "mcpServers": {
-       "penpot": {
-         "command": "npx",
+     "mcpサーバー": {
+       「ペンポット」: {
+         "コマンド": "npx",
          "args": ["-y", "mcp-remote", "http://localhost:4401/sse", "--allow-http"]
        }
      }
    }
-   ```
+   「」4. **完全に終了** Claude デスクトップ (ウィンドウを閉じるだけでなく、[ファイル] → [終了]) して再起動します。
 
-4. **Fully quit** Claude Desktop (File → Quit, not just close window) and restart
+#### クロード コード (CLI)「」バッシュ
+クロード mcp add ペンポット -t http http://localhost:4401/mcp
+「」## トラブルシューティング
 
-#### Claude Code (CLI)
+### 接続の問題
 
-```bash
-claude mcp add penpot -t http http://localhost:4401/mcp
-```
+#### 「プラグインが MCP サーバーに接続できません」
 
-## Troubleshooting
+**症状**: [接続] をクリックした後でもプラグインに「接続されていません」と表示される
 
-### Connection Issues
+**解決策**:
 
-#### "Plugin cannot connect to MCP server"
+1. サーバーが実行されていることを確認します。「」バッシュ
+   # ポートが使用中かどうかを確認する
+   lsof -i :4401 # MCP サーバー
+   lsof -i :4402 # WebSocket
+   lsof -i :4400 # プラグインサーバー
+   「」2. サーバーを再起動します。「」バッシュ
+   #penpot-mcpディレクトリ内
+   npm 実行開始:すべて
+   「」3. ブラウザコンソール (F12) で WebSocket エラーを確認します。
 
-**Symptoms**: Plugin shows "Not connected" even after clicking Connect
+#### ブラウザがローカル接続をブロックする
 
-**Solutions**:
+**症状**: ブラウザが Penpot からローカルホストへの接続を拒否します。
 
-1. Verify servers are running:
-   ```bash
-   # Check if ports are in use
-   lsof -i :4401  # MCP server
-   lsof -i :4402  # WebSocket
-   lsof -i :4400  # Plugin server
-   ```
+**原因**: Chromium 142+ はプライベート ネットワーク アクセス (PNA) 制限を強制します
 
-2. Restart the servers:
+**解決策**:
 
-   ```bash
-   # In the penpot-mcp directory
-   npm run start:all
-   ```
+1. **Chrome/Chromium**: プロンプトが表示されたら、ローカル ネットワークへのアクセスを許可します。
+2. **Brave**: Penpot Web サイトのシールドを無効にします:
+   - アドレスバーの Brave Shield アイコンをクリックします
+   - このサイトのシールドをオフに切り替えます
+3. **Firefox を試してください**: Firefox はこれらの制限をそれほど厳密には強制しません
 
-3. Check browser console (F12) for WebSocket errors
+#### 「WebSocket 接続に失敗しました」
 
-#### Browser Blocks Local Connection
+**解決策**:
 
-**Symptoms**: Browser refuses to connect to localhost from Penpot
+1. ファイアウォール設定を確認します - ポート 4400、4401、4402 を許可します。
+2. VPN がアクティブな場合は無効にします
+3. 同じポートを使用している競合するアプリケーションがないか確認します。
 
-**Cause**: Chromium 142+ enforces Private Network Access (PNA) restrictions
+### MCP クライアントの問題
 
-**Solutions**:
+#### VS Code に表示されないツール/Claude
 
-1. **Chrome/Chromium**: When prompted, allow access to local network
-2. **Brave**: Disable Shield for the Penpot website:
-   - Click the Brave Shield icon in address bar
-   - Toggle Shield off for this site
-3. **Try Firefox**: Firefox doesn't enforce these restrictions as strictly
-
-#### "WebSocket connection failed"
-
-**Solutions**:
-
-1. Check firewall settings - allow ports 4400, 4401, 4402
-2. Disable VPN if active
-3. Check for conflicting applications using the same ports
-
-### MCP Client Issues
-
-#### Tools Not Appearing in VS Code/Claude
-
-1. **Verify endpoint**:
-
-   ```bash
-   # Test the SSE endpoint
-   curl http://localhost:4401/sse
+1. **エンドポイントを確認**:「」バッシュ
+   # SSE エンドポイントをテストする
+   カール http://localhost:4401/sse
    
-   # Test the MCP endpoint
-   curl http://localhost:4401/mcp
-   ```
-
-2. **Check configuration syntax** - JSON must be valid
-3. **Restart the MCP client** completely
-4. **Check MCP server logs**:
-
-   ```bash
-   # Logs are in mcp-server/logs/
+   # MCP エンドポイントをテストする
+   カール http://localhost:4401/mcp
+   「」2. **構成構文を確認します** - JSON が有効である必要があります
+3. **MCP クライアント**を完全に再起動します
+4. **MCP サーバーのログを確認します**:「」バッシュ
+   # ログは mcp-server/logs/ にあります
    tail -f mcp-server/logs/mcp-server.log
-   ```
+   「」#### 「ツールの実行がタイムアウトしました」
 
-#### "Tool execution timed out"
+**原因**: プラグインが切断されたか、操作に時間がかかりすぎました
 
-**Cause**: Plugin disconnected or operation took too long
+**解決策**:
 
-**Solutions**:
+1. プラグイン UI がまだ Penpot で開いていることを確認します
+2. プラグインが「接続済み」ステータスを示していることを確認します。
+3. 再接続してみます。「切断」をクリックしてから、プラグインで「接続」をクリックします。
 
-1. Ensure plugin UI is still open in Penpot
-2. Verify plugin shows "Connected" status
-3. Try reconnecting: click Disconnect then Connect in plugin
+### プラグインの問題
 
-### Plugin Issues
+#### 「プラグインのロードに失敗しました」
 
-#### "Plugin failed to load"
+1. プラグインサーバーがポート 4400 で実行されていることを確認します。
+2. ブラウザで `http://localhost:4400/manifest.json` に直接アクセスしてみます。
+3. ブラウザのキャッシュをクリアして Penpot をリロードします
+4. プラグインを削除して再度追加します
 
-1. Verify plugin server is running on port 4400
-2. Try accessing `http://localhost:4400/manifest.json` directly in browser
-3. Clear browser cache and reload Penpot
-4. Remove and re-add the plugin
+#### 「ペンポット オブジェクトが見つかりません」
 
-#### "Cannot find penpot object"
+**原因**: プラグインが適切に初期化されていないか、デザインファイルが開いていません。
 
-**Cause**: Plugin not properly initialized or design file not open
+**解決策**:
 
-**Solutions**:
+1. (ダッシュボードだけでなく) デザイン ファイルが開いていることを確認します。
+2. ファイルを開いた後、接続する前に数秒待ってください。
+3. Penpotを更新し、プラグインをリロードします
 
-1. Make sure you have a design file open (not just the dashboard)
-2. Wait a few seconds after opening file before connecting
-3. Refresh Penpot and reload the plugin
+### サーバーの問題
 
-### Server Issues
-
-#### Port Already in Use
-
-```bash
-# Find process using the port
+#### ポートはすでに使用されています「」バッシュ
+# ポートを使用してプロセスを検索する
 lsof -i :4401
 
-# Kill the process if needed
+# 必要に応じてプロセスを強制終了します
 kill -9 <PID>
-```
+「」または、環境変数を介して別のポートを構成します。「」バッシュ
+PENPOT_MCP_SERVER_PORT=4501 npm 実行開始:all
+「」#### 起動時にサーバーがクラッシュする
 
-Or configure different ports via environment variables:
-```bash
-PENPOT_MCP_SERVER_PORT=4501 npm run start:all
-```
+1. Node.js バージョンを確認します (v22 以降である必要があります)
+2. `node_modules` を削除し、再インストールします。「」バッシュ
+   rm -rf ノードモジュール
+   npmインストール
+   npm ブートストラップを実行する
+   「」## 構成リファレンス
 
-#### Server Crashes on Startup
+### 環境変数
 
-1. Check Node.js version (must be v22+)
-2. Delete `node_modules` and reinstall:
+|変数 |デフォルト |説明 |
+|----------|-----------|---------------|
+| `PENPOT_MCP_SERVER_PORT` | 4401 | HTTP/SSE サーバー ポート |
+| `PENPOT_MCP_WEBSOCKET_PORT` | 4402 | WebSocket サーバー ポート |
+| `PENPOT_MCP_SERVER_LISTEN_ADDRESS` |ローカルホスト |サーバーバインドアドレス |
+| `PENPOT_MCP_LOG_LEVEL` |情報 |ログ レベル (トレース/デバッグ/情報/警告/エラー) |
+| `PENPOT_MCP_LOG_DIR` |ログ |ログ ファイル ディレクトリ |
+| `PENPOT_MCP_REMOTE_MODE` |偽 |リモート モードを有効にする (ファイル システム アクセスを無効にする) |
 
-   ```bash
-   rm -rf node_modules
-   npm install
-   npm run bootstrap
-   ```
-
-## Configuration Reference
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PENPOT_MCP_SERVER_PORT` | 4401 | HTTP/SSE server port |
-| `PENPOT_MCP_WEBSOCKET_PORT` | 4402 | WebSocket server port |
-| `PENPOT_MCP_SERVER_LISTEN_ADDRESS` | localhost | Server bind address |
-| `PENPOT_MCP_LOG_LEVEL` | info | Log level (trace/debug/info/warn/error) |
-| `PENPOT_MCP_LOG_DIR` | logs | Log file directory |
-| `PENPOT_MCP_REMOTE_MODE` | false | Enable remote mode (disables file system access) |
-
-### Example: Custom Configuration
-
-```bash
-# Run on different ports with debug logging
+### 例: カスタム構成「」バッシュ
+# デバッグログを使用して別のポートで実行します
 PENPOT_MCP_SERVER_PORT=5000 \
 PENPOT_MCP_WEBSOCKET_PORT=5001 \
-PENPOT_MCP_LOG_LEVEL=debug \
-npm run start:all
-```
+PENPOT_MCP_LOG_LEVEL=デバッグ \
+npm 実行開始:すべて
+「」## セットアップの確認
 
-## Verifying the Setup
+このチェックリストを実行して、すべてが機能することを確認します。
 
-Run this checklist to confirm everything works:
+1. **実行中のサーバー**:「」バッシュ
+   カール -s http://localhost:4401/sse |頭-1
+   # SSE ストリーム ヘッダーを返す必要があります
+   「」2. **プラグインが接続されました**: プラグイン UI に「MCP サーバーに接続されました」と表示されます。
 
-1. **Servers Running**:
-   ```bash
-   curl -s http://localhost:4401/sse | head -1
-   # Should return SSE stream headers
-   ```
-
-2. **Plugin Connected**: Plugin UI shows "Connected to MCP server"
-
-3. **Tools Available**: In your MCP client, verify these tools appear:
+3. **利用可能なツール**: MCP クライアントで、次のツールが表示されることを確認します。
    - `mcp__penpot__execute_code`
    - `mcp__penpot__export_shape`
    - `mcp__penpot__import_image`
-   - `mcp__penpot__penpot_api_info`
+   - @@コード3@@
 
-4. **Test Execution**: Ask your AI assistant to run a simple command:
-   > "Use Penpot to get the current page name"
+4. **テスト実行**: AI アシスタントに簡単なコマンドを実行するように依頼します。
+   > 「Penpot を使用して現在のページ名を取得する」
 
-## Getting Help
+## 助けを求める
 
-- **GitHub Issues**: [penpot/penpot-mcp/issues](https://github.com/penpot/penpot-mcp/issues)
-- **GitHub Discussions**: [penpot/penpot-mcp/discussions](https://github.com/penpot/penpot-mcp/discussions)
-- **Penpot Community**: [community.penpot.app](https://community.penpot.app/)
+- **GitHub の問題**: [penpot/penpot-mcp/issues](https://github.com/penpot/penpot-mcp/issues)
+- **GitHub ディスカッション**: [penpot/penpot-mcp/Discussions](https://github.com/penpot/penpot-mcp/Discussions)
+- **ペンポット コミュニティ**: [community.penpot.app](https://community.penpot.app/)

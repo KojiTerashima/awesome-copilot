@@ -2,43 +2,38 @@
 name: planning-oracle-to-postgres-migration-integration-testing
 description: 'Creates an integration testing plan for .NET data access artifacts during Oracle-to-PostgreSQL database migrations. Analyzes a single project to identify repositories, DAOs, and service layers that interact with the database, then produces a structured testing plan. Use when planning integration test coverage for a migrated project, identifying which data access methods need tests, or preparing for Oracle-to-PostgreSQL migration validation.'
 ---
+# Oracle から PostgreSQL への移行のための統合テストの計画
 
-# Planning Integration Testing for Oracle-to-PostgreSQL Migration
+単一のターゲット プロジェクトを分析して、統合テストが必要なデータ アクセス アーティファクトを特定し、構造化された実用的なテスト計画を作成します。
 
-Analyze a single target project to identify data access artifacts that require integration testing, then produce a structured, actionable testing plan.
+## ワークフロー「」
+進捗状況:
+- [ ] ステップ 1: データ アクセス アーティファクトを特定する
+- [ ] ステップ 2: テストの優先順位を分類する
+- [ ] ステップ 3: テスト計画を作成する
+「」**ステップ 1: データ アクセス アーティファクトを特定する**
 
-## Workflow
+スコープはターゲット プロジェクトのみです。データベースと直接対話するクラスとメソッド、つまりリポジトリ、DAO、ストアド プロシージャ呼び出し元、CRUD 操作を実行するサービス レイヤーを見つけます。
 
-```
-Progress:
-- [ ] Step 1: Identify data access artifacts
-- [ ] Step 2: Classify testing priorities
-- [ ] Step 3: Write the testing plan
-```
+**ステップ 2: テストの優先順位を分類する**
 
-**Step 1: Identify data access artifacts**
+移行リスク別にアーティファクトをランク付けします。単純な CRUD よりも、Oracle 固有の機能 (refcursors、`TO_CHAR`、暗黙的な型強制、`NO_DATA_FOUND`) を使用するメソッドを優先します。
 
-Scope to the target project only. Find classes and methods that interact directly with the database — repositories, DAOs, stored procedure callers, service layers performing CRUD operations.
+**ステップ 3: テスト計画を作成する**
 
-**Step 2: Classify testing priorities**
+以下を対象とした値下げ計画を作成します。
+- メソッド署名を含むテスト可能なアーティファクトのリスト
+- アーティファクトごとに推奨されるテスト ケース
+- シードデータの要件
+- 検証する必要がある既知のOracle→PostgreSQLの動作の違い
 
-Rank artifacts by migration risk. Prioritize methods that use Oracle-specific features (refcursors, `TO_CHAR`, implicit type coercion, `NO_DATA_FOUND`) over simple CRUD.
+## 出力
 
-**Step 3: Write the testing plan**
+計画を次の宛先に書いてください: `.github/oracle-to-postgres-migration/Reports/{TARGET_PROJECT} Integration Testing Plan.md`
 
-Write a markdown plan covering:
-- List of testable artifacts with method signatures
-- Recommended test cases per artifact
-- Seed data requirements
-- Known Oracle→PostgreSQL behavioral differences to validate
+## 主要な制約
 
-## Output
-
-Write the plan to: `.github/oracle-to-postgres-migration/Reports/{TARGET_PROJECT} Integration Testing Plan.md`
-
-## Key Constraints
-
-- **Single project scope** — only plan tests for artifacts within the target project.
-- **Database interactions only** — skip business logic that does not touch the database.
-- **Oracle is the golden source** — tests should capture Oracle's expected behavior for comparison against PostgreSQL.
-- **No multi-connection harnessing** — migrated applications are copied and renamed (e.g., `MyApp.Postgres`), so each instance targets one database.
+- **単一プロジェクト スコープ** - ターゲット プロジェクト内のアーティファクトのテストのみを計画します。
+- **データベース インタラクションのみ** - データベースに触れないビジネス ロジックをスキップします。
+- **Oracle は黄金のソース** — テストでは、PostgreSQL と比較するために Oracle の予想される動作をキャプチャする必要があります。
+- **複数接続の利用はありません** - 移行されたアプリケーションはコピーされ、名前が変更されるため (例: `MyApp.Postgres`)、各インスタンスは 1 つのデータベースを対象とします。

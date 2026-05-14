@@ -1,68 +1,56 @@
-# Apollo Client - React 18 Compatibility Details
+# Apollo クライアント - React 18 互換性の詳細
 
-## Why Apollo 3.8+ is Required
+## Apollo 3.8 以降が必要な理由
 
-Apollo Client 3.7 and below use an internal subscription model that is not compatible with React 18's concurrent rendering. In concurrent mode, React can interrupt and replay renders, which causes Apollo's store subscriptions to fire at incorrect times - producing stale data or missed updates.
+Apollo Client 3.7 以前では、React 18 の同時レンダリングと互換性のない内部サブスクリプション モデルが使用されています。同時モードでは、React がレンダリングを中断して再実行する可能性があるため、Apollo のストア サブスクリプションが誤ったタイミングで起動され、古いデータや更新の欠落が発生します。
 
-Apollo 3.8 was the first version to adopt `useSyncExternalStore`, which React 18 requires for external stores to work correctly under concurrent rendering.
+Apollo 3.8 は、`useSyncExternalStore` を採用した最初のバージョンでした。これは、React 18 が同時レンダリングで外部ストアを正しく動作させるために必要です。
 
-## Version Summary
+## バージョンの概要
 
-| Apollo Version | React 18 Support | React 19 Support | Notes |
+|アポロバージョン | React 18 サポート | React 19 サポート |メモ |
 |---|---|---|---|
-| < 3.7 | ❌ | ❌ | Concurrent mode data tearing |
-| 3.7.x | ⚠️ | ⚠️ | Works with legacy root only (ReactDOM.render) |
-| **3.8.x** | ✅ | ✅ | First fully compatible version |
-| 3.9+ | ✅ | ✅ | Recommended |
-| 3.11+ | ✅ | ✅ (confirmed) | Explicit React 19 testing added |
+| < 3.7 | ❌ | ❌ |同時モード データ ティアリング |
+| 3.7.x | ⚠️ | ⚠️ |従来のルートのみで動作します (ReactDOM.render) |
+| **3.8.x** | ✅ | ✅ |最初の完全互換バージョン |
+| 3.9+ | ✅ | ✅ |おすすめ |
+| 3.11+ | ✅ | ✅ (確認済み) |明示的な React 19 テストの追加 |
 
-## If You're on Apollo 3.7 Using Legacy Root
+## レガシー ルートを使用して Apollo 3.7 を使用している場合
 
-If the app still uses `ReactDOM.render` (legacy root) and hasn't migrated to `createRoot` yet, Apollo 3.7 will technically work - but this means you're not getting any React 18 concurrent features (including automatic batching). This is a partial upgrade only.
+アプリがまだ `ReactDOM.render` (レガシー ルート) を使用しており、まだ `createRoot` に移行していない場合、Apollo 3.7 は技術的には動作しますが、これは React 18 の同時機能 (自動バッチ処理を含む) を利用できないことを意味します。これは部分的なアップグレードのみです。
 
-As soon as `createRoot` is used, upgrade Apollo to 3.8+.
+`createRoot` を使用したらすぐに、Apollo を 3.8 以降にアップグレードしてください。
 
-## MockedProvider in Tests - React 18
+## テストの MockedProvider - React 18
 
-Apollo's `MockedProvider` works with React 18 but async behavior changed:
+Apollo の `MockedProvider` は React 18 で動作しますが、非同期の動作が変更されました。```jsx
+// 古いパターン - setTimeout でフラッシュ:
+await 新しい Promise(resolve => setTimeout(resolve, 0));
+ラッパー.update();
 
-```jsx
-// Old pattern - flushing with setTimeout:
-await new Promise(resolve => setTimeout(resolve, 0));
-wrapper.update();
-
-// React 18 pattern - use waitFor or findBy:
+// React 18 パターン - waitFor または findBy を使用します:
 await waitFor(() => {
-  expect(screen.getByText('Alice')).toBeInTheDocument();
+  Expect(screen.getByText('Alice')).toBeInTheDocument();
 });
-// OR:
-expect(await screen.findByText('Alice')).toBeInTheDocument();
-```
+// または:
+Expect(await screen.findByText('Alice')).toBeInTheDocument();
+「」## Apollo のアップグレード「」バッシュ
+npm install @apollo/client@latestgraphql@latest
+「」graphql ピア dep が他のパッケージと競合する場合:「」バッシュ
+npm lsgraphql # 使用されているバージョンを確認する
+npm info @apollo/clientpeerDependency # apollo が必要とするものを確認する
+「」Apollo 3.8 以降は、`graphql@15` と `graphql@16` の両方をサポートします。
 
-## Upgrading Apollo
+## InMemoryCache - 変更は必要ありません
 
-```bash
-npm install @apollo/client@latest graphql@latest
-```
+`InMemoryCache` 設定は React 18 アップグレードの影響を受けません。以下の場合は移行は必要ありません。
 
-If graphql peer dep conflicts with other packages:
-
-```bash
-npm ls graphql  # check what version is being used
-npm info @apollo/client peerDependencies  # check what apollo requires
-```
-
-Apollo 3.8+ supports both `graphql@15` and `graphql@16`.
-
-## InMemoryCache - No Changes Required
-
-`InMemoryCache` configuration is unaffected by the React 18 upgrade. No migration needed for:
-
-- `typePolicies`
-- `fragmentMatcher`
+- @@コード3@@
+- @@コード4@@
 - `possibleTypes`
-- Custom field policies
+- カスタムフィールドポリシー
 
-## useQuery / useMutation / useSubscription - No Changes
+## useQuery / useMutation / useSubscription - 変更なし
 
-Apollo hooks are unchanged in their API. The upgrade is entirely internal to how Apollo integrates with React's rendering model.
+Apollo フックの API は変更されていません。このアップグレードは、Apollo が React のレンダリング モデルと統合される方法の完全に内部的なものです。

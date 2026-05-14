@@ -1,64 +1,57 @@
-# Required and Recommended Attributes
+# 必須および推奨される属性
 
-This document covers the required attribute and highly recommended attributes for all OpenInference spans.
+このドキュメントでは、すべての OpenInference スパンの必須属性と強く推奨される属性について説明します。
 
-## Required Attribute
+## 必須の属性
 
-**Every span MUST have exactly one required attribute:**
-
-```json
+**すべてのスパンには必ず 1 つの必須属性が必要です:**```json
 {
   "openinference.span.kind": "LLM"
 }
-```
+「」## 強く推奨される属性
 
-## Highly Recommended Attributes
+厳密に必須ではありませんが、これらの属性は次のとおり、すべてのスパンで**強く推奨**されます。
+- 評価と品質評価を可能にする
+- アプリケーション内の情報の流れを理解するのに役立ちます
+- トレースをデバッグにさらに便利にします
 
-While not strictly required, these attributes are **highly recommended** on all spans as they:
-- Enable evaluation and quality assessment
-- Help understand information flow through your application
-- Make traces more useful for debugging
+### 入力/出力値
 
-### Input/Output Values
+|属性 |タイプ |説明 |
+|----------|------|---------------|
+| `input.value` |文字列 |操作への入力 (プロンプト、クエリ、ドキュメント) |
+| `output.value` |文字列 |操作からの出力 (応答、結果、応答) |
 
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `input.value` | String | Input to the operation (prompt, query, document) |
-| `output.value` | String | Output from the operation (response, result, answer) |
-
-**Example:**
-```json
+**例：**```json
 {
   "openinference.span.kind": "LLM",
-  "input.value": "What is the capital of France?",
-  "output.value": "The capital of France is Paris."
+  "input.value": "フランスの首都はどこですか?",
+  "output.value": "フランスの首都はパリです。"
 }
-```
+「」**これらが重要な理由:**
+- **評価**: 多くの評価者 (忠実性、関連性、幻覚検出) は、品質を評価するために入力と出力の両方を必要とします。
+- **情報フロー**: 入力/出力を確認することで、アプリケーションを通じてデータがどのように変換されるかを簡単に追跡できます。
+- **デバッグ**: 何か問題が発生した場合、実際の入出力があるため、根本原因の分析がはるかに速くなります。
+- **分析**: 類似した入力または出力にわたるパターン分析を可能にします
 
-**Why these matter:**
-- **Evaluations**: Many evaluators (faithfulness, relevance, hallucination detection) require both input and output to assess quality
-- **Information flow**: Seeing inputs/outputs makes it easy to trace how data transforms through your application
-- **Debugging**: When something goes wrong, having the actual input/output makes root cause analysis much faster
-- **Analytics**: Enables pattern analysis across similar inputs or outputs
+**フェニックスの動作:**
+- スパン詳細で目立つように表示される入力/出力
+- 評価者はこれらの値に自動的にアクセスできます
+- 入力または出力コンテンツによるトレースの検索/フィルタリング
+- データセットを微調整するための入力/出力のエクスポート
 
-**Phoenix Behavior:**
-- Input/output displayed prominently in span details
-- Evaluators can automatically access these values
-- Search/filter traces by input or output content
-- Export inputs/outputs for fine-tuning datasets
+## 有効なスパンの種類
 
-## Valid Span Kinds
+OpenInference には正確に **9 種類の有効なスパン**があります。
 
-There are exactly **9 valid span kinds** in OpenInference:
-
-| Span Kind | Purpose | Common Use Case |
-|-----------|---------|-----------------|
-| `LLM` | Language model inference | OpenAI, Anthropic, local LLM calls |
-| `EMBEDDING` | Vector generation | Text-to-vector conversion |
-| `CHAIN` | Application flow orchestration | LangChain chains, custom workflows |
-| `RETRIEVER` | Document/context retrieval | Vector DB queries, semantic search |
-| `RERANKER` | Result reordering | Rerank retrieved documents |
-| `TOOL` | External tool invocation | API calls, function execution |
-| `AGENT` | Autonomous reasoning | ReAct agents, planning loops |
-| `GUARDRAIL` | Safety/policy checks | Content moderation, PII detection |
-| `EVALUATOR` | Quality assessment | Answer relevance, faithfulness scoring |
+|スパンの種類 |目的 |一般的な使用例 |
+|----------|-----------|------|
+| `LLM` |言語モデルの推論 | OpenAI、Anthropic、ローカル LLM 呼び出し |
+| `EMBEDDING` |ベクトル生成 |テキストからベクターへの変換 |
+| `CHAIN` |アプリケーション フロー オーケストレーション | LangChain チェーン、カスタム ワークフロー |
+| `RETRIEVER` |ドキュメント/コンテキストの取得 |ベクトル DB クエリ、セマンティック検索 |
+| `RERANKER` |結果の並べ替え |取得したドキュメントを再ランク付けする |
+| `TOOL` |外部ツールの呼び出し | API 呼び出し、関数の実行 |
+| `AGENT` |自律的な推論 | ReAct エージェント、プランニング ループ |
+| `GUARDRAIL` |安全性/ポリシーのチェック |コンテンツ管理、PII 検出 |
+| `EVALUATOR` |品質評価 |回答の関連性、忠実度のスコアリング |

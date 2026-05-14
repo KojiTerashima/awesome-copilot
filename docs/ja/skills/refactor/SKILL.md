@@ -3,51 +3,44 @@ name: refactor
 description: 'Surgical code refactoring to improve maintainability without changing behavior. Covers extracting functions, renaming variables, breaking down god functions, improving type safety, eliminating code smells, and applying design patterns. Less drastic than repo-rebuilder; use for gradual improvements.'
 license: MIT
 ---
+# リファクタリング
 
-# Refactor
+## 概要
 
-## Overview
+外部の動作を変更せずに、コードの構造と読みやすさを向上させます。リファクタリングは革命ではなく段階的な進化です。これは、最初から書き直すのではなく、既存のコードを改善するために使用します。
 
-Improve code structure and readability without changing external behavior. Refactoring is gradual evolution, not revolution. Use this for improving existing code, not rewriting from scratch.
+## いつ使用するか
 
-## When to Use
+このスキルは次の場合に使用します。
 
-Use this skill when:
-
-- Code is hard to understand or maintain
-- Functions/classes are too large
-- Code smells need addressing
-- Adding features is difficult due to code structure
-- User asks "clean up this code", "refactor this", "improve this"
+- コードの理解や保守が難しい
+- 関数/クラスが大きすぎます
+- コードの臭いに対処する必要がある
+- コードの構造上、機能の追加が難しい
+- ユーザーが「このコードをクリーンアップして」、「これをリファクタリングして」、「これを改善して」と尋ねます。
 
 ---
 
-## Refactoring Principles
+## リファクタリングの原則
 
-### The Golden Rules
+### 黄金律
 
-1. **Behavior is preserved** - Refactoring doesn't change what the code does, only how
-2. **Small steps** - Make tiny changes, test after each
-3. **Version control is your friend** - Commit before and after each safe state
-4. **Tests are essential** - Without tests, you're not refactoring, you're editing
-5. **One thing at a time** - Don't mix refactoring with feature changes
+1. **動作は保持されます** - リファクタリングはコードの動作を変更するのではなく、変更する方法のみを変更します。
+2. **小さなステップ** - 小さな変更を加え、毎回テストします
+3. **バージョン管理はあなたの友人です** - 各安全な状態の前後にコミットします
+4. **テストは不可欠です** - テストがなければ、リファクタリングではなく編集になります。
+5. **一度に一つずつ** - リファクタリングと機能変更を混同しないでください
 
-### When NOT to Refactor
-
-```
+### リファクタリングをすべきでない場合```
 - Code that works and won't change again (if it ain't broke...)
 - Critical production code without tests (add tests first)
 - When you're under a tight deadline
 - "Just because" - need a clear purpose
-```
+```---
 
----
+## 一般的なコードの匂いと修正
 
-## Common Code Smells & Fixes
-
-### 1. Long Method/Function
-
-```diff
+### 1. 長いメソッド/関数```diff
 # BAD: 200-line function that does everything
 - async function processOrder(orderId) {
 -   // 50 lines: fetch order
@@ -68,11 +61,7 @@ Use this skill when:
 +   await sendNotifications(order, pricing, shipment);
 +   return { order, pricing, shipment };
 + }
-```
-
-### 2. Duplicated Code
-
-```diff
+```### 2. 重複したコード```diff
 # BAD: Same logic in multiple places
 - function calculateUserDiscount(user) {
 -   if (user.membership === 'gold') return user.total * 0.2;
@@ -99,11 +88,7 @@ Use this skill when:
 + function calculateOrderDiscount(order) {
 +   return order.total * getMembershipDiscountRate(order.user.membership);
 + }
-```
-
-### 3. Large Class/Module
-
-```diff
+```### 3. 大規模なクラス/モジュール```diff
 # BAD: God object that knows too much
 - class UserManager {
 -   createUser() { /* ... */ }
@@ -134,11 +119,7 @@ Use this skill when:
 + class PaymentService {
 +   process(amount, method) { /* ... */ }
 + }
-```
-
-### 4. Long Parameter List
-
-```diff
+```### 4. 長いパラメータリスト```diff
 # BAD: Too many parameters
 - function createUser(email, password, name, age, address, city, country, phone) {
 -   /* ... */
@@ -165,11 +146,7 @@ Use this skill when:
 +   .name('Test User')
 +   .address(address)
 +   .build();
-```
-
-### 5. Feature Envy
-
-```diff
+```### 5. 機能羨望```diff
 # BAD: Method that uses another object's data more than its own
 - class Order {
 -   calculateDiscount(user) {
@@ -197,11 +174,7 @@ Use this skill when:
 +     return this.total * user.getDiscountRate(this.total);
 +   }
 + }
-```
-
-### 6. Primitive Obsession
-
-```diff
+```### 6. 原始的な執着```diff
 # BAD: Using primitives for domain concepts
 - function sendEmail(to, subject, body) { /* ... */ }
 - sendEmail('user@example.com', 'Hello', '...');
@@ -233,11 +206,7 @@ Use this skill when:
 + // Usage
 + const email = Email.create('user@example.com');
 + const phone = new PhoneNumber('1', '555-1234');
-```
-
-### 7. Magic Numbers/Strings
-
-```diff
+```### 7. マジックナンバー/文字列```diff
 # BAD: Unexplained values
 - if (user.status === 2) { /* ... */ }
 - const discount = total * 0.15;
@@ -261,11 +230,7 @@ Use this skill when:
 + if (user.status === UserStatus.INACTIVE) { /* ... */ }
 + const discount = total * DISCOUNT_RATES.PREMIUM;
 + setTimeout(callback, ONE_DAY_MS);
-```
-
-### 8. Nested Conditionals
-
-```diff
+```### 8. 入れ子になった条件文```diff
 # BAD: Arrow code
 - function process(order) {
 -   if (order) {
@@ -305,11 +270,7 @@ Use this skill when:
 +     validateOrderTotal(order)
 +   ]).flatMap(() => processOrder(order));
 + }
-```
-
-### 9. Dead Code
-
-```diff
+```### 9. デッドコード```diff
 # BAD: Unused code lingers
 - function oldImplementation() { /* ... */ }
 - const DEPRECATED_VALUE = 5;
@@ -320,11 +281,7 @@ Use this skill when:
 # GOOD: Remove it
 + // Delete unused functions, imports, and commented code
 + // If you need it again, git history has it
-```
-
-### 10. Inappropriate Intimacy
-
-```diff
+```### 10. 不適切な親密さ```diff
 # BAD: One class reaches deep into another
 - class OrderProcessor {
 -   process(order) {
@@ -340,15 +297,11 @@ Use this skill when:
 +     order.save();  // Order knows how to save itself
 +   }
 + }
-```
+```---
 
----
+## メソッドの抽出リファクタリング
 
-## Extract Method Refactoring
-
-### Before and After
-
-```diff
+### 前後```diff
 # Before: One long function
 - function printReport(users) {
 -   console.log('USER REPORT');
@@ -398,15 +351,11 @@ Use this skill when:
 +   console.log(`${title.split(' ')[0]}: ${users.length}`);
 +   console.log('');
 + }
-```
+```---
 
----
+## タイプ セーフティの導入
 
-## Introducing Type Safety
-
-### From Untyped to Typed
-
-```diff
+### 型なしから型ありへ```diff
 # Before: No types
 - function calculateDiscount(user, total, membership, date) {
 -   if (membership === 'gold' && date.getDay() === 5) {
@@ -458,15 +407,11 @@ Use this skill when:
 +     rate
 +   };
 + }
-```
+```---
 
----
+## リファクタリング用のデザインパターン
 
-## Design Patterns for Refactoring
-
-### Strategy Pattern
-
-```diff
+### 戦略パターン```diff
 # Before: Conditional logic
 - function calculateShipping(order, method) {
 -   if (method === 'standard') {
@@ -504,11 +449,7 @@ Use this skill when:
 + function calculateShipping(order: Order, strategy: ShippingStrategy) {
 +   return strategy.calculate(order);
 + }
-```
-
-### Chain of Responsibility
-
-```diff
+```### 責任の連鎖```diff
 # Before: Nested validation
 - function validate(user) {
 -   const errors = [];
@@ -552,15 +493,11 @@ Use this skill when:
 +   .setNext(new NameRequiredValidator())
 +   .setNext(new AgeValidator())
 +   .setNext(new CountryValidator());
-```
+```---
 
----
+## リファクタリング手順
 
-## Refactoring Steps
-
-### Safe Refactoring Process
-
-```
+### 安全なリファクタリングプロセス```
 1. PREPARE
    - Ensure tests exist (write them if missing)
    - Commit current state
@@ -586,60 +523,58 @@ Use this skill when:
    - Update comments
    - Update documentation
    - Final commit
-```
+```---
+
+## リファクタリングチェックリスト
+
+### コードの品質
+
+- [ ] 関数は小さい (< 50 行)
+- [ ] 関数は 1 つのことを行います
+- [ ] 重複したコードはありません
+- [ ] わかりやすい名前 (変数、関数、クラス)
+- [ ] マジックナンバー/文字列はありません
+- [ ] デッドコードが削除されました
+
+### 構造
+
+- [ ] 関連コードまとめ
+- [ ] モジュール境界をクリア
+- [ ] 依存関係は一方向に流れます
+- [ ] 循環依存関係はありません
+
+### タイプセーフティ
+
+- [ ] すべてのパブリック API に対して定義されたタイプ
+- [ ] 正当な理由のない `any` タイプはありません
+- [ ] 明示的にマークされた Null 許容型
+
+### テスト
+
+- [ ] リファクタリングされたコードがテストされます
+- [ ] テストはエッジケースをカバーします
+- [ ] すべてのテストに合格しました
 
 ---
 
-## Refactoring Checklist
+## 一般的なリファクタリング操作
 
-### Code Quality
-
-- [ ] Functions are small (< 50 lines)
-- [ ] Functions do one thing
-- [ ] No duplicated code
-- [ ] Descriptive names (variables, functions, classes)
-- [ ] No magic numbers/strings
-- [ ] Dead code removed
-
-### Structure
-
-- [ ] Related code is together
-- [ ] Clear module boundaries
-- [ ] Dependencies flow in one direction
-- [ ] No circular dependencies
-
-### Type Safety
-
-- [ ] Types defined for all public APIs
-- [ ] No `any` types without justification
-- [ ] Nullable types explicitly marked
-
-### Testing
-
-- [ ] Refactored code is tested
-- [ ] Tests cover edge cases
-- [ ] All tests pass
-
----
-
-## Common Refactoring Operations
-
-| Operation                                     | Description                           |
-| --------------------------------------------- | ------------------------------------- |
-| Extract Method                                | Turn code fragment into method        |
-| Extract Class                                 | Move behavior to new class            |
-| Extract Interface                             | Create interface from implementation  |
-| Inline Method                                 | Move method body back to caller       |
-| Inline Class                                  | Move class behavior to caller         |
-| Pull Up Method                                | Move method to superclass             |
-| Push Down Method                              | Move method to subclass               |
-| Rename Method/Variable                        | Improve clarity                       |
-| Introduce Parameter Object                    | Group related parameters              |
-| Replace Conditional with Polymorphism         | Use polymorphism instead of switch/if |
-| Replace Magic Number with Constant            | Named constants                       |
-| Decompose Conditional                         | Break complex conditions              |
-| Consolidate Conditional                       | Combine duplicate conditions          |
-| Replace Nested Conditional with Guard Clauses | Early returns                         |
-| Introduce Null Object                         | Eliminate null checks                 |
-| Replace Type Code with Class/Enum             | Strong typing                         |
-| Replace Inheritance with Delegation           | Composition over inheritance          |
+|操作 |説明 |
+| ----------------------------------------------- | ------------------------------------- |
+|抽出メソッド |コードフラグメントをメソッドに変換する |
+|クラスの抽出 |動作を新しいクラスに移動する |
+|インターフェイスの抽出 |実装からインターフェイスを作成 |
+|インラインメソッド |メソッド本体を呼び出し元に戻す |
+|インラインクラス |クラスの動作を呼び出し元に移動する |
+|懸垂法 |メソッドをスーパークラスに移動 |
+|プッシュダウン法 |メソッドをサブクラスに移動 |
+|メソッド/変数の名前を変更 |明瞭さを向上させる |
+|パラメータオブジェクトの導入 |グループ関連パラメータ |
+|条件を多態性で置き換える | switch/if | の代わりにポリモーフィズムを使用します。
+|マジックナンバーを定数に置き換える |名前付き定数 |
+|条件付きの分解 |複雑な条件を打ち破る |
+|条件付きを統合 |重複した条件を結合する |
+|入れ子になった条件をガード句に置き換える |早期返品 |
+| Null オブジェクトの導入 | null チェックを排除する |
+|型コードをクラス/列挙型に置き換える |強力な型指定 |
+|継承を委任に置き換える |継承より合成 |

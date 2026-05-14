@@ -1,151 +1,125 @@
-# componentWillUpdate Migration Reference
+#componentWillUpdate 移行リファレンス
 
-## The Core Decision
+## 核心的な決定「」
+ComponentWillUpdate は DOM (スクロール、サイズ、位置、選択) を読み取りますか?
+  YES → getSnapshotBeforeUpdate (componentDidUpdate と組み合わせ)
+  NO（副作用、リクエストキャンセルなど）→componentDidUpdate
+「」---
 
-```
-Does componentWillUpdate read the DOM (scroll, size, position, selection)?
-  YES → getSnapshotBeforeUpdate (paired with componentDidUpdate)
-  NO (side effects, request cancellation, etc.) → componentDidUpdate
-```
+## ケース A - 再レンダリング前に DOM を読み取ります {#case-a}
 
----
+このメソッドは、React が次の更新を適用する前に DOM 測定値 (スクロール位置、要素サイズ、カーソル位置) をキャプチャするため、後で復元または調整できます。
 
-## Case A - Reads DOM Before Re-render {#case-a}
-
-The method captures a DOM measurement (scroll position, element size, cursor position) before React applies the next update, so it can be restored or adjusted after.
-
-**Before:**
-
-```jsx
+**前に：**```jsx
 class MessageList extends React.Component {
-  componentWillUpdate(nextProps) {
+  コンポーネントWillUpdate(nextProps) {
     if (nextProps.messages.length > this.props.messages.length) {
       this.savedScrollHeight = this.listRef.current.scrollHeight;
       this.savedScrollTop = this.listRef.current.scrollTop;
     }
   }
 
-  componentDidUpdate(prevProps) {
+  コンポーネントDidUpdate(prevProps) {
     if (prevProps.messages.length < this.props.messages.length) {
-      const scrollDelta = this.listRef.current.scrollHeight - this.savedScrollHeight;
-      this.listRef.current.scrollTop = this.savedScrollTop + scrollDelta;
+      constscrollDelta = this.listRef.current.scrollHeight - this.savedScrollHeight;
+      this.listRef.current.scrollTop = this.savedScrollTop +scrollDelta;
     }
   }
 }
-```
-
-**After - getSnapshotBeforeUpdate + componentDidUpdate:**
-
-```jsx
+「」**後 - getSnapshotBeforeUpdate +componentDidUpdate:**```jsx
 class MessageList extends React.Component {
-  // Called right before DOM updates are applied - perfect timing to read DOM
+  // DOM 更新が適用される直前に呼び出されます。DOM を読み取るのに最適なタイミングです。
   getSnapshotBeforeUpdate(prevProps, prevState) {
     if (prevProps.messages.length < this.props.messages.length) {
-      return {
-        scrollHeight: this.listRef.current.scrollHeight,
-        scrollTop: this.listRef.current.scrollTop,
+      戻り値 {
+        スクロール高さ: this.listRef.current.scrollHeight、
+        スクロールトップ: this.listRef.current.scrollTop,
       };
     }
-    return null; // Return null when snapshot is not needed
+    null を返します。 // スナップショットが必要ない場合は null を返します
   }
 
-  // Receives the snapshot as the third argument
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    if (snapshot !== null) {
-      const scrollDelta = this.listRef.current.scrollHeight - snapshot.scrollHeight;
-      this.listRef.current.scrollTop = snapshot.scrollTop + scrollDelta;
+  // スナップショットを第 3 引数として受け取ります
+  ComponentDidUpdate(prevProps, prevState, スナップショット) {
+    if (スナップショット !== null) {
+      constscrollDelta = this.listRef.current.scrollHeight - snapshot.scrollHeight;
+      this.listRef.current.scrollTop = スナップショット.スクロールトップ + スクロールデルタ;
     }
   }
 }
-```
+「」**これがcomponentWillUpdateよりも優れている理由:** React 18の同時モードでは、`componentWillUpdate`の実行時とDOMが実際に更新される時との間にギャップが生じる可能性があります。 `componentWillUpdate` の DOM 読み取りが古い可能性があります。 `getSnapshotBeforeUpdate` は、DOM がコミットされる直前に同期的に実行されます。読み取りは常に正確です。
 
-**Why this is better than componentWillUpdate:** In React 18 concurrent mode, there can be a gap between when `componentWillUpdate` runs and when the DOM actually updates. DOM reads in `componentWillUpdate` may be stale. `getSnapshotBeforeUpdate` runs synchronously right before the DOM is committed - the reads are always accurate.
+**契約書:**
 
-**The contract:**
-
-- Return a value from `getSnapshotBeforeUpdate` → that value becomes `snapshot` in `componentDidUpdate`
-- Return `null` → `snapshot` in `componentDidUpdate` is `null`
-- Always check `if (snapshot !== null)` in `componentDidUpdate`
-- `getSnapshotBeforeUpdate` MUST be paired with `componentDidUpdate`
+- `getSnapshotBeforeUpdate` から値を返す → その値は `componentDidUpdate` の `snapshot` になります
+- `null` → `snapshot` を `componentDidUpdate` で返すと `null` になります
+- `componentDidUpdate` の `if (snapshot !== null)` を常にチェックしてください
+- `getSnapshotBeforeUpdate` は `componentDidUpdate` と組み合わせる必要があります
 
 ---
 
-## Case B - Side Effects Before Update {#case-b}
+## ケース B - アップデート前の副作用 {#case-b}
 
-The method cancels an in-flight request, clears a timer, or runs some preparatory side effect when props or state are about to change.
+このメソッドは、props や state が変更されようとしているときに、実行中のリクエストをキャンセルしたり、タイマーをクリアしたり、準備的な副作用を実行したりします。
 
-**Before:**
-
-```jsx
+**前に：**```jsx
 class SearchResults extends React.Component {
-  componentWillUpdate(nextProps) {
+  コンポーネントWillUpdate(nextProps) {
     if (nextProps.query !== this.props.query) {
       this.currentRequest?.cancel();
-      this.setState({ loading: true, results: [] });
+      this.setState({ 読み込み: true、結果: [] });
     }
   }
 }
-```
-
-**After - move to componentDidUpdate (run AFTER the update):**
-
-```jsx
+「」**後 -ComponentDidUpdate に移動します (更新後に実行):**```jsx
 class SearchResults extends React.Component {
-  componentDidUpdate(prevProps) {
+  コンポーネントDidUpdate(prevProps) {
     if (prevProps.query !== this.props.query) {
-      // Cancel the stale request
+      // 古いリクエストをキャンセルします
       this.currentRequest?.cancel();
-      // Start the new request for the updated query
-      this.setState({ loading: true, results: [] });
+      // 更新されたクエリに対する新しいリクエストを開始します
+      this.setState({ 読み込み: true、結果: [] });
       this.currentRequest = searchAPI(this.props.query)
-        .then(results => this.setState({ results, loading: false }));
+        .then(results => this.setState({ results, 読み込み: false }));
     }
   }
 }
-```
-
-**Note:** The side effect now runs AFTER the render, not before. In most cases this is correct - you want to react to the state that's actually showing, not the state that was showing. If you truly need to run something synchronously BEFORE a render, reconsider the design - that usually indicates state that should be managed differently.
+「」**注:** 副作用はレンダリング前ではなくレンダリング後に実行されるようになりました。ほとんどの場合、これは正しいです。表示されている状態ではなく、実際に表示されている状態に反応する必要があります。レンダリング前に何かを同期的に実行する必要がある場合は、設計を再検討してください。通常、これは状態を別の方法で管理する必要があることを示しています。
 
 ---
 
-## Both Cases in One Component
+## 1 つのコンポーネントで両方のケースを実現
 
-If a component had both DOM-reading AND side effects in `componentWillUpdate`:
-
-```jsx
-// Before: does both
-componentWillUpdate(nextProps) {
-  // DOM read
+コンポーネントに `componentWillUpdate` で DOM 読み取りと副作用の両方がある場合:```jsx
+// 前: 両方を実行します
+コンポーネントWillUpdate(nextProps) {
+  // DOMの読み込み
   if (isExpanding(nextProps)) {
     this.savedHeight = this.ref.current.offsetHeight;
   }
-  // Side effect
+  // 副作用
   if (nextProps.query !== this.props.query) {
     this.request?.cancel();
   }
 }
-```
-
-After: split into both patterns:
-
-```jsx
-// DOM read → getSnapshotBeforeUpdate
+「」後: 両方のパターンに分割:```jsx
+// DOM読み込み → getSnapshotBeforeUpdate
 getSnapshotBeforeUpdate(prevProps, prevState) {
   if (isExpanding(this.props)) {
-    return { height: this.ref.current.offsetHeight };
+    return { 高さ: this.ref.current.offsetHeight };
   }
-  return null;
+  null を返します。
 }
 
-// Side effect → componentDidUpdate
-componentDidUpdate(prevProps, prevState, snapshot) {
-  // Handle snapshot if present
-  if (snapshot !== null) { /* ... */ }
+// 副作用 →ComponentDidUpdate
+ComponentDidUpdate(prevProps, prevState, スナップショット) {
+  // スナップショットが存在する場合は処理します
+  if (スナップショット !== null) { /* ... */ }
 
-  // Handle side effect
+  // 副作用を処理します
   if (prevProps.query !== this.props.query) {
     this.request?.cancel();
     this.startNewRequest();
   }
 }
-```
+「」

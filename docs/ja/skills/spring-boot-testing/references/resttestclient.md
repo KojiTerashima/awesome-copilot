@@ -1,26 +1,20 @@
-# RestTestClient
+#RestTestClient
 
-Modern REST client testing with Spring Boot 4+ (replaces TestRestTemplate).
+Spring Boot 4+ を使用した最新の REST クライアント テスト (TestRestTemplate を置き換えます)。
 
-## Overview
+## 概要
 
-RestTestClient is the modern alternative to TestRestTemplate in Spring Boot 4.0+. It provides a fluent, reactive API for testing REST endpoints.
+RestTestClient は、Spring Boot 4.0 以降の TestRestTemplate の最新の代替手段です。 REST エンドポイントをテストするための流暢でリアクティブな API を提供します。
 
-## Setup
+## セットアップ
 
-### Dependency (Spring Boot 4+)
-
-```xml
+### 依存関係 (Spring Boot 4+)```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-restclient-test</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-### Basic Configuration
-
-```java
+```### 基本構成```java
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
 class OrderIntegrationTest {
@@ -28,13 +22,9 @@ class OrderIntegrationTest {
   @Autowired
   private RestTestClient restClient;
 }
-```
+```## HTTP メソッド
 
-## HTTP Methods
-
-### GET Request
-
-```java
+### GETリクエスト```java
 @Test
 void shouldGetOrder() {
   restClient
@@ -49,11 +39,7 @@ void shouldGetOrder() {
       assertThat(order.getStatus()).isEqualTo("PENDING");
     });
 }
-```
-
-### POST Request
-
-```java
+```### POSTリクエスト```java
 @Test
 void shouldCreateOrder() {
   OrderRequest request = new OrderRequest("Laptop", 2);
@@ -71,11 +57,7 @@ void shouldCreateOrder() {
     .expectBody(Long.class)
     .isEqualTo(1L);
 }
-```
-
-### PUT Request
-
-```java
+```### PUT リクエスト```java
 @Test
 void shouldUpdateOrder() {
   restClient
@@ -86,11 +68,7 @@ void shouldUpdateOrder() {
     .expectStatus()
     .isOk();
 }
-```
-
-### DELETE Request
-
-```java
+```### 削除リクエスト```java
 @Test
 void shouldDeleteOrder() {
   restClient
@@ -100,13 +78,9 @@ void shouldDeleteOrder() {
     .expectStatus()
     .isNoContent();
 }
-```
+```## 応答アサーション
 
-## Response Assertions
-
-### Status Codes
-
-```java
+### ステータスコード```java
 restClient
   .get()
   .uri("/orders/1")
@@ -119,11 +93,7 @@ restClient
   .isNotFound()     // 404
   .is5xxServerError() // 5xx
   .isEqualTo(200);  // Specific code
-```
-
-### Headers
-
-```java
+```### ヘッダー```java
 restClient
   .post()
   .uri("/orders")
@@ -133,11 +103,7 @@ restClient
   .contentType(MediaType.APPLICATION_JSON)
   .exists("X-Request-Id")
   .valueEquals("X-Api-Version", "v1");
-```
-
-### Body Assertions
-
-```java
+```### 本文のアサーション```java
 restClient
   .get()
   .uri("/orders/1")
@@ -145,11 +111,7 @@ restClient
   .expectBody(Order.class)
   .value(order -> assertThat(order.getId()).isEqualTo(1L))
   .returnResult();
-```
-
-### JSON Path
-
-```java
+```### JSON パス```java
 restClient
   .get()
   .uri("/orders")
@@ -158,24 +120,16 @@ restClient
   .jsonPath("$.content[0].id").isEqualTo(1)
   .jsonPath("$.content[0].status").isEqualTo("PENDING")
   .jsonPath("$.totalElements").isNumber();
-```
+```## 構成のリクエスト
 
-## Request Configuration
-
-### Headers
-
-```java
+### ヘッダー```java
 restClient
   .get()
   .uri("/orders/1")
   .header("Authorization", "Bearer token")
   .header("X-Api-Key", "secret")
   .exchange();
-```
-
-### Query Parameters
-
-```java
+```### クエリパラメータ```java
 restClient
   .get()
   .uri(uriBuilder -> uriBuilder
@@ -185,22 +139,14 @@ restClient
     .queryParam("size", 10)
     .build())
   .exchange();
-```
-
-### Path Variables
-
-```java
+```### パス変数```java
 restClient
   .get()
   .uri("/orders/{id}", 1L)
   .exchange();
-```
+```## MockMvc を使用する
 
-## With MockMvc
-
-RestTestClient can also work with MockMvc (no server startup):
-
-```java
+RestTestClient は MockMvc とも連携できます (サーバーは起動しません)。```java
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureRestTestClient
@@ -220,23 +166,19 @@ class OrderMockMvcTest {
       .isOk();
   }
 }
-```
+```## 比較: RestTestClient と TestRestTemplate
 
-## Comparison: RestTestClient vs TestRestTemplate
-
-| Feature | RestTestClient | TestRestTemplate |
+|特集 |テストクライアント |テストレストテンプレート |
 | ------- | -------------- | ---------------- |
-| Style | Fluent/reactive | Imperative |
-| Spring Boot | 4.0+ | All versions (deprecated in 4) |
-| Assertions | Built-in | Manual |
-| MockMvc support | Yes | No |
-| Async | Native | Requires extra handling |
+|スタイル |流暢/反応的 |命令的 |
+|スプリングブーツ | 4.0+ |すべてのバージョン (4 で非推奨) |
+|アサーション |内蔵 |マニュアル |
+| MockMvc のサポート |はい |いいえ |
+|非同期 |ネイティブ |追加の処理が必要 |
 
-## Migration from TestRestTemplate
+## TestRestTemplate からの移行
 
-### Before (Deprecated)
-
-```java
+### 以前 (非推奨)```java
 @Autowired
 private TestRestTemplate restTemplate;
 
@@ -248,11 +190,7 @@ void shouldGetOrder() {
   assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
   assertThat(response.getBody().getId()).isEqualTo(1L);
 }
-```
-
-### After (RestTestClient)
-
-```java
+```### 後 (RestTestClient)```java
 @Autowired
 private RestTestClient restClient;
 
@@ -267,12 +205,10 @@ void shouldGetOrder() {
     .expectBody(Order.class)
     .value(order -> assertThat(order.getId()).isEqualTo(1L));
 }
-```
+```## ベストプラクティス
 
-## Best Practices
-
-1. Use with @SpringBootTest(WebEnvironment.RANDOM_PORT) for real HTTP
-2. Use with @AutoConfigureMockMvc for faster tests without server
-3. Leverage fluent assertions for readability
-4. Test both success and error scenarios
-5. Verify headers for security/API versioning
+1. 実際の HTTP には @SpringBootTest(WebEnvironment.RANDOM_PORT) とともに使用します
+2. @AutoConfigureMockMvc と組み合わせて使用すると、サーバーなしでテストを高速化できます。
+3. 読みやすさのために流暢なアサーションを活用する
+4. 成功シナリオとエラーシナリオの両方をテストする
+5. セキュリティ/API バージョン管理のヘッダーを確認する

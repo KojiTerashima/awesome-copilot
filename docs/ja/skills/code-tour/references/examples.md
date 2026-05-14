@@ -1,73 +1,63 @@
-# Real-World CodeTour Examples
+# 実際のコードツアーの例
 
-Reference this file when you want to see how real repos use CodeTour features.
-Each example is sourced from a public GitHub repo with a direct link to the `.tour` file.
+実際のリポジトリが CodeTour 機能をどのように使用するかを確認する場合は、このファイルを参照してください。
+各サンプルは、`.tour` ファイルへの直接リンクを持つパブリック GitHub リポジトリから取得されています。
 
 ---
 
-## microsoft/codetour — Contributor orientation
+##microsoft/codetour — 貢献者志向
 
-**Tour file:** https://github.com/microsoft/codetour/blob/main/.tours/intro.tour
-**Persona:** New contributor
-**Steps:** ~5 · **Depth:** Standard
+**ツアー ファイル:** https://github.com/microsoft/codetour/blob/main/.tours/intro.tour
+**ペルソナ:** 新しい寄稿者
+**ステップ:** ~5 · **深さ:** 標準
 
-**What makes it good:**
-- Intro step with an embedded SVG architecture diagram (raw GitHub URL inside the description)
-- Rich markdown per step with emoji section headers (`### 🎥 Tour Player`)
-- Inline cross-file links inside descriptions: `[Gutter decorator](./src/player/decorator.ts)`
-- Uses the top-level `description` field as a subtitle for the tour itself
+**良い点:**
+- SVG アーキテクチャ図が埋め込まれた導入ステップ (説明内の生の GitHub URL)
+- 絵文字セクションヘッダーを使用したステップごとの豊富なマークダウン (`### 🎥 Tour Player`)
+- 説明内のインライン ファイル間リンク: `[Gutter decorator](./src/player/decorator.ts)`
+- 最上位の `description` フィールドをツアー自体のサブタイトルとして使用します
 
-**Technique to copy:** Embed images and cross-links in descriptions to make them self-contained.
-
-```json
+**コピーするテクニック:** 説明に画像と相互リンクを埋め込み、自己完結型にします。```json
 {
   "file": "src/player/index.ts",
   "line": 436,
   "description": "### 🎥 Tour Player\n\nThe CodeTour player ...\n\n![Architecture](https://raw.githubusercontent.com/.../overview.svg)\n\nSee also: [Gutter decorator](./src/player/decorator.ts)"
 }
-```
+```---
 
----
+## a11yproject/a11yproject.com — 新しい貢献者のオンボーディング
 
-## a11yproject/a11yproject.com — New contributor onboarding
+**ツアー ファイル:** https://github.com/a11yproject/a11yproject.com/blob/main/.tours/code-tour.tour
+**ペルソナ:** 外部寄稿者
+**ステップ:** 26 · **深さ:** 深い
 
-**Tour file:** https://github.com/a11yproject/a11yproject.com/blob/main/.tours/code-tour.tour
-**Persona:** External contributor
-**Steps:** 26 · **Depth:** Deep
+**良い点:**
+- ほぼ完全に `directory` ステップ — ファイル内で迷うことなく、すべての `src/` サブディレクトリに方向付けします
+- 全体を通して会話的で初心者に優しい口調
+- 開始ステップの `selection` は、`package.json` の正確なエントリを強調表示します。
+- 心からの感謝と行動喚起で締めくくります
 
-**What makes it good:**
-- Almost entirely `directory` steps — orients to every `src/` subdirectory without getting lost in files
-- Conversational, beginner-friendly tone throughout
-- `selection` on the opening step to highlight the exact entry in `package.json`
-- Closes with a genuine thank-you and call-to-action
-
-**Technique to copy:** Use directory steps as the skeleton of an onboarding tour — they teach structure without requiring the author to explain every file.
-
-```json
+**コピーするテクニック:** ディレクトリ ステップをオンボーディング ツアーの骨組みとして使用します。作成者がすべてのファイルを説明する必要なく、構造を教えます。```json
 {
   "directory": "src/_data",
   "description": "This folder contains the **data files** for the site. Think of them as a lightweight database — YAML files that power the resource listings, posts index, and nav."
 }
-```
+```---
 
----
+## github/codespaces-codeql — 技術的に最も完全な例
 
-## github/codespaces-codeql — The most technically complete example
+**ツアー ファイル:** https://github.com/github/codespaces-codeql/blob/main/.tours/codeql-tutorial.tour
+**ペルソナ:** セキュリティ エンジニア / コンセプト学習者
+**ステップ:** 12 · **深さ:** 標準
 
-**Tour file:** https://github.com/github/codespaces-codeql/blob/main/.tours/codeql-tutorial.tour
-**Persona:** Security engineer / concept learner
-**Steps:** 12 · **Depth:** Standard
+**良い点:**
+- `isPrimary: true` — コードスペースが開くと自動起動します
+- ツアー中に実際の VS Code コマンドを実行するための `commands` 配列: リーダーがそのステップに到着すると、ツアーは文字通り `codeQL.runQuery` を実行します
+- サイドバーパネルを切り替える `view` プロパティ (`"view": "codeQLDatabases"`)
+- 回復力のあるマッチングの場合、`line` の代わりに `pattern` を使用します: `"pattern": "import tutorial.*"`
+- `selection` : クエリ ファイル内の正確な `select` 句を強調表示します。
 
-**What makes it good:**
-- `isPrimary: true` — auto-launches when the Codespace opens
-- `commands` array to run real VS Code commands mid-tour: the tour literally executes `codeQL.runQuery` when the reader arrives at that step
-- `view` property to switch the sidebar panel (`"view": "codeQLDatabases"`)
-- `pattern` instead of `line` for resilient matching: `"pattern": "import tutorial.*"`
-- `selection` to highlight the exact `select` clause in a query file
-
-**This is the canonical reference for `commands`, `view`, and `pattern`.**
-
-```json
+**これは、`commands`、`view`、および `pattern` の正規の参照です。**```json
 {
   "file": "tutorial.ql",
   "pattern": "import tutorial.*",
@@ -76,120 +66,112 @@ Each example is sourced from a public GitHub repo with a direct link to the `.to
   "title": "Run your first query",
   "description": "Click the **▶ Run** button above. The results appear in the CodeQL Query Results panel."
 }
-```
+```---
+
+## github/codespaces-learn-with-me — 最小限の対話型チュートリアル
+
+**ツアー ファイル:** https://github.com/github/codespaces-learn-with-me/blob/main/.tours/main.tour
+**ペルソナ:** まったくの初心者
+**ステップ:** 4 · **深さ:** クイック
+
+**良い点:**
+- たった 4 つのステップ — クイック/バイブコーダーのペルソナにとっては少ない方が良いことを証明します
+- `isPrimary: true` 自動起動の場合
+- 各ステップでは、ただ読むだけではなく、**何かをする** (文字列を編集したり、色を変更したり) ように読者に指示します。
+- 「ページが公開される」という具体的な結果で終了します。
+
+**コピーするテクニック:** クイック/バイブコーダー ツアーの場合は、容赦なくカットしてください。行動を促す 4 つのステップは、すべてを説明する 12 のステップに勝ります。
 
 ---
 
-## github/codespaces-learn-with-me — Minimal interactive tutorial
+## blackgirlbytes/copilot-todo-list — 28 ステップの対話型チュートリアル
 
-**Tour file:** https://github.com/github/codespaces-learn-with-me/blob/main/.tours/main.tour
-**Persona:** Total beginner
-**Steps:** 4 · **Depth:** Quick
+**ツアー ファイル:** https://github.com/blackgirlbytes/copilot-todo-list/blob/main/.tours/main.tour
+**ペルソナ:** 概念学習 / 実践チュートリアル
+**ステップ数:** 28 · **深さ:** 深い
 
-**What makes it good:**
-- Only 4 steps — proves that less is more for quick/vibecoder personas
-- `isPrimary: true` for auto-launch
-- Each step tells the reader to **do something** (edit a string, change a color) — not just read
-- Ends with a tangible outcome: "your page is live"
+**良い点:**
+- **コンテンツのみのチェックポイント ステップ** (`file` キーなし) を進捗マイルストーンとして使用します: 「ページをチェックしてください! 🎉」と「試してみてください!」コーディングタスクの合間に
+- 説明内のターミナル インライン コマンド: `>> npm install uuid; npm install styled-components`
+- 各ファイルステップには、ユーザーが受け入れる必要がある正確なコードがマークダウンコードフェンス内に表示されるため、期待される出力がわかります。
 
-**Technique to copy:** For quick/vibecoder tours, cut mercilessly. Four steps that drive action beat twelve that explain everything.
-
----
-
-## blackgirlbytes/copilot-todo-list — 28-step interactive tutorial
-
-**Tour file:** https://github.com/blackgirlbytes/copilot-todo-list/blob/main/.tours/main.tour
-**Persona:** Concept learner / hands-on tutorial
-**Steps:** 28 · **Depth:** Deep
-
-**What makes it good:**
-- Uses **content-only checkpoint steps** (no `file` key) as progress milestones: "Check out your page! 🎉" and "Try it out!" between coding tasks
-- Terminal inline commands in descriptions: `>> npm install uuid; npm install styled-components`
-- Each file step shows the exact code the user should accept, in a markdown code fence, so they know the expected output
-
-**Technique to copy:** Checkpoint steps (content-only, milestone title) break up long tours and give the reader a sense of progress.
-
-```json
+**模倣するテクニック:** チェックポイントのステップ (コンテンツのみ、マイルストーン タイトル) は長いツアーを分割し、読者に進歩の感覚を与えます。```json
 {
   "title": "Check out your page! 🎉",
   "description": "Open the **Simple Browser** tab to see your to-do list. You should see all three tasks rendering from your data array.\n\nOnce you're happy with it, continue to add interactivity."
 }
-```
+```---
 
----
+## lucasjellema/cloudnative-on-oci-2021 — マルチツアー建築シリーズ
 
-## lucasjellema/cloudnative-on-oci-2021 — Multi-tour architecture series
-
-**Tour files:**
+**ツアー ファイル:**
 - https://github.com/lucasjellema/cloudnative-on-oci-2021/blob/main/.tours/function-tweet-retriever.tour
-- https://github.com/lucasjellema/cloudnative-on-oci-2021/blob/main/.tours/oci-and-infrastructure-as-code.tour
+- https://github.com/lucasjellema/cloudnative-on-oci-2021/blob/main/.tours/oci-and-infrastructor-as-code.tour
 - https://github.com/lucasjellema/cloudnative-on-oci-2021/blob/main/.tours/build-and-deployment-pipeline-function-tweet-retriever.tour
 
-**Persona:** Platform engineer / architect
-**Steps:** 12 per tour · **Depth:** Standard
+**ペルソナ:** プラットフォーム エンジニア / アーキテクト
+**ステップ:** ツアーあたり 12 · **深さ:** 標準
 
-**What makes it good:**
-- Three separate tours for three separate concerns (function code, IaC, CI/CD pipeline) — each standalone but linked via `nextTour`
-- `selection` coordinates used heavily in Terraform files where a block (not a single line) is the point
-- Steps include markdown links to official OCI documentation inline
-- Designed to be browsed via `vscode.dev/github.com/...` without cloning
+**良い点:**
+- 3 つの個別の関心事項 (関数コード、IaC、CI/CD パイプライン) に対する 3 つの個別のツアー — それぞれスタンドアロンですが、`nextTour` 経由でリンクされています
+- `selection` 座標は、ブロック (単一行ではない) がポイントとなる Terraform ファイルで頻繁に使用されます。
+- ステップには、公式 OCI ドキュメントへのマークダウン リンクがインラインで含まれています
+- クローンを作成せずに `vscode.dev/github.com/...` 経由で参照できるように設計されています
 
-**Technique to copy:** For complex systems, write one tour per layer and chain them with `nextTour`. Don't try to cover infrastructure + application code + CI/CD in one tour.
-
----
-
-## SeleniumHQ/selenium — Monorepo build system onboarding
-
-**Tour files:**
-- `.tours/bazel.tour` — Bazel workspace and build target orientation
-- `.tours/building-and-testing-the-python-bindings.tour` — Python bindings BUILD.bazel walkthrough
-
-**Persona:** External contributor (build system focus)
-**Steps:** ~10 per tour
-
-**What makes it good:**
-- Targets a non-obvious entry point — not the product code but the build system
-- Proves that "contributor onboarding" tours don't have to start with `main()` — they start with whatever is confusing about this specific repo
-- Used in a large, mature OSS project at scale
+**コピーするテクニック:** 複雑なシステムの場合は、レイヤーごとに 1 つのツアーを記述し、`nextTour` でチェーンします。インフラストラクチャ + アプリケーション コード + CI/CD を 1 つのツアーでカバーしようとしないでください。
 
 ---
 
-## Technique quick-reference
+## SeleniumHQ/selenium — Monorepo ビルド システムのオンボーディング
 
-| Feature | When to use | Real example |
-|---------|-------------|-------------|
-| `isPrimary: true` | Auto-launch tour when repo opens (Codespace, vscode.dev) | codespaces-learn-with-me, codespaces-codeql |
-| `commands: [...]` | Run a VS Code command when reader arrives at this step | codespaces-codeql (`codeQL.runQuery`) |
-| `view: "terminal"` | Switch VS Code sidebar/panel at this step | codespaces-codeql (`codeQLDatabases`) |
-| `pattern: "regex"` | Match by line content, not number — use for volatile files | codespaces-codeql |
-| `selection: {start, end}` | Highlight a block (function body, config section, type def) | a11yproject, oci-2021, codespaces-codeql |
-| `directory: "path/"` | Orient to a folder without reading every file | a11yproject, codespaces-codeql |
-| `uri: "https://..."` | Link to PR, issue, RFC, ADR, external doc | Any PR review tour |
-| `nextTour: "Title"` | Chain tours in a series | oci-2021 (3-part series) |
-| Checkpoint steps (content-only) | Progress milestones in long interactive tours | copilot-todo-list |
-| `>> command` in description | Terminal inline command link in VS Code | copilot-todo-list |
-| Embedded image in description | Architecture diagrams, screenshots | microsoft/codetour |
+**ツアー ファイル:**
+- `.tours/bazel.tour` — Bazel ワークスペースとビルド ターゲットの方向
+- `.tours/building-and-testing-the-python-bindings.tour` — Python バインディング BUILD.bazel のウォークスルー
+
+**ペルソナ:** 外部貢献者 (ビルド システム重視)
+**ステップ:** ツアーごとに ~10
+
+**良い点:**
+- 明白ではないエントリ ポイントをターゲットとしています。製品コードではなく、ビルド システムです。
+- 「寄稿者オンボーディング」ツアーは `main()` で始まる必要がないことを証明します。ツアーは、この特定のリポジトリに関して混乱を招くものから始まります。
+- 大規模で成熟した OSS プロジェクトで大規模に使用
 
 ---
 
-## Discover more real tours on GitHub
+## テクニックのクイックリファレンス
 
-**Search all `.tour` files on GitHub:**
-https://github.com/search?q=path%3A**%2F*.tour+&type=code
-
-This search returns every `.tour` file committed to a public GitHub repo. Use it to:
-- Find tours for repos in the same language/framework as the one you're working on
-- Study how other authors handle the same personas or step types
-- Look up how a specific field (`commands`, `selection`, `pattern`) is used in the wild
-
-Filter by language or keyword to narrow results — e.g. add `language:TypeScript` or `fastapi` to the query.
+|特集 |いつ使用するか |実際の例 |
+|----------|---------------|---------------|
+| `isPrimary: true` |リポジトリが開いたときにツアーを自動起動する (Codespace、vscode.dev) | codespaces-learn-with-me、codespaces-codeql |
+| `commands: [...]` |リーダーがこのステップに到達したら、VS Code コマンドを実行します。コードスペース-codeql (`codeQL.runQuery`) |
+| `view: "terminal"` |このステップで VS Code サイドバー/パネルを切り替えます |コードスペース-codeql (`codeQLDatabases`) |
+| `pattern: "regex"` |数値ではなく行の内容で一致します - 揮発性ファイルに使用します |コードスペース-codeql |
+| `selection: {start, end}` |ブロック (関数本体、構成セクション、型定義) を強調表示します。 a11yプロジェクト、oci-2021、codespaces-codeql |
+| `directory: "path/"` |すべてのファイルを読み取らずにフォルダーを指定する | a11yプロジェクト、コードスペース-codeql |
+| `uri: "https://..."` | PR、問題、RFC、ADR、外部ドキュメントへのリンク |あらゆる PR レビュー ツアー |
+| `nextTour: "Title"` |シリーズのチェーンツアー | oci-2021 (3 部構成シリーズ) |
+|チェックポイントの手順 (コンテンツのみ) |長いインタラクティブなツアーでの進歩のマイルストーン |副操縦士のToDoリスト |
+| `>> command` 説明文 | VS Code のターミナル インライン コマンド リンク |副操縦士のToDoリスト |
+|説明内の埋め込み画像 |アーキテクチャ図、スクリーンショット |マイクロソフト/コードツアー |
 
 ---
 
-## Further reading
+## GitHub でさらに実際のツアーを発見
 
-- **DEV Community — "Onboard your codebase with CodeTour"**: https://dev.to/tobiastimm/onboard-your-codebase-with-codetour-2jc8
-- **Coder Blog — "Onboard to new projects faster with CodeTour"**: https://coder.com/blog/onboard-to-new-projects-faster-with-codetour
-- **Microsoft Tech Community — Educator Developer Blog**: https://techcommunity.microsoft.com/blog/educatordeveloperblog/codetour-vscode-extension-allows-you-to-produce-interactive-guides-assessments-a/1274297
-- **AMIS Technology Blog — vscode.dev + CodeTour**: https://technology.amis.nl/software-development/visual-studio-code-the-code-tours-extension-for-in-context-and-interactive-readme/
-- **CodeTour GitHub Topics**: https://github.com/topics/codetour
+**GitHub 上のすべての `.tour` ファイルを検索します:**
+https://github.com/search?q=path%3A**%2F*.tour+&type=codeこの検索で​​は、パブリック GitHub リポジトリにコミットされたすべての `.tour` ファイルが返されます。これを使用して次のことを行います。
+- 作業しているものと同じ言語/フレームワークでリポジトリのツアーを検索します
+- 他の著者が同じペルソナやステップ タイプをどのように扱うかを研究する
+- 特定のフィールド (`commands`、`selection`、`pattern`) が実際にどのように使用されているかを調べる
+
+言語またはキーワードでフィルタリングして結果を絞り込みます — 例: `language:TypeScript` または `fastapi` をクエリに追加します。
+
+---
+
+## さらに読む
+
+- **DEV コミュニティ — 「CodeTour を使用してコードベースをオンボードする」**: https://dev.to/tobiastimm/onboard-your-codebase-with-codetour-2jc8
+- **コーダー ブログ — 「CodeTour を使用して新しいプロジェクトに迅速に参加できる」**: https://coder.com/blog/onboard-to-new-projects-faster-with-codetour
+- **Microsoft Tech Community — 教育者開発者ブログ**: https://techcommunity.microsoft.com/blog/educatordeveloperblog/codetour-vscode-extension-allows-you-to-Produce-interactive-guides-assessments-a/1274297
+- **AMIS テクノロジー ブログ — vscode.dev + CodeTour**: https://technology.amis.nl/software-development/visual-studio-code-the-code-tours-extension-for-in-context-and-interactive-readme/
+- **CodeTour GitHub トピック**: https://github.com/topics/codetour

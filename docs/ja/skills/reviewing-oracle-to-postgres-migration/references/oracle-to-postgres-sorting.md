@@ -1,51 +1,45 @@
-# Oracle to PostgreSQL Sorting Migration Guide
+# Oracle から PostgreSQL へのソート移行ガイド
 
-Purpose: Preserve Oracle-like sorting semantics when moving queries to PostgreSQL.
+目的: クエリを PostgreSQL に移動するときに、Oracle のような並べ替えセマンティクスを維持します。
 
-## Key points
-- Oracle often treats plain `ORDER BY` as binary/byte-wise, giving case-insensitive ordering for ASCII.
-- PostgreSQL defaults differ; to match Oracle behavior, use `COLLATE "C"` on sort expressions.
+## 重要なポイント
+- Oracle は多くの場合、プレーン `ORDER BY` をバイナリ/バイト単位で扱い、ASCII では大文字と小文字を区別しない順序付けを行います。
+- PostgreSQL のデフォルトは異なります。 Oracle の動作と一致させるには、並べ替え式で `COLLATE "C"` を使用します。
 
-## 1) Standard `SELECT … ORDER BY`
-**Goal:** Keep Oracle-style ordering.
+## 1) 標準 `SELECT … ORDER BY`
+**目標:** Oracle スタイルの順序を維持します。
 
-**Pattern:**
-```sql
+**パターン：**```sql
 SELECT col1
 FROM your_table
 ORDER BY col1 COLLATE "C";
-```
-
-**Notes:**
-- Apply `COLLATE "C"` to each sort expression that must mimic Oracle.
-- Works with ascending/descending and multi-column sorts, e.g. `ORDER BY col1 COLLATE "C", col2 COLLATE "C" DESC`.
+```**注:**
+- Oracle を模倣する必要がある各ソート式に `COLLATE "C"` を適用します。
+- 昇順/降順および複数列のソートで動作します。 @@コード1@@。
 
 ## 2) `SELECT DISTINCT … ORDER BY`
-**Issue:** PostgreSQL enforces that `ORDER BY` expressions appear in the `SELECT` list for `DISTINCT`, raising:
-`Npgsql.PostgresException: 42P10: for SELECT DISTINCT, ORDER BY expressions must appear in select list`
+**問題:** PostgreSQL では、`ORDER BY` 式が `DISTINCT` の `SELECT` リストに表示されるように強制し、次のような問題が発生します。
+@@コード6@@
 
-**Oracle difference:** Oracle allowed ordering by expressions not projected when using `DISTINCT`.
+**Oracle の違い:** Oracle では、`DISTINCT` を使用する場合、投影されない式による順序付けが可能でした。
 
-**Recommended pattern (wrap and sort):**
-```sql
+**推奨パターン (ラップとソート):**```sql
 SELECT *
 FROM (
   SELECT DISTINCT col1, col2
   FROM your_table
 ) AS distinct_results
 ORDER BY col2 COLLATE "C";
-```
+```**理由:**
+- 内部クエリは `DISTINCT` プロジェクションを実行します。
+- 外側のクエリは結果セットを安全に順序付けし、Oracle の並べ替えに合わせて `COLLATE "C"` を追加します。
 
-**Why:**
-- The inner query performs the `DISTINCT` projection.
-- The outer query safely orders the result set and adds `COLLATE "C"` to align with Oracle sorting.
+**ヒント:**
+- 外側の `ORDER BY` で使用されている列がすべて内側の射影に含まれていることを確認します。
+- 複数列のソートの場合は、関連する各式を照合します: `ORDER BY col2 COLLATE "C", col3 COLLATE "C" DESC`。
 
-**Tips:**
-- Ensure any columns used in the outer `ORDER BY` are included in the inner projection.
-- For multi-column sorts, collate each relevant expression: `ORDER BY col2 COLLATE "C", col3 COLLATE "C" DESC`.
-
-## Validation checklist
-- [ ] Added `COLLATE "C"` to every `ORDER BY` that should follow Oracle sorting rules.
-- [ ] For `DISTINCT` queries, wrapped the projection and sorted in the outer query.
-- [ ] Confirmed ordered columns are present in the inner projection.
-- [ ] Re-ran tests or representative queries to verify ordering matches Oracle outputs.
+## 検証チェックリスト
+- [ ] Oracle の並べ替えルールに従う必要があるすべての `ORDER BY` に `COLLATE "C"` を追加しました。
+- [ ] `DISTINCT` クエリの場合、射影をラップし、外側のクエリでソートします。
+- [ ] 内部投影に順序付けされた列が存在することを確認しました。
+- [ ] テストまたは代表的なクエリを再実行して、順序が Oracle 出力と一致することを確認します。

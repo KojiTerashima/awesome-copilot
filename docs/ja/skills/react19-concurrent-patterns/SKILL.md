@@ -2,23 +2,20 @@
 name: react19-concurrent-patterns
 description: 'Preserve React 18 concurrent patterns and adopt React 19 APIs (useTransition, useDeferredValue, Suspense, use(), useOptimistic, Actions) during migration.'
 ---
+# React 19 の同時パターン
 
-# React 19 Concurrent Patterns
+React 19 では、移行作業を補完する新しい API が導入されました。このスキルは次の 2 つの懸念事項に対応します。
 
-React 19 introduced new APIs that complement the migration work. This skill covers two concerns:
+1. 移行中に壊れてはいけない既存の React 18 同時パターンを **保持**
+2. 移行が安定した後に導入する価値のある新しい React 19 API を **採用**
 
-1. **Preserve**  existing React 18 concurrent patterns that must not be broken during migration
-2. **Adopt**  new React 19 APIs worth introducing after migration stabilizes
+## パート 1 保持: 移行後も存続する必要がある React 18 の同時パターン
 
-## Part 1  Preserve: React 18 Concurrent Patterns That Must Survive the Migration
+これらのパターンは React 18 コードベースに存在するため、誤って削除したり破損したりしないでください。
 
-These patterns exist in React 18 codebases and must not be accidentally removed or broken:
+### createRoot は R18 Orchestra によってすでに移行されています
 
-### createRoot  Already Migrated by the R18 Orchestra
-
-If the R18 orchestra already ran, `ReactDOM.render` → `createRoot` is done. Verify it's correct:
-
-```jsx
+R18 オケがすでに実行されている場合は、`ReactDOM.render` → `createRoot` が完了します。正しいことを確認してください:```jsx
 // CORRECT React 19 root (same as React 18):
 import { createRoot } from 'react-dom/client';
 const root = createRoot(document.getElementById('root'));
@@ -27,13 +24,9 @@ root.render(
     <App />
   </React.StrictMode>
 );
-```
+```### useTransition 移行は必要ありません
 
-### useTransition  No Migration Needed
-
-`useTransition` from React 18 works identically in React 19. Do not touch these patterns during migration:
-
-```jsx
+React 18 の `useTransition` は React 19 でも同様に機能します。移行中は次のパターンに触れないでください。```jsx
 // React 18 useTransition  unchanged in React 19:
 const [isPending, startTransition] = useTransition();
 
@@ -42,18 +35,10 @@ function handleClick() {
     setFilteredResults(computeExpensiveFilter(input));
   });
 }
-```
-
-### useDeferredValue  No Migration Needed
-
-```jsx
+```### useDeferredValue 移行は必要ありません```jsx
 // React 18 useDeferredValue  unchanged in React 19:
 const deferredQuery = useDeferredValue(query);
-```
-
-### Suspense for Code Splitting  No Migration Needed
-
-```jsx
+```### コード分割のため一時停止、移行は不要```jsx
 // React 18 Suspense with lazy  unchanged in React 19:
 const LazyComponent = React.lazy(() => import('./LazyComponent'));
 
@@ -64,27 +49,21 @@ function App() {
     </Suspense>
   );
 }
-```
+```---
 
----
+## パート 2 React 19 の新しい API
 
-## Part 2  React 19 New APIs
+これらは、移行後のクリーンアップ スプリントで採用する価値があります。最初に移行が安定するまでは、これらを導入しないでください。
 
-These are worth adopting in a post-migration cleanup sprint. Do not introduce these DURING the migration  stabilize first.
+それぞれの新しい API の完全なパターンについては、以下をお読みください。
+- **`references/react19-use.md`** プロミスとコンテキストの `use()` フック
+- **`references/react19-actions.md`** アクション、useActionState、useFormStatus、useOptimistic
+- **`references/react19-suspense.md`** データ取得のサスペンド（新パターン）
 
-For full patterns on each new API, read:
-- **`references/react19-use.md`**  the `use()` hook for promises and context
-- **`references/react19-actions.md`**  Actions, useActionState, useFormStatus, useOptimistic
-- **`references/react19-suspense.md`**  Suspense for data fetching (the new pattern)
+## 移行の安全ルール
 
-## Migration Safety Rules
-
-During the React 19 migration itself, these concurrent-mode patterns must be **left completely untouched**:
-
-```bash
+React 19 への移行中は、これらの同時モード パターンは **完全にそのままにしておく必要があります**。```bash
 # Verify nothing touched these during migration:
 grep -rn "useTransition\|useDeferredValue\|Suspense\|startTransition" \
   src/ --include="*.js" --include="*.jsx" | grep -v "\.test\."
-```
-
-If the migrator touched any of these files, review the changes  the migration should only have modified React API surface (forwardRef, defaultProps, etc.), never concurrent mode logic.
+```移行者がこれらのファイルのいずれかを操作した場合は、移行によって変更された変更は React API サーフェス (forwardRef、defaultProps など) のみであり、同時モード ロジックは変更されていないことを確認してください。

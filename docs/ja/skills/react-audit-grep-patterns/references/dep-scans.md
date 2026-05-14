@@ -1,94 +1,76 @@
-# Dependency Scans - Both Auditors
+# 依存関係スキャン - 両方の監査人
 
-Scans for dependency compatibility and peer conflicts. Run during both R18 and R19 audits.
+依存関係の互換性とピアの競合をスキャンします。 R18 監査と R19 監査の両方で実行します。
 
 ---
 
-## Current Versions
-
-```bash
-# All react-related package versions in one shot
-cat package.json | python3 -c "
-import sys, json
+## 現在のバージョン「」バッシュ
+# すべての反応関連パッケージのバージョンをワンショットで
+猫パッケージ.json | python3 -c "
+SYS、JSONをインポート
 d = json.load(sys.stdin)
-deps = {**d.get('dependencies',{}), **d.get('devDependencies',{})}
-keys = ['react', 'react-dom', 'react-router', 'react-router-dom',
-        '@testing-library/react', '@testing-library/jest-dom',
-        '@testing-library/user-event', '@apollo/client', 'graphql',
-        '@emotion/react', '@emotion/styled', 'jest', 'enzyme',
-        'react-redux', '@reduxjs/toolkit', 'prop-types']
-for k in keys:
-    if k in deps:
+deps = {**d.get('依存関係',{}), **d.get('devDependency',{})}
+キー = ['react', 'react-dom', 'react-router', 'react-router-dom',
+        '@testing-library/react'、'@testing-library/jest-dom'、
+        '@testing-library/user-event'、'@apollo/client'、'graphql'、
+        '@emotion/react'、'@emotion/styled'、'jest'、'enzyme'、
+        'react-redux'、'@reduxjs/toolkit'、'prop-types']
+キーの k の場合:
+    k が深さの場合:
         print(f'{k}: {deps[k]}')
 " 2>/dev/null
-```
+「」---
 
----
+## ピア依存関係の競合「」バッシュ
+# すべてのピア dep 警告 (移行が完了する前に 0 である必要があります)
+npm ls 2>&1 | grep -E "警告|エラー|ピア|無効|未確認"
 
-## Peer Dependency Conflicts
+# ピアエラーの数
+npm ls 2>&1 | grep -E "警告|エラー|ピア|無効|未確認" |トイレ -l
 
-```bash
-# All peer dep warnings (must be 0 before migration completes)
-npm ls 2>&1 | grep -E "WARN|ERR|peer|invalid|unmet"
+# 特定のパッケージのピア配備要件
+npm info @testing-library/reactpeerDependency 2>/dev/null
+npm info @apollo/clientpeerDependency 2>/dev/null
+npm info @emotion/reactpeerDependency 2>/dev/null
+npm info 反応ルーターダムピア依存関係 2>/dev/null
+「」---
 
-# Count of peer errors
-npm ls 2>&1 | grep -E "WARN|ERR|peer|invalid|unmet" | wc -l
-
-# Specific package peer dep requirements
-npm info @testing-library/react peerDependencies 2>/dev/null
-npm info @apollo/client peerDependencies 2>/dev/null
-npm info @emotion/react peerDependencies 2>/dev/null
-npm info react-router-dom peerDependencies 2>/dev/null
-```
-
----
-
-## Enzyme Detection (R18 Blocker)
-
-```bash
-# In package.json
-cat package.json | python3 -c "
-import sys, json
+## 酵素検出 (R18 ブロッカー)「」バッシュ
+# package.json内
+猫パッケージ.json | python3 -c "
+SYS、JSONをインポート
 d = json.load(sys.stdin)
-deps = {**d.get('dependencies',{}), **d.get('devDependencies',{})}
-enzyme = {k: v for k, v in deps.items() if 'enzyme' in k.lower()}
-if enzyme:
-    print('BLOCKER - Enzyme found:', enzyme)
-else:
-    print('No Enzyme - OK')
+deps = {**d.get('依存関係',{}), **d.get('devDependency',{})}
+酵素 = {k: v for k, v in deps.items() if 'enzyme' in k. lower()}
+酵素の場合:
+    print('BLOCKER - 酵素が見つかりました:', 酵素)
+それ以外の場合:
+    print('酵素なし - OK')
 " 2>/dev/null
 
-# Enzyme adapter files
-find . -name "enzyme-adapter*" -not -path "*/node_modules/*" 2>/dev/null
-```
+# 酵素アダプターファイル
+見つけてください。 -name "酵素アダプター*" -not -path "*/node_modules/*" 2>/dev/null
+「」---
 
----
-
-## React Router Version Check
-
-```bash
+## Reactルーターのバージョン確認「」バッシュ
 ROUTER=$(node -e "console.log(require('./node_modules/react-router-dom/package.json').version)" 2>/dev/null)
-echo "react-router-dom version: $ROUTER"
+echo "react-router-dom バージョン: $ROUTER"
 
-# If v5 - flag for assessment
-if [[ $ROUTER == 5* ]]; then
-  echo "WARNING: react-router v5 found - requires scope assessment before upgrade"
-  echo "Run router migration scope scan:"
-  echo "  Routes: $(grep -rn "<Route\|<Switch\|<Redirect" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l) hits"
-  echo "  useHistory: $(grep -rn "useHistory()" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l) hits"
-fi
-```
+# v5 の場合 - 評価用のフラグ
+if [[ $ROUTER == 5* ]];それから
+  echo "警告: 反応ルーター v5 が見つかりました - アップグレードの前にスコープの評価が必要です"
+  echo "ルーター移行スコープ スキャンを実行します:"
+  echo " ルート: $(grep -rn "<Route\|<Switch\|<Redirect" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l) ヒット"
+  echo " useHistory: $(grep -rn "useHistory()" src/ --include="*.js" --include="*.jsx" | grep -v "\.test\." | wc -l) ヒット"
+フィ
+「」---
 
----
+## ロックファイルの一貫性「」バッシュ
+# ロックファイルが package.json と同期していることを確認します
+npm ls --length=0 2>&1 |頭 -20
 
-## Lock File Consistency
-
-```bash
-# Check lockfile is in sync with package.json
-npm ls --depth=0 2>&1 | head -20
-
-# Check for duplicate react installs (can cause hooks errors)
+# 重複した反応インストールをチェックします (フックエラーが発生する可能性があります)
 find node_modules -name "package.json" -path "*/react/package.json" 2>/dev/null \
-  | grep -v "node_modules/node_modules" \
-  | xargs grep '"version"' | sort -u
-```
+  | grep -v "ノードモジュール/ノードモジュール" \
+  | xargs grep '"バージョン"' |並べ替え -u
+「」

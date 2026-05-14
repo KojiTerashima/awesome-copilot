@@ -1,147 +1,117 @@
-# Relationships in Power BI
+# Power BI のリレーションシップ
 
-## Relationship Properties
+## 関係プロパティ
 
-### Cardinality
-| Type | Use Case | Notes |
-|------|----------|-------|
-| One-to-Many (*:1) | Dimension to Fact | Most common, preferred |
-| Many-to-One (1:*) | Fact to Dimension | Same as above, direction reversed |
-| One-to-One (1:1) | Dimension extensions | Use sparingly |
-| Many-to-Many (*:*) | Bridge tables, complex scenarios | Requires careful design |
+### カーディナリティ
+|タイプ |使用例 |メモ |
+|------|----------|------|
+| 1 対多 (*:1) |事実への次元 |最も一般的、推奨される |
+|多対 1 (1:*) |事実から次元へ |上と同じ、方向が逆 |
+| 1対1 (1:1) |寸法の拡張 |控えめに使用してください |
+|多対多 (*:*) |ブリッジ テーブル、複雑なシナリオ |慎重な設計が必要 |
 
-### Cross-Filter Direction
-| Setting | Behavior | When to Use |
-|---------|----------|-------------|
-| Single | Filters flow from "one" to "many" | Default, best performance |
-| Both | Filters flow in both directions | Only when necessary |
+### クロスフィルターの方向
+|設定 |行動 |いつ使用するか |
+|----------|----------|---------------|
+|シングル |フィルターは「1 つ」から「多数」へ流れる |デフォルト、最高のパフォーマンス |
+|両方 |フィルターは両方向に流れます |必要な場合のみ |
 
-## Best Practices
+## ベストプラクティス
 
-### 1. Prefer One-to-Many Relationships
-```
-Customer (1) --> (*) Sales
-Product  (1) --> (*) Sales
-Date     (1) --> (*) Sales
-```
+### 1. 1 対多の関係を優先する「」
+顧客 (1) --> (*) 売上
+製品(1) --> (*) 売上
+日付 (1) --> (*) 売上高
+「」### 2. 単一方向クロスフィルターを使用する
+双方向フィルタリング:
+- パフォーマンスに悪影響を与える
+- 曖昧なフィルターパスを作成できる
+- 予期しない結果が生じる可能性があります
 
-### 2. Use Single-Direction Cross-Filtering
-Bidirectional filtering:
-- Impacts performance negatively
-- Can create ambiguous filter paths
-- May produce unexpected results
+**次の場合にのみ双方向を使用してください**
+- ファクトテーブルによるディメンション間の分析
+- 特定の RLS 要件
 
-**Only use bidirectional when:**
-- Dimension-to-dimension analysis through fact table
-- Specific RLS requirements
+**より良い代替案:** DAX メジャーで CROSSFILTER を使用します。「ダックス」
+販売国 = 
+計算(
+    DISTINCTCOUNT(顧客[国])、
+    CROSSFILTER(顧客[顧客キー], 販売[顧客キー], BOTH)
+）
+「」### 3. テーブル間の 1 つのアクティブ パス
+- 2 つのテーブル間のアクティブな関係は 1 つだけです
+- ロールプレイング ディメンションには USERELATIONSHIP を使用します。「ダックス」
+出荷日別の売上 = 
+計算(
+    [総売上高]、
+    USERELATIONSHIP(売上[出荷日], 日付[日付])
+）
+「」### 4. あいまいなパスを避ける
+循環参照はエラーの原因となります。解決策:
+- 1 つの関係を非アクティブ化する
+- モデルの再構築
+- USERELATIONSHIPを対策に使用する
 
-**Better alternative:** Use CROSSFILTER in DAX measures:
-```dax
-Countries Sold = 
-CALCULATE(
-    DISTINCTCOUNT(Customer[Country]),
-    CROSSFILTER(Customer[CustomerKey], Sales[CustomerKey], BOTH)
-)
-```
+## 関係パターン
 
-### 3. One Active Path Between Tables
-- Only one active relationship between any two tables
-- Use USERELATIONSHIP for role-playing dimensions:
-
-```dax
-Sales by Ship Date = 
-CALCULATE(
-    [Total Sales],
-    USERELATIONSHIP(Sales[ShipDate], Date[Date])
-)
-```
-
-### 4. Avoid Ambiguous Paths
-Circular references cause errors. Solutions:
-- Deactivate one relationship
-- Restructure model
-- Use USERELATIONSHIP in measures
-
-## Relationship Patterns
-
-### Standard Star Schema
-```
-     [Date]
+### 標準スター スキーマ「」
+     【日付】
        |
-[Product]--[Sales]--[Customer]
+[製品]--[販売]--[顧客]
        |
-   [Store]
-```
-
-### Role-Playing Dimension
-```
-[Date] --(active)-- [Sales.OrderDate]
+   【店舗】
+「」### ロールプレイングの次元「」
+[日付] --(アクティブ)-- [Sales.OrderDate]
    |
-   +--(inactive)-- [Sales.ShipDate]
-```
+   +--(非アクティブ)-- [Sales.ShipDate]
+「」### ブリッジ テーブル (多対多)「」
+[顧客]--(*)--[顧客アカウント]--(*)--[アカウント]
+「」### ファクトレスファクトテーブル「」
+[製品]--[製品プロモーション]--[プロモーション]
+「」対策なしで関係を把握するために使用されます。
 
-### Bridge Table (Many-to-Many)
-```
-[Customer]--(*)--[CustomerAccount]--(*)--[Account]
-```
+## MCP を介した関係の作成
 
-### Factless Fact Table
-```
-[Product]--[ProductPromotion]--[Promotion]
-```
-Used to capture relationships without measures.
-
-## Creating Relationships via MCP
-
-### List Current Relationships
-```
-relationship_operations(operation: "List")
-```
-
-### Create New Relationship
-```
-relationship_operations(
-  operation: "Create",
-  definitions: [{
-    fromTable: "Sales",
-    fromColumn: "ProductKey",
-    toTable: "Product", 
-    toColumn: "ProductKey",
-    crossFilteringBehavior: "OneDirection",
+### 現在の関係をリストアップする「」
+relationship_operations(操作: "リスト")
+「」### 新しい関係を作成する「」
+関係操作(
+  操作: "作成"、
+  定義: [{
+    fromTable: "売上",
+    fromColumn: "プロダクトキー",
+    toTable: "製品", 
+    toColumn: "プロダクトキー",
+    CrossFilteringBehavior: "OneDirection"、
     isActive: true
   }]
-)
-```
+）
+「」### 関係を非アクティブ化「」
+関係操作(
+  操作: "非アクティブ化"、
+  参照: [{ 名前: "relationship-guid-here" }]
+）
+「」## トラブルシューティング
 
-### Deactivate Relationship
-```
-relationship_operations(
-  operation: "Deactivate",
-  references: [{ name: "relationship-guid-here" }]
-)
-```
+### 「あいまいなパス」エラー
+テーブル間に複数のアクティブ パスが存在します。
+- チェック項目: ディメンションを共有する複数のファクト テーブル
+- 解決策: 冗長な関係を非アクティブ化します。
 
-## Troubleshooting
+### 双方向は許可されません
+循環参照が作成されます。
+- 解決策: 再構築するか、DAX CROSSFILTER を使用します。
 
-### "Ambiguous Path" Error
-Multiple active paths exist between tables.
-- Check for: Multiple fact tables sharing dimensions
-- Solution: Deactivate redundant relationships
+### 関係が検出されませんでした
+列には異なるデータ型が含まれる場合があります。
+- 両方の列が同じタイプであることを確認してください
+- テキストキーの末尾のスペースをチェックする
 
-### Bidirectional Not Allowed
-Circular reference would be created.
-- Solution: Restructure or use DAX CROSSFILTER
+## 検証チェックリスト
 
-### Relationship Not Detected
-Columns may have different data types.
-- Ensure both columns have identical types
-- Check for trailing spaces in text keys
-
-## Validation Checklist
-
-- [ ] All relationships are one-to-many where possible
-- [ ] Cross-filter is single direction by default
-- [ ] Only one active path between any two tables
-- [ ] Role-playing dimensions use inactive relationships
-- [ ] No circular reference paths
-- [ ] Key columns have matching data types
+- [ ] 可能な場合、すべての関係は 1 対多です
+- [ ] クロスフィルターはデフォルトで単一方向です
+- [ ] 2 つのテーブル間のアクティブなパスは 1 つだけです
+- [ ] ロールプレイング ディメンションは非アクティブな関係を使用します
+- [ ] 循環参照パスはありません
+- [ ] キー列には一致するデータ型があります

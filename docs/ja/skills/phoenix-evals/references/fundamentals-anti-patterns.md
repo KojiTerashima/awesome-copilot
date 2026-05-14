@@ -1,43 +1,33 @@
-# Anti-Patterns
+# アンチパターン
 
-Common mistakes and fixes.
+よくある間違いと修正。
 
-| Anti-Pattern | Problem | Fix |
+|アンチパターン |問題 |修正 |
 | ------------ | ------- | --- |
-| Generic metrics | Pre-built scores don't match your failures | Build from error analysis |
-| Vibe-based | No quantification | Measure with experiments |
-| Ignoring humans | Uncalibrated LLM judges | Validate >80% TPR/TNR |
-| Premature automation | Evaluators for imagined problems | Let observed failures drive |
-| Saturation blindness | 100% pass = no signal | Keep capability evals at 50-80% |
-| Similarity metrics | BERTScore/ROUGE for generation | Use for retrieval only |
-| Model switching | Hoping a model works better | Error analysis first |
+|一般的な指標 |事前に構築されたスコアが失敗と一致しません。エラー分析から構築する |
+|バイブ系 |定量化なし |実験で測定 |
+|人間を無視する |未校正の LLM 審査員 | >80% TPR/TNR を検証 |
+|時期尚早の自動化 |想像上の問題の評価者 |観察された障害を原動力にしましょう |
+|飽和失明 | 100% パス = 信号なし |能力評価を 50 ～ 80% に保つ |
+|類似性メトリクス |生成用の BERTScore/ROUGE |検索のみに使用 |
+|機種変更 |モデルがより良く機能することを願っています |まずはエラー分析 |
 
-## Quantify Changes
+## 変化を定量化する「」パイソン
+ベースライン = run_experiment(データセット、old_prompt、評価者)
+改善 = run_experiment(データセット、新しいプロンプト、評価者)
+print(f"改善: {improved.pass_rate - Baseline.pass_rate:+.1%}")
+「」## 生成に類似性を使用しないでください「」パイソン
+# 悪い
+スコア = bertscore(出力, 参照)
 
-```python
-baseline = run_experiment(dataset, old_prompt, evaluators)
-improved = run_experiment(dataset, new_prompt, evaluators)
-print(f"Improvement: {improved.pass_rate - baseline.pass_rate:+.1%}")
-```
+#良い
+right_facts = check_facts_against_source(出力、コンテキスト)
+「」## モデルチェンジ前のエラー解析「」パイソン
+# 悪い
+モデル内のモデルの場合:
+    結果 = テスト(モデル)
 
-## Don't Use Similarity for Generation
-
-```python
-# BAD
-score = bertscore(output, reference)
-
-# GOOD
-correct_facts = check_facts_against_source(output, context)
-```
-
-## Error Analysis Before Model Change
-
-```python
-# BAD
-for model in models:
-    results = test(model)
-
-# GOOD
-failures = analyze_errors(results)
-# Then decide if model change is warranted
-```
+#良い
+失敗 = 分析エラー(結果)
+# その後、モデル変更が正当かどうかを判断します
+「」

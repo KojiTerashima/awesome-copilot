@@ -1,54 +1,46 @@
-# Evaluators: Custom Templates
+# エバリュエーター: カスタム テンプレート
 
-Design LLM judge prompts.
+LLM 審査員プロンプトを設計します。
 
-## Complete Template Pattern
-
-```python
-TEMPLATE = """Evaluate faithfulness of the response to the context.
+## 完全なテンプレート パターン「」パイソン
+TEMPLATE = """コンテキストに対する応答の忠実性を評価します。
 
 <context>{{context}}</context>
-<response>{{output}}</response>
+<応答>{{出力}}</応答>
 
-CRITERIA:
-"faithful" = ALL claims supported by context
-"unfaithful" = ANY claim NOT in context
+基準:
+「忠実」 = 文脈によってサポートされるすべての主張
+「不誠実」 = 文脈に当てはまらないあらゆる主張
 
-EXAMPLES:
-Context: "Price is $10" → Response: "It costs $10" → faithful
-Context: "Price is $10" → Response: "About $15" → unfaithful
+例:
+コンテキスト: 「価格は 10 ドルです」 → 応答: 「それは 10 ドルかかります」 → 忠実です
+文脈: 「価格は 10 ドルです」 → 応答: 「約 15 ドルです」 → 不誠実
 
-EDGE CASES:
-- Empty context → cannot_evaluate
-- "I don't know" when appropriate → faithful
-- Partial faithfulness → unfaithful (strict)
+エッジケース:
+- 空のコンテキスト → cant_evaluate
+- 適切な場合は「わかりません」 → 忠実
+・部分的な忠実→不誠実（厳格）
 
-Answer (faithful/unfaithful):"""
-```
+答え（忠実/不忠実）：「」
+「」## テンプレート構造
 
-## Template Structure
+1. タスクの説明
+2. XMLタグに変数を入力する
+3. 基準の定義
+4. 事例（2～4件）
+5. 特殊なケース
+6. 出力形式
 
-1. Task description
-2. Input variables in XML tags
-3. Criteria definitions
-4. Examples (2-4 cases)
-5. Edge cases
-6. Output format
-
-## XML Tags
-
-```
-<question>{{input}}</question>
-<response>{{output}}</response>
+## XML タグ「」
+<質問>{{入力}}</質問>
+<応答>{{出力}}</応答>
 <context>{{context}}</context>
-<reference>{{reference}}</reference>
-```
+<参照>{{参照}}</参照>
+「」## よくある間違い
 
-## Common Mistakes
-
-| Mistake | Fix |
+|間違い |修正 |
 | ------- | --- |
-| Vague criteria | Define each label exactly |
-| No examples | Include 2-4 cases |
-| Ambiguous format | Specify exact output |
-| No edge cases | Address ambiguity |
+|曖昧な基準 |各ラベルを正確に定義する |
+|例はありません | 2 ～ 4 件のケースを含める |
+|あいまいな形式 |正確な出力を指定する |
+|特殊なケースはありません |アドレスの曖昧さ |

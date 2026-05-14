@@ -2,104 +2,101 @@
 name: python-mcp-server-generator
 description: 'Generate a complete MCP server project in Python with tools, resources, and proper configuration'
 ---
+# Python MCP サーバーを生成する
 
-# Generate Python MCP Server
+次の仕様を持つ完全な Model Context Protocol (MCP) サーバーを Python で作成します。
 
-Create a complete Model Context Protocol (MCP) server in Python with the following specifications:
+## 要件
 
-## Requirements
+1. **プロジェクト構造**: uv を使用して、適切な構造を持つ新しい Python プロジェクトを作成します。
+2. **依存関係**: mcp[cli] パッケージを uv に含めます
+3. **トランスポート タイプ**: stdio (ローカルの場合) または streamable-http (リモートの場合) を選択します。
+4. **ツール**: 適切な型ヒントを備えた便利なツールを少なくとも 1 つ作成します
+5. **エラー処理**: 包括的なエラー処理と検証が含まれます
 
-1. **Project Structure**: Create a new Python project with proper structure using uv
-2. **Dependencies**: Include mcp[cli] package with uv
-3. **Transport Type**: Choose between stdio (for local) or streamable-http (for remote)
-4. **Tools**: Create at least one useful tool with proper type hints
-5. **Error Handling**: Include comprehensive error handling and validation
+## 実装の詳細
 
-## Implementation Details
+### プロジェクトのセットアップ
+- `uv init project-name`で初期化
+- MCP SDK を追加: `uv add "mcp[cli]"`
+- メインサーバーファイルの作成 (例: `server.py`)
+- Python プロジェクトの場合は `.gitignore` を追加します
+- `if __name__ == "__main__"` で直接実行するように設定します
 
-### Project Setup
-- Initialize with `uv init project-name`
-- Add MCP SDK: `uv add "mcp[cli]"`
-- Create main server file (e.g., `server.py`)
-- Add `.gitignore` for Python projects
-- Configure for direct execution with `if __name__ == "__main__"`
+### サーバー構成
+- `mcp.server.fastmcp` の `FastMCP` クラスを使用する
+- サーバー名とオプションの指示を設定します
+- トランスポートを選択します: stdio (デフォルト) または streamable-http
+- HTTP の場合: オプションでホスト、ポート、ステートレス モードを構成します
 
-### Server Configuration
-- Use `FastMCP` class from `mcp.server.fastmcp`
-- Set server name and optional instructions
-- Choose transport: stdio (default) or streamable-http
-- For HTTP: optionally configure host, port, and stateless mode
+### ツールの実装
+- 関数で `@mcp.tool()` デコレータを使用する
+- 常に型ヒントを含めます - スキーマを自動的に生成します
+- 明確な docstring を作成します - ツールの説明になります
+- 構造化された出力には Pydantic モデルまたは TypedDicts を使用します
+- I/Oバウンドタスクの非同期操作をサポート
+- 適切なエラー処理を含める
 
-### Tool Implementation
-- Use `@mcp.tool()` decorator on functions
-- Always include type hints - they generate schemas automatically
-- Write clear docstrings - they become tool descriptions
-- Use Pydantic models or TypedDicts for structured outputs
-- Support async operations for I/O-bound tasks
-- Include proper error handling
+### リソース/プロンプトのセットアップ (オプション)
+- `@mcp.resource()` デコレータを使用してリソースを追加する
+- 動的リソースには URI テンプレートを使用します: `"resource://{param}"`
+- `@mcp.prompt()` デコレータを使用してプロンプトを追加する
+- プロンプトから文字列またはメッセージ リストを返す
 
-### Resource/Prompt Setup (Optional)
-- Add resources with `@mcp.resource()` decorator
-- Use URI templates for dynamic resources: `"resource://{param}"`
-- Add prompts with `@mcp.prompt()` decorator
-- Return strings or Message lists from prompts
+### コードの品質
+- すべての関数パラメータと戻り値に型ヒントを使用する
+- ツール、リソース、プロンプトの docstring を作成します。
+- PEP 8 スタイル ガイドラインに従う
+- 非同期操作には async/await を使用します
+- リソースのクリーンアップのためのコンテキスト マネージャーの実装
+- 複雑なロジックにはインライン コメントを追加します
 
-### Code Quality
-- Use type hints for all function parameters and returns
-- Write docstrings for tools, resources, and prompts
-- Follow PEP 8 style guidelines
-- Use async/await for asynchronous operations
-- Implement context managers for resource cleanup
-- Add inline comments for complex logic
+## 考慮すべきツールの種類の例
+- データの処理と変換
+- ファイル システム操作 (読み取り、分析、検索)
+- 外部 API 統合
+- データベースクエリ
+- テキスト分析または生成 (サンプリング付き)
+- システム情報の取得
+- 数学または科学計算
 
-## Example Tool Types to Consider
-- Data processing and transformation
-- File system operations (read, analyze, search)
-- External API integrations
-- Database queries
-- Text analysis or generation (with sampling)
-- System information retrieval
-- Math or scientific calculations
-
-## Configuration Options
-- **For stdio Servers**:
-  - Simple direct execution
-  - Test with `uv run mcp dev server.py`
-  - Install to Claude: `uv run mcp install server.py`
+## 構成オプション
+- **標準入出力サーバーの場合**:
+  - シンプルな直接実行
+  - `uv run mcp dev server.py` でテストする
+  - クロードにインストール: `uv run mcp install server.py`
   
-- **For HTTP Servers**:
-  - Port configuration via environment variables
-  - Stateless mode for scalability: `stateless_http=True`
-  - JSON response mode: `json_response=True`
-  - CORS configuration for browser clients
-  - Mounting to existing ASGI servers (Starlette/FastAPI)
+- **HTTP サーバーの場合**:
+  - 環境変数によるポート設定
+  - スケーラビリティのためのステートレス モード: `stateless_http=True`
+  - JSON応答モード：`json_response=True`
+  - ブラウザクライアントの CORS 設定
+  - 既存の ASGI サーバー (Starlette/FastAPI) へのマウント
 
-## Testing Guidance
-- Explain how to run the server:
-  - stdio: `python server.py` or `uv run server.py`
-  - HTTP: `python server.py` then connect to `http://localhost:PORT/mcp`
-- Test with MCP Inspector: `uv run mcp dev server.py`
-- Install to Claude Desktop: `uv run mcp install server.py`
-- Include example tool invocations
-- Add troubleshooting tips
+## テストのガイダンス
+- サーバーの実行方法を説明します。
+  - 標準出力: `python server.py` または `uv run server.py`
+  - HTTP: `python server.py` から `http://localhost:PORT/mcp` に接続します
+- MCP Inspector でテスト: `uv run mcp dev server.py`
+- クロード デスクトップにインストール: `uv run mcp install server.py`
+- ツール呼び出しの例を含める
+- トラブルシューティングのヒントを追加## 考慮すべき追加機能
+- ログ、進行状況、通知のためのコンテキストの使用
+- AI を活用したツールのための LLM サンプリング
+- インタラクティブなワークフローのためのユーザー入力の引き出し
+- 共有リソース (データベース、接続) の寿命管理
+- Pydantic モデルを使用した構造化された出力
+- UI表示用のアイコン
+- Imageクラスによる画像処理
+- UXを向上させるための補完サポート
 
-## Additional Features to Consider
-- Context usage for logging, progress, and notifications
-- LLM sampling for AI-powered tools
-- User input elicitation for interactive workflows
-- Lifespan management for shared resources (databases, connections)
-- Structured output with Pydantic models
-- Icons for UI display
-- Image handling with Image class
-- Completion support for better UX
+## ベストプラクティス
+- あらゆる場所でタイプヒントを使用します - オプションではありません
+- 可能な場合は構造化データを返します
+- stdout 汚染を避けるために、stderr にログを記録します (またはコンテキスト ログを使用します)。
+- リソースを適切にクリーンアップする
+- 入力を早期に検証する
+- 明確なエラーメッセージを提供する
+- LLM 統合前にツールを個別にテストする
 
-## Best Practices
-- Use type hints everywhere - they're not optional
-- Return structured data when possible
-- Log to stderr (or use Context logging) to avoid stdout pollution
-- Clean up resources properly
-- Validate inputs early
-- Provide clear error messages
-- Test tools independently before LLM integration
-
-Generate a complete, production-ready MCP server with type safety, proper error handling, and comprehensive documentation.
+タイプ セーフティ、適切なエラー処理、および包括的なドキュメントを備えた完全な運用準備完了の MCP サーバーを生成します。

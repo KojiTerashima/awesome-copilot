@@ -1,14 +1,12 @@
-# Skeleton: 1.2-threatmodel-summary.mmd
+# スケルトン: 1.2-threatmodel-summary.mmd
 
-> **⛔ ALWAYS evaluate this skeleton after creating `1.1-threatmodel.mmd`.**
-> Count elements (nodes with `(("..."))`, `[("...")]`, `["..."]`) and boundaries (`subgraph`) in the detailed DFD.
-> - If elements > 15 OR boundaries > 4 → this file is **REQUIRED**. Fill the template below.
-> - If elements ≤ 15 AND boundaries ≤ 4 → **SKIP** this file. Proceed to `1-threatmodel.md`.
-> **⛔ This is a raw Mermaid file. The template below is shown inside a code fence for readability only — do NOT include the fence in the output file. The `.mmd` file must start with `%%{init:` on line 1.**
+> **⛔ `1.1-threatmodel.mmd`.** を作成した後は、常にこのスケルトンを評価してください。
+> 詳細 DFD 内の要素 (`(("..."))`、`[("...")]`、`["..."]` を持つノード) と境界 (`subgraph`) をカウントします。
+> - 要素が 15 を超えるか、境界が 4 を超える場合 → このファイルは **必須**です。以下のテンプレートに記入します。
+> - 要素 ≤ 15 かつ境界 ≤ 4 の場合 → **このファイルをスキップ**。 `1-threatmodel.md` に進みます。
+> **⛔ これは生の Mermaid ファイルです。以下のテンプレートは、読みやすさを目的としてコード フェンス内に示されています。出力ファイルにはフェンスを含めないでください。 `.mmd` ファイルは、1 行目の `%%{init:` で始まる必要があります。**
 
----
-
-```
+---```
 %%{init: {'theme': 'base', 'themeVariables': { 'background': '#ffffff', 'primaryColor': '#ffffff', 'lineColor': '#666666' }}}%%
 flowchart LR
     classDef process fill:#6baed6,stroke:#2171b5,stroke-width:2px,color:#000000
@@ -33,30 +31,26 @@ flowchart LR
     [END-REPEAT]
 
     linkStyle default stroke:#666666,stroke-width:2px
-```
+```## 集計ルール
 
-## Aggregation Rules
+**参照:** `diagram-conventions.md` → 詳細については、概要図のルールを参照してください。
 
-**Reference:** `diagram-conventions.md` → Summary Diagram Rules for full details.
-
-1. **ALL trust boundaries MUST be preserved** — never combine or omit boundaries.
-2. **Keep individually:** entry points, core flow components, security-critical services, primary data stores, all external actors.
-3. **Aggregate only:** supporting infrastructure, secondary caches, multiple externals at same trust level.
-4. **Aggregated element labels MUST list contents:**
-   ```
+1. **すべての信頼境界を保持する必要があります** — 境界を結合したり省略したりしないでください。
+2. **個別に保持します:** エントリ ポイント、コア フロー コンポーネント、セキュリティ クリティカルなサービス、プライマリ データ ストア、すべての外部アクター。
+3. **集約のみ:** インフラストラクチャ、二次キャッシュ、同じ信頼レベルの複数の外部をサポートします。
+4. **集約要素ラベルには内容をリストする必要があります:**```
    DataLayer[("Data Layer<br/>(UserDB, OrderDB, Redis)")]
    SupportServices(("Supporting<br/>(Logging, Monitoring)"))
-   ```
-5. **Flow IDs:** Use `SDF` prefix: `SDF01`, `SDF02`, ...
+   ```5. **フロー ID:** `SDF` プレフィックスを使用します: `SDF01`、`SDF02` ...
 
-## Required in `1-threatmodel.md`
+## `1-threatmodel.md` では必須です
 
-When this file is generated, `1-threatmodel.md` MUST include:
-- A `## Summary View` section with this diagram in a ` ```mermaid ` fence
+このファイルが生成されるとき、`1-threatmodel.md` には以下を含める必要があります。
+- この図を ` で囲んだ `## Summary View` セクション```mermaid ` fence
 - A `## Summary to Detailed Mapping` table:
 
-```markdown
-| Summary Element | Contains | Summary Flows | Maps to Detailed Flows |
-|----------------|----------|---------------|------------------------|
-| [FILL] | [FILL: list of detailed elements] | [FILL: SDF##] | [FILL: DF## list] |
-```
+```値下げ
+|概要要素 |含まれています |フローの概要 |詳細なフローへのマッピング |
+|-----|----------|---------------|--------------------------|
+| [フィル] | [FILL: 詳細要素のリスト] | [記入: SDF##] | [フィル: DF## リスト] |
+「」

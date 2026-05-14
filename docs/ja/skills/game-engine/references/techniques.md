@@ -1,220 +1,192 @@
-# Game Development Techniques
+# ゲーム開発テクニック
 
-A comprehensive reference covering essential techniques for building web-based games, compiled from MDN Web Docs.
+MDN Web Docs から編集された、Web ベースのゲームを構築するための重要なテクニックを網羅した包括的なリファレンス。
 
 ---
 
-## Async Scripts
+## 非同期スクリプト
 
-**Source:** [MDN - Async Scripts for asm.js](https://developer.mozilla.org/en-US/docs/Games/Techniques/Async_scripts)
+**出典:** [MDN - asm.js の非同期スクリプト](https://developer.mozilla.org/en-US/docs/Games/Techniques/Async_scripts)
 
-### What It Is
+### それは何ですか
 
-Async compilation allows JavaScript engines to compile asm.js code off the main thread during game loading and cache the generated machine code. This prevents recompilation on subsequent loads and gives the browser maximum flexibility to optimize the compilation process.
+非同期コンパイルにより、JavaScript エンジンはゲームの読み込み中にメインスレッドから asm.js コードをコンパイルし、生成されたマシン コードをキャッシュできます。これにより、後続のロード時の再コンパイルが防止され、ブラウザーに最大限の柔軟性が与えられ、コンパイル プロセスが最適化されます。
 
-### How It Works
+### 仕組み
 
-When a script is loaded asynchronously, the browser can compile it on a background thread while the main thread continues handling rendering and user interaction. The compiled code is cached so future visits skip recompilation entirely.
+スクリプトが非同期で読み込まれると、メイン スレッドがレンダリングとユーザー インタラクションの処理を継続している間、ブラウザはバックグラウンド スレッドでスクリプトをコンパイルできます。コンパイルされたコードはキャッシュされるため、今後のアクセスでは再コンパイルが完全にスキップされます。
 
-### When to Use It
+### いつ使用するか
 
-- Medium or large games that compile asm.js code.
-- Any game where startup performance matters (which is virtually all games).
-- When you want the browser to cache compiled machine code across sessions.
+- asm.js コードをコンパイルする中規模または大規模なゲーム。
+- 起動時のパフォーマンスが重要なゲーム (事実上すべてのゲーム)。
+- ブラウザーがセッション間でコンパイルされたマシン コードをキャッシュしたい場合。
 
-### Code Examples
+### コード例
 
-**HTML attribute approach:**
-
-```html
+**HTML 属性のアプローチ:**```html
 <script async src="file.js"></script>
-```
-
-**JavaScript dynamic creation (defaults to async):**
-
-```javascript
+```**JavaScript の動的作成 (デフォルトは非同期):**```javascript
 const script = document.createElement("script");
 script.src = "file.js";
 document.body.appendChild(script);
-```
-
-**Important:** Inline scripts are never async, even with the `async` attribute. They compile and run immediately:
-
-```html
+```**重要:** インライン スクリプトは、`async` 属性を使用しても非同期になりません。これらはすぐにコンパイルされて実行されます。```html
 <!-- This is NOT async despite the attribute -->
 <script async>
   // Inline JavaScript code
 </script>
-```
-
-**Using Blob URLs for async compilation of string-based code:**
-
-```javascript
+```**文字列ベースのコードの非同期コンパイルに BLOB URL を使用する:**```javascript
 const blob = new Blob([codeString]);
 const script = document.createElement("script");
 const url = URL.createObjectURL(blob);
 script.onload = script.onerror = () => URL.revokeObjectURL(url);
 script.src = url;
 document.body.appendChild(script);
-```
-
-The key insight is that setting `src` (rather than `innerHTML` or `textContent`) triggers async compilation.
+```重要な洞察は、`src` (`innerHTML` または `textContent` ではなく) を設定すると、非同期コンパイルがトリガーされるということです。
 
 ---
 
-## Optimizing Startup Performance
+## 起動パフォーマンスの最適化
 
-**Source:** [MDN - Optimizing Startup Performance](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Optimizing_startup_performance)
+**出典:** [MDN - 起動パフォーマンスの最適化](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Optimizing_startup_performance)
 
-### What It Is
+### それは何ですか
 
-A collection of strategies for improving how quickly web applications and games start up and become responsive, preventing the app, browser, or device from appearing frozen to users.
+Web アプリケーションとゲームの起動と応答の速さを改善し、アプリ、ブラウザー、またはデバイスがフリーズしているようにユーザーに表示されるのを防ぐための戦略のコレクション。
 
-### How It Works
+### 仕組み
 
-The core principle is avoiding blocking the main thread during startup. Work is offloaded to background threads (Web Workers), startup code is broken into small micro-tasks, and the main thread is kept free for user events and rendering. The event loop must keep cycling continuously.
+基本的な原則は、起動時にメインスレッドのブロックを回避することです。作業はバックグラウンド スレッド (Web ワーカー) にオフロードされ、スタートアップ コードは小さなマイクロタスクに分割され、メイン スレッドはユーザー イベントとレンダリングのために解放されます。イベント ループは継続的に循環し続ける必要があります。
 
-### When to Use It
+### いつ使用するか
 
-- Always -- this is a universal concern for all web applications and games.
-- Critical for new apps since it is easier to build asynchronously from the start.
-- Essential when porting native apps that expect synchronous loading and need refactoring.
+- 常に -- これは、すべての Web アプリケーションとゲームに共通する懸念事項です。
+- 最初から非同期で構築する方が簡単なため、新しいアプリには重要です。
+- 同期読み込みを想定し、リファクタリングが必要なネイティブ アプリを移植する場合に不可欠です。
 
-### Key Techniques
+### 主要なテクニック
 
-**1. Script Loading with `defer` and `async`**
+**1. `defer` および `async`** を使用したスクリプトの読み込み
 
-Prevent blocking HTML parsing:
-
-```html
+HTML 解析のブロックを防止します。```html
 <script defer src="app.js"></script>
 <script async src="helper.js"></script>
-```
+```**2.大量の処理を行う Web ワーカー**
 
-**2. Web Workers for Heavy Processing**
+データのフェッチ、デコード、計算をワーカーに移します。これにより、メイン スレッドが UI およびユーザー イベント用に解放されます。
 
-Move data fetching, decoding, and calculations to workers. This frees the main thread for UI and user events.
+**3.データ処理**
 
-**3. Data Processing**
+- カスタム実装の代わりに、ブラウザーが提供するデコーダー (画像、ビデオ) を使用します。
+- データを順次ではなく、可能な限り並行して処理します。
+- アセットのデコーディング (例: JPEG から生のテクスチャ データへ) をワーカーにオフロードします。
 
-- Use browser-provided decoders (image, video) instead of custom implementations.
-- Process data in parallel whenever possible, not sequentially.
-- Offload asset decoding (e.g., JPEG to raw texture data) to workers.
+**4.リソースの読み込み**
 
-**4. Resource Loading**
+- 起動 HTML の重要なレンダリング パスの外側にスクリプトやスタイルシートを含めないでください。必要な場合にのみロードしてください。
+- リソース ヒントを使用します: `preconnect`、`preload`。
 
-- Do not include scripts or stylesheets outside the critical rendering path in the startup HTML -- load them only when needed.
-- Use resource hints: `preconnect`, `preload`.
+**5.コードのサイズと圧縮**
 
-**5. Code Size and Compression**
+- JavaScript ファイルを縮小します。
+- Gzip または Brotli 圧縮を使用します。
+- データファイルを最適化して圧縮します。
 
-- Minify JavaScript files.
-- Use Gzip or Brotli compression.
-- Optimize and compress data files.
+**6.知覚されたパフォーマンス**
 
-**6. Perceived Performance**
+- ユーザーの関心を維持するためにスプラッシュ画面を表示します。
+- 重いサイトの進行状況インジケーターを表示します。
+- 絶対的な持続時間が同じであっても、時間が速く感じられるようにします。
 
-- Display splash screens to keep users engaged.
-- Show progress indicators for heavy sites.
-- Make time feel faster even if absolute duration stays the same.
-
-**7. Emscripten Main Loop Blockers (for ported apps)**
-
-```javascript
+**7. Emscripten メイン ループ ブロッカー (移植されたアプリ用)**```javascript
 emscripten_push_main_loop_blocker();
 // Establish functions to execute before main thread continues
 // Create queue of functions called in sequence
-```
+```### パフォーマンス目標
 
-### Performance Targets
-
-| Metric | Target |
+|メトリック |ターゲット |
 |---|---|
-| Initial content appearance | 1-2 seconds |
-| User-perceptible delay | 50ms or less |
-| Sluggish threshold | Greater than 200ms |
+|コンテンツの初期外観 | 1～2秒 |
+|ユーザーが知覚できる遅延 | 50ms以下 |
+|しきい値が遅い | 200ミリ秒を超える |
 
-Users on older or slower devices experience longer delays than developers -- always optimize accordingly.
-
----
-
-## WebRTC Data Channels
-
-**Source:** [MDN - WebRTC Data Channels](https://developer.mozilla.org/en-US/docs/Games/Techniques/WebRTC_data_channels)
-
-### What It Is
-
-WebRTC data channels let you send text or binary data over an active connection to a peer. In the context of games, this enables players to send data to each other for text chat or game state synchronization, without routing through a central server.
-
-### How It Works
-
-WebRTC establishes a peer-to-peer connection between two browsers. Once established, a data channel can be opened on that connection. Data channels come in two flavors:
-
-**Reliable Channels:**
-- Guarantee that messages arrive at the peer.
-- Maintain message order -- messages arrive in the same sequence they were sent.
-- Analogous to TCP sockets.
-
-**Unreliable Channels:**
-- Make no guarantees about message delivery.
-- Messages may not arrive in any particular order.
-- Messages may not arrive at all.
-- Analogous to UDP sockets.
-
-### When to Use It
-
-- **Reliable channels:** Turn-based games, chat, or any scenario where every message must arrive in order.
-- **Unreliable channels:** Real-time action games where low latency matters more than guaranteed delivery (e.g., position updates where stale data is worse than missing data).
-
-### Use Cases in Games
-
-- Player-to-player text chat communication.
-- Game status information exchange between players.
-- Real-time game state synchronization.
-- Peer-to-peer multiplayer without a dedicated game server.
-
-### Implementation Notes
-
-- The WebRTC API is primarily known for audio and video communication but includes robust peer-to-peer data channel capabilities.
-- Libraries are recommended to simplify implementation and work around browser differences.
-- Full WebRTC documentation is available at [MDN WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API).
+古いデバイスや遅いデバイスを使用しているユーザーは、開発者よりも長い遅延を経験します。常にそれに応じて最適化してください。
 
 ---
 
-## Audio for Web Games
+## WebRTC データ チャネル
 
-**Source:** [MDN - Audio for Web Games](https://developer.mozilla.org/en-US/docs/Games/Techniques/Audio_for_Web_Games)
+**出典:** [MDN - WebRTC データ チャネル](https://developer.mozilla.org/en-US/docs/Games/Techniques/WebRTC_data_channels)
 
-### What It Is
+### それは何ですか
 
-Audio provides feedback and atmosphere in web games. This technique covers implementing audio across desktop and mobile platforms, addressing browser differences and optimization strategies.
+WebRTC データ チャネルを使用すると、アクティブな接続を介してテキストまたはバイナリ データをピアに送信できます。ゲームのコンテキストでは、これにより、プレイヤーは中央サーバーを経由せずに、テキスト チャットやゲーム状態の同期のためにデータを相互に送信できるようになります。
 
-### How It Works
+### 仕組み
 
-Two primary APIs are available:
+WebRTC は 2 つのブラウザー間にピアツーピア接続を確立します。確立されると、その接続上でデータ チャネルを開くことができます。データ チャネルには 2 つの種類があります。
 
-1. **HTMLMediaElement** -- The standard `<audio>` element for basic audio playback.
-2. **Web Audio API** -- An advanced API for dynamic audio manipulation, positioning, and precise timing.
+**信頼できるチャネル:**
+- メッセージがピアに到着することを保証します。
+- メッセージの順序を維持する -- メッセージは送信されたのと同じ順序で到着します。
+- TCP ソケットに似ています。
 
-### When to Use It
+**信頼できないチャネル:**
+- メッセージの配信については保証しません。
+- メッセージは特定の順序で届くとは限りません。
+・メッセージが全く届かない場合がございます。
+- UDP ソケットに似ています。
 
-- Use `<audio>` elements for simple, linear playback (background music without complex control).
-- Use the Web Audio API for dynamic music, 3D spatial audio, precise timing, and real-time manipulation.
-- Use audio sprites when targeting mobile or when you have many short sound effects.
+### いつ使用するか
 
-### Key Challenges on Mobile
+- **信頼できるチャネル:** ターンベースのゲーム、チャット、またはすべてのメッセージが順番に到着する必要があるシナリオ。
+- **信頼性の低いチャネル:** 保証された配信よりも低レイテンシーが重要なリアルタイム アクション ゲーム (例: 古いデータが欠落データよりも悪い位置更新)。
 
-- **Autoplay policy:** Browsers restrict autoplay with sound. Playback must be user-initiated via click or tap.
-- **Volume control:** Mobile browsers may disable programmatic volume control to preserve OS-level user control.
-- **Buffering/preloading:** Mobile browsers often disable buffering before playback initiation to reduce data usage.
+### ゲームでの使用例
 
-### Technique 1: Audio Sprites
+- プレイヤー間のテキストチャットコミュニケーション。
+- プレイヤー間でのゲームステータス情報の交換。
+- リアルタイムのゲーム状態の同期。
+- 専用のゲームサーバーを必要としないピアツーピアのマルチプレイヤー。
 
-Combines multiple audio clips into a single file, playing specific sections by timestamp, borrowed from the CSS sprites concept.
+### 実装メモ
 
-**HTML:**
+- WebRTC API は主にオーディオおよびビデオ通信用として知られていますが、堅牢なピアツーピア データ チャネル機能も含まれています。
+- 実装を簡素化し、ブラウザの違いを回避するために、ライブラリを推奨します。
+- WebRTC の完全なドキュメントは、[MDN WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) で入手できます。
 
-```html
+---
+
+## Web ゲーム用オーディオ
+
+**出典:** [MDN - ウェブ ゲーム用オーディオ](https://developer.mozilla.org/en-US/docs/Games/Techniques/Audio_for_Web_Games)
+
+### それは何ですか
+
+オーディオは Web ゲームにフィードバックと雰囲気を提供します。この手法では、デスクトップおよびモバイル プラットフォーム全体でのオーディオの実装、ブラウザーの違いへの対応、および最適化戦略について説明します。
+
+### 仕組み
+
+次の 2 つの主要な API が利用可能です。
+
+1. **HTMLMediaElement** -- 基本的なオーディオ再生用の標準 `<audio>` 要素。
+2. **Web Audio API** -- 動的なオーディオ操作、位置決め、正確なタイミングのための高度な API。
+
+### いつ使用するか- シンプルでリニアな再生 (複雑な制御を必要としない BGM) には `<audio>` 要素を使用します。
+- Web オーディオ API を使用して、ダイナミックな音楽、3D 空間オーディオ、正確なタイミング、リアルタイム操作を実現します。
+- モバイルをターゲットにする場合、または短いサウンド効果が多数ある場合は、オーディオ スプライトを使用します。
+
+### モバイルにおける主な課題
+
+- **自動再生ポリシー:** ブラウザはサウンド付きの自動再生を制限します。再生は、ユーザーがクリックまたはタップして開始する必要があります。
+- **音量制御:** モバイル ブラウザでは、OS レベルのユーザー制御を維持するために、プログラムによる音量制御が無効になる場合があります。
+- **バッファリング/プリロード:** モバイル ブラウザでは、データ使用量を削減するために、再生開始前にバッファリングが無効になることがよくあります。
+
+### テクニック 1: オーディオ スプライト
+
+CSS スプライトの概念から借用した、複数のオーディオ クリップを 1 つのファイルに結合し、タイムスタンプごとに特定のセクションを再生します。
+
+**HTML:**```html
 <audio id="myAudio" src="mysprite.mp3"></audio>
 <button data-start="18" data-stop="19">0</button>
 <button data-start="16" data-stop="17">1</button>
@@ -226,11 +198,7 @@ Combines multiple audio clips into a single file, playing specific sections by t
 <button data-start="4" data-stop="5">7</button>
 <button data-start="2" data-stop="3">8</button>
 <button data-start="0" data-stop="1">9</button>
-```
-
-**JavaScript:**
-
-```javascript
+```**JavaScript:**```javascript
 const myAudio = document.getElementById("myAudio");
 const buttons = document.getElementsByTagName("button");
 let stopTime = 0;
@@ -248,24 +216,16 @@ myAudio.addEventListener("timeupdate", () => {
     myAudio.pause();
   }
 });
-```
-
-**Priming audio for mobile (trigger on first user interaction):**
-
-```javascript
+```**モバイル向けオーディオのプライミング (最初のユーザー インタラクションでトリガー):**```javascript
 const myAudio = document.createElement("audio");
 myAudio.src = "my-sprite.mp3";
 myAudio.play();
 myAudio.pause();
-```
+```### テクニック 2: Web オーディオ API マルチトラック ミュージック
 
-### Technique 2: Web Audio API Multi-Track Music
+別々のオーディオ トラックを正確なタイミングでロードして同期します。
 
-Load and synchronize separate audio tracks with precise timing.
-
-**Create audio context and load files:**
-
-```javascript
+**オーディオ コンテキストを作成し、ファイルをロードします:**```javascript
 const audioCtx = new AudioContext();
 
 async function getFile(filepath) {
@@ -274,11 +234,7 @@ async function getFile(filepath) {
   const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
   return audioBuffer;
 }
-```
-
-**Track playback with synchronization:**
-
-```javascript
+```**同期によるトラック再生:**```javascript
 let offset = 0;
 
 function playTrack(audioBuffer) {
@@ -295,11 +251,7 @@ function playTrack(audioBuffer) {
 
   return trackSource;
 }
-```
-
-**Handle autoplay policy in playback handlers:**
-
-```javascript
+```**再生ハンドラーで自動再生ポリシーを処理します:**```javascript
 playButton.addEventListener("click", () => {
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
@@ -308,13 +260,9 @@ playButton.addEventListener("click", () => {
   playTrack(track);
   playButton.dataset.playing = true;
 });
-```
+```### テクニック 3: ビート同期したトラックの再生
 
-### Technique 3: Beat-Synchronized Track Playback
-
-For seamless transitions, sync new tracks to beat boundaries:
-
-```javascript
+シームレスなトランジションを実現するには、新しいトラックを同期して境界を越えます。```javascript
 const tempo = 3.074074076; // Time in seconds of your beat/bar
 
 if (offset === 0) {
@@ -327,53 +275,49 @@ if (offset === 0) {
   const delay = tempo - remainder * tempo;
   source.start(context.currentTime + delay, relativeTime + delay);
 }
-```
+```### テクニック 4: 位置オーディオ (3D 空間化)
 
-### Technique 4: Positional Audio (3D Spatialization)
+`PannerNode` を使用して 3D 空間にオーディオを配置します。
 
-Use the `PannerNode` to position audio in 3D space:
+- ゲームの世界空間にオブジェクトを配置します。
+- 音源の方向と動きを設定します。
+- 環境効果（洞窟の残響、水中消音など）を適用します。
 
-- Position objects in game world space.
-- Set direction and movement of audio sources.
-- Apply environmental effects (cave reverb, underwater muffling, etc.).
+WebGL 3D ゲームでオーディオをビジュアル オブジェクトやプレーヤーの視点に結び付けるのに特に役立ちます。
 
-Particularly useful for WebGL 3D games to tie audio to visual objects and the player's viewpoint.
+### 意思決定マトリックス
 
-### Decision Matrix
-
-| Technique | Use When | Pros | Cons |
+|テクニック |いつ使用する |長所 |短所 |
 |---|---|---|---|
-| Audio Sprites | Many short sounds, mobile | Reduces HTTP requests, mobile-friendly | Seeking accuracy reduced at low bitrates |
-| Basic `<audio>` | Simple linear playback | Broad support | Limited control, autoplay restrictions |
-| Web Audio API | Dynamic music, 3D positioning, precise timing | Full control, real-time manipulation, sync | More complex code |
-| Positional Audio | 3D immersive games | Realism, player immersion | Requires WebGL context awareness |
+|オーディオ スプライト |短い音が多く、モバイル | HTTP リクエストを削減し、モバイル対応 |低ビットレートではシーク精度が低下する |
+|基本的な `<audio>` |シンプルなリニア再生 |幅広いサポート |制限された制御、自動再生の制限 |
+|ウェブオーディオ API |ダイナミックな音楽、3D ポジショニング、正確なタイミング |フルコントロール、リアルタイム操作、同期 |より複雑なコード |
+|位置オーディオ | 3D イマーシブ ゲーム |リアリズム、プレイヤーの没入感 | WebGL コンテキスト認識が必要 |
 
 ---
 
-## 2D Collision Detection
+## 2D 衝突検出
 
-**Source:** [MDN - 2D Collision Detection](https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection)
+**出典:** [MDN - 2D 衝突検出](https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection)
 
-### What It Is
+### それは何ですか
 
-2D collision detection algorithms determine when game entities overlap or intersect based on their shape types (rectangle-to-rectangle, rectangle-to-circle, circle-to-circle, etc.). Rather than pixel-perfect detection, games typically use simple generic shapes called "hitboxes" that cover entities, balancing visual accuracy with performance.
+2D 衝突検出アルゴリズムは、ゲーム エンティティがその形状タイプ (長方形から長方形、長方形から円、円から円など) に基づいて重なり合うか交差するかを判断します。ゲームでは通常、ピクセル完璧な検出ではなく、エンティティをカバーする「ヒットボックス」と呼ばれる単純な汎用形状を使用し、視覚的な精度とパフォーマンスのバランスをとります。
 
-### How It Works
+### 仕組み
 
-Each algorithm checks the geometric relationship between two shapes. If any overlap is detected, a collision is reported. The approach varies by shape type.
+各アルゴリズムは、2 つの形状間の幾何学的関係をチェックします。重複が検出された場合は、衝突が報告されます。アプローチは形状の種類によって異なります。
 
-### When to Use It
+### いつ使用するか
 
-- Use AABB for simple rectangular entities without rotation.
-- Use circle collision for round entities or when you need fast, simple checks.
-- Use the Separating Axis Theorem (SAT) for complex convex polygons.
-- Use broad-phase narrowing (quad trees, spatial hashmaps) when you have many entities.
+- 回転のない単純な長方形エンティティには AABB を使用します。
+- 丸いエンティティの場合、または迅速で簡単なチェックが必要な場合は、円衝突を使用します。
+- 複雑な凸多角形には分離軸定理 (SAT) を使用します。
+- 多数のエンティティがある場合は、広範なフェーズの縮小 (クワッド ツリー、空間ハッシュマップ) を使用します。
 
-### Algorithm 1: Axis-Aligned Bounding Box (AABB)
+### アルゴリズム 1: 軸揃えバウンディング ボックス (AABB)
 
-Collision detection between two axis-aligned rectangles (no rotation). Detects collision by ensuring there is no gap between any of the 4 sides of the rectangles.
-
-```javascript
+軸が揃った 2 つの長方形間の衝突検出 (回転なし)。長方形の 4 つの辺の間に隙間がないことを確認することで衝突を検出します。```javascript
 class BoxEntity extends BaseEntity {
   width = 20;
   height = 20;
@@ -387,13 +331,9 @@ class BoxEntity extends BaseEntity {
     );
   }
 }
-```
+```### アルゴリズム 2: サークル衝突
 
-### Algorithm 2: Circle Collision
-
-Collision detection between two circles. Takes the center points of two circles and checks whether the distance between them is less than the sum of their radii.
-
-```javascript
+2 つの円間の衝突検出。 2 つの円の中心点を取得し、それらの間の距離が半径の合計より小さいかどうかを確認します。```javascript
 class CircleEntity extends BaseEntity {
   radius = 10;
 
@@ -406,32 +346,28 @@ class CircleEntity extends BaseEntity {
     return distance < this.radius + other.radius;
   }
 }
-```
+```注: 円の `x` 座標と `y` 座標は左上隅を参照するため、実際の中心を比較するには半径を追加する必要があります。
 
-Note: The circle's `x` and `y` coordinates refer to their top-left corner, so you must add the radius to compare their actual centers.
+### アルゴリズム 3: 分離軸定理 (SAT)
 
-### Algorithm 3: Separating Axis Theorem (SAT)
+任意の 2 つの凸多角形間の衝突を検出する衝突アルゴリズム。これは、各ポリゴンを可能なすべての軸に投影し、重なりをチェックすることによって機能します。いずれかの軸にギャップがある場合、ポリゴンは衝突していません。
 
-A collision algorithm that detects collisions between any two convex polygons. It works by projecting each polygon onto every possible axis and checking for overlap. If any axis shows a gap, the polygons are not colliding.
+SAT は実装がより複雑ですが、任意の凸多角形を処理します。
 
-SAT is more complex to implement but handles arbitrary convex polygon shapes.
+### 衝突パフォーマンス: ブロードフェーズとナローフェーズ
 
-### Collision Performance: Broad Phase and Narrow Phase
+すべてのエンティティを他のすべてのエンティティに対してテストすると、計算コストが高くなります (O(n^2))。ゲームは衝突検出を 2 つのフェーズに分割します。
 
-Testing every entity against every other entity is computationally expensive (O(n^2)). Games split collision detection into two phases:
+**ブロードフェーズ** -- 空間データ構造を使用して、どのエンティティが衝突している可能性があるかを迅速に特定します。
+- クアッドツリー
+- R ツリー
+- 空間ハッシュマップ
 
-**Broad Phase** -- Uses spatial data structures to quickly identify which entities could be colliding:
-- Quad Trees
-- R-Trees
-- Spatial Hashmaps
+**狭いフェーズ** -- 正確な衝突アルゴリズム (AABB、Circle、SAT) を広いフェーズの少数の候補リストにのみ適用します。
 
-**Narrow Phase** -- Applies precise collision algorithms (AABB, Circle, SAT) only to the small list of candidates from the broad phase.
+### 基本エンジン コード
 
-### Base Engine Code
-
-**CSS for collision visualization:**
-
-```css
+**衝突視覚化用の CSS:**```css
 .entity {
   display: inline-block;
   position: absolute;
@@ -449,11 +385,7 @@ Testing every entity against every other entity is computationally expensive (O(
 .collision-state {
   background-color: green !important;
 }
-```
-
-**JavaScript collision checker and entity system:**
-
-```javascript
+```**JavaScript 衝突チェッカーとエンティティ システム:**```javascript
 const collider = {
   moveableEntity: null,
   staticEntities: [],
@@ -517,38 +449,34 @@ document.addEventListener("keydown", (e) => {
   }
   collider.checkCollision();
 });
-```
+```---
 
----
+## タイルマップ
 
-## Tilemaps
+**出典:** [MDN - タイルマップ](https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps)
 
-**Source:** [MDN - Tilemaps](https://developer.mozilla.org/en-US/docs/Games/Techniques/Tilemaps)
+### それは何ですか
 
-### What It Is
+タイルマップは、タイルと呼ばれる小さな規則的な形状の画像を使用してゲーム世界を構築する 2D ゲーム開発の基本的な技術です。大きなモノリシック レベルのイメージを保存する代わりに、ゲーム世界は再利用可能なタイル グラフィックスのグリッドから組み立てられ、パフォーマンスとメモリに大きなメリットをもたらします。
 
-Tilemaps are a fundamental technique in 2D game development that constructs game worlds using small, regular-shaped images called tiles. Instead of storing large monolithic level images, the game world is assembled from a grid of reusable tile graphics, providing significant performance and memory benefits.
+### 仕組み
 
-### How It Works
+**コア構造:**
 
-**Core structure:**
+1. **タイル アトラス (スプライトシート):** すべてのタイル イメージが 1 つのアトラス ファイルに保存されます。各タイルには、その識別子として使用されるインデックスが割り当てられます。
+2. **タイルマップ データ オブジェクト:** タイル サイズ (ピクセル寸法)、画像アトラス参照、マップ寸法 (タイルまたはピクセル単位)、ビジュアル グリッド (タイル インデックスの配列)、およびオプションのロジック グリッド (衝突、パスファインディング、スポーン データ) が含まれます。
 
-1. **Tile Atlas (Spritesheet):** All tile images stored in a single atlas file. Each tile is assigned an index used as its identifier.
-2. **Tilemap Data Object:** Contains tile size (pixel dimensions), image atlas reference, map dimensions (in tiles or pixels), a visual grid (array of tile indices), and an optional logic grid (collision, pathfinding, spawn data).
+特別な値 (負の数、0、または null) は空のタイルを表します。
 
-Special values (negative numbers, 0, or null) represent empty tiles.
+### いつ使用するか
 
-### When to Use It
+- あらゆる種類の 2D ゲーム世界 (プラットフォーマー、RPG、戦略ゲーム、パズル ゲーム) の構築。
+- スーパー マリオ ブラザーズ、パックマン、ゼルダ、スタークラフト、シム シティなどの古典にインスピレーションを得たゲーム。
+- グリッドベースの世界がパスファインディング、衝突、またはレベル編集に論理的な利点をもたらすシナリオ。
 
-- Building 2D game worlds of any kind (platformers, RPGs, strategy games, puzzle games).
-- Games inspired by classics like Super Mario Bros, Pacman, Zelda, Starcraft, or Sim City.
-- Any scenario where a grid-based world offers logical advantages for pathfinding, collision, or level editing.
+### 静的タイルマップのレンダリング
 
-### Rendering Static Tilemaps
-
-For maps fitting entirely on screen:
-
-```javascript
+地図が画面上に完全に収まる場合:```javascript
 for (let column = 0; column < map.columns; column++) {
   for (let row = 0; row < map.rows; row++) {
     const tile = map.getTile(column, row);
@@ -557,13 +485,9 @@ for (let column = 0; column < map.columns; column++) {
     drawTile(tile, x, y);
   }
 }
-```
+```### カメラを使用したタイルマップのスクロール
 
-### Scrolling Tilemaps with Camera
-
-Convert between world coordinates (level position) and screen coordinates (rendered position):
-
-```javascript
+ワールド座標 (レベル位置) とスクリーン座標 (レンダリング位置) の間の変換:```javascript
 // These functions assume camera points to top-left corner
 
 function worldToScreen(x, y) {
@@ -573,85 +497,81 @@ function worldToScreen(x, y) {
 function screenToWorld(x, y) {
   return { x: x + camera.x, y: y + camera.y };
 }
-```
+```重要な原則: パフォーマンスを最適化するために、表示されているタイルのみをレンダリングします。レンダリング中にカメラ オフセット変換を適用します。
 
-Key principle: Only render visible tiles to optimize performance. Apply the camera offset transformation during rendering.
+### タイルマップの種類
 
-### Tilemap Types
+**正方形タイル (最も一般的):**
+- RPG および戦略ゲーム (Warcraft 2、Final Fantasy) のトップダウン ビュー。
+- プラットフォーマー (スーパー マリオ ブラザーズ) の側面図。
 
-**Square Tiles (most common):**
-- Top-down view for RPGs and strategy games (Warcraft 2, Final Fantasy).
-- Side view for platformers (Super Mario Bros).
+**アイソメトリック タイルマップ:**
+- 3D 環境のような錯覚を作り出します。
+- シミュレーションおよび戦略ゲーム (シムシティ 2000、ファラオ、ファイナルファンタジー タクティクス) で人気。
 
-**Isometric Tilemaps:**
-- Creates the illusion of a 3D environment.
-- Popular in simulation and strategy games (SimCity 2000, Pharaoh, Final Fantasy Tactics).
+### レイヤー
 
-### Layers
+複数のビジュアル レイヤーを使用すると、次のことが可能になります。
+- さまざまな背景タイプ間でタイルを再利用します。
+- キャラクターが地形の後ろまたは前に出現します (木の後ろを歩きます)。
+- タイルのバリエーションが少なくなり、より豊かな世界。
 
-Multiple visual layers enable:
-- Reusing tiles across different background types.
-- Characters appearing behind or in front of terrain (walking behind trees).
-- Richer worlds with fewer tile variations.
+例: 草、砂、またはレンガの背景上の別のレイヤーにレンダリングされた岩のタイル。
 
-Example: A rock tile rendered on a separate layer over grass, sand, or brick backgrounds.
+### ロジックグリッド
 
-### Logic Grid
+非ビジュアル ゲーム ロジック用の別個のグリッド:
+- **衝突検出:** 歩行可能なタイルとブロックされたタイルをマークします。
+- **キャラクターのスポーン:** スポーンポイントの位置を定義します。
+- **経路探索:** ナビゲーション グラフを作成します。
+- **タイルの組み合わせ:** 有効なパターン (テトリス、宝石で飾られた) を検出します。
 
-A separate grid for non-visual game logic:
-- **Collision detection:** Mark walkable vs. blocked tiles.
-- **Character spawning:** Define spawn point locations.
-- **Pathfinding:** Create navigation graphs.
-- **Tile combinations:** Detect valid patterns (Tetris, Bejeweled).
+### パフォーマンスの最適化
 
-### Performance Optimization
-
-1. **Only render visible tiles** -- Skip off-screen tiles entirely.
-2. **Pre-render to canvas** -- Render the map to an off-screen canvas element and blit as a single operation.
-3. **Offcanvas buffering** -- Draw a section larger than the visible area (2x2 tiles bigger) to reduce redraws during scrolling.
-4. **Chunking** -- Divide large tilemaps into sections (e.g., 10x10 tile chunks), pre-render each as a "big tile."
+1. **表示されているタイルのみをレンダリング** -- 画面外のタイルを完全にスキップします。
+2. **キャンバスに事前レンダリング** -- マップをオフスクリーンのキャンバス要素にレンダリングし、単一の操作としてブリットします。
+3. **オフキャンバス バッファリング** -- スクロール中の再描画を減らすために、表示領域より大きいセクション (2x2 タイルより大きい) を描画します。
+4. **チャンキング** -- 大きなタイルマップをセクション (例: 10x10 タイル チャンク) に分割し、それぞれを「大きなタイル」として事前レンダリングします。
 
 ---
 
-## Controls: Gamepad API
+## コントロール: ゲームパッド API
 
-**Source:** [MDN - Controls Gamepad API](https://developer.mozilla.org/en-US/docs/Games/Techniques/Controls_Gamepad_API)
+**出典:** [MDN - コントロール ゲームパッド API](https://developer.mozilla.org/en-US/docs/Games/Techniques/Controls_Gamepad_API)
 
-### What It Is
+### それは何ですか
 
-The Gamepad API provides an interface for detecting and using gamepad controllers in web browsers without plugins. It exposes button presses and axis changes through JavaScript, allowing console-like control of browser-based games.
+ゲームパッド API は、プラグインなしで Web ブラウザーでゲームパッド コントローラーを検出して使用するためのインターフェイスを提供します。 JavaScript を通じてボタンの押下と軸の変更を公開し、ブラウザベースのゲームをコンソールのように制御できるようにします。
 
-### How It Works
+### 仕組み
 
-Two fundamental events handle the controller lifecycle:
+2 つの基本的なイベントがコントローラーのライフサイクルを処理します。
 
-- `gamepadconnected` -- fired when a gamepad is connected.
-- `gamepaddisconnected` -- fired when disconnected (physically or due to inactivity).
+- `gamepadconnected` -- ゲームパッドが接続されているときに発生します。
+- `gamepaddisconnected` -- (物理的または非アクティブのため) 切断されたときに起動されます。
 
-Security note: User interaction with the controller is required while the page is visible for the event to fire (prevents fingerprinting).
+セキュリティ上の注意: イベントを発生させるには、ページが表示されている間、ユーザーによるコントローラーの操作が必要です (フィンガープリントの防止)。
 
-**Gamepad object properties:**
+**ゲームパッド オブジェクトのプロパティ:**
 
-| Property | Description |
+|プロパティ |説明 |
 |---|---|
-| `id` | String containing controller information |
-| `index` | Unique identifier for the connected device |
-| `connected` | Boolean indicating connection status |
-| `mapping` | Layout type ("standard" is the common option) |
-| `axes` | Array of floats (-1 to 1) representing analog stick positions |
-| `buttons` | Array of GamepadButton objects with `pressed` and `value` properties |
+| `id` |コントローラー情報を含む文字列 |
+| `index` |接続されたデバイスの一意の識別子 |
+| `connected` |接続ステータスを示すブール値 |
+| `mapping` |レイアウトタイプ (「標準」が一般的なオプション) |
+| `axes` |アナログ スティックの位置を表す浮動小数点数 (-1 ～ 1) の配列 |
+| `buttons` | `pressed` および `value` プロパティを持つ GamepadButton オブジェクトの配列 |
 
-### When to Use It
+### いつ使用するか
 
-- When building games that should work with console controllers.
-- When supporting Xbox 360, Xbox One, PS3, or PS4 controllers on Windows and macOS.
-- When you want dual input support (keyboard + gamepad).
+- コンソール コントローラーで動作するゲームを構築する場合。
+- Windows および macOS で Xbox 360、Xbox One、PS3、または PS4 コントローラーをサポートする場合。
+- デュアル入力サポート (キーボード + ゲームパッド) が必要な場合。
 
-### Code Examples
+### コード例
 
-**Basic setup structure:**
-
-```javascript
+**基本的なセットアップ構造:**```javascript
 const gamepadAPI = {
   controller: {},
   turbo: false,
@@ -664,11 +584,7 @@ const gamepadAPI = {
   buttonsStatus: [],
   axesStatus: [],
 };
-```
-
-**Button layout (Xbox 360):**
-
-```javascript
+```**ボタン レイアウト (Xbox 360):**```javascript
 const gamepadAPI = {
   buttons: [
     "DPad-Up", "DPad-Down", "DPad-Left", "DPad-Right",
@@ -676,18 +592,10 @@ const gamepadAPI = {
     "LB", "RB", "Power", "A", "B", "X", "Y",
   ],
 };
-```
-
-**Event listeners:**
-
-```javascript
+```**イベントリスナー:**```javascript
 window.addEventListener("gamepadconnected", gamepadAPI.connect);
 window.addEventListener("gamepaddisconnected", gamepadAPI.disconnect);
-```
-
-**Connection and disconnection handlers:**
-
-```javascript
+```**接続および切断ハンドラー:**```javascript
 connect(evt) {
   gamepadAPI.controller = evt.gamepad;
   gamepadAPI.turbo = true;
@@ -699,11 +607,7 @@ disconnect(evt) {
   delete gamepadAPI.controller;
   console.log("Gamepad disconnected.");
 },
-```
-
-**Update method (called every frame):**
-
-```javascript
+```**更新メソッド (フレームごとに呼び出されます):**```javascript
 update() {
   // Clear the buttons cache
   gamepadAPI.buttonsCache = [];
@@ -743,11 +647,7 @@ update() {
 
   return pressed;
 },
-```
-
-**Button detection with hold support:**
-
-```javascript
+```**ホールドサポートによるボタン検出:**```javascript
 buttonPressed(button, hold) {
   let newPress = false;
   if (gamepadAPI.buttonsStatus.includes(button)) {
@@ -758,15 +658,11 @@ buttonPressed(button, hold) {
   }
   return newPress;
 },
-```
+```パラメータ:
+- `button` -- リッスンするボタンの名前。
+- `hold` -- true の場合、ボタンの長押しは連続アクションとしてカウントされます。 false の場合、新しいプレスのみが登録されます。
 
-Parameters:
-- `button` -- the button name to listen for.
-- `hold` -- if true, holding the button counts as continuous action; if false, only new presses register.
-
-**Usage in a game loop:**
-
-```javascript
+**ゲームループでの使用:**```javascript
 if (gamepadAPI.turbo) {
   if (gamepadAPI.buttonPressed("A", "hold")) {
     this.turbo_fire();
@@ -775,52 +671,40 @@ if (gamepadAPI.turbo) {
     this.managePause();
   }
 }
-```
-
-**Analog stick input with threshold (prevent stick drift):**
-
-```javascript
+```**閾値付きアナログスティック入力 (スティックドリフト防止):**```javascript
 if (gamepadAPI.axesStatus[0].x > 0.5) {
   this.player.angle += 3;
   this.turret.angle += 3;
 }
-```
-
-**Getting all connected gamepads:**
-
-```javascript
+```**接続されているすべてのゲームパッドの取得:**```javascript
 const gamepads = navigator.getGamepads();
 // Returns an array where unavailable/disconnected slots contain null
 // Example with one device at index 1: [null, [object Gamepad]]
-```
+```---
 
----
+## 鮮明なピクセルアートの外観
 
-## Crisp Pixel Art Look
+**出典:** [MDN - 鮮明なピクセル アートの外観](https://developer.mozilla.org/en-US/docs/Games/Techniques/Crisp_pixel_art_look)
 
-**Source:** [MDN - Crisp Pixel Art Look](https://developer.mozilla.org/en-US/docs/Games/Techniques/Crisp_pixel_art_look)
+### それは何ですか
 
-### What It Is
+平滑化補間を行わずに個々の画像ピクセルを画面ピクセルのブロックにマッピングすることにより、高解像度ディスプレイ上でぼやけのないピクセル アートをレンダリングする技術。レトロなピクセル アートでは、拡大縮小中にハード エッジを維持する必要がありますが、最新のブラウザでは、色をブレンドしてぼかしを作成するスムージング アルゴリズムがデフォルトで使用されます。
 
-A technique for rendering pixel art without blurriness on high-resolution displays by mapping individual image pixels to blocks of screen pixels without smoothing interpolation. Retro pixel art requires preserving hard edges during scaling, but modern browsers default to smoothing algorithms that blend colors and create blur.
+### 仕組み
 
-### How It Works
+CSS `image-rendering` プロパティは、ブラウザーが画像を拡大縮小する方法を制御します。 `pixelated` に設定すると、最近傍スケーリングが強制され、バイリニアまたはバイキュービック スムージングを適用する代わりに、ピクセル アートの鮮明でブロック状の外観が維持されます。
 
-The CSS `image-rendering` property controls how browsers scale images. Setting it to `pixelated` enforces nearest-neighbor scaling, which preserves the crisp, blocky look of pixel art instead of applying bilinear or bicubic smoothing.
+**主要な CSS 値:**
+- `pixelated` -- ピクセル アートの鮮明なエッジを保持します。
+- `crisp-edges` -- 一部のブラウザでサポートされる代替手段。
 
-**Key CSS values:**
-- `pixelated` -- preserves crisp edges for pixel art.
-- `crisp-edges` -- alternative supported on some browsers.
+### いつ使用するか
 
-### When to Use It
+- ピクセルアートアセットを使用したレトロスタイルのゲーム。
+- 意図的にブロック状のピクセル化されたビジュアル スタイルが必要なゲーム。
+- 小さなスプライト画像を大きな表示サイズに拡大縮小する場合。
 
-- Retro-style games with pixel art assets.
-- Any game where you want a deliberately blocky, pixelated visual style.
-- When scaling small sprite images to larger display sizes.
-
-### Technique 1: Scaling `<img>` Elements with CSS
-
-```html
+### テクニック 1: CSS を使用して `<img>` 要素をスケーリングする```html
 <img
   src="character.png"
   alt="pixel art character, upscaled with CSS, appearing crisp" />
@@ -832,13 +716,9 @@ img {
   height: 136px;
   image-rendering: pixelated;
 }
-```
+```### テクニック 2: キャンバス内の鮮明なピクセル アート
 
-### Technique 2: Crisp Pixel Art in Canvas
-
-Set the canvas `width`/`height` attributes to the original pixel art resolution, then use CSS `width`/`height` for scaling (e.g., 4x scale: 128 pixels to 512px CSS width).
-
-```html
+キャンバスの `width`/`height` 属性を元のピクセル アートの解像度に設定し、CSS `width`/`height` を使用してスケーリングします (例: 4 倍のスケール: 128 ピクセルから 512 ピクセルの CSS 幅)。```html
 <canvas id="game" width="128" height="128">A cat</canvas>
 ```
 
@@ -858,13 +738,9 @@ image.onload = () => {
   ctx.drawImage(image, 0, 0);
 };
 image.src = "cat.png";
-```
+```### テクニック 3: 補正を伴う任意のキャンバス スケーリング
 
-### Technique 3: Arbitrary Canvas Scaling with Correction
-
-For non-integer scale factors, image pixels must align to canvas pixels at integer multiples:
-
-```javascript
+非整数のスケール係数の場合、画像ピクセルは整数倍でキャンバス ピクセルに揃える必要があります。```javascript
 const ctx = document.getElementById("game").getContext("2d");
 ctx.scale(0.8, 0.8);
 
@@ -874,21 +750,19 @@ image.onload = () => {
   ctx.drawImage(image, 0, 0, 128, 128, 0, 0, 128 / 0.8, 128 / 0.8);
 };
 image.src = "cat.png";
-```
+````drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)`を使用する場合:
+- `dWidth` は `sWidth / xScale * n` と等しくなければなりません
+- `dHeight` は `sHeight / yScale * m` と等しくなければなりません
+- `n` と `m` は正の整数 (1、2、3 など)
 
-When using `drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)`:
-- `dWidth` must equal `sWidth / xScale * n`
-- `dHeight` must equal `sHeight / yScale * m`
-- Where `n` and `m` are positive integers (1, 2, 3, etc.)
+### 既知の制限事項
 
-### Known Limitations
+**devicePixelRatio のずれ:** `devicePixelRatio` が整数ではない場合 (例: ブラウザーのズームが 110% の場合)、CSS ピクセルがデバイス ピクセルに完全にマッピングできないため、ピクセルが不均一にレンダリングされる可能性があります。これにより、外観が不均一になり、簡単な解決策はありません。
 
-**devicePixelRatio misalignment:** When `devicePixelRatio` is not an integer (e.g., at 110% browser zoom), pixels may render unevenly because CSS pixels cannot perfectly map to device pixels. This creates a non-uniform appearance without an easy solution.
+### ベストプラクティス
 
-### Best Practices
-
-1. Use integer scale factors (2x, 3x, 4x) whenever possible.
-2. Preserve the aspect ratio -- scale width and height equally.
-3. Test across different browser zoom levels.
-4. Avoid fractional canvas scale factors or drawImage dimensions.
-5. Include descriptive `aria-label` attributes on canvas elements for accessibility.
+1. 可能な限り、整数のスケール係数 (2x、3x、4x) を使用します。
+2. アスペクト比を維持します -- 幅と高さを均等に拡大します。
+3. さまざまなブラウザーのズーム レベルでテストします。
+4. 分数のキャンバス スケール係数やdrawImage の寸法を避けてください。
+5. アクセシビリティのために、キャンバス要素に説明的な `aria-label` 属性を含めます。

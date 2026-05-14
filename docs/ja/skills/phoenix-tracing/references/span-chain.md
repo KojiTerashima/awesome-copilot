@@ -1,43 +1,37 @@
-# CHAIN Spans
+# チェーンスパン
 
-## Purpose
+## 目的
 
-CHAIN spans represent orchestration layers in your application (LangChain chains, custom workflows, application entry points). Often used as root spans.
+CHAIN スパンは、アプリケーション内のオーケストレーション レイヤー (LangChain チェーン、カスタム ワークフロー、アプリケーション エントリ ポイント) を表します。ルート スパンとしてよく使用されます。
 
-## Required Attributes
+## 必須の属性
 
-| Attribute                 | Type   | Description     | Required |
+|属性 |タイプ |説明 |必須 |
 | ------------------------- | ------ | --------------- | -------- |
-| `openinference.span.kind` | String | Must be "CHAIN" | Yes      |
+| `openinference.span.kind` |文字列 | 「チェーン」である必要があります |はい |
 
-## Common Attributes
+## 共通の属性
 
-CHAIN spans typically use [Universal Attributes](fundamentals-universal-attributes.md):
+CHAIN スパンは通常、[ユニバーサル属性](fundamentals-universal-attributes.md) を使用します。
 
-- `input.value` - Input to the chain (user query, request payload)
-- `output.value` - Output from the chain (final response)
-- `input.mime_type` / `output.mime_type` - Format indicators
+- `input.value` - チェーンへの入力 (ユーザークエリ、リクエストペイロード)
+- `output.value` - チェーンからの出力（最終応答）
+- `input.mime_type` / `output.mime_type` - フォーマットインジケーター
 
-## Example: Root Chain
-
-```json
+## 例: ルートチェーン```json
 {
-  "openinference.span.kind": "CHAIN",
-  "input.value": "{\"question\": \"What is the capital of France?\"}",
-  "input.mime_type": "application/json",
-  "output.value": "{\"answer\": \"The capital of France is Paris.\", \"sources\": [\"doc_123\"]}",
-  "output.mime_type": "application/json",
-  "session.id": "session_abc123",
+  "openinference.span.kind": "チェーン",
+  "input.value": "{\"question\": \"フランスの首都はどこですか?\"}",
+  "input.mime_type": "アプリケーション/json",
+  "output.value": "{\"answer\": \"フランスの首都はパリです。\", \"sources\": [\"doc_123\"]}",
+  "output.mime_type": "アプリケーション/json",
+  "セッションID": "セッション_abc123",
   "user.id": "user_xyz789"
 }
-```
-
-## Example: Nested Sub-Chain
-
-```json
+「」## 例: ネストされたサブチェーン```json
 {
-  "openinference.span.kind": "CHAIN",
-  "input.value": "Summarize this document: ...",
-  "output.value": "This document discusses..."
+  "openinference.span.kind": "チェーン",
+  "input.value": "この文書の要約: ...",
+  "output.value": "このドキュメントでは...について説明します。"
 }
-```
+「」

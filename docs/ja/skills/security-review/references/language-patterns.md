@@ -1,22 +1,18 @@
-# Language-Specific Vulnerability Patterns
+# 言語固有の脆弱性パターン
 
-Load the relevant section during Step 1 (Scope Resolution) after identifying languages.
+言語を特定した後、ステップ 1 (スコープの解決) で関連するセクションをロードします。
 
 ---
 
-## JavaScript / TypeScript (Node.js, React, Next.js, Express)
+## JavaScript / TypeScript (Node.js、React、Next.js、Express)
 
-### Critical APIs/calls to flag
-```js
+### 重要な API/フラグへの呼び出し```js
 eval()                    // arbitrary code execution
 Function('return ...')   // same as eval
 child_process.exec()     // command injection if user input reaches it
 fs.readFile              // path traversal if user controls path
 fs.writeFile             // path traversal if user controls path
-```
-
-### Express.js specific
-```js
+```### Express.js 固有```js
 // Missing helmet (security headers)
 const app = express()
 // Should have: app.use(helmet())
@@ -31,16 +27,10 @@ app.use(cors({ origin: req.headers.origin }))  // reflects any origin
 
 // Trust proxy without validation
 app.set('trust proxy', true)  // only safe behind known proxy
-```
-
-### React specific
-```jsx
+```### React 固有```jsx
 <div dangerouslySetInnerHTML={{ __html: userContent }} />  // XSS
 <a href={userUrl}>link</a>  // javascript: URL injection
-```
-
-### Next.js specific
-```js
+```### Next.js 固有```js
 // Server Actions without auth
 export async function deleteUser(id) {   // missing: auth check
   await db.users.delete(id)
@@ -51,14 +41,11 @@ export default function handler(req, res) {
   // Should check: if (req.method !== 'POST') return res.status(405)
   doSensitiveAction()
 }
-```
+```---
 
----
+## Python (Django、Flask、FastAPI)
 
-## Python (Django, Flask, FastAPI)
-
-### Django specific
-```python
+### Django 固有```python
 # Raw SQL
 User.objects.raw(f"SELECT * FROM users WHERE name = '{name}'")  # SQLi
 
@@ -73,10 +60,7 @@ SECRET_KEY = 'django-insecure-...'  # must be changed for production
 
 # ALLOWED_HOSTS
 ALLOWED_HOSTS = ['*']  # too permissive
-```
-
-### Flask specific
-```python
+```### フラスコ固有```python
 # Debug mode
 app.run(debug=True)  # never in production
 
@@ -88,10 +72,7 @@ eval(request.args.get('expr'))
 
 # render_template_string with user input (SSTI)
 render_template_string(f"Hello {name}")  # Server-Side Template Injection
-```
-
-### FastAPI specific
-```python
+```### FastAPI 固有```python
 # Missing auth dependency
 @app.delete("/users/{user_id}")  # No Depends(get_current_user)
 async def delete_user(user_id: int):
@@ -101,14 +82,11 @@ async def delete_user(user_id: int):
 @app.get("/files/{filename}")
 async def read_file(filename: str):
     return FileResponse(f"uploads/{filename}")  # path traversal
-```
+```---
 
----
+## Java (スプリングブート)
 
-## Java (Spring Boot)
-
-### Spring Boot specific
-```java
+### Spring Boot 固有```java
 // SQL Injection
 String query = "SELECT * FROM users WHERE name = '" + name + "'";
 jdbcTemplate.query(query, ...);
@@ -126,13 +104,9 @@ Object obj = ois.readObject();  // only safe with allowlist
 
 // Actuator endpoints exposed
 management.endpoints.web.exposure.include=*  # in application.properties
-```
+```---
 
----
-
-## PHP
-
-```php
+## PHP```php
 // Direct user input in queries
 $result = mysql_query("SELECT * FROM users WHERE id = " . $_GET['id']);
 
@@ -150,13 +124,9 @@ if ($password == "admin") {}  // use === instead
 
 // Unserialize
 unserialize($_COOKIE['data']);  // remote code execution
-```
+```- -
 
----
-
-## Go
-
-```go
+＃＃ 行く```go
 // Command injection
 exec.Command("sh", "-c", userInput)
 
@@ -174,13 +144,9 @@ go func() {
   // No done channel or context
   for { ... }
 }()
-```
+```---
 
----
-
-## Ruby on Rails
-
-```ruby
+## Ruby on Rails```ruby
 # SQL injection (safe alternatives use placeholders)
 User.where("name = '#{params[:name]}'")  # VULNERABLE
 User.where("name = ?", params[:name])   # SAFE
@@ -197,13 +163,9 @@ redirect_to params[:url]
 
 # YAML.load (allows arbitrary object creation)
 YAML.load(user_input)  # use YAML.safe_load instead
-```
+```- -
 
----
-
-## Rust
-
-```rust
+＃＃ さび```rust
 // Unsafe blocks — flag for manual review
 unsafe {
     // Reason for unsafety should be documented

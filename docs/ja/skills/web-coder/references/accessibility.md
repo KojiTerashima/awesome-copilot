@@ -1,26 +1,24 @@
-# Accessibility Reference
+# アクセシビリティリファレンス
 
-Web accessibility ensures content is usable by everyone, including people with disabilities.
+Web アクセシビリティにより、障害のある人を含むすべての人がコンテンツを利用できるようになります。
 
-## WCAG (Web Content Accessibility Guidelines)
+## WCAG (Web コンテンツ アクセシビリティ ガイドライン)
 
-### Levels
-- **A**: Minimum level
-- **AA**: Standard target (legal requirement in many jurisdictions)
-- **AAA**: Enhanced accessibility
+### レベル
+- **A**: 最低レベル
+- **AA**: 標準目標 (多くの管轄区域における法的要件)
+- **AAA**: アクセシビリティの強化
 
-### Four Principles (POUR)
+### 4 つの原則 (POUR)
 
-1. **Perceivable**: Information presented in ways users can perceive
-2. **Operable**: UI components and navigation are operable
-3. **Understandable**: Information and UI operation is understandable
-4. **Robust**: Content works with current and future technologies
+1. **知覚可能**: ユーザーが知覚できる方法で情報が提示されます。
+2. **操作可能**: UI コンポーネントとナビゲーションが操作可能です。
+3. **理解可能**: 情報と UI 操作が理解できる
+4. **堅牢**: コンテンツは現在および将来のテクノロジーで動作します
 
-## ARIA (Accessible Rich Internet Applications)
+## ARIA (アクセス可能なリッチ インターネット アプリケーション)
 
-### ARIA Roles
-
-```html
+### ARIA の役割```html
 <!-- Landmark roles -->
 <nav role="navigation">
 <main role="main">
@@ -36,11 +34,7 @@ Web accessibility ensures content is usable by everyone, including people with d
 <div role="list">
   <div role="listitem">Item 1</div>
 </div>
-```
-
-### ARIA Attributes
-
-```html
+```### ARIA 属性```html
 <!-- States -->
 <button aria-pressed="true">Toggle</button>
 <input aria-invalid="true" aria-errormessage="error1">
@@ -62,13 +56,9 @@ Web accessibility ensures content is usable by everyone, including people with d
 <div aria-live="polite" aria-atomic="true">
   Status updated
 </div>
-```
+```## キーボード ナビゲーション
 
-## Keyboard Navigation
-
-### Tab Order
-
-```html
+### タブオーダー```html
 <!-- Natural tab order -->
 <button>First</button>
 <button>Second</button>
@@ -82,11 +72,7 @@ Web accessibility ensures content is usable by everyone, including people with d
 
 <!-- In tab order -->
 <div tabindex="0" role="button">Custom button</div>
-```
-
-### Keyboard Events
-
-```javascript
+```### キーボードイベント```javascript
 element.addEventListener('keydown', (e) => {
   switch(e.key) {
     case 'Enter':
@@ -104,11 +90,7 @@ element.addEventListener('keydown', (e) => {
       break;
   }
 });
-```
-
-## Semantic HTML
-
-```html
+```## セマンティック HTML```html
 <!-- ✅ Good: semantic elements -->
 <nav aria-label="Main navigation">
   <ul>
@@ -129,11 +111,7 @@ element.addEventListener('keydown', (e) => {
 <!-- ❌ Bad: skipping levels -->
 <h1>Page Title</h1>
   <h3>Skipped h2</h3>
-```
-
-## Forms Accessibility
-
-```html
+```## フォームのアクセシビリティ```html
 <form>
   <!-- Labels -->
   <label for="name">Name:</label>
@@ -172,11 +150,7 @@ element.addEventListener('keydown', (e) => {
     Must be at least 8 characters
   </span>
 </form>
-```
-
-## Images and Media
-
-```html
+```## 画像とメディア```html
 <!-- Informative image -->
 <img src="chart.png" alt="Sales increased 50% in Q1">
 
@@ -196,16 +170,12 @@ element.addEventListener('keydown', (e) => {
   <source src="video.mp4" type="video/mp4">
   <track kind="captions" src="captions.vtt" srclang="en" label="English">
 </video>
-```
+```## 色とコントラスト
 
-## Color and Contrast
+### WCAG の要件
 
-### WCAG Requirements
-
-- **Level AA**: 4.5:1 for normal text, 3:1 for large text
-- **Level AAA**: 7:1 for normal text, 4.5:1 for large text
-
-```css
+- **レベル AA**: 通常のテキストの場合は 4.5:1、大きなテキストの場合は 3:1
+- **レベル AAA**: 通常のテキストの場合は 7:1、大きなテキストの場合は 4.5:1```css
 /* ✅ Good contrast */
 .text {
   color: #000; /* Black */
@@ -221,13 +191,9 @@ element.addEventListener('keydown', (e) => {
     content: '⚠ ';
   }
 }
-```
+```## スクリーン リーダー
 
-## Screen Readers
-
-### Best Practices
-
-```html
+### ベストプラクティス```html
 <!-- Skip links for navigation -->
 <a href="#main-content" class="skip-link">
   Skip to main content
@@ -262,11 +228,7 @@ element.addEventListener('keydown', (e) => {
   white-space: nowrap;
   border-width: 0;
 }
-```
-
-## Focus Management
-
-```css
+```## 集中管理```css
 /* Visible focus indicator */
 :focus {
   outline: 2px solid #005fcc;
@@ -299,48 +261,46 @@ function openModal() {
     }
   });
 }
-```
+```## テストツール
 
-## Testing Tools
+- **axe DevTools**: ブラウザ拡張機能
+- **WAVE**: Webアクセシビリティ評価ツール
+- **NVDA**: スクリーン リーダー (Windows)
+- **JAWS**: スクリーン リーダー (Windows)
+- **VoiceOver**: スクリーン リーダー (macOS/iOS)
+- **Lighthouse**: 自動監査
 
-- **axe DevTools**: Browser extension
-- **WAVE**: Web accessibility evaluation tool
-- **NVDA**: Screen reader (Windows)
-- **JAWS**: Screen reader (Windows)
-- **VoiceOver**: Screen reader (macOS/iOS)
-- **Lighthouse**: Automated audits
+## チェックリスト
 
-## Checklist
+- [ ] セマンティック HTML が使用されています
+- [ ] すべての画像には代替テキストが含まれます
+- [ ] カラーコントラストが WCAG AA を満たす
+- [ ] キーボード ナビゲーションが機能する
+- [ ] フォーカスインジケーターが表示されます
+- [ ] フォームにはラベルが付いています
+- [ ] 見出し階層が正しい
+- [ ] ARIA が適切に使用される
+- [ ] スクリーン リーダーのテスト済み
+- [ ] キーボードトラップなし
 
-- [ ] Semantic HTML used
-- [ ] All images have alt text
-- [ ] Color contrast meets WCAG AA
-- [ ] Keyboard navigation works
-- [ ] Focus indicators visible
-- [ ] Forms have labels
-- [ ] Heading hierarchy correct
-- [ ] ARIA used appropriately
-- [ ] Screen reader tested
-- [ ] No keyboard traps
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Accessibility
-- Accessibility tree
-- Accessible description
-- Accessible name
-- ARIA
+**対象となる重要な用語**:
+- アクセシビリティ
+- アクセシビリティツリー
+- アクセシブルな説明
+- アクセシブルな名前
+- アリア
 - ATAG
-- Boolean attribute (ARIA)
-- Screen reader
+- ブール属性 (ARIA)
+- スクリーンリーダー
 - UAAG
-- WAI
+- ワイ
 - WCAG
 
-## Additional Resources
+## 追加のリソース
 
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [MDN Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
+- [WCAG 2.1 ガイドライン](https://www.w3.org/WAI/WCAG21/quickref/)
+- [MDN アクセシビリティ](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
 - [WebAIM](https://webaim.org/)
-- [A11y Project](https://www.a11yproject.com/)
+- 【A11yプロジェクト】(https://www.a11yproject.com/)

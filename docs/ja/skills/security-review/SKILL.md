@@ -2,167 +2,160 @@
 name: security-review
 description: 'AI-powered codebase security scanner that reasons about code like a security researcher — tracing data flows, understanding component interactions, and catching vulnerabilities that pattern-matching tools miss. Use this skill when asked to scan code for security vulnerabilities, find bugs, check for SQL injection, XSS, command injection, exposed API keys, hardcoded secrets, insecure dependencies, access control issues, or any request like "is my code secure?", "review for security issues", "audit this codebase", or "check for vulnerabilities". Covers injection flaws, authentication and access control bugs, secrets exposure, weak cryptography, insecure dependencies, and business logic issues across JavaScript, TypeScript, Python, Java, PHP, Go, Ruby, and Rust.'
 ---
+# セキュリティレビュー
 
-# Security Review
+人間のセキュリティと同じようにコードベースを推論する、AI を活用したセキュリティ スキャナー
+研究者なら、データ フローを追跡し、コンポーネントの相互作用を理解し、状況を把握するでしょう。
+パターンマッチングツールが見逃す脆弱性。
 
-An AI-powered security scanner that reasons about your codebase the way a human security
-researcher would — tracing data flows, understanding component interactions, and catching
-vulnerabilities that pattern-matching tools miss.
+## このスキルを使用する場合
 
-## When to Use This Skill
+このスキルは、リクエストに以下が含まれる場合に使用します。
 
-Use this skill when the request involves:
+- コードベースまたはファイルのセキュリティ脆弱性のスキャン
+- セキュリティレビューまたは脆弱性チェックの実行
+- SQL インジェクション、XSS、コマンド インジェクション、またはその他のインジェクションの欠陥のチェック
+- コード内の公開された API キー、ハードコードされたシークレット、または認証情報の検索
+- 既知の CVE の依存関係を監査する
+- 認証、認可、またはアクセス制御ロジックのレビュー
+- 安全でない暗号または弱いランダム性の検出
+- データ フロー分析を実行して、危険なシンクへのユーザー入力を追跡します。
+- 「私のコードは安全ですか?」、「このファイルをスキャンしてください」、「リポジトリに脆弱性がないか確認してください」などのリクエストの表現
+- `/security-review` または `/security-review <path>` の実行
 
-- Scanning a codebase or file for security vulnerabilities
-- Running a security review or vulnerability check
-- Checking for SQL injection, XSS, command injection, or other injection flaws
-- Finding exposed API keys, hardcoded secrets, or credentials in code
-- Auditing dependencies for known CVEs
-- Reviewing authentication, authorization, or access control logic
-- Detecting insecure cryptography or weak randomness
-- Performing a data flow analysis to trace user input to dangerous sinks
-- Any request phrasing like "is my code secure?", "scan this file", or "check my repo for vulnerabilities"
-- Running `/security-review` or `/security-review <path>`
+## このスキルの仕組み
 
-## How This Skill Works
+パターンを照合する従来の静的分析ツールとは異なり、このスキルは次のことを行います。
+1. **セキュリティ研究者のようにコードを読む** — コンテキスト、意図、データ フローを理解する
+2. **ファイル全体のトレース** — ユーザー入力がアプリケーション内をどのように移動するかを追跡します
+3. **結果を自己検証** — 各結果を再検査して誤検知をフィルタリングします
+4. **重大度評価の割り当て** — クリティカル / 高 / 中 / 低 / 情報
+5. **対象を絞ったパッチを提案します** — すべての発見には具体的な修正が含まれます
+6. **人間の承認が必要です** — 何も自動適用されません。あなたはいつも最初にレビューします
 
-Unlike traditional static analysis tools that match patterns, this skill:
-1. **Reads code like a security researcher** — understanding context, intent, and data flow
-2. **Traces across files** — following how user input moves through your application
-3. **Self-verifies findings** — re-examines each result to filter false positives
-4. **Assigns severity ratings** — CRITICAL / HIGH / MEDIUM / LOW / INFO
-5. **Proposes targeted patches** — every finding includes a concrete fix
-6. **Requires human approval** — nothing is auto-applied; you always review first
+## 実行ワークフロー
 
-## Execution Workflow
+毎回、**順番に**次の手順を実行してください。
 
-Follow these steps **in order** every time:
+### ステップ 1 — スコープの解決
+何をスキャンするかを決定します。
+- パスが指定されている場合 (`/security-review src/auth/`)、そのスコープのみをスキャンします
+- パスが指定されていない場合は、ルートから開始して **プロジェクト全体**をスキャンします
+- 使用している言語とフレームワークを特定します (package.json、requirements.txt、
+  go.mod、Cargo.toml、pom.xml、Gemfile、composer.json など)
+- `references/language-patterns.md` を読んで、言語固有の脆弱性パターンをロードします### ステップ 2 — 依存関係の監査
+ソース コードをスキャンする前に、まず依存関係を監査します (早いもの勝ち)。
+- **Node.js**: 既知の脆弱なパッケージについては `package.json` + `package-lock.json` を確認してください
+- **Python**: `requirements.txt` / `pyproject.toml` / `Pipfile` を確認してください
+- **Java**: `pom.xml` / `build.gradle` を確認してください
+- **Ruby**: `Gemfile.lock` を確認してください
+- **Rust**: `Cargo.toml` を確認してください
+- **Go**: `go.sum` を確認してください
+- 既知の CVE、非推奨の暗号ライブラリ、または疑わしい古い固定バージョンを含むパッケージにフラグを立てます
+- 厳選されたウォッチリストについては `references/vulnerable-packages.md` をご覧ください
 
-### Step 1 — Scope Resolution
-Determine what to scan:
-- If a path was provided (`/security-review src/auth/`), scan only that scope
-- If no path given, scan the **entire project** starting from the root
-- Identify the language(s) and framework(s) in use (check package.json, requirements.txt,
-  go.mod, Cargo.toml, pom.xml, Gemfile, composer.json, etc.)
-- Read `references/language-patterns.md` to load language-specific vulnerability patterns
+### ステップ 3 — 秘密と暴露スキャン
+以下のすべてのファイル (config、env、CI/CD、Dockerfile、IaC を含む) をスキャンします。
+- ハードコードされた API キー、トークン、パスワード、秘密キー
+- `.env` ファイルが誤ってコミットされました
+- コメントまたはデバッグ ログ内の秘密
+- クラウド認証情報 (AWS、GCP、Azure、Stripe、Twilio など)
+- 資格情報が埋め込まれたデータベース接続文字列
+- 適用する正規表現パターンとエントロピー ヒューリスティックについては、`references/secret-patterns.md` を参照してください。
 
-### Step 2 — Dependency Audit
-Before scanning source code, audit dependencies first (fast wins):
-- **Node.js**: Check `package.json` + `package-lock.json` for known vulnerable packages
-- **Python**: Check `requirements.txt` / `pyproject.toml` / `Pipfile`
-- **Java**: Check `pom.xml` / `build.gradle`
-- **Ruby**: Check `Gemfile.lock`
-- **Rust**: Check `Cargo.toml`
-- **Go**: Check `go.sum`
-- Flag packages with known CVEs, deprecated crypto libs, or suspiciously old pinned versions
-- Read `references/vulnerable-packages.md` for a curated watchlist
+### ステップ 4 — 脆弱性の詳細スキャン
+これがコアスキャンです。コードに関する理由 — 単にパターン一致するだけではありません。
+各カテゴリの詳細については、`references/vuln-categories.md` を参照してください。
 
-### Step 3 — Secrets & Exposure Scan
-Scan ALL files (including config, env, CI/CD, Dockerfiles, IaC) for:
-- Hardcoded API keys, tokens, passwords, private keys
-- `.env` files accidentally committed
-- Secrets in comments or debug logs
-- Cloud credentials (AWS, GCP, Azure, Stripe, Twilio, etc.)
-- Database connection strings with credentials embedded
-- Read `references/secret-patterns.md` for regex patterns and entropy heuristics to apply
+**射出欠陥**
+- SQL インジェクション: 文字列補間を使用した生のクエリ、ORM の誤用、二次 SQLi
+- XSS: エスケープされていない出力、dangerlySetInnerHTML、innerHTML、テンプレート インジェクション
+- コマンドインジェクション: ユーザー入力による exec/spawn/system
+- LDAP、XPath、ヘッダー、ログインジェクション
 
-### Step 4 — Vulnerability Deep Scan
-This is the core scan. Reason about the code — don't just pattern-match.
-Read `references/vuln-categories.md` for full details on each category.
+**認証とアクセス制御**
+- 機密性の高いエンドポイントで認証が欠落している
+- オブジェクトレベルの認証の破損 (BOLA/IDOR)
+- JWT の弱点 (alg:none、弱いシークレット、有効期限検証なし)
+- セッション固定、CSRF 保護の欠如
+- 権限昇格パス
+- 質量割り当て/パラメータ汚染
 
-**Injection Flaws**
-- SQL Injection: raw queries with string interpolation, ORM misuse, second-order SQLi
-- XSS: unescaped output, dangerouslySetInnerHTML, innerHTML, template injection
-- Command Injection: exec/spawn/system with user input
-- LDAP, XPath, Header, Log injection
+**データの処理**
+- ログ、エラー メッセージ、または API 応答内の機密データ
+- 保存中または転送中の暗号化が欠落している
+- 安全でない逆シリアル化
+- パストラバーサル / ディレクトリトラバーサル
+- XXE (XML 外部エンティティ) 処理
+- SSRF (サーバーサイドリクエストフォージェリ)
 
-**Authentication & Access Control**
-- Missing authentication on sensitive endpoints
-- Broken object-level authorization (BOLA/IDOR)
-- JWT weaknesses (alg:none, weak secrets, no expiry validation)
-- Session fixation, missing CSRF protection
-- Privilege escalation paths
-- Mass assignment / parameter pollution
+**暗号化**
+- セキュリティ目的での MD5、SHA1、DES の使用
+- ハードコードされた IV またはソルト
+- 弱い乱数生成 (トークンの Math.random())
+- TLS 証明書の検証が欠落しています**ビジネス ロジック**
+- 競合状態 (TOCTOU)
+- 財務計算における整数のオーバーフロー
+- 機密性の高いエンドポイントにレート制限がない
+- 予測可能なリソース識別子
 
-**Data Handling**
-- Sensitive data in logs, error messages, or API responses
-- Missing encryption at rest or in transit
-- Insecure deserialization
-- Path traversal / directory traversal
-- XXE (XML External Entity) processing
-- SSRF (Server-Side Request Forgery)
+### ステップ 5 — ファイル間のデータ フロー分析
+ファイルごとのスキャン後、**全体的なレビュー**を実行します。
+- エントリ ポイントからのユーザー制御入力のトレース (HTTP パラメータ、ヘッダー、本文、ファイル アップロード)
+  シンクに至るまで (DB クエリ、実行呼び出し、HTML 出力、ファイル書き込み)
+- 複数のファイルを一緒に見た場合にのみ現れる脆弱性を特定します
+- サービスまたはモジュール間の安全でない信頼境界を確認します。
 
-**Cryptography**
-- Use of MD5, SHA1, DES for security purposes
-- Hardcoded IVs or salts
-- Weak random number generation (Math.random() for tokens)
-- Missing TLS certificate validation
+### ステップ 6 — 自己検証パス
+それぞれの結果について:
+1. 関連するコードを新鮮な目で読み直します
+2. 「これは実際に悪用可能ですか? それとも、私が見逃したサニタイズはありますか?」と尋ねます。
+3. フレームワークまたはミドルウェアがすでにこのアップストリームを処理しているかどうかを確認します
+4. 本物の脆弱性ではない検出結果をダウングレードまたは破棄する
+5. 最終重大度を割り当てます: CRITICAL / HIGH / MEDIUM / LOW / INFO
 
-**Business Logic**
-- Race conditions (TOCTOU)
-- Integer overflow in financial calculations
-- Missing rate limiting on sensitive endpoints
-- Predictable resource identifiers
+### ステップ 7 — セキュリティ レポートの生成
+`references/report-format.md` で定義された形式で完全なレポートを出力します。
 
-### Step 5 — Cross-File Data Flow Analysis
-After the per-file scan, perform a **holistic review**:
-- Trace user-controlled input from entry points (HTTP params, headers, body, file uploads)
-  all the way to sinks (DB queries, exec calls, HTML output, file writes)
-- Identify vulnerabilities that only appear when looking at multiple files together
-- Check for insecure trust boundaries between services or modules
+### ステップ 8 — パッチを提案する
+すべての CRITICAL および HIGH の検出結果に対して、具体的なパッチを生成します。
+- 脆弱なコードを表示します (前)
+- 修正されたコードを表示(後)
+- 何が変わったのか、なぜ変わったのか説明する
+- 元のコード スタイル、変数名、構造を保持します。
+- 修正を説明するコメントをインラインで追加します
 
-### Step 6 — Self-Verification Pass
-For EACH finding:
-1. Re-read the relevant code with fresh eyes
-2. Ask: "Is this actually exploitable, or is there sanitization I missed?"
-3. Check if a framework or middleware already handles this upstream
-4. Downgrade or discard findings that aren't genuine vulnerabilities
-5. Assign final severity: CRITICAL / HIGH / MEDIUM / LOW / INFO
+**「適用する前に各パッチを確認してください。まだ何も変更されていません。」** と明示的に述べます。
 
-### Step 7 — Generate Security Report
-Output the full report in the format defined in `references/report-format.md`.
+## 重大度ガイド
 
-### Step 8 — Propose Patches
-For every CRITICAL and HIGH finding, generate a concrete patch:
-- Show the vulnerable code (before)
-- Show the fixed code (after)
-- Explain what changed and why
-- Preserve the original code style, variable names, and structure
-- Add a comment explaining the fix inline
+|重大度 |意味 |例 |
+|----------|-----------|----------|
+| 🔴 クリティカル |差し迫った悪用リスク、データ侵害の可能性 | SQLi、RCE、認証バイパス |
+| 🟠高い |深刻な脆弱性、悪用パスが存在 | XSS、IDOR、ハードコードされたシークレット |
+| 🟡 ミディアム |条件または連鎖で悪用可能 | CSRF、オープンリダイレクト、弱い暗号 |
+| 🔵 低い |ベストプラクティス違反、直接的なリスクは低い |詳細なエラー、ヘッダーの欠落 |
+| ⚪ 情報 |脆弱性ではなく、注目に値する観察結果 |古い依存関係 (CVE なし) |
 
-Explicitly state: **"Review each patch before applying. Nothing has been changed yet."**
+## 出力ルール- **常に** 最初に調査結果の概要表を作成します (重大度別にカウント)
+- **決してパッチを自動適用しないでください** - 人間によるレビューのためにのみパッチを提示してください
+- **常に** 結果ごとに信頼度評価 (高 / 中 / 低) を含めます
+- **結果をファイル別ではなくカテゴリ別にグループ化**
+- **具体的に** — ファイル パス、行番号、脆弱なコード スニペットを正確に含めます
+- **リスクについて説明** 平易な英語で — 攻撃者はこれを使って何ができるでしょうか?
+- コードベースがクリーンな場合は、スキャンされた内容で「脆弱性は見つかりませんでした」とはっきりと伝えます。
 
-## Severity Guide
+## 参照ファイル
 
-| Severity | Meaning | Example |
-|----------|---------|---------|
-| 🔴 CRITICAL | Immediate exploitation risk, data breach likely | SQLi, RCE, auth bypass |
-| 🟠 HIGH | Serious vulnerability, exploit path exists | XSS, IDOR, hardcoded secrets |
-| 🟡 MEDIUM | Exploitable with conditions or chaining | CSRF, open redirect, weak crypto |
-| 🔵 LOW | Best practice violation, low direct risk | Verbose errors, missing headers |
-| ⚪ INFO | Observation worth noting, not a vulnerability | Outdated dependency (no CVE) |
+詳細な検出ガイダンスについては、必要に応じて次の参照ファイルをロードしてください。
 
-## Output Rules
-
-- **Always** produce a findings summary table first (counts by severity)
-- **Never** auto-apply any patch — present patches for human review only
-- **Always** include a confidence rating per finding (High / Medium / Low)
-- **Group findings** by category, not by file
-- **Be specific** — include file path, line number, and the exact vulnerable code snippet
-- **Explain the risk** in plain English — what could an attacker do with this?
-- If the codebase is clean, say so clearly: "No vulnerabilities found" with what was scanned
-
-## Reference Files
-
-For detailed detection guidance, load the following reference files as needed:
-
-- `references/vuln-categories.md` — Deep reference for every vulnerability category with detection signals, safe patterns, and escalation checkers
-  - Search patterns: `SQL injection`, `XSS`, `command injection`, `SSRF`, `BOLA`, `IDOR`, `JWT`, `CSRF`, `secrets`, `cryptography`, `race condition`, `path traversal`
-- `references/secret-patterns.md` — Regex patterns, entropy-based detection, and CI/CD secret risks
-  - Search patterns: `API key`, `token`, `private key`, `connection string`, `entropy`, `.env`, `GitHub Actions`, `Docker`, `Terraform`
-- `references/language-patterns.md` — Framework-specific vulnerability patterns for JavaScript, Python, Java, PHP, Go, Ruby, and Rust
-  - Search patterns: `Express`, `React`, `Next.js`, `Django`, `Flask`, `FastAPI`, `Spring Boot`, `PHP`, `Go`, `Rails`, `Rust`
-- `references/vulnerable-packages.md` — Curated CVE watchlist for npm, pip, Maven, Rubygems, Cargo, and Go modules
-  - Search patterns: `lodash`, `axios`, `jsonwebtoken`, `Pillow`, `log4j`, `nokogiri`, `CVE`
-- `references/report-format.md` — Structured output template for security reports with finding cards, dependency audit, secrets scan, and patch proposal formatting
-  - Search patterns: `report`, `format`, `template`, `finding`, `patch`, `summary`, `confidence`
+- `references/vuln-categories.md` — 検出シグナル、安全なパターン、エスカレーション チェッカーを備えたあらゆる脆弱性カテゴリの詳細なリファレンス
+  - 検索パターン: `SQL injection`、`XSS`、`command injection`、`SSRF`、`BOLA`、`IDOR`、`JWT`、`CSRF`、`secrets`、`cryptography`、`race condition`、`path traversal`
+- `references/secret-patterns.md` — 正規表現パターン、エントロピーベースの検出、CI/CD シークレットのリスク
+  - 検索パターン: `API key`、`token`、`private key`、`connection string`、`entropy`、`.env`、`GitHub Actions`、`Docker`、`Terraform`
+- `references/language-patterns.md` — JavaScript、Python、Java、PHP、Go、Ruby、Rust のフレームワーク固有の脆弱性パターン
+  - 検索パターン：`Express`、`React`、`Next.js`、`Django`、`Flask`、`FastAPI`、`Spring Boot`、`PHP`、`Go`、`Rails`、`Rust`
+- `references/vulnerable-packages.md` — npm、pip、Maven、Rubygems、Cargo、Go モジュール用に厳選された CVE ウォッチリスト
+  - 検索パターン: `lodash`、`axios`、`jsonwebtoken`、`Pillow`、`log4j`、`nokogiri`、`CVE`
+- `references/report-format.md` — 検索カード、依存関係の監査、シークレットのスキャン、およびパッチ提案の書式設定を含むセキュリティ レポートの構造化された出力テンプレート
+  - 検索パターン: `report`、`format`、`template`、`finding`、`patch`、`summary`、`confidence`

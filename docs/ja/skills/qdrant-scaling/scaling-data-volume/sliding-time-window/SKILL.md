@@ -2,67 +2,64 @@
 name: qdrant-sliding-time-window
 description: "Guides sliding time window scaling in Qdrant. Use when someone asks 'only recent data matters', 'how to expire old vectors', 'time-based data rotation', 'delete old data efficiently', 'social media feed search', 'news search', 'log search with retention', or 'how to keep only last N months of data'."
 ---
+# スライディング時間ウィンドウによるスケーリング
 
-# Scaling with a Sliding Time Window
+ソーシャル メディアの投稿、ニュース記事、サポート チケット、ログ、求人情報など、最近のデータのみを高速検索する必要がある場合に使用します。古いデータは無関係になるか、より遅いアクセスを許容できるかのどちらかです。
 
-Use when only recent data needs fast search -- social media posts, news articles, support tickets, logs, job listings. Old data either becomes irrelevant or can tolerate slower access.
-
-Three strategies: **shard rotation** (recommended), **collection rotation** (when per-period config differs), and **filter-and-delete** (simplest, for continuous cleanup).
-
-
-## Shard Rotation (Recommended)
-
-Use when: data has natural time boundaries (daily, weekly, monthly). Preferred because queries span all time periods in one request without application-level fan-out. [User-defined sharding](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=user-defined-sharding)
-
-1. Create a collection with user-defined sharding enabled
-2. Create one shard key per time period (e.g., `2025-01`, `2025-02`, ..., `2025-06`)
-3. Ingest data into the current period's shard key
-4. When a new period starts, create a new shard key and redirect writes
-5. Delete the oldest shard key outside the retention window
-
-- Deleting a shard key reclaims all resources instantly (no fragmentation, no optimizer overhead)
-- Pre-create the next period's shard key before rotation to avoid write disruption
-- Use `shard_key_selector` at query time to search only specific periods for efficiency
-- Shard keys can be placed on specific nodes for hot/cold tiering
+3 つの戦略: **シャード ローテーション** (推奨)、**コレクション ローテーション** (期間ごとの構成が異なる場合)、**フィルターと削除** (継続的なクリーンアップのための最も簡単な方法)。
 
 
-## Collection Rotation (Alias Swap)
+## シャードのローテーション (推奨)
 
-Use when: you need per-period collection configuration (e.g., different quantization or storage settings). [Collection aliases](https://search.qdrant.tech/md/documentation/manage-data/collections/?s=collection-aliases)
+次の場合に使用します: データに自然な時間境界 (日次、週次、月次) がある。クエリはアプリケーション レベルのファンアウトなしで 1 つのリクエストですべての期間にまたがるため、推奨されます。 [ユーザー定義のシャーディング](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=user-dependent-sharding)
 
-1. Create one collection per time period, point a write alias at the newest
-2. Query across all active collections in parallel, merge results client-side
-3. When a new period starts, create the new collection and swap the write alias [Switch collection](https://search.qdrant.tech/md/documentation/manage-data/collections/?s=switch-collection)
-4. Drop the oldest collection outside the window
+1. ユーザー定義のシャーディングを有効にしてコレクションを作成します
+2. 期間ごとに 1 つのシャード キーを作成します (例: `2025-01`、`2025-02`、...、`2025-06`)
+3. 現在の期間のシャードキーにデータを取り込みます
+4. 新しい期間が始まると、新しいシャード キーを作成し、書き込みをリダイレクトします
+5. 保持期間外の最も古いシャード キーを削除します。
 
-Trade-off vs shard rotation: allows per-collection config differences, but requires application-level fan-out and more operational overhead.
-
-
-## Filter-and-Delete
-
-Use when: data arrives continuously without clear time boundaries, or you want the simplest setup.
-
-1. Store a `timestamp` payload on every point, create a payload index on it [Payload index](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=payload-index)
-2. Filter to the desired window at query time using `range` condition [Range filter](https://search.qdrant.tech/md/documentation/search/filtering/?s=range)
-3. Periodically delete expired points using delete-by-filter [Delete points](https://search.qdrant.tech/md/documentation/manage-data/points/?s=delete-points)
-
-- Run cleanup during off-peak hours in batches (10k-50k points) to avoid optimizer locks
-- Deletes are not free: tombstoned points degrade search until optimizer compacts segments
-- Does not reclaim disk instantly (compaction is asynchronous)
+- シャード キーを削除すると、すべてのリソースが即座に再利用されます (断片化やオプティマイザーのオーバーヘッドはありません)。
+- 書き込みの中断を避けるために、ローテーションの前に次の期間のシャード キーを事前に作成します。
+- クエリ時に `shard_key_selector` を使用して、効率性を高めるために特定の期間のみを検索します
+- ホット/コールド階層化のために特定のノードにシャード キーを配置できます
 
 
-## Hot/Cold Tiers
+## コレクションのローテーション (エイリアス交換)
 
-Use when: recent data needs fast in-RAM search, older data should remain searchable at lower performance.
+次の場合に使用します: 期間ごとのコレクション構成が必要な場合 (例: 異なる量子化またはストレージ設定)。 [コレクションのエイリアス](https://search.qdrant.tech/md/documentation/manage-data/collections/?s=collection-aliases)
 
-- **Shard rotation:** place current shard key on fast-storage nodes, move older shard keys to cheaper nodes via shard placement. All queries still go through a single collection.
-- **Collection rotation:** keep current collection in RAM (`always_ram: true`), move older collections to mmap/on-disk vectors. [Quantization](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+1. 期間ごとに 1 つのコレクションを作成し、最新の書き込みエイリアスをポイントします。
+2. すべてのアクティブなコレクションに対して並行してクエリを実行し、結果をクライアント側でマージします。
+3. 新しい期間が開始したら、新しいコレクションを作成し、書き込みエイリアスを交換します [コレクションの切り替え](https://search.qdrant.tech/md/documentation/manage-data/collections/?s=switch-collection)
+4. 最も古いコレクションをウィンドウの外にドロップします
+
+トレードオフとシャードのローテーション: コレクションごとの構成の違いは許容されますが、アプリケーション レベルのファンアウトとより多くの運用オーバーヘッドが必要になります。
 
 
-## What NOT to Do
+## フィルターと削除
 
-- Do not use filter-and-delete for high-volume time-series with millions of daily deletes (use rotation instead)
-- Do not forget to index the timestamp field (range filters without an index cause full scans)
-- Do not use collection rotation when shard rotation would suffice (unnecessary fan-out complexity)
-- Do not drop a shard key or collection before verifying its period is fully outside the retention window
-- Do not skip pre-creating the next period's shard key or collection (write failures during rotation are hard to recover)
+使用する場合: データが明確な時間境界なしで継続的に到着する場合、または最も単純なセットアップが必要な場合。
+
+1. `timestamp` ペイロードをすべてのポイントに保存し、そのペイロード インデックスを作成します [ペイロード インデックス](https://search.qdrant.tech/md/documentation/manage-data/indexing/?s=payload-index)
+2. `range` 条件 [範囲フィルター](https://search.qdrant.tech/md/documentation/search/filtering/?s=range) を使用して、クエリ時に目的のウィンドウにフィルターします。
+3. delete-by-filter [ポイントの削除](https://search.qdrant.tech/md/documentation/manage-data/points/?s=delete-points) を使用して、期限切れのポイントを定期的に削除します。- オプティマイザーのロックを回避するために、オフピーク時にクリーンアップをバッチ (10,000 ～ 50,000 ポイント) で実行します。
+- 削除は自由ではありません: オプティマイザがセグメントを圧縮するまで、トゥームストーン化されたポイントにより検索が低下します。
+- ディスクを即座に再利用しません (圧縮は非同期です)
+
+
+## ホット/コールド層
+
+次の場合に使用します: 最近のデータは RAM 内で高速検索する必要があり、古いデータはパフォーマンスが低くても検索可能なままにしておく必要があります。
+
+- **シャード ローテーション:** 現在のシャード キーを高速ストレージ ノードに配置し、シャード配置を通じて古いシャード キーを安価なノードに移動します。すべてのクエリは引き続き単一のコレクションを通過します。
+- **コレクションのローテーション:** 現在のコレクションを RAM (`always_ram: true`) に保持し、古いコレクションを mmap/ディスク上のベクトルに移動します。 [量子化](https://search.qdrant.tech/md/documentation/manage-data/quantization/)
+
+
+## してはいけないこと
+
+- 毎日何百万もの削除が行われる大量の時系列にはフィルターと削除を使用しないでください (代わりにローテーションを使用します)
+- タイムスタンプ フィールドのインデックス付けを忘れないでください (インデックスのない範囲フィルターではフル スキャンが発生します)。
+- シャードのローテーションで十分な場合は、コレクションのローテーションを使用しないでください (ファンアウトが不必要に複雑になる)
+- シャード キーまたはコレクションの期間が保持期間を完全に超えていることを確認するまでは、シャード キーまたはコレクションを削除しないでください。
+- 次の期間のシャード キーまたはコレクションの事前作成をスキップしないでください (ローテーション中の書き込みエラーは回復が困難です)

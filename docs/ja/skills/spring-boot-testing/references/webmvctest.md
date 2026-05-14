@@ -1,10 +1,8 @@
 # @WebMvcTest
 
-Testing Spring MVC controllers with focused slice tests.
+集中的なスライス テストによる Spring MVC コントローラーのテスト。
 
-## Basic Structure
-
-```java
+## 基本構造```java
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
   
@@ -17,20 +15,16 @@ class OrderControllerTest {
   @MockitoBean
   private UserService userService;
 }
-```
+```## ロードされるもの
 
-## What Gets Loaded
+- 指定されたコントローラー
+- Spring MVC インフラストラクチャ (HandlerMapping、HandlerAdapter)
+- Jackson ObjectMapper (JSON 用)
+- 例外ハンドラー (@ControllerAdvice)
+- Spring Security フィルター (クラスパス上の場合)
+- 検証 (クラスパス上の場合)
 
-- The specified controller(s)
-- Spring MVC infrastructure (HandlerMapping, HandlerAdapter)
-- Jackson ObjectMapper (for JSON)
-- Exception handlers (@ControllerAdvice)
-- Spring Security filters (if on classpath)
-- Validation (if on classpath)
-
-## Testing GET Endpoints
-
-```java
+## GET エンドポイントのテスト```java
 @Test
 void shouldReturnOrder() {
   var order = new Order(1L, "PENDING", BigDecimal.valueOf(99.99));
@@ -43,13 +37,9 @@ void shouldReturnOrder() {
     .extractingPath("$.status")
     .isEqualTo("PENDING");
 }
-```
+```## リクエスト本文を使用した POST のテスト
 
-## Testing POST with Request Body
-
-### Using Text Blocks (Java 25)
-
-```java
+### テキスト ブロックの使用 (Java 25)```java
 @Test
 void shouldCreateOrder() {
   given(orderService.create(any(OrderRequest.class))).willReturn(1L);
@@ -67,11 +57,7 @@ void shouldCreateOrder() {
     .hasStatus(HttpStatus.CREATED)
     .hasHeader("Location", "/orders/1");
 }
-```
-
-### Using Records
-
-```java
+```### レコードの使用```java
 record OrderRequest(String product, int quantity) {}
 
 @Test
@@ -84,11 +70,7 @@ void shouldCreateOrderWithRecord() {
     .content(json.write(request).getJson()))
     .hasStatus(HttpStatus.CREATED);
 }
-```
-
-## Testing Validation Errors
-
-```java
+```## 検証エラーのテスト```java
 @Test
 void shouldRejectInvalidOrder() {
   var invalidJson = """
@@ -105,11 +87,7 @@ void shouldRejectInvalidOrder() {
     .bodyJson()
     .hasPath("$.errors");
 }
-```
-
-## Testing Query Parameters
-
-```java
+```## クエリパラメータのテスト```java
 @Test
 void shouldFilterOrdersByStatus() {
   assertThat(mvc.get().uri("/orders?status=PENDING"))
@@ -117,11 +95,7 @@ void shouldFilterOrdersByStatus() {
   
   verify(orderService).findByStatus(OrderStatus.PENDING);
 }
-```
-
-## Testing Path Variables
-
-```java
+```## パス変数のテスト```java
 @Test
 void shouldCancelOrder() {
   assertThat(mvc.put().uri("/orders/123/cancel"))
@@ -129,11 +103,7 @@ void shouldCancelOrder() {
   
   verify(orderService).cancel(123L);
 }
-```
-
-## Testing with Security
-
-```java
+```## セキュリティを備えたテスト```java
 @Test
 @WithMockUser(roles = "ADMIN")
 void adminShouldDeleteOrder() {
@@ -146,32 +116,22 @@ void anonymousUserShouldBeForbidden() {
   assertThat(mvc.delete().uri("/orders/1"))
     .hasStatus(HttpStatus.UNAUTHORIZED);
 }
-```
-
-## Multiple Controllers
-
-```java
+```## 複数のコントローラー```java
 @WebMvcTest({OrderController.class, ProductController.class})
 class WebLayerTest {
   // Tests multiple controllers in one slice
 }
-```
-
-## Excluding Auto-Configuration
-
-```java
+```## 自動構成を除く```java
 @WebMvcTest(OrderController.class)
 @AutoConfigureMockMvc(addFilters = false) // Skip security filters
 class OrderControllerWithoutSecurityTest {
   // Tests without security filters
 }
-```
+```## 重要なポイント
 
-## Key Points
-
-1. Always mock services with @MockitoBean
-2. Use MockMvcTester for AssertJ-style assertions
-3. Test HTTP semantics (status, headers, content-type)
-4. Verify service method calls when side effects matter
-5. Don't test business logic here - that's for unit tests
-6. Leverage Java 25 text blocks for JSON payloads
+1. @MockitoBean を使用して常にサービスを模擬する
+2. AssertJ スタイルのアサーションには MockMvcTester を使用する
+3. HTTP セマンティクス (ステータス、ヘッダー、コンテンツ タイプ) をテストします。
+4. 副作用が問題になる場合はサービス メソッド呼び出しを検証する
+5. ここではビジネス ロジックをテストしないでください - それは単体テスト用です
+6. JSON ペイロードに Java 25 テキスト ブロックを活用する

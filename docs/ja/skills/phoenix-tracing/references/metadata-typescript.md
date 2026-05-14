@@ -1,50 +1,44 @@
-# Phoenix Tracing: Custom Metadata (TypeScript)
+# Phoenix トレーシング: カスタム メタデータ (TypeScript)
 
-Add custom attributes to spans for richer observability.
+より豊かな可観測性を実現するために、カスタム属性をスパンに追加します。
 
-## Using Context (Propagates to All Child Spans)
-
-```typescript
-import { context } from "@arizeai/phoenix-otel";
-import { setMetadata } from "@arizeai/openinference-core";
+## コンテキストの使用 (すべての子スパンに伝播)```タイプスクリプト
+import { context } から "@arizeai/phoenix-otel";
+import { setMetadata } から "@arizeai/openinference-core";
 
 context.with(
   setMetadata(context.active(), {
-    experiment_id: "exp_123",
-    model_version: "gpt-4-1106-preview",
-    environment: "production",
-  }),
-  async () => {
-    // All spans created within this block will have:
-    // "metadata" = '{"experiment_id": "exp_123", ...}'
-    await myApp.run(query);
+    実験ID: "exp_123",
+    モデルバージョン: "gpt-4-1106-プレビュー",
+    環境: "実稼働"、
+  })、
+  非同期() => {
+    // このブロック内で作成されたすべてのスパンには以下が含まれます。
+    // "メタデータ" = '{"experiment_id": "exp_123", ...}'
+    myApp.run(クエリ)を待ちます;
   }
 );
-```
+「」## 単一スパン上```タイプスクリプト
+import {traceChain} から "@arizeai/openinference-core";
+import { トレース } から "@arizeai/phoenix-otel";
 
-## On a Single Span
+const myFunction =traceChain(
+  非同期 (入力: 文字列) => {
+    const スパン = トレース.getActiveSpan();
 
-```typescript
-import { traceChain } from "@arizeai/openinference-core";
-import { trace } from "@arizeai/phoenix-otel";
-
-const myFunction = traceChain(
-  async (input: string) => {
-    const span = trace.getActiveSpan();
-
-    span?.setAttribute(
-      "metadata",
+    スパン?.setAttribute(
+      「メタデータ」、
       JSON.stringify({
-        experiment_id: "exp_123",
-        model_version: "gpt-4-1106-preview",
-        environment: "production",
+        実験ID: "exp_123",
+        モデルバージョン: "gpt-4-1106-プレビュー",
+        環境: "実稼働"、
       })
     );
 
-    return result;
-  },
-  { name: "my-function" }
+    結果を返します。
+  }、
+  { 名前: "私の関数" }
 );
 
 await myFunction("hello");
-```
+「」

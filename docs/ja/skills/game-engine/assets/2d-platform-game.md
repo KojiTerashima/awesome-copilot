@@ -1,35 +1,33 @@
-# 2D Platform Game Template
+# 2D プラットフォーム ゲーム テンプレート
 
-A complete step-by-step guide for building a 2D platformer game using Phaser (v2.x / Phaser CE) with Arcade Physics. This template walks through every stage of development: setting up the project, creating platforms from JSON level data, adding a hero with physics-based movement and jumping, collectible coins, walking enemies, death and stomp mechanics, a scoreboard, sprite animations, win conditions with a door/key system, and multi-level progression.
+Phaser (v2.x / Phaser CE) と Arcade Physics を使用して 2D プラットフォーマー ゲームを構築するための完全なステップバイステップ ガイド。このテンプレートは、プロジェクトのセットアップ、JSON レベルのデータからのプラットフォームの作成、物理ベースの動きとジャンプを備えたヒーローの追加、収集可能なコイン、歩く敵、死と踏みつけのメカニズム、スコアボード、スプライト アニメーション、ドア/キー システムによる勝利条件、マルチレベルの進行など、開発のあらゆる段階を順を追って説明します。
 
-**What you will build:** A classic side-scrolling platformer where a hero navigates platforms, collects coins, avoids or stomps on spider enemies, finds a key to unlock a door, and progresses through multiple levels -- with score tracking, animations, and physics.
+**構築するもの:** 古典的な横スクロール プラットフォーマーで、ヒーローがプラットフォームを移動し、コインを集め、クモの敵を避けたり踏みつけたり、ドアのロックを解除する鍵を見つけたり、スコア追跡、アニメーション、物理学を使用して複数のレベルを進んでいきます。
 
-**Prerequisites:** Basic to intermediate JavaScript knowledge, familiarity with HTML, and a local web server for development (e.g., browser-sync, live-server, or Python's SimpleHTTPServer).
+**前提条件:** 基本から中級の JavaScript の知識、HTML、開発用のローカル Web サーバー (ブラウザ同期、ライブサーバー、Python の SimpleHTTPServer など) に精通していること。
 
-**Source:** Based on the [Mozilla HTML5 Games Workshop - Platformer](https://mozdevs.github.io/html5-games-workshop/en/guides/platformer/start-here/). Project starter files available at the workshop repository.
+**出典:** [Mozilla HTML5 ゲーム ワークショップ - プラットフォーマー](https://mozdevs.github.io/html5-games-workshop/en/guides/platformer/start-here/) に基づいています。プロジェクト スターター ファイルはワークショップ リポジトリで入手できます。
 
 ---
 
-## Start Here
+## ここから始めてください
 
-This tutorial builds a 2D platformer using the **Phaser** framework. Phaser handles rendering, physics, input, audio, and asset loading so you can focus on game logic.
+このチュートリアルでは、**Phaser** フレームワークを使用して 2D プラットフォーマーを構築します。 Phaser はレンダリング、物理学、入力、オーディオ、アセットの読み込みを処理するため、ゲーム ロジックに集中できます。
 
-### What You Will Build
+### あなたが構築するもの
 
-The finished game features:
+完成したゲームの特徴は次のとおりです。
 
-- A hero character the player controls with the keyboard
-- Platforms the hero can walk and jump on
-- Collectible coins that increase the score
-- Walking spider enemies that kill the hero on contact (but can be stomped from above)
-- A key and door system: the hero must pick up a key to unlock the door and complete the level
-- Multiple levels loaded from JSON data files
-- A scoreboard showing collected coins
-- Sprite animations for the hero (idle, running, jumping, falling)
+- プレイヤーがキーボードで操作するヒーローキャラクター
+- 主人公が歩いたりジャンプしたりできるプラットフォーム
+- スコアを増やす収集可能なコイン
+- 歩くクモの敵は接触するとヒーローを殺します（ただし上から踏みつけられる可能性があります）
+- キーとドアのシステム: 主人公はドアのロックを解除し、レベルを完了するためにキーを拾う必要があります。
+- JSON データ ファイルからロードされた複数のレベル
+- 集めたコインを示すスコアボード
+- ヒーローのスプライトアニメーション (アイドル、ランニング、ジャンプ、落下)
 
-### Project Structure
-
-```
+### プロジェクトの構造```
 project/
   index.html
   js/
@@ -62,13 +60,9 @@ project/
   data/
     level00.json
     level01.json
-```
+```### レベルデータフォーマット
 
-### Level Data Format
-
-Each level is defined in a JSON file. The JSON structure describes positions of every entity:
-
-```json
+各レベルは JSON ファイルで定義されます。 JSON 構造は、すべてのエンティティの位置を記述します。```json
 {
     "hero": { "x": 21, "y": 525 },
     "door": { "x": 169, "y": 546 },
@@ -95,21 +89,17 @@ Each level is defined in a JSON file. The JSON structure describes positions of 
         ]
     }
 }
-```
-
-Each entity type (hero, door, key, platforms, coins, spiders) has `x` and `y` coordinates. Platforms also specify which `image` asset to use for that platform tile.
+```各エンティティ タイプ (ヒーロー、ドア、キー、プラットフォーム、コイン、スパイダー) には `x` および `y` 座標があります。プラットフォームは、そのプラットフォーム タイルに使用する `image` アセットも指定します。
 
 ---
 
-## Initialise Phaser
+## フェイザーを初期化する
 
-The first step is setting up the HTML file and creating the Phaser game instance.
+最初のステップは、HTML ファイルを設定し、Phaser ゲーム インスタンスを作成することです。
 
-### HTML Entry Point
+### HTML エントリ ポイント
 
-Create an `index.html` file that loads Phaser and your game script:
-
-```html
+Phaser とゲーム スクリプトをロードする `index.html` ファイルを作成します。```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -129,16 +119,12 @@ Create an `index.html` file that loads Phaser and your game script:
     <div id="game"></div>
 </body>
 </html>
-```
+```- `<div id="game">` は、Phaser がゲーム キャンバスを挿入するコンテナーです。
+- Phaser が最初にロードされ、次にゲーム スクリプトがロードされます。
 
-- The `<div id="game">` is the container where Phaser will insert the game canvas.
-- Phaser is loaded first, then your game script.
+### ゲームインスタンスの作成
 
-### Creating the Game Instance
-
-In `js/main.js`, create the Phaser game object and register a game state:
-
-```javascript
+`js/main.js` で、Phaser ゲーム オブジェクトを作成し、ゲームの状態を登録します。```javascript
 // Create a Phaser game instance
 // Parameters: width, height, renderer, DOM element ID
 window.onload = function () {
@@ -148,17 +134,13 @@ window.onload = function () {
     game.state.add('play', PlayState);
     game.state.start('play');
 };
-```
+```- `960, 600` は、ゲーム キャンバスの寸法をピクセル単位で設定します。
+- `Phaser.AUTO` は、Phaser が WebGL レンダリングと Canvas レンダリングのどちらかを自動的に選択できるようにします。
+- `'game'` は、キャンバスを含む DOM 要素の ID です。
 
-- `960, 600` sets the game canvas dimensions in pixels.
-- `Phaser.AUTO` lets Phaser choose between WebGL and Canvas rendering automatically.
-- `'game'` is the ID of the DOM element that will contain the canvas.
+### PlayState オブジェクト
 
-### The PlayState Object
-
-Define the game state as an object with lifecycle methods:
-
-```javascript
+ライフサイクル メソッドを使用してゲームの状態をオブジェクトとして定義します。```javascript
 PlayState = {};
 
 PlayState.init = function () {
@@ -177,26 +159,22 @@ PlayState.update = function () {
     // Called every frame (~60 times per second)
     // Handle game logic, input, collisions here
 };
-```
+```- `init` -- 最初に実行されます。設定とパラメータの受信に使用されます。
+- `preload` -- ゲームの開始前にすべてのアセット (画像、オーディオ、JSON) をロードするために使用されます。
+- `create` -- アセットがロードされた後に 1 回呼び出されます。スプライト、グループ、ゲーム オブジェクトの作成に使用されます。
+- `update` -- フレームごとに ~60fps で呼び出されます。入力処理、物理チェック、ゲーム ロジックに使用されます。
 
-- `init` -- runs first; used for configuration and receiving parameters.
-- `preload` -- used to load all assets (images, audio, JSON) before the game starts.
-- `create` -- called once after assets are loaded; used to create sprites, groups, and game objects.
-- `update` -- called every frame at ~60fps; used for input handling, physics checks, and game logic.
-
-At this point you should see an empty black canvas rendered on the page.
+この時点で、ページ上に空の黒いキャンバスが表示されるはずです。
 
 ---
 
-## The Game Loop
+## ゲームループ
 
-Phaser uses a game loop architecture. Every frame, Phaser calls `update()`, which is where you handle input, move sprites, and check collisions. Before the loop starts, `preload()` loads assets and `create()` sets up the initial game state.
+Phaser はゲーム ループ アーキテクチャを使用します。フレームごとに、Phaser は `update()` を呼び出します。ここで入力を処理し、スプライトを移動し、衝突をチェックします。ループが開始する前に、`preload()` はアセットをロードし、`create()` はゲームの初期状態を設定します。
 
-### Loading and Displaying the Background
+### 背景のロードと表示
 
-Start by loading and displaying a background image to verify the game loop is working:
-
-```javascript
+まず背景画像をロードして表示し、ゲーム ループが機能していることを確認します。```javascript
 PlayState.preload = function () {
     this.game.load.image('background', 'images/background.png');
 };
@@ -205,32 +183,24 @@ PlayState.create = function () {
     // Add the background image at position (0, 0)
     this.game.add.image(0, 0, 'background');
 };
-```
+```- `this.game.load.image(key, path)` は画像をロードし、後で参照できるようにキーを割り当てます。
+- `this.game.add.image(x, y, key)` は、指定された位置に静止画像を作成します。
 
-- `this.game.load.image(key, path)` loads an image and assigns it a key for later reference.
-- `this.game.add.image(x, y, key)` creates a static image at the given position.
+ゲーム キャンバスに背景画像がレンダリングされているのが表示されます。
 
-You should now see the background image rendered in the game canvas.
-
-### Understanding the Frame Cycle
-
-```
+### フレームサイクルを理解する```
 preload() -> [assets loaded] -> create() -> update() -> update() -> update() -> ...
-```
-
-Each call to `update()` represents one frame. The game targets 60 frames per second. All movement, input reading, and collision detection happen inside `update()`.
+````update()` への各呼び出しは 1 つのフレームを表します。ゲームは 1 秒あたり 60 フレームをターゲットとしています。すべての移動、入力読み取り、衝突検出は `update()` 内で行われます。
 
 ---
 
-## Creating Platforms
+## プラットフォームの作成
 
-Platforms are the surfaces the hero walks and jumps on. They are loaded from the level JSON data and created as physics-enabled sprites arranged in a group.
+プラットフォームは、主人公が歩いたりジャンプしたりする表面です。これらはレベル JSON データからロードされ、グループに配置された物理対応スプライトとして作成されます。
 
-### Loading Platform Assets
+### プラットフォーム資産のロード
 
-Load the level JSON data and all platform tile images in `preload`:
-
-```javascript
+レベルの JSON データとすべてのプラットフォーム タイル イメージを `preload` にロードします。```javascript
 PlayState.preload = function () {
     this.game.load.image('background', 'images/background.png');
 
@@ -245,13 +215,9 @@ PlayState.preload = function () {
     this.game.load.image('grass:2x1', 'images/grass_2x1.png');
     this.game.load.image('grass:1x1', 'images/grass_1x1.png');
 };
-```
+```### レベルデータからプラットフォームを生成する
 
-### Spawning Platforms from Level Data
-
-Create a method to load the level and spawn each platform as a sprite inside a physics group:
-
-```javascript
+レベルをロードし、各プラットフォームを物理グループ内のスプライトとして生成するメソッドを作成します。```javascript
 PlayState.create = function () {
     // Add the background
     this.game.add.image(0, 0, 'background');
@@ -279,35 +245,27 @@ PlayState._spawnPlatform = function (platform) {
     sprite.body.allowGravity = false;
     sprite.body.immovable = true;
 };
-```
+```- `this.game.add.group()` は、バッチ操作と衝突検出を可能にする関連するスプライトのコンテナーである Phaser グループを作成します。
+- `this.platforms.create(x, y, key)` はグループ内にスプライトを作成します。
+- `sprite.body.immovable = true` は、プラットフォームが他の物理ボディによってプッシュされるのを防ぎます。
+- `sprite.body.allowGravity = false` は、重力によるプラットフォームの落下を防ぎます。
 
-- `this.game.add.group()` creates a Phaser group -- a container for related sprites that enables batch operations and collision detection.
-- `this.platforms.create(x, y, key)` creates a sprite inside the group.
-- `sprite.body.immovable = true` prevents the platform from being pushed by other physics bodies.
-- `sprite.body.allowGravity = false` prevents platforms from falling due to gravity.
-
-You should now see the ground and grass platform tiles rendered on the screen.
+地面と草のプラットフォームのタイルが画面上にレンダリングされているのが表示されます。
 
 ---
 
-## The Main Character Sprite
+## 主人公のスプライト
 
-Now add the hero character that the player will control.
+次に、プレイヤーが操作するヒーローキャラクターを追加します。
 
-### Loading the Hero Image
+### ヒーロー画像のロード
 
-Add the hero image to `preload`. Initially we use a single static image; we will switch to a spritesheet later for animations:
-
-```javascript
+ヒーロー画像を `preload` に追加します。最初は単一の静的画像を使用します。後でアニメーション用にスプライトシートに切り替えます。```javascript
 // In PlayState.preload:
 this.game.load.image('hero', 'images/hero_stopped.png');
-```
+```### ヒーローのスポーン
 
-### Spawning the Hero
-
-Add the hero to `_loadLevel` and create a spawn method:
-
-```javascript
+ヒーローを `_loadLevel` に追加し、スポーン メソッドを作成します。```javascript
 PlayState._loadLevel = function (data) {
     this.platforms = this.game.add.group();
     data.platforms.forEach(this._spawnPlatform, this);
@@ -323,21 +281,17 @@ PlayState._spawnCharacters = function (data) {
     // Set the anchor to the bottom-center for easier positioning
     this.hero.anchor.set(0.5, 1);
 };
-```
-
-- `anchor.set(0.5, 1)` sets the sprite's origin point to the horizontal center and vertical bottom. This makes it easier to position the hero on top of platforms, since the `y` position refers to the hero's feet rather than the top-left corner.
+```- `anchor.set(0.5, 1)` は、スプライトの原点を水平方向の中央と垂直方向の下部に設定します。これにより、`y` の位置が左上隅ではなくヒーローの足元を指すため、ヒーローをプラットフォームの上に配置することが容易になります。
 
 ---
 
-## Keyboard Controls
+## キーボードコントロール
 
-Capture keyboard input so the player can move the hero left, right, and jump.
+キーボード入力をキャプチャして、プレイヤーがヒーローを左右に動かしたり、ジャンプしたりできるようにします。
 
-### Setting Up Input Keys
+### 入力キーの設定
 
-In `init`, configure the keyboard controls:
-
-```javascript
+`init` で、キーボード コントロールを構成します。```javascript
 PlayState.init = function () {
     // Force integer rendering for pixel-art crispness
     this.game.renderer.renderSession.roundPixels = true;
@@ -349,17 +303,13 @@ PlayState.init = function () {
         up: Phaser.KeyCode.UP
     });
 };
-```
+```- `addKeys()` は、指定されたキーをキャプチャし、キー状態参照を持つオブジェクトを返します。
+- `Phaser.KeyCode.LEFT`、`RIGHT`、`UP`は矢印キーに対応します。
+- `renderSession.roundPixels = true` は、サブピクセル レンダリングによってピクセル アートのスプライトがぼやけて見えるのを防ぎます。
 
-- `addKeys()` captures the specified keys and returns an object with key state references.
-- `Phaser.KeyCode.LEFT`, `RIGHT`, `UP` correspond to the arrow keys.
-- `renderSession.roundPixels = true` prevents pixel-art sprites from appearing blurry due to sub-pixel rendering.
+### アップデートでの入力の読み取り
 
-### Reading Input in Update
-
-Handle the key states in `update`. For now, just log the direction; the next step adds physics-based movement:
-
-```javascript
+`update` でキーの状態を処理します。今のところは、方向を記録するだけです。次のステップでは、物理ベースの動きを追加します。```javascript
 PlayState.update = function () {
     this._handleInput();
 };
@@ -373,22 +323,18 @@ PlayState._handleInput = function () {
         // Stop (no key held)
     }
 };
-```
-
-- `this.keys.left.isDown` returns `true` while the left arrow key is held down.
-- The `else` clause handles the case where neither left nor right is pressed (the hero should stop).
+```- `this.keys.left.isDown` は、左矢印キーを押している間、`true` を返します。
+- `else` 句は、左も右も押されていない場合を処理します (主人公は停止する必要があります)。
 
 ---
 
-## Moving Sprites with Physics
+## 物理演算を使用してスプライトを移動する
 
-Enable Arcade Physics so the hero can move with velocity and interact with platforms through collisions.
+アーケード フィジックスを有効にすると、ヒーローが速度を上げて移動し、衝突を通じてプラットフォームと対話できるようになります。
 
-### Enabling the Physics Engine
+### 物理エンジンの有効化
 
-Enable Arcade Physics in `init`:
-
-```javascript
+`init` でアーケード フィジックスを有効にする:```javascript
 PlayState.init = function () {
     this.game.renderer.renderSession.roundPixels = true;
 
@@ -401,13 +347,9 @@ PlayState.init = function () {
     // Enable Arcade Physics
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 };
-```
+```### ヒーローに物理ボディを追加する
 
-### Adding a Physics Body to the Hero
-
-Enable physics on the hero sprite in `_spawnCharacters`:
-
-```javascript
+`_spawnCharacters` でヒーロー スプライトの物理演算を有効にします。```javascript
 PlayState._spawnCharacters = function (data) {
     this.hero = this.game.add.sprite(data.hero.x, data.hero.y, 'hero');
     this.hero.anchor.set(0.5, 1);
@@ -415,13 +357,9 @@ PlayState._spawnCharacters = function (data) {
     // Enable physics body on the hero
     this.game.physics.enable(this.hero);
 };
-```
+```### 速度に合わせて移動する
 
-### Moving with Velocity
-
-Now update `_handleInput` to set the hero's velocity based on key presses:
-
-```javascript
+ここで `_handleInput` を更新して、キーの押下に基づいてヒーローの速度を設定します。```javascript
 const SPEED = 200; // pixels per second
 
 PlayState._handleInput = function () {
@@ -433,25 +371,21 @@ PlayState._handleInput = function () {
         this.hero.body.velocity.x = 0;
     }
 };
-```
+```- `body.velocity.x` は、水平速度をピクセル/秒で設定します。
+- 負の値を指定すると、スプライトが左に移動します。ポジティブにすると右に移動します。
+- キーが押されていないときにベロシティを `0` に設定すると、ヒーローはすぐに停止します。
 
-- `body.velocity.x` sets the horizontal speed in pixels per second.
-- A negative value moves the sprite left; positive moves it right.
-- Setting velocity to `0` when no keys are pressed makes the hero stop immediately.
-
-The hero can now move left and right, but will fall through platforms and off the screen because there is no gravity or collision handling yet.
+ヒーローは左右に移動できるようになりましたが、重力や衝突の処理がまだないため、プラットフォームを通って落ちたり、画面の外に落ちたりします。
 
 ---
 
-## Gravity
+## 重力
 
-Add gravity so the hero falls downward and collides with platforms.
+重力を追加すると、ヒーローが下に落ちてプラットフォームに衝突します。
 
-### Setting Global Gravity
+### グローバル重力の設定
 
-Enable gravity for the entire physics world in `init`:
-
-```javascript
+`init` で物理世界全体の重力を有効にします。```javascript
 PlayState.init = function () {
     this.game.renderer.renderSession.roundPixels = true;
 
@@ -466,15 +400,11 @@ PlayState.init = function () {
     // Set global gravity
     this.game.physics.arcade.gravity.y = 1200;
 };
-```
+```- `gravity.y = 1200` は、すべての物理演算が有効なスプライトに 1200 ピクセル/秒の 2 乗の下向き加速を適用します (`allowGravity = false` でオプトアウトしない限り)。
 
-- `gravity.y = 1200` applies a downward acceleration of 1200 pixels per second squared to all physics-enabled sprites (unless they opt out with `allowGravity = false`).
+### ヒーローとプラットフォーム間の衝突検出
 
-### Collision Detection Between Hero and Platforms
-
-Add collision detection in `update` so the hero lands on platforms instead of falling through:
-
-```javascript
+`update` に衝突検出を追加して、ヒーローが落ちずにプラットフォームに着地するようにします。```javascript
 PlayState.update = function () {
     this._handleCollisions();
     this._handleInput();
@@ -484,24 +414,20 @@ PlayState._handleCollisions = function () {
     // Make the hero collide with the platform group
     this.game.physics.arcade.collide(this.hero, this.platforms);
 };
-```
+```- `arcade.collide(spriteA, groupB)` は、ヒーローとプラットフォーム グループ内のすべてのスプライトの間の物理衝突をチェックします。ヒーローがプラットフォームに着地すると、物理エンジンがヒーローの通過を阻止し、重なりを解決します。
+- 入力を処理するときに衝突データ (ヒーローが地面に触れているかどうかなど) が最新になるように、`_handleInput()` の前に `_handleCollisions()` を呼び出すことが重要です。
 
-- `arcade.collide(spriteA, groupB)` checks for physics collisions between the hero and every sprite in the platforms group. When the hero lands on a platform, the physics engine prevents it from passing through and resolves the overlap.
-- It is important to call `_handleCollisions()` before `_handleInput()` so collision data (like whether the hero is touching the ground) is up to date when we process input.
-
-The hero now falls due to gravity and lands on the platforms. You can walk left and right on the platforms.
+主人公は重力により落下し、プラットフォームに着地します。ホーム上は左右に歩くことができます。
 
 ---
 
-## Jumps
+## ジャンプ
 
-Allow the hero to jump when the up arrow key is pressed -- but only when standing on a platform (no mid-air jumps).
+上矢印キーを押したときにヒーローがジャンプできるようにします。ただし、プラットフォームに立っている場合に限ります (空中ジャンプはできません)。
 
-### Implementing the Jump Mechanic
+### ジャンプメカニズムの実装
 
-Add a jump constant and update `_handleInput`:
-
-```javascript
+ジャンプ定数を追加し、`_handleInput` を更新します。```javascript
 const SPEED = 200;
 const JUMP_SPEED = 600;
 
@@ -529,18 +455,14 @@ PlayState._jump = function () {
 
     return canJump;
 };
-```
+```- ヒーローの物理ボディがその下面で別のボディに触れている場合、`this.hero.body.touching.down` は `true` になります。つまり、ヒーローが何かの上に立っていることを意味します。
+- `velocity.y` を負の値に設定すると、ヒーローが上向きに起動します (Y 軸は画面座標で下を指します)。
+- `canJump` チェックは、ヒーローがすでに空中にいるときにジャンプすることを防ぎ、シングル ジャンプ動作を強制します。
+- このメソッドは、ジャンプが実行されたかどうかを返します。これは、後で効果音を再生するときに役立ちます。
 
-- `this.hero.body.touching.down` is `true` when the hero's physics body is touching another body on its underside -- meaning the hero is standing on something.
-- Setting `velocity.y` to a negative value launches the hero upward (the y-axis points downward in screen coordinates).
-- The `canJump` check prevents the hero from jumping while already in the air, enforcing single-jump behavior.
-- The method returns whether the jump was performed, which is useful later for playing sound effects.
+### ジャンプ効果音の追加
 
-### Adding a Jump Sound Effect
-
-Load a jump sound and play it on successful jumps:
-
-```javascript
+ジャンプ サウンドをロードし、ジャンプが成功したときに再生します。```javascript
 // In PlayState.preload:
 this.game.load.audio('sfx:jump', 'audio/sfx/jump.wav');
 
@@ -560,31 +482,23 @@ PlayState._jump = function () {
 
     return canJump;
 };
-```
+```---
 
----
+## 選択可能なコイン
 
-## Pickable Coins
+プレイヤーがスコアを増やすために拾える収集可能なコインを追加します。
 
-Add collectible coins that the player can pick up to increase their score.
+### コイン資産のロード
 
-### Loading Coin Assets
-
-Load the coin spritesheet and coin sound effect in `preload`:
-
-```javascript
+コインのスプライトシートとコインの効果音を `preload` にロードします。```javascript
 // In PlayState.preload:
 this.game.load.spritesheet('coin', 'images/coin_animated.png', 22, 22);
 this.game.load.audio('sfx:coin', 'audio/sfx/coin.wav');
-```
+```- `load.spritesheet(key, path, frameWidth, frameHeight)` は、スプライトシートをロードし、アニメーション用に 22x22 ピクセルの個々のフレームにスライスします。
 
-- `load.spritesheet(key, path, frameWidth, frameHeight)` loads a spritesheet and slices it into individual frames of 22x22 pixels for animation.
+### レベルデータからコインを生成する
 
-### Spawning Coins from Level Data
-
-Update `_loadLevel` to create a coins group and spawn each coin:
-
-```javascript
+`_loadLevel` を更新してコイン グループを作成し、各コインを生成します。```javascript
 PlayState._loadLevel = function (data) {
     this.platforms = this.game.add.group();
     this.coins = this.game.add.group();
@@ -607,17 +521,13 @@ PlayState._spawnCoin = function (coin) {
     sprite.animations.add('rotate', [0, 1, 2, 1], 6, true); // 6fps, looping
     sprite.animations.play('rotate');
 };
-```
+```- 衝突検出を容易にするために、各コインは `coins` グループ内に作成されます。
+- `allowGravity = false`はコインの落下を防ぎます。
+- `animations.add` は、スプライトシートのフレーム 0、1、2、1 を 6fps で使用し、連続的にループするフレーム アニメーションを作成します。
 
-- Each coin is created inside the `coins` group for easy collision detection.
-- `allowGravity = false` prevents coins from falling.
-- The `animations.add` creates a frame animation using the spritesheet frames 0, 1, 2, 1 at 6fps, looping continuously.
+### コインを集める
 
-### Collecting Coins
-
-Add the coin sound to the sfx object and detect overlap between the hero and coins:
-
-```javascript
+コインの音を sfx オブジェクトに追加し、ヒーローとコインの間の重なりを検出します。```javascript
 // In PlayState.create, add to the sfx object:
 this.sfx = {
     jump: this.game.add.audio('sfx:jump'),
@@ -639,15 +549,11 @@ PlayState._onHeroVsCoin = function (hero, coin) {
     coin.kill();  // Remove the coin from the game
     this.coinPickupCount++;
 };
-```
+```- `arcade.overlap()` は、物理的に衝突を解決せずに 2 つのスプライト/グループが重なっているかどうかをチェックします。重複を検出するとコールバック関数(`_onHeroVsCoin`)を呼び出します。
+- `coin.kill()` は、ゲーム世界からコイン スプライトを削除します。
+- `this.coinPickupCount` は、収集されたコインの数を追跡します (`_loadLevel` で初期化します)。
 
-- `arcade.overlap()` checks if two sprites/groups overlap without resolving collisions physically. When an overlap is detected, it calls the callback function (`_onHeroVsCoin`).
-- `coin.kill()` removes the coin sprite from the game world.
-- `this.coinPickupCount` tracks the number of coins collected (initialize it in `_loadLevel`).
-
-### Initializing the Coin Counter
-
-```javascript
+### Initializing the Coin Counter```javascript
 PlayState._loadLevel = function (data) {
     this.platforms = this.game.add.group();
     this.coins = this.game.add.group();
@@ -660,31 +566,23 @@ PlayState._loadLevel = function (data) {
     // Initialize coin counter
     this.coinPickupCount = 0;
 };
-```
+```---
 
----
+## 歩く敵
 
-## Walking Enemies
+プラットフォームを行ったり来たりするクモの敵を追加します。主人公は上から踏みつけることはできますが、横から触れると死んでしまいます。
 
-Add spider enemies that walk back and forth on platforms. The hero can stomp on them from above but dies if touching them from the side.
-
-### Loading Enemy Assets
-
-```javascript
+### 敵のアセットをロードする```javascript
 // In PlayState.preload:
 this.game.load.spritesheet('spider', 'images/spider.png', 42, 32);
 this.game.load.image('invisible-wall', 'images/invisible_wall.png');
 this.game.load.audio('sfx:stomp', 'audio/sfx/stomp.wav');
-```
+```- スパイダーのスプリットシートには、這うアニメーション用のフレームがあります。
+- クモが立ち去るのを防ぐために、目に見えない壁がプラットフォームの端に配置されます。壁は視覚的にレンダリングされませんが、物理ボディを持ちます。
 
-- The spider spritsheet has frames for a crawling animation.
-- Invisible walls are placed at platform edges to keep spiders from walking off -- they are not rendered visually but have physics bodies.
+### 敵の出現
 
-### Spawning Enemies
-
-Update `_loadLevel` and add a spawn method for spiders:
-
-```javascript
+`_loadLevel` を更新し、スパイダーのスポーン メソッドを追加します。```javascript
 PlayState._loadLevel = function (data) {
     this.platforms = this.game.add.group();
     this.coins = this.game.add.group();
@@ -702,13 +600,9 @@ PlayState._loadLevel = function (data) {
 
     this.coinPickupCount = 0;
 };
-```
+```### プラットフォーム上に見えない壁を作成する
 
-### Creating Invisible Walls on Platforms
-
-Modify `_spawnPlatform` to add invisible walls at both edges of each platform:
-
-```javascript
+`_spawnPlatform` を変更して、各プラットフォームの両端に目に見えない壁を追加します。```javascript
 PlayState._spawnPlatform = function (platform) {
     let sprite = this.platforms.create(platform.x, platform.y, platform.image);
     this.game.physics.enable(sprite);
@@ -730,15 +624,11 @@ PlayState._spawnEnemyWall = function (x, y, side) {
     sprite.body.immovable = true;
     sprite.body.allowGravity = false;
 };
-```
+```- 各プラットフォームには、各端に 1 つずつ、2 つの目に見えない壁があります。
+- 壁は、クモが端から歩き出すのを防ぐ障壁として機能します。
+- 壁がプラットフォームの正しい側に揃うようにアンカーが設定されています。
 
-- Each platform gets two invisible walls, one at each edge.
-- The walls act as barriers that prevent spiders from walking off the edge.
-- The anchor is set so the wall aligns to the correct side of the platform.
-
-### Spawning and Animating Spiders
-
-```javascript
+### スパイダーのスポーンとアニメーション化```javascript
 PlayState._spawnSpider = function (spider) {
     let sprite = this.spiders.create(spider.x, spider.y, 'spider');
     sprite.anchor.set(0.5, 1);
@@ -757,16 +647,12 @@ PlayState._spawnSpider = function (spider) {
 
 // Spider speed constant
 const Spider = { SPEED: 100 };
-```
+```- スパイダーには、`crawl` (ループ) と `die` (死亡時に 1 回再生) の 2 つのアニメーションがあります。
+- `velocity.x = 100` は、スパイダーを毎秒 100 ピクセルで右に移動させます。
 
-- Spiders have two animations: `crawl` (looping) and `die` (played once on death).
-- `velocity.x = 100` starts the spider moving to the right at 100 pixels per second.
+### クモを壁に跳ね返らせる
 
-### Making Spiders Bounce Off Walls
-
-Add collision handling so spiders reverse direction when hitting invisible walls or platform edges:
-
-```javascript
+衝突処理を追加して、スパイダーが目に見えない壁やプラットフォームの端にぶつかったときに方向を逆転させるようにします。```javascript
 // In PlayState._handleCollisions:
 PlayState._handleCollisions = function () {
     this.game.physics.arcade.collide(this.hero, this.platforms);
@@ -780,11 +666,7 @@ PlayState._handleCollisions = function () {
         this.hero, this.spiders, this._onHeroVsEnemy, null, this
     );
 };
-```
-
-To make spiders reverse direction when colliding with walls, check their velocity each frame and flip them:
-
-```javascript
+```壁に衝突したときにスパイダーの方向を反転させるには、フレームごとに速度を確認して反転させます。```javascript
 // In PlayState.update, after collision handling, update spider directions:
 PlayState.update = function () {
     this._handleCollisions();
@@ -799,22 +681,18 @@ PlayState.update = function () {
         }
     }, this);
 };
-```
-
-- When a spider touches a wall on its right side, it reverses to move left, and vice versa.
-- `body.touching` is set by Phaser after collision resolution.
+```- クモは右側の壁に触れると反転して左に移動し、その逆も同様です。
+- `body.touching` は、衝突解決後に Phaser によって設定されます。
 
 ---
 
-## Death
+## 死
 
-Implement hero death when touching enemies and the stomp mechanic for killing enemies.
+敵に触れたときのヒーローの死と、敵を倒すためのストンプメカニズムを実装します。
 
-### Hero vs Enemy: Stomp or Die
+### ヒーロー vs 敵: ストンプ・オア・ダイ
 
-When the hero overlaps with a spider, check if the hero is falling (stomping) or not:
-
-```javascript
+ヒーローがクモと重なったときに、ヒーローが落ちている (踏みつけている) かどうかを確認します。```javascript
 PlayState._onHeroVsEnemy = function (hero, enemy) {
     if (hero.body.velocity.y > 0) {
         // Hero is falling -> stomp the enemy
@@ -844,29 +722,21 @@ PlayState._killHero = function () {
         this.game.state.restart(true, false, { level: this.level });
     }, this);
 };
-```
+```- `hero.body.velocity.y > 0` の場合、主人公は下方向に移動 (落下) しており、ストンプを示します。
+- ストンプ時: 敵は停止し、死亡アニメーションが再生され、排除されます。主人公は飛び起きます。
+- 主人公が倒れていない場合、主人公は死亡します。 `this.hero.kill()` は、ゲームからヒーローを削除します。
+- 500 ミリ秒後、状態全体が再起動され、レベルが効果的にリロードされます。
 
-- If `hero.body.velocity.y > 0`, the hero is moving downward (falling), indicating a stomp.
-- On stomp: the enemy stops, plays its death animation, and is removed. The hero bounces up.
-- If the hero is not falling, the hero dies. `this.hero.kill()` removes the hero from the game.
-- After 500ms, the entire state is restarted, effectively reloading the level.
-
-### Add Stomp Sound
-
-```javascript
+### ストンプサウンドを追加する```javascript
 // In PlayState.create, add to sfx:
 this.sfx = {
     jump: this.game.add.audio('sfx:jump'),
     coin: this.game.add.audio('sfx:coin'),
     stomp: this.game.add.audio('sfx:stomp')
 };
-```
+```### ヒーローの死亡アニメーションを追加する
 
-### Adding a Death Animation for the Hero
-
-Make the hero flash and fall off the screen when dying:
-
-```javascript
+死亡時にヒーローが点滅して画面から落ちるようにします。```javascript
 PlayState._killHero = function () {
     this.hero.alive = false;
 
@@ -883,13 +753,9 @@ PlayState._killHero = function () {
         this.game.state.restart(true, false, { level: this.level });
     }, this);
 };
-```
+```### デッド時の入力の保護
 
-### Guarding Input When Dead
-
-Prevent input from controlling the hero after death:
-
-```javascript
+死後に入力がヒーローを制御できないようにします。```javascript
 PlayState._handleInput = function () {
     if (!this.hero.alive) { return; }
 
@@ -905,29 +771,21 @@ PlayState._handleInput = function () {
         this._jump();
     }
 };
-```
-
-- `this.hero.alive` is set to `false` in `_killHero`, so input is ignored after death and the hero falls off screen naturally.
+```- `_killHero` の `this.hero.alive` が `false` に設定されているため、死亡後は入力が無視され、主人公は自然に画面から落ちます。
 
 ---
 
-## Scoreboard
+## スコアボード
 
-Display the number of collected coins on screen using a bitmap font.
+集めたコインの枚数をビットマップフォントで画面上に表示します。
 
-### Loading the Bitmap Font
-
-```javascript
+### ビットマップフォントのロード```javascript
 // In PlayState.preload:
 this.game.load.image('font:numbers', 'images/numbers.png');
 this.game.load.image('icon:coin', 'images/coin_icon.png');
-```
+```### HUD の作成
 
-### Creating the HUD
-
-Create a fixed HUD (heads-up display) that shows the coin icon and count:
-
-```javascript
+コインのアイコンとカウントを表示する固定 HUD (ヘッドアップ ディスプレイ) を作成します。```javascript
 PlayState._createHud = function () {
     let coinIcon = this.game.make.image(0, 0, 'icon:coin');
 
@@ -949,11 +807,7 @@ PlayState._createHud = function () {
     this.hud.position.set(10, 10);
     this.hud.fixedToCamera = true;
 };
-```
-
-Alternatively, using Phaser's `RetroFont` for pixel-art number rendering:
-
-```javascript
+```あるいは、Phaser の `RetroFont` を使用してピクセル アート番号をレンダリングすることもできます。```javascript
 PlayState._createHud = function () {
     // Bitmap-based number rendering using RetroFont
     this.coinFont = this.game.add.retroFont(
@@ -973,14 +827,10 @@ PlayState._createHud = function () {
     this.hud.position.set(10, 10);
     this.hud.fixedToCamera = true;
 };
-```
+```- `retroFont` は、文字グリフを含むスプライトシートからビットマップ フォントを作成します。
+- パラメータ: 画像キー、文字幅、文字高さ、文字セット文字列、行ごとの文字数。
 
-- `retroFont` creates a bitmap font from a spritesheet containing character glyphs.
-- Parameters: image key, character width, character height, character set string, number of characters per row.
-
-### Calling createHud in create
-
-```javascript
+### create での createHud の呼び出し```javascript
 PlayState.create = function () {
     this.game.add.image(0, 0, 'background');
 
@@ -989,13 +839,7 @@ PlayState.create = function () {
     // Create the HUD
     this._createHud();
 };
-```
-
-### Updating the Score Display
-
-Update the score text whenever a coin is collected:
-
-```javascript
+```Error 504 (Server Error)!!1504.That’s an error.There was an error. Please try again later.That’s all we know.```javascript
 PlayState._onHeroVsCoin = function (hero, coin) {
     this.sfx.coin.play();
     coin.kill();
@@ -1004,32 +848,24 @@ PlayState._onHeroVsCoin = function (hero, coin) {
     // Update the HUD
     this.coinFont.text = 'x' + this.coinPickupCount;
 };
-```
+```---
 
----
+## 主人公のアニメーション
 
-## Animations for the Main Character
+静的なヒーロー画像をスプライトシートに置き換え、アイドル (停止)、走行、ジャンプ、落下などのさまざまな状態のアニメーションを追加します。
 
-Replace the static hero image with a spritesheet and add animations for different states: idle (stopped), running, jumping, and falling.
+### ヒーロー スプライトシートのロード
 
-### Loading the Hero Spritesheet
-
-Replace the single image load with a spritesheet in `preload`:
-
-```javascript
+単一の画像ロードを `preload` のスプライトシートに置き換えます。```javascript
 // Replace: this.game.load.image('hero', 'images/hero_stopped.png');
 // With:
 this.game.load.spritesheet('hero', 'images/hero.png', 36, 42);
-```
+```- ヒーローのスプライトシートは、フレームごとに幅 36 ピクセル、高さ 42 ピクセルです。
+- フレームには、アイドル、ウォーク サイクル、ジャンプ、および落下のポーズが含まれます。
 
-- The hero spritesheet is 36 pixels wide and 42 pixels tall per frame.
-- Frames include idle, walk cycle, jump, and fall poses.
+### アニメーションの定義
 
-### Defining Animations
-
-In `_spawnCharacters`, add animation definitions after creating the hero sprite:
-
-```javascript
+`_spawnCharacters` で、ヒーロー スプライトの作成後にアニメーション定義を追加します。```javascript
 PlayState._spawnCharacters = function (data) {
     this.hero = this.game.add.sprite(data.hero.x, data.hero.y, 'hero');
     this.hero.anchor.set(0.5, 1);
@@ -1041,17 +877,13 @@ PlayState._spawnCharacters = function (data) {
     this.hero.animations.add('jump', [3]);                // Single frame: jumping up
     this.hero.animations.add('fall', [4]);                // Single frame: falling down
 };
-```
+```- `animations.add(name, frames, fps, loop)` は、指定された名前でアニメーションを登録します。
+- `stop`、`jump`、`fall` などの単一フレーム アニメーションは、静的なポーズを効果的に設定します。
+- `run` アニメーションは 8fps でフレーム 1 とフレーム 2 を交互に繰り返します。
 
-- `animations.add(name, frames, fps, loop)` registers an animation with the given name.
-- Single-frame animations like `stop`, `jump`, and `fall` effectively set a static pose.
-- The `run` animation alternates between frames 1 and 2 at 8fps.
+### 正しいアニメーションの再生
 
-### Playing the Correct Animation
-
-Add a method to determine and play the right animation based on the hero's current state:
-
-```javascript
+ヒーローの現在の状態に基づいて適切なアニメーションを決定して再生するメソッドを追加します。```javascript
 PlayState._getAnimationName = function () {
     let name = 'stop'; // Default: standing still
 
@@ -1067,13 +899,9 @@ PlayState._getAnimationName = function () {
 
     return name;
 };
-```
+```### 方向に基づいてスプライトを反転する
 
-### Flipping the Sprite Based on Direction
-
-Update the hero's facing direction and play the animation in `update`:
-
-```javascript
+ヒーローの向いている方向を更新し、`update` でアニメーションを再生します。```javascript
 PlayState.update = function () {
     this._handleCollisions();
     this._handleInput();
@@ -1097,20 +925,16 @@ PlayState.update = function () {
         }
     }, this);
 };
-```
-
-- `this.hero.scale.x = -1` flips the sprite horizontally to face left. Setting it to `1` faces right. Because the anchor is at `(0.5, 1)`, the flip looks natural.
-- `animations.play()` only restarts the animation if the name changes, so calling it every frame is safe and efficient.
+```- `this.hero.scale.x = -1` は、スプライトを水平方向に反転して左向きにします。 `1` にすると右向きになります。アンカーが `(0.5, 1)` にあるため、反転は自然に見えます。
+- `animations.play()` は、名前が変更された場合にのみアニメーションを再開するため、フレームごとに呼び出すのが安全で効率的です。
 
 ---
 
-## Win Condition
+## 勝利条件
 
-Add a door and key mechanic: the hero must collect a key, then reach the door to complete the level.
+ドアと鍵の仕組みを追加します。レベルを完了するには、主人公は鍵を収集し、ドアに到達する必要があります。
 
-### Loading Door and Key Assets
-
-```javascript
+### ドアとキーアセットのロード```javascript
 // In PlayState.preload:
 this.game.load.spritesheet('door', 'images/door.png', 42, 66);
 this.game.load.spritesheet('key', 'images/key.png', 20, 22);  // Key bobbing animation
@@ -1118,13 +942,9 @@ this.game.load.image('icon:key', 'images/key_icon.png');
 
 this.game.load.audio('sfx:key', 'audio/sfx/key.wav');
 this.game.load.audio('sfx:door', 'audio/sfx/door.wav');
-```
+```### ドアと鍵の生成
 
-### Spawning the Door and Key
-
-Update `_loadLevel` and `_spawnCharacters`:
-
-```javascript
+`_loadLevel` と `_spawnCharacters` を更新します。```javascript
 PlayState._loadLevel = function (data) {
     this.platforms = this.game.add.group();
     this.coins = this.game.add.group();
@@ -1171,16 +991,12 @@ PlayState._spawnKey = function (x, y) {
         .loop()
         .start();
 };
-```
+```- ドアは背景装飾グループに配置されているため、主人公の後ろにレンダリングされます。
+- キーには正弦波の上下トゥイーンがあり、800 ミリ秒にわたって 6 ピクセル上下に移動し、永久にループします。
 
-- The door is placed in a background decoration group so it renders behind the hero.
-- The key has a sinusoidal bobbing tween that moves it 6 pixels up and down over 800ms, looping forever.
+### 鍵を集めてドアを開ける
 
-### Collecting the Key and Opening the Door
-
-Add key and door sound effects to the sfx object:
-
-```javascript
+鍵とドアのサウンドエフェクトを sfx オブジェクトに追加します。```javascript
 // In PlayState.create sfx:
 this.sfx = {
     jump: this.game.add.audio('sfx:jump'),
@@ -1189,11 +1005,7 @@ this.sfx = {
     key: this.game.add.audio('sfx:key'),
     door: this.game.add.audio('sfx:door')
 };
-```
-
-Add overlap detection for the key and door in `_handleCollisions`:
-
-```javascript
+````_handleCollisions` に鍵とドアの重複検出を追加します。```javascript
 PlayState._handleCollisions = function () {
     this.game.physics.arcade.collide(this.hero, this.platforms);
     this.game.physics.arcade.collide(this.spiders, this.platforms);
@@ -1216,13 +1028,9 @@ PlayState._handleCollisions = function () {
         }, this
     );
 };
-```
+```- ドアのオーバーラップには **プロセス コールバック** (4 番目の引数) があり、`this.hasKey` が true でヒーローが何かの上に立っている場合にのみオーバーラップ コールバックをトリガーします。これにより、主人公が転落したり、鍵を持たずにドアに入るのを防ぎます。
 
-- The door overlap has a **process callback** (the fourth argument) that only triggers the overlap callback when `this.hasKey` is true and the hero is standing on something. This prevents the hero from entering the door while falling or without the key.
-
-### Key and Door Callbacks
-
-```javascript
+### 鍵とドアのコールバック```javascript
 PlayState._onHeroVsKey = function (hero, key) {
     this.sfx.key.play();
     key.kill();
@@ -1252,17 +1060,13 @@ PlayState._goToNextLevel = function () {
         });
     }, this);
 };
-```
+```- 主人公がキーに触れると、キーが削除され、`hasKey` が `true` に設定されます。
+- 主人公が (鍵を持って) ドアに到達すると、主人公はフリーズし、ドアが開き、遅れてゲームが次のレベルに移行します。
+- `camera.fade()` は、洗練されたレベル スイッチのフェードから黒へのトランジションを作成します。
 
-- When the hero touches the key, the key is removed and `hasKey` is set to `true`.
-- When the hero reaches the door (with the key), the hero freezes, the door opens, and after a delay the game transitions to the next level.
-- `camera.fade()` creates a fade-to-black transition for a polished level switch.
+### HUD に鍵アイコンを表示する
 
-### Showing the Key Icon in the HUD
-
-Update `_createHud` to show whether the hero has collected the key:
-
-```javascript
+`_createHud` を更新して、ヒーローがキーを収集したかどうかを表示します。```javascript
 PlayState._createHud = function () {
     this.keyIcon = this.game.make.image(0, 19, 'icon:key');
     this.keyIcon.anchor.set(0, 0.5);
@@ -1275,28 +1079,20 @@ PlayState._createHud = function () {
     this.hud.position.set(10, 10);
     this.hud.fixedToCamera = true;
 };
-```
-
-Update the key icon appearance each frame in `update`:
-
-```javascript
+````update` の各フレームでキー アイコンの外観を更新します。```javascript
 // In PlayState.update, add:
 this.keyIcon.frame = this.hasKey ? 1 : 0;
-```
-
-- Frame 0 shows a grayed-out key icon; frame 1 shows the collected key icon.
+```- フレーム 0 にはグレー表示された鍵アイコンが表示されます。フレーム 1 は収集された鍵のアイコンを示しています。
 
 ---
 
-## Switching Levels
+## レベルの切り替え
 
-Support multiple levels by loading different JSON files based on a level index.
+レベル インデックスに基づいて異なる JSON ファイルをロードすることで、複数のレベルをサポートします。
 
-### Passing Level Number Through init
+### init を介してレベル番号を渡す
 
-Modify `init` to accept a level parameter:
-
-```javascript
+レベル パラメータを受け入れるように `init` を変更します。```javascript
 PlayState.init = function (data) {
     this.game.renderer.renderSession.roundPixels = true;
 
@@ -1314,16 +1110,12 @@ PlayState.init = function (data) {
 };
 
 const LEVEL_COUNT = 2; // Total number of levels
-```
+```- `data` は、`game.state.start()` または `game.state.restart()` から渡されたオブジェクトです。
+- モジュロ演算 (`% LEVEL_COUNT`) は、最後のレベルの後にレベル 0 にラップアラウンドし、レベルの無限ループを作成します。
 
-- `data` is an object passed from `game.state.start()` or `game.state.restart()`.
-- The modulo operation (`% LEVEL_COUNT`) wraps around to level 0 after the last level, creating an infinite loop of levels.
+### レベルデータを動的にロードする
 
-### Loading Level Data Dynamically
-
-Update `preload` to load the correct level based on `this.level`:
-
-```javascript
+`preload` を更新して、`this.level` に基づいて正しいレベルをロードします。```javascript
 PlayState.preload = function () {
     this.game.load.image('background', 'images/background.png');
 
@@ -1333,11 +1125,7 @@ PlayState.preload = function () {
 
     // ... load all other assets ...
 };
-```
-
-Update `create` to use the correct level data:
-
-```javascript
+```正しいレベル データを使用するように `create` を更新します。```javascript
 PlayState.create = function () {
     this.sfx = {
         jump: this.game.add.audio('sfx:jump'),
@@ -1354,60 +1142,52 @@ PlayState.create = function () {
 
     this._createHud();
 };
-```
+```### ゲームをレベル 0 から開始する
 
-### Starting the Game at Level 0
-
-Update the initial state start to pass level 0:
-
-```javascript
+初期状態を更新してレベル 0 を通過します。```javascript
 window.onload = function () {
     let game = new Phaser.Game(960, 600, Phaser.AUTO, 'game');
     game.state.add('play', PlayState);
     game.state.start('play', true, false, { level: 0 });
 };
-```
+```- 3 番目と 4 番目の `start` 引数は、ワールド/キャッシュのクリアを制御します。 `true, false` は、再起動の間にキャッシュを保持します (そのため、アセットを再ロードする必要はありません) が、ワールドをクリアします。
+- `{ level: 0 }` は `data` パラメータとして `init` に渡されます。
 
-- The third and fourth `start` arguments control world/cache clearing. `true, false` keeps the cache between restarts (so assets do not need to be reloaded) but clears the world.
-- `{ level: 0 }` is passed to `init` as the `data` parameter.
+### レベル移行の流れ
 
-### Level Transition Flow
+完全なレベル フローは次のとおりです。
 
-The complete level flow is:
-
-1. Hero collects key -> `hasKey = true`
-2. Hero reaches door -> `_onHeroVsDoor` fires
-3. Camera fades to black -> `_goToNextLevel` fires
-4. State restarts with `{ level: this.level + 1 }`
-5. `init` receives the new level number
-6. The correct level JSON is loaded and the game continues
+1. ヒーローがキーを収集 -> `hasKey = true`
+2. ヒーローがドアに到達 -> `_onHeroVsDoor` が起動
+3. カメラが黒にフェードアウト -> `_goToNextLevel` が起動
+4. `{ level: this.level + 1 }` でステートが再開されます。
+5. `init` は新しいレベル番号を受け取ります
+6. 正しいレベルの JSON がロードされ、ゲームが続行されます。
 
 ---
 
-## Moving Forward
+## 前進する
 
-Congratulations -- you have built a complete 2D platformer. Here are ideas for extending the game further:
+おめでとうございます -- 完全な 2D プラットフォーマーが構築されました。ゲームをさらに拡張するためのアイデアは次のとおりです。
 
-### Suggested Improvements
+### 提案された改善点
 
-- **Mobile / touch controls:** Add on-screen buttons or swipe gestures using `game.input.onDown` for touch-enabled devices.
-- **More levels:** Create additional JSON level files with new platform layouts, coin placements, and enemy configurations.
-- **Menu screen:** Add a `MenuState` with a title screen and start button before entering `PlayState`.
-- **Game over screen:** Instead of instantly restarting, show a "Game Over" screen with the score.
-- **Lives system:** Give the hero multiple lives instead of instant restart.
-- **Power-ups:** Add items like speed boosts, double jump, or invincibility.
-- **Moving platforms:** Create platforms that travel along a path using tweens.
-- **Different enemy types:** Add flying enemies, enemies that shoot projectiles, or enemies with different movement patterns.
-- **Parallax scrolling:** Add multiple background layers that scroll at different speeds for depth.
-- **Camera scrolling:** For levels wider than the screen, use `game.camera.follow(this.hero)` to scroll with the hero.
-- **Sound and music:** Add background music and additional sound effects for a more polished experience.
-- **Particle effects:** Use Phaser's particle emitter for coin collection sparkles, enemy death effects, or dust when landing.
+- **モバイル/タッチ コントロール:** タッチ対応デバイスの場合は、`game.input.onDown` を使用してオンスクリーン ボタンまたはスワイプ ジェスチャを追加します。
+- **さらなるレベル:** 新しいプラットフォーム レイアウト、コインの配置、敵の構成を含む追加の JSON レベル ファイルを作成します。
+- **メニュー画面:** `PlayState`を入力する前に、タイトル画面とスタートボタンを含む`MenuState`を追加します。
+- **ゲームオーバー画面:** すぐに再開する代わりに、スコアを含む「ゲームオーバー」画面を表示します。
+- **ライフシステム:** 即座に再起動する代わりに、ヒーローに複数のライフを与えます。
+- **パワーアップ:** 速度ブースト、ダブルジャンプ、無敵などのアイテムを追加します。
+- **移動プラットフォーム:** トゥイーンを使用してパスに沿って移動するプラットフォームを作成します。
+- **さまざまな敵のタイプ:** 飛行する敵、発射物を発射する敵、またはさまざまな動きパターンを持つ敵を追加します。
+- **視差スクロール:** 奥行きを持たせるために異なる速度でスクロールする複数の背景レイヤーを追加します。
+- **カメラのスクロール:** 画面より広いレベルの場合、`game.camera.follow(this.hero)` を使用してヒーローと一緒にスクロールします。
+- **サウンドと音楽:** バックグラウンドミュージックと追加のサウンドエフェクトを追加して、より洗練されたエクスペリエンスを実現します。
+- **パーティクル エフェクト:** フェイザーのパーティクル エミッターを使用して、コイン収集の輝き、敵の死亡エフェクト、または着陸時の粉塵を演出します。
 
-### Full Game Source Reference
+### 完全なゲーム ソース リファレンス
 
-Below is the complete `main.js` file combining all steps for reference. This represents the final state of the game with all features:
-
-```javascript
+以下は、参考のためにすべての手順を組み合わせた完全な `main.js` ファイルです。これは、すべての機能を備えたゲームの最終状態を表します。```javascript
 // =============================================================================
 // Constants
 // =============================================================================
@@ -1828,28 +1608,26 @@ window.onload = function () {
     game.state.add('play', PlayState);
     game.state.start('play', true, false, { level: 0 });
 };
-```
+```### 重要な概念のまとめ
 
-### Key Concepts Summary
-
-| Concept | Phaser API | Purpose |
-|---------|-----------|---------|
-| Game instance | `new Phaser.Game(w, h, renderer, container)` | Creates the game canvas and engine |
-| Game states | `game.state.add()` / `game.state.start()` | Organizes code into init/preload/create/update lifecycle |
-| Loading images | `game.load.image(key, path)` | Loads a static image asset |
-| Loading spritesheets | `game.load.spritesheet(key, path, fw, fh)` | Loads an animated spritesheet |
-| Loading JSON | `game.load.json(key, path)` | Loads JSON data (level definitions) |
-| Loading audio | `game.load.audio(key, path)` | Loads a sound effect |
-| Sprite groups | `game.add.group()` | Container for related sprites; enables batch collision detection |
-| Physics bodies | `game.physics.enable(sprite)` | Adds an Arcade Physics body to a sprite |
-| Gravity | `game.physics.arcade.gravity.y` | Global downward acceleration |
-| Collision | `arcade.collide(a, b)` | Physical collision resolution (sprites push each other) |
-| Overlap | `arcade.overlap(a, b, callback)` | Detection without physical push (for pickups) |
-| Velocity | `sprite.body.velocity.x/y` | Movement speed in pixels per second |
-| Immovable | `sprite.body.immovable = true` | Prevents sprite from being pushed by collisions |
-| Animations | `sprite.animations.add(name, frames, fps, loop)` | Defines a frame animation |
-| Tweens | `game.add.tween(target).to(props, duration, easing)` | Smooth property animation |
-| Keyboard input | `game.input.keyboard.addKeys({...})` | Captures specific keyboard keys |
-| Camera | `this.camera.fade()` | Screen transition effects |
-| Anchor | `sprite.anchor.set(x, y)` | Sets the origin point for positioning and rotation |
-| Sprite flipping | `sprite.scale.x = -1` | Horizontally mirrors the sprite |
+|コンセプト |フェイザー API |目的 |
+|----------|-----------|----------|
+|ゲームインスタンス | `new Phaser.Game(w, h, renderer, container)` |ゲームのキャンバスとエンジンを作成します |
+|ゲームの状態 | `game.state.add()` / `game.state.start()` |コードを init/preload/create/update ライフサイクルに整理します |
+|画像をロード中 | `game.load.image(key, path)` |静的画像アセットをロードします |
+|スプライトシートのロード | `game.load.spritesheet(key, path, fw, fh)` |アニメーション化されたスプライトシートをロードします |
+| JSON の読み込み中 | `game.load.json(key, path)` | JSON データをロードします (レベル定義) |
+|オーディオをロードしています | `game.load.audio(key, path)` |効果音をロードします |
+|スプライトグループ | `game.add.group()` |関連するスプライトのコンテナ。バッチ衝突検出を有効にする |
+|物理体 | `game.physics.enable(sprite)` | Arcade Physics ボディをスプライトに追加します。
+|重力 | `game.physics.arcade.gravity.y` |世界的な下降加速 |
+|衝突 | `arcade.collide(a, b)` |物理的な衝突の解決 (スプライトが互いに押し合う) |
+|オーバーラップ | `arcade.overlap(a, b, callback)` |物理的に押さずに検出（ピックアップ用） |
+|速度 | `sprite.body.velocity.x/y` |移動速度 (ピクセル/秒) |
+|不動 | `sprite.body.immovable = true` |スプライトが衝突によって押し出されるのを防ぎます |
+|アニメーション | `sprite.animations.add(name, frames, fps, loop)` |フレームアニメーションを定義します |
+|トゥイーン | `game.add.tween(target).to(props, duration, easing)` |スムーズなプロパティ アニメーション |
+|キーボード入力 | `game.input.keyboard.addKeys({...})` |特定のキーボード キーをキャプチャします。
+|カメラ | `this.camera.fade()` |画面遷移効果 |
+|アンカー | `sprite.anchor.set(x, y)` |位置決めと回転の原点を設定します |
+|スプライト反転 | `sprite.scale.x = -1` |スプライトを水平方向にミラーリングします |

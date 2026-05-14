@@ -2,46 +2,45 @@
 name: qdrant-horizontal-scaling
 description: "Diagnoses and guides Qdrant horizontal scaling decisions. Use when someone asks 'vertical or horizontal?', 'how many nodes?', 'how many shards?', 'how to add nodes', 'resharding', 'data doesn't fit', or 'need more capacity'. Also use when data growth outpaces current deployment."
 ---
+# Qdrant にさらに多くの容量が必要な場合の対処方法
 
-# What to Do When Qdrant Needs More Capacity
+垂直優先: より単純な操作、ネットワーク オーバーヘッドなし、次元と量子化に応じてノードあたり最大 100M ベクトルまで対応可能。データが単一ノードの容量を超えている場合、フォールト トレランスが必要な場合、テナントを分離する必要がある場合、または IOPS 制限がある場合 (ノードが多い = 独立した IOPS が高い) の場合は水平です。
 
-Vertical first: simpler operations, no network overhead, good up to ~100M vectors per node depending on dimensions and quantization. Horizontal when: data exceeds single node capacity, need fault tolerance, need to isolate tenants, or IOPS-bound (more nodes = more independent IOPS).
+## 最も基本的な分散構成
 
-## Most basic distributed configuration
+- 3 ノード、3 シャード (`replication_factor: 2` によるダウンタイムなしのスケーリング)
 
-- 3 nodes, 3 shards with `replication_factor: 2` for zero-downtime scaling
+コンセンサスと耐障害性のためには、少なくとも 3 つのノードが重要です。 3 つのノードがある場合、ダウンタイムなしで 1 つのノードを失う可能性があります。 2 つのノードがある場合、1 つのノードを失うと収集操作のダウンタイムが発生します。
+レプリケーション係数 2 は、各シャードに 1 つのレプリカがあることを意味し、データのコピーが 2 つあることになります。これにより、ダウンタイムなしのスケーリングとメンテナンスが可能になります。 `replication_factor: 1` では、ポイントレベルの操作であってもゼロダウンタイムは保証されず、クラスターのメンテナンスにはダウンタイムが必要です。
 
-Minimum of 3 nodes is important for consensus and fault tolerance. With 3 nodes, you can lose 1 node without downtime. With 2 nodes, losing 1 node causes downtime for collection operations.
-Replication factor of 2 means each shard has 1 replica, so you have 2 copies of data. This allows for zero-downtime scaling and maintenance. With `replication_factor: 1`, zero-downtime is not guaranteed even for point-level operations, and cluster maintenance requires downtime.
+## シャードの数の選択
 
-## Choosing number of shards
+シャードはデータ分散の単位です。 
+シャードが増えると、ノードの数が増え、分散が向上しますが、オーバーヘッドが増加します。シャードの数が少ないとオーバーヘッドが減りますが、水平方向のスケーリングが制限されます。
 
-Shards are the unit of data distribution. 
-More shards allows more nodes and better distribution, but adds overhead. Fewer shards reduces overhead but limits horizontal scaling.
+3 ～ 6 ノードのクラスターの場合、推奨されるシャード数は 6 ～ 12 です。 
+これにより、ノードあたり 2 ～ 4 個のシャードが可能になり、分散とオーバーヘッドのバランスが取れます。 
 
-For cluster of 3-6 nodes the recommended shard count is 6-12. 
-This allows for 2-4 shards per node, which balances distribution and overhead. 
+## シャード数の変更
 
-## Changing number of shards
+次の場合に使用します: シャード数がノード数で均等に割り切れず、不均一な分散が発生する場合、または再バランスが必要な場合。
 
-Use when: shard count isn't evenly divisible by node count, causing uneven distribution, or need to rebalance.
+リシャーディングは費用と時間がかかるため、定期的なデータ分散が不可能な場合の最後の手段として使用する必要があります。
+リシャーディングはユーザーの操作に対して透過的に設計されており、パフォーマンスへの影響は多少ありますが、リシャーディング中も更新と検索は引き続き機能します。
 
-Resharding is expensive and time-consuming, it should be used as a last resort if regular data distribution is not possible.
-Resharding is designed to be transparent for user operations, updates and searches should still work during resharding with some small performance impact.
+ただし、リシャーディング操作自体は時間がかかり、ノード間で大量のデータを移動する必要があります。
 
-But resharding operation itself is time-consuming and requires to move large amounts of data between nodes.
+- Qdrant クラウドで利用可能 [リシャーディング](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=resharding)
+- リシャーディングはセルフホスト展開では利用できません。
 
-- Available in Qdrant Cloud [Resharding](https://search.qdrant.tech/md/documentation/operations/distributed_deployment/?s=resharding)
-- Resharding is not available for self-hosted deployments.
-
-Better alternatives: over-provision shards initially, or spin up new cluster with correct config and migrate data.
+より良い代替案: 最初にシャードをオーバープロビジョニングするか、正しい構成で新しいクラスターをスピンアップしてデータを移行します。
 
 
-## What NOT to Do
+## してはいけないこと
 
-- Do not jump to horizontal before exhausting vertical (adds complexity for no gain)
-- Do not set `shard_number` that isn't a multiple of node count (uneven distribution)
-- Do not use `replication_factor: 1` in production if you need fault tolerance
-- Do not add nodes without rebalancing shards (use shard move API to redistribute)
-- Do not scale down RAM without load testing (cache eviction causes days-long latency incidents)
-- Do not hit the collection limit by using one collection per tenant (use payload partitioning)
+- 垂直方向を使い果たす前に水平方向にジャンプしないでください (複雑さが増すため利益は得られません)
+・ ノード数の倍数以外の`shard_number`は設定しないでください(偏在)
+- 耐障害性が必要な場合は、運用環境で `replication_factor: 1` を使用しないでください。
+- シャードを再調整せずにノードを追加しないでください (再分散するにはシャード移動 API を使用します)
+- 負荷テストを行わずに RAM をスケールダウンしないでください (キャッシュの削除により、数日間の遅延が発生する可能性があります)
+- テナントごとに 1 つのコレクションを使用して、コレクション制限に達しないようにします (ペイロード パーティショニングを使用します)。

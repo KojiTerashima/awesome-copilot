@@ -1,20 +1,17 @@
 ---
 title: React 19 API Migrations Reference
 ---
+# React 19 API 移行リファレンス
 
-# React 19 API Migrations Reference
-
-Complete before/after patterns for all React 19 breaking changes and removed APIs.
+すべての React 19 の重大な変更と削除された API の完全な前/後パターン。
 
 ---
 
-## ReactDOM Root API Migration
+## ReactDOM ルート API の移行
 
-React 19 requires `createRoot()` or `hydrateRoot()` for all apps. If the React 18 migration already ran, this is done. Verify it's correct.
+React 19 では、すべてのアプリに `createRoot()` または `hydrateRoot()` が必要です。 React 18 の移行がすでに実行されている場合は、これで完了です。正しいことを確認してください。
 
-### Pattern 1: createRoot()  CSR App
-
-```jsx
+### パターン 1: createRoot() CSR アプリ```jsx
 // Before (React 18 or earlier):
 import ReactDOM from 'react-dom';
 ReactDOM.render(<App />, document.getElementById('root'));
@@ -23,11 +20,7 @@ ReactDOM.render(<App />, document.getElementById('root'));
 import { createRoot } from 'react-dom/client';
 const root = createRoot(document.getElementById('root'));
 root.render(<App />);
-```
-
-### Pattern 2: hydrateRoot()  SSR/Static App
-
-```jsx
+```### パターン 2: quantumRoot() SSR/静的アプリ```jsx
 // Before (React 18 server-rendered app):
 import ReactDOM from 'react-dom';
 ReactDOM.hydrate(<App />, document.getElementById('root'));
@@ -35,11 +28,7 @@ ReactDOM.hydrate(<App />, document.getElementById('root'));
 // After (React 19):
 import { hydrateRoot } from 'react-dom/client';
 hydrateRoot(document.getElementById('root'), <App />);
-```
-
-### Pattern 3: unmountComponentAtNode() Removed
-
-```jsx
+```### パターン 3: unmountComponentAtNode() の削除```jsx
 // Before (React 18):
 import ReactDOM from 'react-dom';
 ReactDOM.unmountComponentAtNode(container);
@@ -48,28 +37,20 @@ ReactDOM.unmountComponentAtNode(container);
 const root = createRoot(container); // Save the root reference
 // later:
 root.unmount();
-```
-
-**Caveat:** If the root reference was never saved, you must refactor to pass it around or use a global registry.
+```**警告:** ルート参照が保存されていない場合は、それを渡すようにリファクタリングするか、グローバル レジストリを使用する必要があります。
 
 ---
 
-## findDOMNode() Removed
+## findDOMNode() が削除されました
 
-### Pattern 1: Direct ref
-
-```jsx
+### パターン 1: 直接参照```jsx
 // Before (React 18):
 import { findDOMNode } from 'react-dom';
 const domNode = findDOMNode(componentRef);
 
 // After (React 19):
 const domNode = componentRef.current; // refs point directly to DOM
-```
-
-### Pattern 2: Class Component ref
-
-```jsx
+```### パターン 2: クラスコンポーネントの参照```jsx
 // Before (React 18):
 import { findDOMNode } from 'react-dom';
 class MyComponent extends React.Component {
@@ -96,15 +77,11 @@ class MyComponent extends React.Component {
     return this.nodeRef.current.offsetWidth;
   }
 }
-```
+```---
 
----
+## forwardRef() - オプションの最新化
 
-## forwardRef() - Optional Modernization
-
-### Pattern 1: Function Component Direct ref
-
-```jsx
+### パターン 1: 関数コンポーネントの直接参照```jsx
 // Before (React 18):
 import { forwardRef } from 'react';
 
@@ -127,11 +104,7 @@ function App() {
   const inputRef = useRef(null);
   return <Input ref={inputRef} />;
 }
-```
-
-### Pattern 2: forwardRef + useImperativeHandle
-
-```jsx
+```### パターン 2: forwardRef + useImperativeHandle```jsx
 // Before (React 18):
 import { forwardRef, useImperativeHandle } from 'react';
 
@@ -177,17 +150,13 @@ function App() {
     </>
   );
 }
-```
-
-**Note:** `useImperativeHandle` is still valid; only the `forwardRef` wrapper is removed.
+```**注意:** `useImperativeHandle` は引き続き有効です。 `forwardRef` ラッパーのみが削除されます。
 
 ---
 
-## defaultProps Removed
+##defaultProps が削除されました
 
-### Pattern 1: Function Component with defaultProps
-
-```jsx
+### パターン 1:defaultProps を使用した関数コンポーネント```jsx
 // Before (React 18):
 function Button({ label = 'Click', disabled = false }) {
   return <button disabled={disabled}>{label}</button>;
@@ -206,11 +175,7 @@ function Button({ label = 'Click', disabled = false }) {
 }
 
 // Remove all defaultProps assignments
-```
-
-### Pattern 2: Class Component defaultProps
-
-```jsx
+```### パターン 2: クラスコンポーネントのdefaultProps```jsx
 // Before (React 18):
 class Button extends React.Component {
   static defaultProps = {
@@ -241,11 +206,7 @@ class Button extends React.Component {
 function Button({ label = 'Click', disabled = false }) {
   return <button disabled={disabled}>{label}</button>;
 }
-```
-
-### Pattern 3: defaultProps with null
-
-```jsx
+```### パターン 3: null を含むdefaultProps```jsx
 // Before (React 18):
 function Component({ value }) {
   // defaultProps can set null to reset a parent-passed value
@@ -266,15 +227,11 @@ function Component({ value = null }) {
 function Component({ value }) {
   return <div>{value ?? null}</div>;
 }
-```
+```---
 
----
+## 初期値なしの useRef
 
-## useRef Without Initial Value
-
-### Pattern 1: useRef()
-
-```jsx
+### パターン 1: useRef()```jsx
 // Before (React 18):
 const ref = useRef(); // undefined initially
 
@@ -284,11 +241,7 @@ const ref = useRef(null);
 
 // Then use current:
 ref.current = someElement; // Set it manually later
-```
-
-### Pattern 2: useRef with DOM Elements
-
-```jsx
+```### パターン 2: DOM 要素を使用した useRef```jsx
 // Before:
 function Component() {
   const inputRef = useRef();
@@ -300,15 +253,11 @@ function Component() {
   const inputRef = useRef(null); // Explicit null
   return <input ref={inputRef} />;
 }
-```
+```---
 
----
+## 従来のコンテキスト API が削除されました
 
-## Legacy Context API Removed
-
-### Pattern 1: React.createContext vs contextTypes
-
-```jsx
+### パターン 1: React.createContext と contextTypes```jsx
 // Before (React 18  not recommended but worked):
 // Using contextTypes (old PropTypes-style context):
 class MyComponent extends React.Component {
@@ -352,11 +301,7 @@ function App() {
     </ThemeContext.Provider>
   );
 }
-```
-
-### Pattern 2: Class Component Consuming createContext
-
-```jsx
+```### パターン 2: createContext を使用するクラス コンポーネント```jsx
 // Before (class component consuming old context):
 class MyComponent extends React.Component {
   static contextType = ThemeContext;
@@ -369,17 +314,13 @@ class MyComponent extends React.Component {
 // After (still works in React 19):
 // No change needed for static contextType
 // Continue using this.context
-```
-
-**Important:** If you're still using the old `contextTypes` + `getChildContext` pattern (not modern `createContext`), you **must** migrate to `createContext`  the old pattern is completely removed.
+```**重要:** 古い `contextTypes` + `getChildContext` パターン (最新の `createContext` ではない) をまだ使用している場合は、古いパターンが完全に削除された `createContext` に移行する必要があります**。
 
 ---
 
-## String Refs Removed
+## 文字列参照が削除されました
 
-### Pattern 1: this.refs String Refs
-
-```jsx
+### パターン 1: this.refs 文字列参照```jsx
 // Before (React 18):
 class Component extends React.Component {
   render() {
@@ -405,11 +346,7 @@ class Component extends React.Component {
     );
   }
 }
-```
-
-### Pattern 2: Callback Refs (Recommended)
-
-```jsx
+```### パターン 2: コールバック参照 (推奨)```jsx
 // Before (React 18):
 class Component extends React.Component {
   render() {
@@ -438,15 +375,11 @@ class Component extends React.Component {
     );
   }
 }
-```
+```---
 
----
+## 未使用の React インポートの削除
 
-## Unused React Import Removal
-
-### Pattern 1: React Import After JSX Transform
-
-```jsx
+### パターン 1: JSX 変換後の React インポート```jsx
 // Before (React 18):
 import React from 'react'; // Needed for JSX transform
 
@@ -466,21 +399,13 @@ import React from 'react';
 function Component() {
   return <div>{React.useState ? 'yes' : 'no'}</div>;
 }
-```
-
-### Scan for Unused React Imports
-
-```bash
+```### 未使用の React インポートをスキャンする```bash
 # Find imports that can be removed:
 grep -rn "^import React from 'react';" src/ --include="*.js" --include="*.jsx"
 # Then check if the file uses React.*, useContext, etc.
-```
+```---
 
----
-
-## Complete Migration Checklist
-
-```bash
+## 完全な移行チェックリスト```bash
 # 1. Find all ReactDOM.render calls:
 grep -rn "ReactDOM.render" src/ --include="*.js" --include="*.jsx"
 # Should be converted to createRoot

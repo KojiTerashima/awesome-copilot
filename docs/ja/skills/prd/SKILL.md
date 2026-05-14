@@ -3,141 +3,136 @@ name: prd
 description: 'Generate high-quality Product Requirements Documents (PRDs) for software systems and AI-powered features. Includes executive summaries, user stories, technical specifications, and risk analysis.'
 license: MIT
 ---
+# 製品要件文書 (PRD)
 
-# Product Requirements Document (PRD)
+## 概要
 
-## Overview
+ビジネスビジョンと技術的実行の間のギャップを埋める、包括的な実稼働グレードの製品要件文書 (PRD) を設計します。このスキルは最新のソフトウェア システムでも機能し、要件が明確に定義されるようにします。
 
-Design comprehensive, production-grade Product Requirements Documents (PRDs) that bridge the gap between business vision and technical execution. This skill works for modern software systems, ensuring that requirements are clearly defined.
+## いつ使用するか
 
-## When to Use
+このスキルは次の場合に使用します。
 
-Use this skill when:
-
-- Starting a new product or feature development cycle
-- Translating a vague idea into a concrete technical specification
-- Defining requirements for AI-powered features
-- Stakeholders need a unified "source of truth" for project scope
-- User asks to "write a PRD", "document requirements", or "plan a feature"
-
----
-
-## Operational Workflow
-
-### Phase 1: Discovery (The Interview)
-
-Before writing a single line of the PRD, you **MUST** interrogate the user to fill knowledge gaps. Do not assume context.
-
-**Ask about:**
-
-- **The Core Problem**: Why are we building this now?
-- **Success Metrics**: How do we know it worked?
-- **Constraints**: Budget, tech stack, or deadline?
-
-### Phase 2: Analysis & Scoping
-
-Synthesize the user's input. Identify dependencies and hidden complexities.
-
-- Map out the **User Flow**.
-- Define **Non-Goals** to protect the timeline.
-
-### Phase 3: Technical Drafting
-
-Generate the document using the **Strict PRD Schema** below.
+- 新製品または新機能の開発サイクルの開始
+- 漠然としたアイデアを具体的な技術仕様に変換する
+- AI を活用した機能の要件の定義
+- 利害関係者は、プロジェクトの範囲に関する統一された「信頼できる情報源」を必要としています
+- ユーザーは「PRD を書く」、「要件を文書化する」、または「機能を計画する」ことを要求します。
 
 ---
 
-## PRD Quality Standards
+## 運用ワークフロー
 
-### Requirements Quality
+### フェーズ 1: 発見 (インタビュー)
 
-Use concrete, measurable criteria. Avoid "fast", "easy", or "intuitive".
+PRD を 1 行書く前に、知識のギャップを埋めるためにユーザーに質問する必要があります**。文脈を想定しないでください。
 
-```diff
-# Vague (BAD)
-- The search should be fast and return relevant results.
-- The UI must look modern and be easy to use.
+**次について質問してください:**
 
-# Concrete (GOOD)
-+ The search must return results within 200ms for a 10k record dataset.
-+ The search algorithm must achieve >= 85% Precision@10 in benchmark evals.
-+ The UI must follow the 'Vercel/Next.js' design system and achieve 100% Lighthouse Accessibility score.
-```
+- **中心的な問題**: なぜ今これを構築するのでしょうか?
+- **成功指標**: 効果があったことはどのようにしてわかりますか?
+- **制約**: 予算、技術スタック、または期限?
 
----
+### フェーズ 2: 分析と範囲設定
 
-## Strict PRD Schema
+ユーザーの入力を合成します。依存関係と隠れた複雑さを特定します。
 
-You **MUST** follow this exact structure for the output:
+- **ユーザー フロー**を計画します。
+- タイムラインを保護するために **非目標** を定義します。
 
-### 1. Executive Summary
+### フェーズ 3: 技術的な製図
 
-- **Problem Statement**: 1-2 sentences on the pain point.
-- **Proposed Solution**: 1-2 sentences on the fix.
-- **Success Criteria**: 3-5 measurable KPIs.
-
-### 2. User Experience & Functionality
-
-- **User Personas**: Who is this for?
-- **User Stories**: `As a [user], I want to [action] so that [benefit].`
-- **Acceptance Criteria**: Bulleted list of "Done" definitions for each story.
-- **Non-Goals**: What are we NOT building?
-
-### 3. AI System Requirements (If Applicable)
-
-- **Tool Requirements**: What tools and APIs are needed?
-- **Evaluation Strategy**: How to measure output quality and accuracy.
-
-### 4. Technical Specifications
-
-- **Architecture Overview**: Data flow and component interaction.
-- **Integration Points**: APIs, DBs, and Auth.
-- **Security & Privacy**: Data handling and compliance.
-
-### 5. Risks & Roadmap
-
-- **Phased Rollout**: MVP -> v1.1 -> v2.0.
-- **Technical Risks**: Latency, cost, or dependency failures.
+以下の **厳密な PRD スキーマ**を使用してドキュメントを生成します。
 
 ---
 
-## Implementation Guidelines
+## PRD 品質基準
 
-### DO (Always)
+### 要件の品質
 
-- **Define Testing**: For AI systems, specify how to test and validate output quality.
-- **Iterate**: Present a draft and ask for feedback on specific sections.
+具体的で測定可能な基準を使用します。 「速い」、「簡単」、または「直感的」は避けてください。「」違い
+# 曖昧 (BAD)
+- 検索は高速で、関連する結果が返される必要があります。
+- UI はモダンで使いやすいものでなければなりません。
 
-### DON'T (Avoid)
+# コンクリート (GOOD)
++ 検索では、10,000 レコードのデータセットに対して 200 ミリ秒以内に結果が返される必要があります。
++ 検索アルゴリズムは、ベンチマーク評価で 85% 以上の精度 @10 を達成する必要があります。
++ UI は「Vercel/Next.js」設計システムに従い、Lighthouse アクセシビリティ スコア 100% を達成する必要があります。
+「」---
 
-- **Skip Discovery**: Never write a PRD without asking at least 2 clarifying questions first.
-- **Hallucinate Constraints**: If the user didn't specify a tech stack, ask or label it as `TBD`.
+## 厳密な PRD スキーマ
+
+出力については、次の構造に正確に従う必要があります**。
+
+### 1. 概要
+
+- **問題ステートメント**: 問題点に関する 1 ～ 2 文。
+- **提案された解決策**: 修正に関する 1 ～ 2 文。
+- **成功基準**: 3 ～ 5 個の測定可能な KPI。
+
+### 2. ユーザーエクスペリエンスと機能
+
+- **ユーザーペルソナ**: これは誰を対象としていますか?
+- **ユーザー ストーリー**: `As a [user], I want to [action] so that [benefit].`
+- **受け入れ基準**: 各ストーリーの「完了」定義の箇条書きリスト。
+- **非目標**: 構築していないものは何ですか?
+
+### 3. AI システム要件 (該当する場合)
+
+- **ツール要件**: どのようなツールと API が必要ですか?
+- **評価戦略**: 出力の品質と精度を測定する方法。
+
+### 4. 技術仕様
+
+- **アーキテクチャの概要**: データ フローとコンポーネントの相互作用。
+- **統合ポイント**: API、DB、および認証。
+- **セキュリティとプライバシー**: データの処理とコンプライアンス。
+
+### 5. リスクとロードマップ
+
+- **段階的ロールアウト**: MVP -> v1.1 -> v2.0。
+- **技術的リスク**: 遅延、コスト、または依存関係の障害。
 
 ---
 
-## Example: Intelligent Search System
+## 実装ガイドライン
 
-### 1. Executive Summary
+### 行うこと (常に)
 
-**Problem**: Users struggle to find specific documentation snippets in massive repositories.
-**Solution**: An intelligent search system that provides direct answers with source citations.
-**Success**:
+- **テストの定義**: AI システムの場合、出力品質をテストおよび検証する方法を指定します。
+- **反復**: 草案を提示し、特定のセクションについてフィードバックを求めます。
 
-- Reduce search time by 50%.
-- Citation accuracy >= 95%.
+### しないでください (避けてください)
 
-### 2. User Stories
+- **発見をスキップ**: 最初に少なくとも 2 つの明確な質問をせずに PRD を作成しないでください。
+- **幻覚制約**: ユーザーが技術スタックを指定しなかった場合は、尋ねるか、`TBD` というラベルを付けます。
 
-- **Story**: As a developer, I want to ask natural language questions so I don't have to guess keywords.
+---
+
+## 例: インテリジェント検索システム
+
+### 1. 概要
+
+**問題**: ユーザーは、大規模なリポジトリで特定のドキュメントのスニペットを見つけるのに苦労しています。
+**ソリューション**: 出典の引用とともに直接的な回答を提供するインテリジェントな検索システム。
+**成功**:
+
+- 検索時間を 50% 短縮します。
+- 引用精度 >= 95%。
+
+### 2. ユーザーストーリー
+
+- **ストーリー**: 開発者として、キーワードを推測する必要がないように自然言語で質問したいと考えています。
 - **AC**:
-  - Supports multi-turn clarification.
-  - Returns code blocks with "Copy" button.
+  - マルチターンの明確化をサポートします。
+  - 「コピー」ボタンでコードブロックを返します。
 
-### 3. AI System Architecture
+### 3. AI システムのアーキテクチャ
 
-- **Tools Required**: `codesearch`, `grep`, `webfetch`.
+- **必要なツール**: `codesearch`、`grep`、`webfetch`。
 
-### 4. Evaluation
+### 4. 評価
 
-- **Benchmark**: Test with 50 common developer questions.
-- **Pass Rate**: 90% must match expected citations.
+- **ベンチマーク**: 開発者によくある 50 の質問でテストします。
+- **合格率**: 90% が予想される引用と一致する必要があります。

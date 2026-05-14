@@ -1,19 +1,16 @@
-# Skeleton: 1-threatmodel.md
+# スケルトン: 1-threatmodel.md
 
-> **⛔ Copy the template content below VERBATIM (excluding the outer code fence). Replace `[FILL]` placeholders. Diagram in `.md` and `.mmd` must be IDENTICAL.**
-> **⛔ Data Flow Table columns: `ID | Source | Target | Protocol | Description`. DO NOT rename `Target` to `Destination`. DO NOT reorder columns.**
-> **⛔ Trust Boundary Table columns: `Boundary | Description | Contains` (3 columns). DO NOT add a `Name` column or rename `Contains` to `Components Inside`.**
+> **⛔ テンプレートの内容を VERBATIM の下にコピーします (外側のコード フェンスを除く)。 `[FILL]` プレースホルダーを置き換えます。 `.md` と `.mmd` の図は同一である必要があります。**
+> **⛔ データ フロー テーブルの列: `ID | Source | Target | Protocol | Description`。 `Target` の名前を `Destination` に変更しないでください。列の順序を変更しないでください。**
+> **⛔ 信頼境界テーブルの列: `Boundary | Description | Contains` (3 列)。 `Name` 列を追加したり、`Contains` を `Components Inside` に名前変更したりしないでください。**
 
----
-
-````markdown
+---````markdown
 # Threat Model
 
 ## Data Flow Diagram
 
-```mermaid
-[FILL: Copy EXACT content from 1.1-threatmodel.mmd]
-```
+```人魚
+[FILL: 1.1-threatmodel.mmd から正確なコンテンツをコピー]```
 
 ## Element Table
 
@@ -44,9 +41,8 @@
 
 ## Summary View
 
-```mermaid
-[FILL: Copy EXACT content from 1.2-threatmodel-summary.mmd]
-```
+```人魚
+[FILL: 1.2-threatmodel-summary.mmd から正確な内容をコピー]```
 
 ## Summary to Detailed Mapping
 
@@ -59,7 +55,7 @@
 [END-CONDITIONAL]
 ````
 
-**Fixed rules:**
-- Use `DF01`, `DF02` for detailed flows; `SDF01`, `SDF02` for summary flows
-- Element Type: exactly `Process`, `External Interactor`, or `Data Store`
-- TMT Category: must be a specific ID from tmt-element-taxonomy.md (e.g., `SE.P.TMCore.WebSvc`)
+**修正されたルール:**
+- 詳細なフローには `DF01`、`DF02` を使用します。 `SDF01`、`SDF02` (概要フロー)
+- 要素タイプ: 正確に `Process`、`External Interactor`、または `Data Store`
+- TMT カテゴリ: tmt-element-taxonomy.md の特定の ID である必要があります (例: `SE.P.TMCore.WebSvc`)

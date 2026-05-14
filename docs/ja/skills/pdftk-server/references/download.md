@@ -1,75 +1,51 @@
-# Download
+# ダウンロード
 
-PDFtk provides an installer for Windows. Many Linux distributions provide a PDFtk package you can download and install using their package manager.
+PDFtk は Windows 用のインストーラーを提供します。多くの Linux ディストリビューションでは、パッケージ マネージャーを使用してダウンロードしてインストールできる PDFtk パッケージが提供されています。
 
 ## Microsoft Windows
 
-Download the PDFtk Server installer for Windows 10 and 11 using the following command:
-
-```bash
+次のコマンドを使用して、Windows 10 および 11 用の PDFtk Server インストーラーをダウンロードします。```bash
 winget install --id PDFLabs.PDFtk.Server
-```
-
-Then run the installer:
-
-```bash
+```次に、インストーラーを実行します。```bash
 .\pdftk_server-2.02-win-setup.exe
-```
-
-After installation, open a command prompt, type `pdftk` and press Enter. PDFtk will respond by displaying brief usage information.
+```インストール後、コマンド プロンプトを開き、「`pdftk`」と入力して Enter キーを押します。 PDFtk は、簡単な使用法情報を表示して応答します。
 
 ## Linux
 
-On Debian/Ubuntu-based distributions:
-
-```bash
+Debian/Ubuntu ベースのディストリビューションの場合:```bash
 sudo apt-get install pdftk
-```
-
-On Red Hat/Fedora-based distributions:
-
-```bash
+```Red Hat/Fedora ベースのディストリビューションの場合:```bash
 sudo dnf install pdftk
-```
+```## PDFtk サーバー GPL ライセンス
 
-## PDFtk Server GPL License
+PDFtk サーバー (pdftk) はパブリック ドメイン ソフトウェアではありません。 [GNU General Public License (GPL) バージョン 2](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt) に基づいて無料でインストールして使用できます。 PDFtk はサードパーティのライブラリを使用します。 [これらのライブラリのライセンスとソース コードは、ここで説明されています](https://www.pdflabs.com/docs/pdftk-license/) のサードパーティ マテリアルの下にあります。
 
-PDFtk Server (pdftk) is not public domain software. It can be installed and used at no charge under its [GNU General Public License (GPL) Version 2](https://www.pdflabs.com/docs/pdftk-license/gnu_general_public_license_2.txt). PDFtk uses third-party libraries. The [licenses and source code for these libraries are described here](https://www.pdflabs.com/docs/pdftk-license/) under Third-Party Materials.
+## PDFtk サーバー再配布ライセンス
 
-## PDFtk Server Redistribution License
+PDFtk Server を独自のソフトウェアの一部として配布する予定がある場合は、PDFtk Server 再配布ライセンスが必要になります。この規則の例外は、ソフトウェアが GPL または別の互換ライセンスに基づいて一般にライセンスされている場合です。
 
-If you plan to distribute PDFtk Server as part of your own software, you will need a PDFtk Server Redistribution License. The exception to this rule is if your software is licensed to the public under the GPL or another compatible license.
+商用再配布ライセンスを使用すると、ライセンスの条項に従って、無制限の数の PDFtk Server バイナリを 1 つの異なる商用製品の一部として配布できます。ライセンス全文をお読みください:
 
-The commercial redistribution license allows you, subject to the terms of the license, to distribute an unlimited number of PDFtk Server binaries as part of one distinct commercial product. Please read the full license:
+[PDFtk サーバー再配布ライセンス (PDF)](https://pdflabs.onfastspring.com/pdftk-server)
 
-[PDFtk Server Redistribution License (PDF)](https://pdflabs.onfastspring.com/pdftk-server)
+現在 $995 で入手可能:
 
-Now available for $995:
+[PDFtkサーバー再配布ライセンス](https://www.pdflabs.com/docs/pdftk-license/)
 
-[PDFtk Server Redistribution License](https://www.pdflabs.com/docs/pdftk-license/)
+## ソースから PDFtk サーバーを構築する
 
-## Build PDFtk Server from Source
+PDFtk Server はソース コードからコンパイルできます。 PDFtk サーバーは、[Debian](https://packages.debian.org/search?keywords=pdftk)、[Ubuntu Linux](https://packages.ubuntu.com/search?keywords=pdftk)、[FreeBSD](https://www.freshports.org/print/pdftk/)、Slackware Linux、SuSE、Solaris 上でコンパイルおよび実行できることが知られています。 [HP-UX](http://hpux.connect.org.uk/hppd/hpux/Text/pdftk-1.45/)。
 
-PDFtk Server can be compiled from its source code. PDFtk Server is known to compile and run on [Debian](https://packages.debian.org/search?keywords=pdftk), [Ubuntu Linux](https://packages.ubuntu.com/search?keywords=pdftk), [FreeBSD](https://www.freshports.org/print/pdftk/), Slackware Linux, SuSE, Solaris and [HP-UX](http://hpux.connect.org.uk/hppd/hpux/Text/pdftk-1.45/).
-
-Download and unpack the source:
-
-```bash
+ソースをダウンロードして解凍します。```bash
 curl -LO https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk-2.02-src.zip
 unzip pdftk-2.02-src.zip
-```
+````license_gpl_pdftk/readme.txt` で [pdftk ライセンス情報](https://www.pdflabs.com/docs/pdftk-license/) を確認します。
 
-Review the [pdftk license information](https://www.pdflabs.com/docs/pdftk-license/) in: `license_gpl_pdftk/readme.txt`.
+プラットフォームに提供されている Makefile を確認し、`TOOLPATH` および `VERSUFF` が gcc/gcj/libgcj のインストールに適合していることを確認します。 `apropos gcc` を実行して `gcc-4.5` のような結果が返された場合は、`VERSUFF` を `-4.5` に設定します。 `TOOLPATH` はおそらく設定する必要はありません。
 
-Review the Makefile provided for your platform and confirm that `TOOLPATH` and `VERSUFF` suit your installation of gcc/gcj/libgcj. If you run `apropos gcc` and it returns something like `gcc-4.5`, then set `VERSUFF` to `-4.5`. The `TOOLPATH` probably does not need to be set.
-
-Change into the `pdftk` sub-directory and run:
-
-```bash
+`pdftk` サブディレクトリに移動し、次を実行します。```bash
 cd pdftk
 make -f Makefile.Debian
-```
+```必要に応じて、プラットフォームの Makefile ファイル名を置き換えます。
 
-Substitute your platform's Makefile filename as needed.
-
-PDFtk has been built using gcc/gcj/libgcj versions 3.4.5, 4.4.1, 4.5.0, and 4.6.3. PDFtk 1.4x fails to build on gcc 3.3.5 due to missing libgcj features. If you are using gcc 3.3 or older, try building [pdftk 1.12](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk-1.12.tar.gz) instead.
+PDFtk は、gcc/gcj/libgcj バージョン 3.4.5、4.4.1、4.5.0、および 4.6.3 を使用して構築されています。 PDFtk 1.4x は、libgcj 機能がないため、gcc 3.3.5 でのビルドに失敗します。 gcc 3.3 以前を使用している場合は、代わりに [pdftk 1.12](https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/pdftk-1.12.tar.gz) をビルドしてみてください。

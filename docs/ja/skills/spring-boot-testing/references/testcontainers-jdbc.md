@@ -1,16 +1,14 @@
-# Testcontainers JDBC
+# テストコンテナ JDBC
 
-Testing JPA repositories with real databases using Testcontainers.
+Testcontainer を使用した実際のデータベースでの JPA リポジトリのテスト。
 
-## Overview
+## 概要
 
-Testcontainers provides real database instances in Docker containers for integration testing. More reliable than H2 for production parity.
+Testcontainers は、統合テスト用に実際のデータベース インスタンスを Docker コンテナ内に提供します。実稼働同等性に関しては H2 よりも信頼性が高くなります。
 
-## PostgreSQL Setup
+## PostgreSQL のセットアップ
 
-### Dependencies
-
-```xml
+### 依存関係```xml
 <dependency>
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-testcontainers</artifactId>
@@ -21,11 +19,7 @@ Testcontainers provides real database instances in Docker containers for integra
   <artifactId>testcontainers-postgresql</artifactId>
   <scope>test</scope>
 </dependency>
-```
-
-### Basic Test
-
-```java
+```### 基本テスト```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -41,11 +35,7 @@ class OrderRepositoryPostgresTest {
   @Autowired
   private TestEntityManager entityManager;
 }
-```
-
-## MySQL Setup
-
-```xml
+```## MySQL のセットアップ```xml
 <dependency>
   <groupId>org.testcontainers</groupId>
   <artifactId>testcontainers-mysql</artifactId>
@@ -57,11 +47,7 @@ class OrderRepositoryPostgresTest {
 @Container
 @ServiceConnection
 static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.4");
-```
-
-## Multiple Databases
-
-```java
+```## 複数のデータベース```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -75,39 +61,23 @@ class MultiDatabaseTest {
   @ServiceConnection(name = "analytics")
   static PostgreSQLContainer<?> analyticsDb = new PostgreSQLContainer<>("postgres:18");
 }
-```
+```## コンテナの再利用 (速度の最適化)
 
-## Container Reuse (Speed Optimization)
-
-Add to `~/.testcontainers.properties`:
-
-```properties
+`~/.testcontainers.properties` に追加:```properties
 testcontainers.reuse.enable=true
-```
-
-Then enable reuse in code:
-
-```java
+```次に、コード内での再利用を有効にします。```java
 @Container
 @ServiceConnection
 static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18")
   .withReuse(true);
-```
+```## データベースの初期化
 
-## Database Initialization
-
-### With SQL Scripts
-
-```java
+### SQL スクリプトを使用する場合```java
 @Container
 @ServiceConnection
 static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18")
   .withInitScript("schema.sql");
-```
-
-### With Flyway
-
-```java
+```### フライウェイ付き```java
 @SpringBootTest
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -126,13 +96,9 @@ class MigrationTest {
     // Test code
   }
 }
-```
+```## 高度な構成
 
-## Advanced Configuration
-
-### Custom Database/Schema
-
-```java
+### カスタム データベース/スキーマ```java
 @Container
 @ServiceConnection
 static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18")
@@ -140,19 +106,11 @@ static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18"
   .withUsername("testuser")
   .withPassword("testpass")
   .withInitScript("init-schema.sql");
-```
-
-### Wait Strategies
-
-```java
+```### 待機戦略```java
 @Container
 static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18")
   .waitingFor(Wait.forLogMessage(".*database system is ready.*", 1));
-```
-
-## Test Example
-
-```java
+```## テスト例```java
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
@@ -191,13 +149,9 @@ class OrderRepositoryTest {
     // - Full-text search
   }
 }
-```
+```## @DynamicPropertySource の代替
 
-## @DynamicPropertySource Alternative
-
-If not using @ServiceConnection:
-
-```java
+@ServiceConnection を使用しない場合:```java
 @SpringBootTest
 @Testcontainers
 class OrderServiceTest {
@@ -212,23 +166,21 @@ class OrderServiceTest {
     registry.add("spring.datasource.password", postgres::getPassword);
   }
 }
-```
+```## サポートされているデータベース
 
-## Supported Databases
-
-| Database | Container Class | Maven Artifact |
+|データベース |コンテナクラス | Maven アーティファクト |
 | -------- | --------------- | -------------- |
-| PostgreSQL | PostgreSQLContainer | testcontainers-postgresql |
-| MySQL | MySQLContainer | testcontainers-mysql |
-| MariaDB | MariaDBContainer | testcontainers-mariadb |
-| SQL Server | MSSQLServerContainer | testcontainers-mssqlserver |
-| Oracle | OracleContainer | testcontainers-oracle-free |
-| MongoDB | MongoDBContainer | testcontainers-mongodb |
+|ポストグレSQL | PostgreSQLコンテナ |テストコンテナ-postgresql |
+| MySQL | MySQLコンテナ |テストコンテナ-mysql |
+|マリアDB |マリアDBコンテナ | testcontainers-mariadb |
+| SQLサーバー | MSSQLサーバーコンテナ |テストコンテナ-mssqlserver |
+|オラクル | Oracleコンテナ | testcontainers-oracle-free |
+|モンゴDB | MongoDBコンテナ |テストコンテナ-mongodb |
 
-## Best Practices
+## ベストプラクティス
 
-1. Use @ServiceConnection when possible (Spring Boot 3.1+)
-2. Enable container reuse for faster local builds
-3. Use specific versions (postgres:18) not latest
-4. Keep container config in static field
-5. Use @DataJpaTest with AutoConfigureTestDatabase.Replace.NONE
+1. 可能な場合は @ServiceConnection を使用します (Spring Boot 3.1 以降)
+2. ローカルビルドを高速化するためにコンテナーの再利用を有効にする
+3. 最新ではない特定のバージョン (postgres:18) を使用する
+4. コンテナー構成を静的フィールドに保持します
+5. @DataJpaTest を AutoConfigureTestDatabase.Replace.NONE とともに使用する

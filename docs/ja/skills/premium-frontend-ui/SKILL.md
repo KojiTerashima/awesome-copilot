@@ -5,109 +5,104 @@ metadata:
   author: 'Utkarsh Patrikar'
   author_url: 'https://github.com/utkarsh232005'
 ---
+# 没入型フロントエンド UI の職人技
 
-# Immersive Frontend UI Craftsmanship
+AI エンジニアリング アシスタントとして、プレミアム フロントエンド エクスペリエンスを構築する際の役割は、機能的な HTML や CSS を出力するだけではありません。 **没入型デジタル環境**を構築する必要があります。このスキルは、美的品質、深い対話性、完璧なパフォーマンスを優先する、高度に意図的な受賞レベルの Web アプリケーションを生成するための青写真を提供します。
 
-As an AI engineering assistant, your role when building premium frontend experiences goes beyond outputting functional HTML and CSS. You must architect **immersive digital environments**. This skill provides the blueprint for generating highly intentional, award-level web applications that prioritize aesthetic quality, deep interactivity, and flawless performance.
-
-When a user requests a high-end landing page, an interactive portfolio, or a specialized component that requires top-tier visual polish, apply the following rigorous standards to every line of code you generate.
-
----
-
-## 1. Establishing the Creative Foundation
-
-Before generating layout code, ensure you understand the core emotional resonance the UI should deliver. Do not default to generic, unopinionated code. 
-
-Commit to a strong visual identity in your CSS and component structure:
-- **Editorial Brutalism**: High-contrast monochromatic palettes, oversized typography, sharp rectangular edges, and raw grid structures.
-- **Organic Fluidity**: Soft gradients, deeply rounded corners, glassmorphism overlays, and bouncy spring-based physics.
-- **Cyber / Technical**: Dark mode dominance, glowing neon accents, monospaced typography, and rapid, staggered reveal animations.
-- **Cinematic Pacing**: Full-viewport imagery, slow cross-fades, profound use of negative space, and scroll-dependent storytelling.
+ユーザーがハイエンドのランディング ページ、インタラクティブなポートフォリオ、または最上級のビジュアル洗練を必要とする特殊なコンポーネントをリクエストする場合は、生成するコードのすべての行に次の厳格な基準を適用します。
 
 ---
 
-## 2. Structural Requirements for Immersive UI
+## 1. クリエイティブ基盤の確立
 
-When scaffolding a page or generating core components, include the following architectural layers to transform a standard page into an experience.
+レイアウト コードを生成する前に、UI が提供すべき核となる感情的共鳴を必ず理解してください。デフォルトで汎用的で意見のないコードを使用しないでください。 
 
-### 2.1 The Entry Sequence (Preloading & Initialization)
-A blank screen is unacceptable. The user's first interaction must set expectations.
-- **Implementation**: Generate a lightweight preloader component that handles asset resolution (fonts, initial images, 3D models).
-- **Animation**: Output code that transitions the preloader away fluidly—such as a split-door reveal, a scale-up zoom, or a staggered text sweep.
-
-### 2.2 The Hero Architecture
-The top fold must command attention immediately.
-- **Visuals**: Output code that implements full-bleed containers (`100vh`/`100dvh`).
-- **Typography Engine**: Ensure headlines are broken down syntactically (e.g., span wrapping by word or character) to allow for cascading entrance animations.
-- **Depth**: Utilize subtle floating elements or background clipping paths to create a sense of scale and depth behind the primary copy.
-
-### 2.3 Fluid & Contextual Navigation
-- **Implementation**: Do not generate standard static navbars. Output sticky headers that react toscroll direction (hide on scroll down, reveal on scroll up).
-- **Interactivity**: Include hover states that reveal rich content (e.g., mega-menus that display image previews of the hovered link).
+CSS とコンポーネント構造で強力な視覚的アイデンティティを確保します。
+- **編集上のブルータリズム**: ハイコントラストの単色パレット、特大のタイポグラフィ、シャープな長方形のエッジ、生のグリッド構造。
+- **有機的な流動性**: 柔らかいグラデーション、深く丸みを帯びたコーナー、ガラスモーフィズム オーバーレイ、弾むようなスプリングベースの物理学。
+- **サイバー / テクニカル**: ダーク モードの優位性、輝くネオンのアクセント、等幅のタイポグラフィ、および高速で交互に表示されるアニメーション。
+- **映画のようなペーシング**: フルビューポート画像、ゆっくりとしたクロスフェード、ネガティブスペースの多用、スクロール依存のストーリーテリング。
 
 ---
 
-## 3. The Motion Design System
+## 2. イマーシブ UI の構造要件
 
-Animation is not an afterthought; it is the connective tissue of a premium site. Always implement the following motion principles:
+ページをスキャフォールディングするとき、またはコア コンポーネントを生成するときに、次のアーキテクチャ レイヤーを含めて、標準ページをエクスペリエンスに変換します。
 
-### 3.1 Scroll-Driven Narratives
-Generate code utilizing modern scroll libraries (like GSAP's ScrollTrigger) to tie animations to user progress.
-- **Pinned Containers**: Create sections that lock into the viewport while secondary content flows past or reveals itself.
-- **Horizontal Journeys**: Translate vertical scroll data into horizontal movement for specific galleries or showcases.
-- **Parallax Mapping**: Assign subtle, varying scroll-speeds to background elements, midground text, and foreground imagery.
+### 2.1 エントリシーケンス (プリロードと初期化)
+空白の画面は受け入れられません。ユーザーの最初の対話では、期待を設定する必要があります。
+- **実装**: アセットの解像度 (フォント、初期イメージ、3D モデル) を処理する軽量のプリローダー コンポーネントを生成します。
+- **アニメーション**: 分割ドアの表示、拡大ズーム、千鳥状のテキスト スイープなど、プリローダーを流動的に遷移させる出力コード。
 
-### 3.2 High-Fidelity Micro-Interactions
-The cursor is the user's avatar. Build interactions around it.
-- **Magnetic Components**: Write logic that calculates the distance between the mouse pointer and a button, pulling the button towards the cursor dynamically.
-- **Custom Tracking Elements**: Generate custom cursor components that follow the mouse with calculated interpolation (lerp) for a smooth drag effect.
-- **Dimensional Hover States**: Use CSS Transforms (`scale`, `rotateX`, `translate3d`) to give interactive elements weight and tactile feedback.
+### 2.2 ヒーローのアーキテクチャ
+一番上の折り目はすぐに注目を集める必要があります。
+- **ビジュアル**: フルブリード コンテナを実装する出力コード (`100vh`/`100dvh`)。
+- **タイポグラフィ エンジン**: 見出しが構文的に分割されていることを確認し (単語または文字によるスパンの折り返しなど)、カスケード的な入口アニメーションを可能にします。
+- **奥行き**: 微妙な浮遊要素や背景クリッピング パスを利用して、プライマリ コピーの背後にスケール感と奥行き感を作成します。
 
----
-
-## 4. Typography & Visual Texture
-
-The aesthetics of your generated code must reflect premium craftsmanship.
-
-- **Type Hierarchy**: Enforce massive contrast in scale. Headlines should utilize extreme sizing (`clamp()` functions spanning up to `12vw`), while body copy remains incredibly crisp (`16px-18px` minimum). 
-- **Font Selection**: Always recommend or implement highly specified variable fonts or premium typefaces over system defaults.
-- **Atmospheric Filters**: Implement CSS/SVG noise overlays (`mix-blend-mode: overlay`, opacity `0.02 - 0.05`) to remove digital sterility and add photographic grain.
-- **Lighting & Glass**: Utilize `backdrop-filter: blur(x)` combined with ultra-thin, semi-transparent borders to create modern, frosted-glass depth.
+### 2.3 流動的でコンテキストに沿ったナビゲーション
+- **実装**: 標準の静的ナビゲーションバーを生成しません。スクロール方向に反応する出力スティッキーヘッダー (下スクロールで非表示、上スクロールで表示)。
+- **インタラクティブ性**: 豊富なコンテンツを表示するホバー状態を含めます (例: ホバーされたリンクの画像プレビューを表示するメガメニュー)。
 
 ---
 
-## 5. The Performance Imperative
+## 3. モーションデザインシステムアニメーションは思いつきではありません。それはプレミアムサイトの結合組織です。常に次の動作原則を実装してください。
 
-A beautiful site that stutters is a failure. Enforce strict performance guardrails in all generated code:
+### 3.1 スクロール主導の物語
+最新のスクロール ライブラリ (GSAP の ScrollTrigger など) を利用してコードを生成し、アニメーションとユーザーの進行状況を結び付けます。
+- **ピン留めされたコンテナ**: 二次コンテンツが通過したり、それ自体が現れたりする間に、ビューポートに固定されるセクションを作成します。
+- **水平移動**: 特定のギャラリーまたはショーケースの垂直スクロール データを水平移動に変換します。
+- **視差マッピング**: 微妙に変化するスクロール速度を背景要素、中間テキスト、および前景画像に割り当てます。
 
-- **Hardware Acceleration**: Only animate properties that do not trigger layout recalculations: `transform` and `opacity`. Code that animates `width`, `height`, `top`, or `margin` should be fiercely avoided.
-- **Render Optimization**: Apply `will-change: transform` intelligently on complex moving elements, but remove it post-animation to conserve memory.
-- **Responsive Degradation**: Wrap custom cursor logic and heavy hover animations in `@media (hover: hover) and (pointer: fine)` to ensure pristine performance on touch devices.
-- **Accessibility**: Wrap heavy continuous animations in `@media (prefers-reduced-motion: no-preference)`. Never sacrifice user accessibility for aesthetic flair.
-
----
-
-## 6. Implementation Ecosystem
-
-When the user asks you to implement these patterns, leverage industry-standard libraries tailored to their framework:
-
-### For React / Next.js Targets
-- Structure the application to support **Framer Motion** for layout transitions and spring physics.
-- Recommend **Lenis** (`@studio-freight/lenis`) for smooth scrolling context.
-- Implement **React Three Fiber** (`@react-three/fiber`) if webGL or 3D interactions are requested.
-
-### For Vanilla / HTML / Astro Targets
-- Rely heavily on **GSAP** (GreenSock Animation Platform) for timeline sequencing.
-- Utilize vanilla **Lenis** via CDN for scroll hijacking and smoothing.
-- Use **SplitType** for safe, accessible typography chunking.
+### 3.2 高忠実度のマイクロインタラクション
+カーソルはユーザーのアバターです。それを中心に相互作用を構築します。
+- **磁気コンポーネント**: マウス ポインタとボタンの間の距離を計算し、ボタンをカーソルに向かって動的に引っ張るロジックを作成します。
+- **カスタム トラッキング要素**: 計算された補間 (lerp) を使用してマウスを追跡するカスタム カーソル コンポーネントを生成し、スムーズなドラッグ効果を実現します。
+- **次元ホバー状態**: CSS 変換 (`scale`、`rotateX`、`translate3d`) を使用して、インタラクティブな要素に重みと触覚フィードバックを与えます。
 
 ---
 
-## Summary of Action
+## 4. タイポグラフィーとビジュアルテクスチャ
 
-Whenever you receive a prompt to "Build a premium landing page," "Create an Awwwards-style component," or "Design an immersive UI," you must automatically:
-1. Wrap the output in a robust, scroll-smoothed architecture.
-2. Provide CSS that guarantees perfect performance using composited layers.
-3. Integrate sweeping, staggered component entrances.
-4. Elevate the typography using fluid scales.
-5. Create an intentional, memorable aesthetic footprint.
+生成されたコードの美しさは、優れた職人技を反映している必要があります。
+
+- **タイプ階層**: 規模の大きなコントラストを強制します。見出しでは極端なサイズ設定 (`12vw` までの `clamp()` 関数) を使用する必要がありますが、本文のコピーは信じられないほど鮮明なまま (`16px-18px` は最小限) にします。 
+- **フォントの選択**: システムのデフォルトよりも、高度に指定されたバリアブル フォントまたはプレミアム 書体を常に推奨または実装します。
+- **大気フィルター**: CSS/SVG ノイズ オーバーレイ (`mix-blend-mode: overlay`、不透明度 `0.02 - 0.05`) を実装して、デジタルの不純物を除去し、写真の粒子を追加します。
+- **照明とガラス**: `backdrop-filter: blur(x)` を極薄の半透明の境界線と組み合わせて利用し、モダンなすりガラスのような奥行きを作り出します。
+
+---
+
+## 5. パフォーマンスの重要性
+
+途切れる美しいサイトは失敗です。生成されたすべてのコードに厳格なパフォーマンス ガードレールを適用します。
+
+- **ハードウェア アクセラレーション**: レイアウトの再計算をトリガーしないプロパティのみをアニメーション化します: `transform` および `opacity`。 `width`、`height`、`top`、または `margin` をアニメーション化するコードは絶対に避けてください。
+- **レンダリングの最適化**: `will-change: transform` を複雑な移動要素にインテリジェントに適用しますが、メモリを節約するためにアニメーション後に削除します。
+- **応答性の低下**: カスタム カーソル ロジックと重いホバー アニメーションを `@media (hover: hover) and (pointer: fine)` でラップし、タッチ デバイスでの本来のパフォーマンスを保証します。
+- **アクセシビリティ**: 重い連続アニメーションを `@media (prefers-reduced-motion: no-preference)` でラップします。美的センスのためにユーザーのアクセシビリティを決して犠牲にしてはいけません。
+
+---
+
+## 6. 実装エコシステム
+
+ユーザーがこれらのパターンの実装を要求した場合は、ユーザーのフレームワークに合わせて調整された業界標準ライブラリを活用します。### React / Next.js ターゲットの場合
+- レイアウト遷移とスプリング物理学のための **Framer Motion** をサポートするようにアプリケーションを構造化します。
+- コンテキストをスムーズにスクロールするには、**Lenis** (`@studio-freight/lenis`) をお勧めします。
+- WebGL または 3D インタラクションが要求される場合は、**React Three Fiber** (`@react-three/fiber`) を実装します。
+
+### バニラ / HTML / Astro ターゲットの場合
+- タイムラインのシーケンスには **GSAP** (GreenSock アニメーション プラットフォーム) に大きく依存します。
+- スクロール ハイジャックとスムージングに CDN 経由でバニラ **Lenis** を利用します。
+- 安全でアクセス可能なタイポグラフィ チャンクには **SplitType** を使用します。
+
+---
+
+## アクションの概要
+
+「プレミアム ランディング ページを作成する」、「Awwwards スタイルのコンポーネントを作成する」、または「没入型 UI をデザインする」というプロンプトが表示されるたびに、次のことを自動的に行う必要があります。
+1. 出力を堅牢でスクロールがスムーズなアーキテクチャでラップします。
+2. 複合レイヤーを使用して完璧なパフォーマンスを保証する CSS を提供します。
+3. 広範囲にわたる千鳥状のコンポーネント入口を統合します。
+4. 流体スケールを使用してタイポグラフィーを向上させます。
+5. 意図的で記憶に残る美的な足跡を作成します。

@@ -6,19 +6,18 @@ allowed-tools:
   - Grep
   - Glob
 ---
+# Qdrant モニタリング
 
-# Qdrant Monitoring
+Qdrant モニタリングを使用すると、デプロイメントのパフォーマンスと健全性を追跡し、障害が発生する前に問題を特定できます。まず、監視を設定する必要があるか、進行中の問題を診断する必要があるかを判断します。
 
-Qdrant monitoring allows tracking performance and health of your deployment, and identifying issues before they become outages. First determine whether you need to set up monitoring or diagnose an active issue.
-
-- Understand available metrics [Monitoring docs](https://search.qdrant.tech/md/documentation/operations/monitoring/)
-
-
-## Monitoring Setup
-
-Prometheus scraping, health probes, Hybrid Cloud specifics, alerting, and log centralization. [Monitoring Setup](setup/SKILL.md)
+- 利用可能なメトリクスを理解する [モニタリング ドキュメント](https://search.qdrant.tech/md/documentation/operations/monitoring/)
 
 
-## Debugging with Metrics
+## モニタリングのセットアップ
 
-Optimizer stuck, memory growth, slow requests. Using metrics to diagnose active production issues. [Debugging with Metrics](debugging/SKILL.md)
+Prometheus スクレイピング、正常性プローブ、ハイブリッド クラウドの詳細、アラート、ログの一元化。 [モニタリング設定](setup/SKILL.md)
+
+
+## メトリクスを使用したデバッグ
+
+オプティマイザがスタックし、メモリが増加し、リクエストが遅くなります。メトリクスを使用してアクティブな運用上の問題を診断します。 [メトリクスを使用したデバッグ](debugging/SKILL.md)

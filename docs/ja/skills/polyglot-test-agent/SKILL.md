@@ -2,160 +2,142 @@
 name: polyglot-test-agent
 description: 'Generates comprehensive, workable unit tests for any programming language using a multi-agent pipeline. Use when asked to generate tests, write unit tests, improve test coverage, add test coverage, create test files, or test a codebase. Supports C#, TypeScript, JavaScript, Python, Go, Rust, Java, and more. Orchestrates research, planning, and implementation phases to produce tests that compile, pass, and follow project conventions.'
 ---
+# 多言語テスト生成スキル
 
-# Polyglot Test Generation Skill
+調整されたマルチエージェント パイプラインを使用して、あらゆるプログラミング言語に対して包括的で実行可能な単体テストを生成する、AI を活用したスキル。
 
-An AI-powered skill that generates comprehensive, workable unit tests for any programming language using a coordinated multi-agent pipeline.
+## このスキルを使用する場合
 
-## When to Use This Skill
+このスキルは、次の場合に使用します。
+- プロジェクト全体または特定のファイルの単体テストを生成
+- 既存のコードベースのテスト カバレッジを改善する
+- プロジェクトの規則に従ってテスト ファイルを作成する
+- 実際にコンパイルして合格するテストを作成する
+- 新しい機能または未テストのコードのテストを追加します
 
-Use this skill when you need to:
-- Generate unit tests for an entire project or specific files
-- Improve test coverage for existing codebases
-- Create test files that follow project conventions
-- Write tests that actually compile and pass
-- Add tests for new features or untested code
+## 仕組み
 
-## How It Works
+このスキルは、**調査 → 計画 → 実装** パイプラインで複数の専門エージェントを調整します。
 
-This skill coordinates multiple specialized agents in a **Research → Plan → Implement** pipeline:
-
-### Pipeline Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     TEST GENERATOR                          │
-│  Coordinates the full pipeline and manages state            │
-└─────────────────────┬───────────────────────────────────────┘
+### パイプラインの概要「」
+┌───────────────────────────┐
+│ テストジェネレーター │
+│ パイプライン全体を調整し、状態を管理します │
+━━━━━━━━━━━━━━━━━━━━━━━┘
                       │
-        ┌─────────────┼─────────────┐
-        ▼             ▼             ▼
-┌───────────┐  ┌───────────┐  ┌───────────────┐
-│ RESEARCHER│  │  PLANNER  │  │  IMPLEMENTER  │
-│           │  │           │  │               │
-│ Analyzes  │  │ Creates   │  │ Writes tests  │
-│ codebase  │→ │ phased    │→ │ per phase     │
-│           │  │ plan      │  │               │
-└───────────┘  └───────────┘  └───────┬───────┘
+        ┌─────────┼─────────┐
+        ▼ ▼ ▼
+┌───────┐ ┌───────┐ ┌─────────┐
+│ 研究者│ │ プランナー │ │ 実装者 │
+│ │ │ │ │ │
+│ 分析 │ │ 作成 │ │ テストの作成 │
+│ コードベース │→ │ 段階的 │→ │ フェーズごと │
+│ │ │ 計画 │ │ │
+━━━━━┘ ━━━━━┘ └───────┬───────┘
                                       │
-                    ┌─────────┬───────┼───────────┐
-                    ▼         ▼       ▼           ▼
-              ┌─────────┐ ┌───────┐ ┌───────┐ ┌───────┐
-              │ BUILDER │ │TESTER │ │ FIXER │ │LINTER │
-              │         │ │       │ │       │ │       │
-              │ Compiles│ │ Runs  │ │ Fixes │ │Formats│
-              │ code    │ │ tests │ │ errors│ │ code  │
-              └─────────┘ └───────┘ └───────┘ └───────┘
-```
+                    ┌─────┬───────┼───────┐
+                    ▼ ▼ ▼ ▼
+              ┌─────┐ ┌───────┐ ┌───────┐ ┌────────┐
+              │ ビルダー │ │テスター │ │ フィクサー │ │リンター │
+              │ │ │ │ │ │ │
+              │ コンパイル│ │ 実行 │ │ 修正 │ │フォーマット│
+              │ コード │ │ テスト │ │ エラー│ │ コード │
+              ━━━━┘ ━━━━━┘ ━━━━━┘ ━━━━━┘
+「」## 詳しい手順
 
-## Step-by-Step Instructions
+### ステップ 1: ユーザーリクエストを決定する
 
-### Step 1: Determine the User Request
+ユーザーが何を求めているのか、またその範囲は何かを必ず理解してください。
+ユーザーがテスト スタイル、カバレッジ目標、または規約について強い要件を表明していない場合は、[unit-test-generation.prompt.md](unit-test-generation.prompt.md) からガイドラインを参照してください。このプロンプトは、規則、パラメーター化戦略、カバレッジ目標 (80% を目指す)、および言語固有のパターンを見つけるためのベスト プラクティスを提供します。
 
-Make sure you understand what user is asking and for what scope.
-When the user does not express strong requirements for test style, coverage goals, or conventions, source the guidelines from [unit-test-generation.prompt.md](unit-test-generation.prompt.md). This prompt provides best practices for discovering conventions, parameterization strategies, coverage goals (aim for 80%), and language-specific patterns.
+### ステップ 2: テスト ジェネレーターを起動する
 
-### Step 2: Invoke the Test Generator
+まず、テスト生成リクエストを使用して `polyglot-test-generator` エージェントを呼び出します。「」
+[unit-test-generation.prompt.md](unit-test-generation.prompt.md) ガイドラインに従って、[テスト対象のパスまたは説明] の単体テストを生成します。
+「」テスト ジェネレーターはパイプライン全体を自動的に管理します。
 
-Start by calling the `polyglot-test-generator` agent with your test generation request:
+### ステップ 3: 研究フェーズ (自動)
 
-```
-Generate unit tests for [path or description of what to test], following the [unit-test-generation.prompt.md](unit-test-generation.prompt.md) guidelines
-```
+`polyglot-test-researcher` エージェントは、コードベースを分析して以下を理解します。
+- **言語とフレームワーク**: C#、TypeScript、Python、Go、Rust、Java などを検出します。
+- **テスト フレームワーク**: MSTest、xUnit、Jest、pytest、go test などを識別します。
+- **プロジェクト構造**: ソース ファイル、既存のテスト、依存関係をマップします。
+- **ビルド コマンド**: プロジェクトをビルドしてテストする方法を説明します。
 
-The Test Generator will manage the entire pipeline automatically.
+出力: `.testagent/research.md`
 
-### Step 3: Research Phase (Automatic)
+### ステップ 4: 計画フェーズ (自動)
 
-The `polyglot-test-researcher` agent analyzes your codebase to understand:
-- **Language & Framework**: Detects C#, TypeScript, Python, Go, Rust, Java, etc.
-- **Testing Framework**: Identifies MSTest, xUnit, Jest, pytest, go test, etc.
-- **Project Structure**: Maps source files, existing tests, and dependencies
-- **Build Commands**: Discovers how to build and test the project
+`polyglot-test-planner` エージェントは、構造化された実装計画を作成します。
+- ファイルを論理フェーズにグループ化します (通常 2 ～ 5 フェーズ)
+- 複雑さと依存関係による優先順位付け
+- 各ファイルのテスト ケースを指定します
+- フェーズごとに成功基準を定義する
 
-Output: `.testagent/research.md`
+出力: `.testagent/plan.md`
 
-### Step 4: Planning Phase (Automatic)
+### ステップ 5: 実装フェーズ (自動)
 
-The `polyglot-test-planner` agent creates a structured implementation plan:
-- Groups files into logical phases (2-5 phases typical)
-- Prioritizes by complexity and dependencies
-- Specifies test cases for each file
-- Defines success criteria per phase
+`polyglot-test-implementer` エージェントは、各フェーズを順番に実行します。
 
-Output: `.testagent/plan.md`
+1. API を理解するために **ソース ファイルを読んでください**
+2. プロジェクト パターンに従って **テスト ファイルを作成**
+3. `polyglot-test-builder` サブエージェントを使用して **ビルド** し、コンパイルを検証します
+4. `polyglot-test-tester` サブエージェントを使用して **テスト** し、テストが成功したことを確認します
+5. エラーが発生した場合は、`polyglot-test-fixer` サブエージェントを使用して **修正**
+6. コードのフォーマットに `polyglot-test-linter` サブエージェントを使用する **Lint**
 
-### Step 5: Implementation Phase (Automatic)
+各フェーズは次のフェーズが開始される前に完了し、確実に段階的に進行します。
 
-The `polyglot-test-implementer` agent executes each phase sequentially:
+### 補償範囲の種類
+- **ハッピー パス**: 有効な入力により期待される出力が生成されます
+- **エッジケース**: 空の値、境界、特殊文字
+- **エラーケース**: 無効な入力、null 処理、例外
 
-1. **Read** source files to understand the API
-2. **Write** test files following project patterns
-3. **Build** using the `polyglot-test-builder` subagent to verify compilation
-4. **Test** using the `polyglot-test-tester` subagent to verify tests pass
-5. **Fix** using the `polyglot-test-fixer` subagent if errors occur
-6. **Lint** using the `polyglot-test-linter` subagent for code formatting
+## 状態管理
 
-Each phase completes before the next begins, ensuring incremental progress.
+すべてのパイプライン状態は `.testagent/` フォルダーに保存されます。
 
-### Coverage Types
-- **Happy path**: Valid inputs produce expected outputs
-- **Edge cases**: Empty values, boundaries, special characters
-- **Error cases**: Invalid inputs, null handling, exceptions
+|ファイル |目的 |
+|-----|----------|
+| `.testagent/research.md` |コードベース分析結果 |
+| `.testagent/plan.md` |段階的な実装計画 |
+| `.testagent/status.md` |進捗状況の追跡 (オプション) |
 
-## State Management
+## 例
 
-All pipeline state is stored in `.testagent/` folder:
+### 例 1: プロジェクト全体のテスト「」
+C:\src\Calculator で Calculator プロジェクトの単体テストを生成します。
+「」### 例 2: 特定のファイルのテスト「」
+src/services/UserService.ts の単体テストを生成する
+「」### 例 3: 対象を絞ったカバレッジ「」
+エッジケースに焦点を当てた認証モジュールのテストを追加する
+「」## エージェントリファレンス
 
-| File | Purpose |
-|------|---------|
-| `.testagent/research.md` | Codebase analysis results |
-| `.testagent/plan.md` | Phased implementation plan |
-| `.testagent/status.md` | Progress tracking (optional) |
+|エージェント |目的 |ツール |
+|------|-------|------|
+| `polyglot-test-generator` |座標パイプライン | runCommands、コードベース、editFiles、検索、runSubagent |
+| `polyglot-test-researcher` |コードベースを分析する | runCommands、コードベース、editFiles、検索、フェッチ、runSubagent |
+| `polyglot-test-planner` |テスト計画を作成します |コードベース、editFiles、検索、runSubagent |
+| `polyglot-test-implementer` |テスト ファイルを書き込みます | runCommands、コードベース、editFiles、検索、runSubagent |
+| `polyglot-test-builder` |コードをコンパイルします | runCommands、コードベース、検索 |
+| `polyglot-test-tester` |テストを実行します | runCommands、コードベース、検索 |
+| `polyglot-test-fixer` |エラーを修正します | runCommands、コードベース、editFiles、検索 |
+| `polyglot-test-linter` |コードのフォーマット | runCommands、コードベース、検索 |
 
-## Examples
+## 要件
 
-### Example 1: Full Project Testing
-```
-Generate unit tests for my Calculator project at C:\src\Calculator
-```
+- プロジェクトにはビルド/テスト システムが構成されている必要があります
+- テスト フレームワークがインストールされている (またはインストール可能である) 必要があります。
+- GitHub Copilot 拡張機能を備えた VS Code
 
-### Example 2: Specific File Testing
-```
-Generate unit tests for src/services/UserService.ts
-```
+## トラブルシューティング
 
-### Example 3: Targeted Coverage
-```
-Add tests for the authentication module with focus on edge cases
-```
+### テストがコンパイルされない
+`polyglot-test-fixer` エージェントはコンパイル エラーの解決を試みます。予想されるテスト構造については `.testagent/plan.md` を確認してください。
 
-## Agent Reference
+### テストが失敗する
+テスト出力を確認し、テストの期待値を調整します。一部のテストでは、依存関係のモックが必要になる場合があります。
 
-| Agent | Purpose | Tools |
-|-------|---------|-------|
-| `polyglot-test-generator` | Coordinates pipeline | runCommands, codebase, editFiles, search, runSubagent |
-| `polyglot-test-researcher` | Analyzes codebase | runCommands, codebase, editFiles, search, fetch, runSubagent |
-| `polyglot-test-planner` | Creates test plan | codebase, editFiles, search, runSubagent |
-| `polyglot-test-implementer` | Writes test files | runCommands, codebase, editFiles, search, runSubagent |
-| `polyglot-test-builder` | Compiles code | runCommands, codebase, search |
-| `polyglot-test-tester` | Runs tests | runCommands, codebase, search |
-| `polyglot-test-fixer` | Fixes errors | runCommands, codebase, editFiles, search |
-| `polyglot-test-linter` | Formats code | runCommands, codebase, search |
-
-## Requirements
-
-- Project must have a build/test system configured
-- Testing framework should be installed (or installable)
-- VS Code with GitHub Copilot extension
-
-## Troubleshooting
-
-### Tests don't compile
-The `polyglot-test-fixer` agent will attempt to resolve compilation errors. Check `.testagent/plan.md` for the expected test structure.
-
-### Tests fail
-Review the test output and adjust test expectations. Some tests may require mocking dependencies.
-
-### Wrong testing framework detected
-Specify your preferred framework in the initial request: "Generate Jest tests for..."
+### 間違ったテスト フレームワークが検出されました
+最初のリクエストで希望のフレームワークを指定します:「Generate Jest testing for...」

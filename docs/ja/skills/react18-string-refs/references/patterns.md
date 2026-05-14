@@ -1,10 +1,8 @@
-# String Refs - All Migration Patterns
+# 文字列参照 - すべての移行パターン
 
-## Single Ref on a DOM Element {#single-ref}
+## DOM 要素の単一参照 {#single-ref}
 
-The most common case - one ref to one DOM node.
-
-```jsx
+最も一般的なケースは、1 つの DOM ノードに対する 1 つの参照です。```jsx
 // Before:
 class SearchBox extends React.Component {
   handleSearch() {
@@ -50,15 +48,11 @@ class SearchBox extends React.Component {
     );
   }
 }
-```
+```---
 
----
+## 1 つのコンポーネント内の複数の参照 {#multiple-refs}
 
-## Multiple Refs in One Component {#multiple-refs}
-
-Each string ref becomes its own named `createRef()` field.
-
-```jsx
+各文字列 ref は、独自の名前付き `createRef()` フィールドになります。```jsx
 // Before:
 class LoginForm extends React.Component {
   handleSubmit(e) {
@@ -103,15 +97,11 @@ class LoginForm extends React.Component {
     );
   }
 }
-```
+```---
 
----
+## リスト内の参照 / 動的参照 {#list-refs}
 
-## Refs in a List / Dynamic Refs {#list-refs}
-
-String refs in a map/loop - the most tricky case. Each item needs its own ref.
-
-```jsx
+マップ/ループ内の文字列参照 - 最も注意が必要なケースです。各項目には独自の参照が必要です。```jsx
 // Before:
 class TabPanel extends React.Component {
   focusTab(index) {
@@ -161,11 +151,7 @@ class TabPanel extends React.Component {
     );
   }
 }
-```
-
-**Alternative - callback ref for lists (simpler):**
-
-```jsx
+```**代替案 - リストのコールバック参照 (より単純):**```jsx
 class TabPanel extends React.Component {
   tabRefs = {};
 
@@ -190,15 +176,11 @@ class TabPanel extends React.Component {
 }
 // Note: callback refs store the DOM node directly (not wrapped in .current)
 // this.tabRefs[i] is the element, not this.tabRefs[i].current
-```
+```---
 
----
+## コールバック参照 (createRef の代替) {#callback-refs}
 
-## Callback Refs (Alternative to createRef) {#callback-refs}
-
-Callback refs are an alternative to `createRef()`. They're useful for lists (above) and when you need to run code when the ref attaches/detaches.
-
-```jsx
+コールバック参照は `createRef()` の代替です。これらはリスト (上記) や、ref のアタッチ/デタッチ時にコードを実行する必要がある場合に便利です。```jsx
 // Callback ref syntax:
 class MyComponent extends React.Component {
   // Callback ref - called with the element when it mounts, null when it unmounts
@@ -214,16 +196,12 @@ class MyComponent extends React.Component {
     return <input ref={this.setInputRef} />;
   }
 }
-```
+```**コールバック参照と createRef を使用する場合:**
 
-**When to use callback refs vs createRef:**
+- `createRef()` - コンポーネント定義時に既知の固定数の参照用 (ほとんどの場合)
+- コールバック参照 - 動的リストの場合、アタッチ/デタッチに反応する必要がある場合、または参照が変更される可能性がある場合
 
-- `createRef()` - for a fixed number of refs known at component definition time (most cases)
-- Callback refs - for dynamic lists, when you need to react to attach/detach, or when the ref might change
-
-**Important:** Inline callback refs (defined in render) re-create a new function on every render, which causes the ref to be called with `null` then the element on each render cycle. Use a bound method or class field arrow function instead:
-
-```jsx
+**重要:** インライン コールバック ref (レンダリングで定義) は、レンダリングごとに新しい関数を再作成します。これにより、各レンダリング サイクルで `null` を使用して ref が呼び出され、次に要素が呼び出されます。代わりに、バインドされたメソッドまたはクラス フィールドのアロー関数を使用します。```jsx
 // AVOID - new function every render, causes ref flicker:
 render() {
   return <input ref={(el) => { this.inputEl = el; }} />;  // inline - bad
@@ -234,15 +212,11 @@ setInputRef = (el) => { this.inputEl = el; };  // class field - good
 render() {
   return <input ref={this.setInputRef} />;
 }
-```
+```---
 
----
+## 子コンポーネントに渡される参照 {#forwarded-refs}
 
-## Ref Passed to a Child Component {#forwarded-refs}
-
-If a string ref was passed to a custom component (not a DOM element), the migration also requires updating the child.
-
-```jsx
+文字列参照がカスタム コンポーネント (DOM 要素ではない) に渡された場合、移行には子も更新する必要があります。```jsx
 // Before:
 class Parent extends React.Component {
   handleClick() {

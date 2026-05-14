@@ -1,13 +1,12 @@
-# Skeleton: incremental-comparison.html
+# スケルトン：incremental-comparison.html
 
-> **⛔ Self-contained HTML — ALL CSS inline. No CDN links. Follow this exact 8-section structure.**
+> **⛔ 自己完結型 HTML — すべての CSS インライン。 CDN リンクはありません。この 8 セクションの構造に従ってください。**
 
 ---
 
-The HTML report has exactly 8 sections in this order. Each section MUST be present.
+HTML レポートには、この順序でちょうど 8 つのセクションがあります。各セクションが存在する必要があります。
 
-## Section 1: Header + Comparison Cards
-```html
+## セクション 1: ヘッダー + 比較カード```html
 <div class="header">
   <div class="report-badge">INCREMENTAL THREAT MODEL COMPARISON</div>
   <h1>[FILL: repo name]</h1>
@@ -32,11 +31,9 @@ The HTML report has exactly 8 sections in this order. Each section MUST be prese
     <div class="trend-duration">[FILL: N months]</div>
   </div>
 </div>
-```
-<!-- SKELETON INSTRUCTION: Section 2 (Risk Shift) is merged into Section 1 above. The old separate risk-shift div is removed. The comparison-cards div replaces both the old subtitle + risk-shift + time-between box. -->
+```<!-- 基本手順: セクション 2 (リスクシフト) は上記のセクション 1 に統合されます。古い個別のリスクシフト div は削除されました。比較カード div は、古いサブタイトル + リスクシフト + 間隔ボックスの両方を置き換えます。 -->
 
-## Section 2: Metrics Bar (5 boxes)
-```html
+## セクション 2: メトリック バー (5 ボックス)```html
 <div class="metrics-bar">
   [FILL: Components: old → new (±N)]
   [FILL: Trust Boundaries: old → new (±N)]
@@ -44,49 +41,39 @@ The HTML report has exactly 8 sections in this order. Each section MUST be prese
   [FILL: Findings: old → new (±N)]
   [FILL: Code Changes: N commits, M PRs — use git rev-list --count and git log --oneline --merges --grep="Merged PR"]
 </div>
-```
-**MUST include Trust Boundaries as one of the 5 metrics. 5th box is Code Changes (NOT Time Between).**
+```**5 つの指標の 1 つとして信頼境界を含める必要があります。 5 番目のボックスはコード変更です (時間間隔ではありません)。**
 
-## Section 3: Status Summary Cards (colored)
-```html
+## セクション 3: ステータス概要カード (色付き)```html
 <div class="status-cards">
   <!-- Green card --> Fixed: [FILL: count] [FILL: 1-sentence summary, NO IDs]
   <!-- Red card --> New: [FILL: count] [FILL: 1-sentence summary, NO IDs]
   <!-- Amber card --> Previously Unidentified: [FILL: count] [FILL: 1-sentence summary, NO IDs]
   <!-- Gray card --> Still Present: [FILL: count] [FILL: 1-sentence summary, NO IDs]
 </div>
-```
-<!-- SKELETON INSTRUCTION: Status cards show COUNT + a short human-readable sentence ONLY.
-  DO NOT include threat IDs (T06.S, T02.E), finding IDs (FIND-14), or component names.
-  Good: "1 credential handling vulnerability remediated"
-  Good: "4 new components with 21 new threats identified"
-  Good: "No new threats or findings introduced"
-  Bad: "T06.S: DefaultAzureCredential → ManagedIdentityCredential"
-  Bad: "ConfigurationOrchestrator — 5 threats (T16.*), LLMService — 6 threats (T17.*)"
-  The detailed item-by-item breakdown with IDs belongs in Section 5 (Threat/Finding Status Breakdown). -->
-**Status info appears ONLY here — NOT also in the metrics bar.**
+```<!-- スケルトンの説明: ステータス カードには COUNT + 人間が読める短い文のみが表示されます。
+  脅威 ID (T06.S、T02.E)、検出結果 ID (FIND-14)、またはコンポーネント名は含めないでください。
+  良好: 「認証情報処理の脆弱性が 1 件修正されました」
+  良い: 「21 の新しい脅威を含む 4 つの新しいコンポーネントが特定されました」
+  良い: 「新たな脅威や調査結果は導入されていません」
+  悪い: 「T06.S: DefaultAzureCredential → ManagedIdentityCredential」
+  悪い: 「ConfigurationOrchestrator — 5 つの脅威 (T16.*)、LLMService — 6 つの脅威 (T17.*)」
+  ID を含む項目ごとの詳細な内訳は、セクション 5 (脅威/調査状況の内訳) に属します。 -->
+**ステータス情報はここにのみ表示され、メトリクス バーには表示されません。**
 
-## Section 4: Component Status Grid
-```html
+## セクション 4: コンポーネント ステータス グリッド```html
 <table class="component-grid">
   <tr><th>Component</th><th>Type</th><th>Status</th><th>Source Files</th></tr>
   [REPEAT: one row per component with color-coded status badge]
   <tr><td>[FILL]</td><td>[FILL]</td><td><span class="badge-[FILL: status]">[FILL]</span></td><td>[FILL]</td></tr>
   [END-REPEAT]
 </table>
-```
-
-## Section 5: Threat/Finding Status Breakdown
-```html
+```## セクション 5: 脅威/調査状況の内訳```html
 <div class="status-breakdown">
   [FILL: Grouped by status — Fixed items, New items, etc.]
   [REPEAT: Each item: ID | Title | Component | Status]
   [END-REPEAT]
 </div>
-```
-
-## Section 6: STRIDE Heatmap with Deltas
-```html
+```## セクション 6: デルタを含む STRIDE ヒートマップ```html
 <table class="stride-heatmap">
   <thead>
     <tr>
@@ -109,42 +96,32 @@ The HTML report has exactly 8 sections in this order. Each section MUST be prese
     [END-REPEAT]
   </tbody>
 </table>
-```
-**MUST have 13 columns: Component + S + T + R + I + D + E + A + Total + divider + T1 + T2 + T3**
+```**13 列が必要です: コンポーネント + S + T + R + I + D + E + A + 合計 + 除算器 + T1 + T2 + T3**
 
-## Section 7: Needs Verification
-```html
+## セクション 7: 検証が必要```html
 <div class="needs-verification">
   [REPEAT: items where analysis disagrees with old report]
   [FILL: item description]
   [END-REPEAT]
 </div>
-```
-
-## Section 8: Footer
-```html
+```## セクション 8: フッター```html
 <div class="footer">
   Model: [FILL] | Duration: [FILL]
   Baseline: [FILL: folder] at [FILL: SHA]
   Generated: [FILL: timestamp]
 </div>
-```
+```---
 
----
-
-**Fixed CSS variables (use in `<style>` block):**
-```css
+**修正された CSS 変数 (`<style>` ブロックで使用):**```css
 --red: #dc3545;    /* new vulnerability */
 --green: #28a745;  /* fixed/improved */
 --amber: #fd7e14;  /* previously unidentified */
 --gray: #6c757d;   /* still present */
 --accent: #2171b5; /* modified/info */
-```
-
-**Fixed rules:**
-- ALL CSS in inline `<style>` block — no external stylesheets
-- Include `@media print` styles
-- Heatmap MUST have T1/T2/T3 columns after divider
-- Metrics bar MUST include Trust Boundaries
-- Status data in cards ONLY — not duplicated in metrics bar
-- HTML threat/finding totals MUST match markdown STRIDE summary totals
+```**修正されたルール:**
+- インライン `<style>` ブロック内のすべての CSS — 外部スタイルシートなし
+- `@media print` スタイルを含める
+- ヒートマップにはディバイダーの後に T1/T2/T3 列が必要です
+- メトリクスバーには信頼境界を含める必要があります
+- カード内のステータス データのみ - メトリクス バーには複製されません
+- HTML の脅威/検出結果の合計は、マークダウン STRIDE 概要の合計と一致する必要があります。

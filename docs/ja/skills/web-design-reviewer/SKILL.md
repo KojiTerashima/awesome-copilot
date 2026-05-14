@@ -2,39 +2,36 @@
 name: web-design-reviewer
 description: 'This skill enables visual inspection of websites running locally or remotely to identify and fix design issues. Triggers on requests like "review website design", "check the UI", "fix the layout", "find design problems". Detects issues with responsive design, accessibility, visual consistency, and layout breakage, then performs fixes at the source code level.'
 ---
+# Web デザインレビューアー
 
-# Web Design Reviewer
+このスキルにより、Web サイトのデザイン品質を視覚的に検査して検証し、ソース コード レベルで問題を特定して修正できるようになります。
 
-This skill enables visual inspection and validation of website design quality, identifying and fixing issues at the source code level.
+## 適用範囲
 
-## Scope of Application
+- 静的サイト (HTML/CSS/JS)
+- React / Vue / Angular / Svelte などの SPA フレームワーク
+- Next.js / Nuxt / SvelteKit などのフルスタック フレームワーク
+- WordPress / Drupal などの CMS プラットフォーム
+- その他の Web アプリケーション
 
-- Static sites (HTML/CSS/JS)
-- SPA frameworks such as React / Vue / Angular / Svelte
-- Full-stack frameworks such as Next.js / Nuxt / SvelteKit
-- CMS platforms such as WordPress / Drupal
-- Any other web application
+## 前提条件
 
-## Prerequisites
+### 必須
 
-### Required
+1. **対象の Web サイトが実行されている必要があります**
+   - ローカル開発サーバー (例: `http://localhost:3000`)
+   - ステージング環境
+   - 実稼働環境 (読み取り専用レビュー用)
 
-1. **Target website must be running**
-   - Local development server (e.g., `http://localhost:3000`)
-   - Staging environment
-   - Production environment (for read-only reviews)
+2. **ブラウザ自動化が利用可能である必要があります**
+   - スクリーンショットのキャプチャ
+   - ページナビゲーション
+   - DOM情報の取得
 
-2. **Browser automation must be available**
-   - Screenshot capture
-   - Page navigation
-   - DOM information retrieval
+3. **ソース コードへのアクセス (修正時)**
+   - プロジェクトはワークスペース内に存在する必要があります
 
-3. **Access to source code (when making fixes)**
-   - Project must exist within the workspace
-
-## Workflow Overview
-
-```mermaid
+## ワークフローの概要```mermaid
 flowchart TD
     A[Step 1: Information Gathering] --> B[Step 2: Visual Inspection]
     B --> C[Step 3: Issue Fixing]
@@ -42,34 +39,30 @@ flowchart TD
     D --> E{Issues Remaining?}
     E -->|Yes| B
     E -->|No| F[Completion Report]
-```
+```---
 
----
+## ステップ 1: 情報収集フェーズ
 
-## Step 1: Information Gathering Phase
+### 1.1 URLの確認
 
-### 1.1 URL Confirmation
+URL が提供されていない場合は、ユーザーに次のように尋ねます。
 
-If the URL is not provided, ask the user:
+> レビューする Web サイトの URL を入力してください (例: `http://localhost:3000`)
 
-> Please provide the URL of the website to review (e.g., `http://localhost:3000`)
+### 1.2 プロジェクト構造の理解
 
-### 1.2 Understanding Project Structure
+修正を行う場合は、次の情報を収集します。
 
-When making fixes, gather the following information:
+|アイテム |質問例 |
+|------|-----------------|
+|フレームワーク | React / Vue / Next.js などを使用していますか? |
+|スタイリング方法 | CSS / SCSS / Tailwind / CSS-in-JS など |
+|ソースの場所 |スタイル ファイルとコンポーネントはどこにありますか? |
+|レビュー範囲 |特定のページのみですか、それともサイト全体ですか? |
 
-| Item | Example Question |
-|------|------------------|
-| Framework | Are you using React / Vue / Next.js, etc.? |
-| Styling Method | CSS / SCSS / Tailwind / CSS-in-JS, etc. |
-| Source Location | Where are style files and components located? |
-| Review Scope | Specific pages only or entire site? |
+### 1.3 プロジェクトの自動検出
 
-### 1.3 Automatic Project Detection
-
-Attempt automatic detection from files in the workspace:
-
-```
+ワークスペース内のファイルから自動検出を試みます。```
 Detection targets:
 ├── package.json     → Framework and dependencies
 ├── tsconfig.json    → TypeScript usage
@@ -78,85 +71,79 @@ Detection targets:
 ├── vite.config      → Vite
 ├── nuxt.config      → Nuxt
 └── src/ or app/     → Source directory
-```
+```### 1.4 スタイリング方法の特定
 
-### 1.4 Identifying Styling Method
-
-| Method | Detection | Edit Target |
-|--------|-----------|-------------|
-| Pure CSS | `*.css` files | Global CSS or component CSS |
-| SCSS/Sass | `*.scss`, `*.sass` | SCSS files |
-| CSS Modules | `*.module.css` | Module CSS files |
-| Tailwind CSS | `tailwind.config.*` | className in components |
-| styled-components | `styled.` in code | JS/TS files |
-| Emotion | `@emotion/` imports | JS/TS files |
-| CSS-in-JS (other) | Inline styles | JS/TS files |
+|方法 |検出 |ターゲットの編集 |
+|----------|----------|---------------|
+|純粋な CSS | `*.css` ファイル |グローバル CSS またはコンポーネント CSS |
+| SCSS/サス | `*.scss`、`*.sass` | SCSS ファイル |
+| CSS モジュール | `*.module.css` |モジュール CSS ファイル |
+|追い風 CSS | `tailwind.config.*` |コンポーネント内の className |
+|スタイル付きコンポーネント | `styled.` コード内 | JS/TS ファイル |
+|感情 | `@emotion/` インポート | JS/TS ファイル |
+| JS 内の CSS (その他) |インラインスタイル | JS/TS ファイル |
 
 ---
 
-## Step 2: Visual Inspection Phase
+## ステップ 2: 目視検査フェーズ
 
-### 2.1 Page Traversal
+### 2.1 ページトラバーサル
 
-1. Navigate to the specified URL
-2. Capture screenshots
-3. Retrieve DOM structure/snapshot (if possible)
-4. If additional pages exist, traverse through navigation
+1. 指定された URL に移動します
+2. スクリーンショットをキャプチャする
+3. DOM 構造/スナップショットを取得します (可能な場合)
+4. 追加のページが存在する場合は、ナビゲーションをたどります
 
-### 2.2 Inspection Items
+### 2.2 検査項目
 
-#### Layout Issues
+#### レイアウトの問題
 
-| Issue | Description | Severity |
-|-------|-------------|----------|
-| Element Overflow | Content overflows from parent element or viewport | High |
-| Element Overlap | Unintended overlapping of elements | High |
-| Alignment Issues | Grid or flex alignment problems | Medium |
-| Inconsistent Spacing | Padding/margin inconsistencies | Medium |
-| Text Clipping | Long text not handled properly | Medium |
+|問題 |説明 |重大度 |
+|----------|---------------|----------|
+|要素のオーバーフロー |コンテンツが親要素またはビューポートからオーバーフローする |高 |
+|要素の重なり |要素の意図しない重複 |高 |
+|調整の問題 |グリッドまたはフレックスの位置合わせの問題 |中 |
+|一貫性のない間隔 |パディング/マージンの不一致 |中 |
+|テキストクリッピング |長いテキストが適切に処理されない |中 |
 
-#### Responsive Issues
+#### 対応に関する問題
 
-| Issue | Description | Severity |
-|-------|-------------|----------|
-| Non-mobile Friendly | Layout breaks on small screens | High |
-| Breakpoint Issues | Unnatural transitions when screen size changes | Medium |
-| Touch Targets | Buttons too small on mobile | Medium |
+|問題 |説明 |重大度 |
+|----------|---------------|----------|
+|非モバイル対応 |小さな画面でレイアウトが崩れる |高 |
+|ブレークポイントの問題 |画面サイズ変更時の画面遷移が不自然 |中 |
+|タッチターゲット |モバイルではボタンが小さすぎる |中 |
 
-#### Accessibility Issues
+#### アクセシビリティの問題
 
-| Issue | Description | Severity |
-|-------|-------------|----------|
-| Insufficient Contrast | Low contrast ratio between text and background | High |
-| No Focus State | Cannot determine state during keyboard navigation | High |
-| Missing alt Text | No alternative text for images | Medium |
+|問題 |説明 |重大度 |
+|----------|---------------|----------|
+|コントラストが不十分です |テキストと背景のコントラスト比が低い |高 |
+|フォーカス状態なし |キーボード ナビゲーション中に状態を判断できません。高 |
+|代替テキストがありません |画像の代替テキストはありません |中 |
 
-#### Visual Consistency
+#### 視覚的な一貫性
 
-| Issue | Description | Severity |
-|-------|-------------|----------|
-| Font Inconsistency | Mixed font families | Medium |
-| Color Inconsistency | Non-unified brand colors | Medium |
-| Spacing Inconsistency | Non-uniform spacing between similar elements | Low |
+|問題 |説明 |重大度 |
+|----------|---------------|----------|
+|フォントの不一致 |混合フォントファミリー |中 |
+|色の不一致 |ブランドカラーが統一されていない |中 |
+|間隔の不一致 |類似した要素間の不均一な間隔 |低い |
 
-### 2.3 Viewport Testing (Responsive)
+### 2.3 ビューポートのテスト (レスポンシブ)
 
-Test at the following viewports:
+次のビューポートでテストします。
 
-| Name | Width | Representative Device |
-|------|-------|----------------------|
-| Mobile | 375px | iPhone SE/12 mini |
-| Tablet | 768px | iPad |
-| Desktop | 1280px | Standard PC |
-| Wide | 1920px | Large display |
+|名前 |幅 |代表的なデバイス |
+|------|-------|-----------|
+|モバイル | 375ピクセル | iPhone SE/12mini｜
+|タブレット | 768ピクセル | iPad |
+|デスクトップ | 1280ピクセル |標準PC |
+|ワイド | 1920ピクセル |大型ディスプレイ |
 
 ---
 
-## Step 3: Issue Fixing Phase
-
-### 3.1 Issue Prioritization
-
-```mermaid
+## ステップ 3: 問題修正フェーズ### 3.1 問題の優先順位付け```mermaid
 block-beta
     columns 1
     block:priority["Priority Matrix"]
@@ -164,73 +151,62 @@ block-beta
         P2["P2: Fix Next\n(Visual issues degrading UX)"]
         P3["P3: Fix If Possible\n(Minor visual inconsistencies)"]
     end
-```
+```### 3.2 ソースファイルの特定
 
-### 3.2 Identifying Source Files
+問題のある要素からソース ファイルを特定します。
 
-Identify source files from problematic elements:
+1. **セレクターベースの検索**
+   - クラス名またはIDでコードベースを検索
+   - `grep_search` を使用してスタイル定義を調べる
 
-1. **Selector-based Search**
-   - Search codebase by class name or ID
-   - Explore style definitions with `grep_search`
+2. **コンポーネントベースの検索**
+   - 要素のテキストまたは構造からコンポーネントを識別する
+   - `semantic_search` を使用して関連ファイルを探索します
 
-2. **Component-based Search**
-   - Identify components from element text or structure
-   - Explore related files with `semantic_search`
-
-3. **File Pattern Filtering**
-   ```
+3. **ファイル パターン フィルタリング**```
    Style files: src/**/*.css, styles/**/*
    Components: src/components/**/*
    Pages: src/pages/**, app/**
-   ```
+   ```### 3.3 修正の適用
 
-### 3.3 Applying Fixes
+#### フレームワーク固有の修正ガイドライン
 
-#### Framework-specific Fix Guidelines
+詳細については、[references/framework-fixes.md](references/framework-fixes.md) を参照してください。
 
-See [references/framework-fixes.md](references/framework-fixes.md) for details.
+#### 原則を修正する
 
-#### Fix Principles
-
-1. **Minimal Changes**: Only make the minimum changes necessary to resolve the issue
-2. **Respect Existing Patterns**: Follow existing code style in the project
-3. **Avoid Breaking Changes**: Be careful not to affect other areas
-4. **Add Comments**: Add comments to explain the reason for fixes where appropriate
+1. **最小限の変更**: 問題を解決するために必要な最小限の変更のみを加えます。
+2. **既存のパターンを尊重**: プロジェクト内の既存のコード スタイルに従います。
+3. **重大な変更を避ける**: 他の領域に影響を与えないように注意してください
+4. **コメントの追加**: 必要に応じて、修正の理由を説明するコメントを追加します。
 
 ---
 
-## Step 4: Re-verification Phase
+## ステップ 4: 再検証フェーズ
 
-### 4.1 Post-fix Confirmation
+### 4.1 修正後の確認
 
-1. Reload browser (or wait for development server HMR)
-2. Capture screenshots of fixed areas
-3. Compare before and after
+1. ブラウザをリロードします (または開発サーバー HMR を待ちます)。
+2. 固定領域のスクリーンショットをキャプチャする
+3. 前後を比較する
 
-### 4.2 Regression Testing
+### 4.2 回帰テスト
 
-- Verify that fixes haven't affected other areas
-- Confirm responsive display is not broken
+- 修正が他の領域に影響を与えていないことを確認する
+- 応答性の高いディスプレイが壊れていないことを確認します
 
-### 4.3 Iteration Decision
-
-```mermaid
+### 4.3 反復の決定```mermaid
 flowchart TD
     A{Issues Remaining?}
     A -->|Yes| B[Return to Step 2]
     A -->|No| C[Proceed to Completion Report]
-```
-
-**Iteration Limit**: If more than 3 fix attempts are needed for a specific issue, consult the user
+```**反復制限**: 特定の問題に対して 3 回を超える修正試行が必要な場合は、ユーザーに相談してください。
 
 ---
 
-## Output Format
+## 出力フォーマット
 
-### Review Results Report
-
-```markdown
+### レビュー結果レポート```markdown
 # Web Design Review Results
 
 ## Summary
@@ -267,41 +243,37 @@ flowchart TD
 ## Recommendations
 
 - {Suggestions for future improvements}
-```
+```---
+
+## 必要な機能
+
+|能力 |説明 |必須 |
+|-----------|---------------|----------|
+| Web ページのナビゲーション |アクセスURL、ページ遷移 | ✅ |
+|スクリーンショットのキャプチャ |ページ画像のキャプチャ | ✅ |
+|画像解析 |視覚的な問題検出 | ✅ |
+| DOM の取得 |ページ構造の取得 |おすすめ |
+|ファイルの読み取り/書き込み |ソースコードの読み取りと編集 |修正に必要 |
+|コード検索 |プロジェクト内のコード検索 |修正に必要 |
 
 ---
 
-## Required Capabilities
+## リファレンス実装
 
-| Capability | Description | Required |
-|------------|-------------|----------|
-| Web Page Navigation | Access URLs, page transitions | ✅ |
-| Screenshot Capture | Page image capture | ✅ |
-| Image Analysis | Visual issue detection | ✅ |
-| DOM Retrieval | Page structure retrieval | Recommended |
-| File Read/Write | Source code reading and editing | Required for fixes |
-| Code Search | Code search within project | Required for fixes |
+### Playwright MCP による実装
 
----
+このスキルのリファレンス実装としては、[Playwright MCP](https://github.com/microsoft/playwright-mcp) を推奨します。
 
-## Reference Implementation
+|能力 |劇作家 MCP ツール |目的 |
+|-----------|---------------------|----------|
+|ナビゲーション | `browser_navigate` |アクセスURL |
+|スナップショット | `browser_snapshot` | DOM 構造の取得 |
+|スクリーンショット | `browser_take_screenshot` |目視検査用画像 |
+| |をクリックします`browser_click` |インタラクティブな要素を操作する |
+|サイズ変更 | `browser_resize` |レスポンシブテスト |
+|コンソール | `browser_console_messages` | JS エラーを検出する |
 
-### Implementation with Playwright MCP
-
-[Playwright MCP](https://github.com/microsoft/playwright-mcp) is recommended as the reference implementation for this skill.
-
-| Capability | Playwright MCP Tool | Purpose |
-|------------|---------------------|---------|
-| Navigation | `browser_navigate` | Access URLs |
-| Snapshot | `browser_snapshot` | Retrieve DOM structure |
-| Screenshot | `browser_take_screenshot` | Images for visual inspection |
-| Click | `browser_click` | Interact with interactive elements |
-| Resize | `browser_resize` | Responsive testing |
-| Console | `browser_console_messages` | Detect JS errors |
-
-#### Configuration Example (MCP Server)
-
-```json
+#### 構成例 (MCP サーバー)```json
 {
   "mcpServers": {
     "playwright": {
@@ -310,59 +282,57 @@ flowchart TD
     }
   }
 }
-```
+```### その他の互換性のあるブラウザ自動化ツール
 
-### Other Compatible Browser Automation Tools
-
-| Tool | Features |
+|ツール |特長 |
 |------|----------|
-| Selenium | Broad browser support, multi-language support |
-| Puppeteer | Chrome/Chromium focused, Node.js |
-| Cypress | Easy integration with E2E testing |
-| WebDriver BiDi | Standardized next-generation protocol |
+|セレン |幅広いブラウザのサポート、多言語のサポート |
+|人形遣い | Chrome/Chromium 中心、Node.js |
+|サイプレス | E2E テストとの簡単な統合 |
+| WebDriver BiDi |標準化された次世代プロトコル |
 
-The same workflow can be implemented with these tools. As long as they provide the necessary capabilities (navigation, screenshot, DOM retrieval), the choice of tool is flexible.
-
----
-
-## Best Practices
-
-### DO (Recommended)
-
-- ✅ Always save screenshots before making fixes
-- ✅ Fix one issue at a time and verify each
-- ✅ Follow the project's existing code style
-- ✅ Confirm with user before major changes
-- ✅ Document fix details thoroughly
-
-### DON'T (Not Recommended)
-
-- ❌ Large-scale refactoring without confirmation
-- ❌ Ignoring design systems or brand guidelines
-- ❌ Fixes that ignore performance
-- ❌ Fixing multiple issues at once (difficult to verify)
+これらのツールを使用して同じワークフローを実装できます。必要な機能 (ナビゲーション、スクリーンショット、DOM 取得) を提供する限り、ツールの選択は柔軟です。
 
 ---
 
-## Troubleshooting
+## ベストプラクティス
 
-### Problem: Style files not found
+### 実行する (推奨)
 
-1. Check dependencies in `package.json`
-2. Consider the possibility of CSS-in-JS
-3. Consider CSS generated at build time
-4. Ask user about styling method
+- ✅ 修正を行う前に必ずスクリーンショットを保存してください
+- ✅ 一度に 1 つずつ問題を修正し、それぞれを確認します
+- ✅ プロジェクトの既存のコード スタイルに従います。
+- ✅ 大きな変更を行う前にユーザーに確認する
+- ✅ 修正の詳細を徹底的に文書化する
 
-### Problem: Fixes not reflected
+### しないでください (推奨されません)
 
-1. Check if development server HMR is working
-2. Clear browser cache
-3. Rebuild if project requires build
-4. Check CSS specificity issues
+- ❌ 確認を伴わない大規模なリファクタリング
+- ❌ デザインシステムやブランドガイドラインを無視する
+- ❌ パフォーマンスを無視する修正
+- ❌ 複数の問題を一度に修正する (検証が困難)
 
-### Problem: Fixes affecting other areas
+---
 
-1. Rollback changes
-2. Use more specific selectors
-3. Consider using CSS Modules or scoped styles
-4. Consult user to confirm impact scope
+## トラブルシューティング
+
+### 問題: スタイル ファイルが見つかりません
+
+1. `package.json` で依存関係を確認します。
+2. CSS-in-JS の可能性を検討する
+3. ビルド時に生成される CSS を考慮する
+4. ユーザーにスタイリング方法を尋ねる
+
+### 問題: 修正が反映されない
+
+1. 開発サーバー HMR が動作しているかどうかを確認します
+2. ブラウザのキャッシュをクリアする
+3. プロジェクトにビルドが必要な場合は再ビルドする
+4. CSS の特異性の問題を確認する
+
+### 問題: 他の領域に影響を与える修正
+
+1. 変更のロールバック
+2. より具体的なセレクターを使用する
+3. CSS モジュールまたは範囲指定されたスタイルの使用を検討する
+4. ユーザーに相談して影響範囲を確認する

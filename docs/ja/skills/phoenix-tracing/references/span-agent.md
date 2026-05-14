@@ -1,15 +1,13 @@
-# AGENT Spans
+# エージェントのスパン
 
-AGENT spans represent autonomous reasoning blocks (ReAct agents, planning loops, multi-step decision making).
+AGENT スパンは、自律的な推論ブロック (ReAct エージェント、計画ループ、複数ステップの意思決定) を表します。
 
-**Required:** `openinference.span.kind` = "AGENT"
+**必須:** `openinference.span.kind` = "エージェント"
 
-## Example
-
-```json
+## 例```json
 {
-  "openinference.span.kind": "AGENT",
-  "input.value": "Book a flight to New York for next Monday",
-  "output.value": "I've booked flight AA123 departing Monday at 9:00 AM"
+  "openinference.span.kind": "エージェント",
+  "input.value": "来週月曜日のニューヨーク行きのフライトを予約します",
+  "output.value": "月曜日の午前 9 時に出発する AA123 便を予約しました。"
 }
-```
+「」

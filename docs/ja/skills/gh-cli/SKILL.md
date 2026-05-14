@@ -2,18 +2,15 @@
 name: gh-cli
 description: GitHub CLI (gh) comprehensive reference for repositories, issues, pull requests, Actions, projects, releases, gists, codespaces, organizations, extensions, and all GitHub operations from the command line.
 ---
-
 # GitHub CLI (gh)
 
-Comprehensive reference for GitHub CLI (gh) - work seamlessly with GitHub from the command line.
+GitHub CLI (gh) の包括的なリファレンス - コマンド ラインから GitHub をシームレスに操作します。
 
-**Version:** 2.85.0 (current as of January 2026)
+**バージョン:** 2.85.0 (2026 年 1 月現在)
 
-## Prerequisites
+## 前提条件
 
-### Installation
-
-```bash
+### インストール```bash
 # macOS
 brew install gh
 
@@ -28,11 +25,7 @@ winget install --id GitHub.cli
 
 # Verify installation
 gh --version
-```
-
-### Authentication
-
-```bash
+```### 認証```bash
 # Interactive login (default: github.com)
 gh auth login
 
@@ -50,11 +43,7 @@ gh auth switch --hostname github.com --user username
 
 # Logout
 gh auth logout --hostname github.com --user username
-```
-
-### Setup Git Integration
-
-```bash
+```### Git 統合のセットアップ```bash
 # Configure git to use gh as credential helper
 gh auth setup-git
 
@@ -63,11 +52,7 @@ gh auth token
 
 # Refresh authentication scopes
 gh auth refresh --scopes write:org,read:public_key
-```
-
-## CLI Structure
-
-```
+```## CLI 構造```
 gh                          # Root command
 ├── auth                    # Authentication
 │   ├── login
@@ -262,13 +247,9 @@ gh                          # Root command
     ├── get
     ├── list
     └── set
-```
+```## 構成
 
-## Configuration
-
-### Global Configuration
-
-```bash
+### グローバル構成```bash
 # List all configuration
 gh config list
 
@@ -284,11 +265,7 @@ gh config set pager "less -R"
 
 # Clear configuration cache
 gh config clear-cache
-```
-
-### Environment Variables
-
-```bash
+```### 環境変数```bash
 # GitHub token (for automation)
 export GH_TOKEN=ghp_xxxxxxxxxxxx
 
@@ -312,13 +289,9 @@ export GH_REPO=owner/repo
 
 # Custom git protocol
 export GH_ENTERPRISE_HOSTNAME=hostname
-```
+```## 認証 (gh 認証)
 
-## Authentication (gh auth)
-
-### Login
-
-```bash
+### ログイン```bash
 # Interactive login
 gh auth login
 
@@ -339,11 +312,7 @@ gh auth login --with-token < token.txt
 
 # Insecure storage (plain text)
 gh auth login --insecure-storage
-```
-
-### Status
-
-```bash
+```＃＃＃ 状態```bash
 # Show all authentication status
 gh auth status
 
@@ -361,31 +330,19 @@ gh auth status --json hosts
 
 # Filter with jq
 gh auth status --json hosts --jq '.hosts | add'
-```
-
-### Switch Accounts
-
-```bash
+```### アカウントを切り替える```bash
 # Interactive switch
 gh auth switch
 
 # Switch to specific user/host
 gh auth switch --hostname github.com --user monalisa
-```
-
-### Token
-
-```bash
+```### トークン```bash
 # Print authentication token
 gh auth token
 
 # Token for specific host/user
 gh auth token --hostname github.com --user monalisa
-```
-
-### Refresh
-
-```bash
+```### 更新```bash
 # Refresh credentials
 gh auth refresh
 
@@ -400,11 +357,7 @@ gh auth refresh --reset-scopes
 
 # With clipboard
 gh auth refresh --clipboard
-```
-
-### Setup Git
-
-```bash
+```### Git のセットアップ```bash
 # Setup git credential helper
 gh auth setup-git
 
@@ -413,11 +366,7 @@ gh auth setup-git --hostname enterprise.internal
 
 # Force setup even if host not known
 gh auth setup-git --hostname enterprise.internal --force
-```
-
-## Browse (gh browse)
-
-```bash
+```## ブラウズ (gh ブラウズ)```bash
 # Open repository in browser
 gh browse
 
@@ -446,13 +395,9 @@ gh browse --wiki          # Wiki page
 
 # Print URL instead of opening
 gh browse --no-browser
-```
+```## リポジトリ (gh リポジトリ)
 
-## Repositories (gh repo)
-
-### Create Repository
-
-```bash
+### リポジトリの作成```bash
 # Create new repository
 gh repo create my-repo
 
@@ -488,11 +433,7 @@ gh repo create my-repo --disable-issues
 
 # Disable wiki
 gh repo create my-repo --disable-wiki
-```
-
-### Clone Repository
-
-```bash
+```### リポジトリのクローンを作成する```bash
 # Clone repository
 gh repo clone owner/repo
 
@@ -501,11 +442,7 @@ gh repo clone owner/repo my-directory
 
 # Clone with different branch
 gh repo clone owner/repo --branch develop
-```
-
-### List Repositories
-
-```bash
+```### リポジトリの一覧表示```bash
 # List all repositories
 gh repo list
 
@@ -529,11 +466,7 @@ gh repo list --limit 100 | tail -n +2
 
 # Filter with jq
 gh repo list --json name --jq '.[].name'
-```
-
-### View Repository
-
-```bash
+```### リポジトリの表示```bash
 # View repository details
 gh repo view
 
@@ -545,11 +478,7 @@ gh repo view --json name,description,defaultBranchRef
 
 # View in browser
 gh repo view --web
-```
-
-### Edit Repository
-
-```bash
+```### リポジトリの編集```bash
 # Edit description
 gh repo edit --description "New description"
 
@@ -577,21 +506,13 @@ gh repo rename new-name
 # Archive repository
 gh repo archive
 gh repo unarchive
-```
-
-### Delete Repository
-
-```bash
+```### リポジトリの削除```bash
 # Delete repository
 gh repo delete owner/repo
 
 # Confirm without prompt
 gh repo delete owner/repo --yes
-```
-
-### Fork Repository
-
-```bash
+```### フォークリポジトリ```bash
 # Fork repository
 gh repo fork owner/repo
 
@@ -603,11 +524,7 @@ gh repo fork owner/repo --clone
 
 # Remote name for fork
 gh repo fork owner/repo --remote-name upstream
-```
-
-### Sync Fork
-
-```bash
+```### 同期フォーク```bash
 # Sync fork with upstream
 gh repo sync
 
@@ -616,11 +533,7 @@ gh repo sync --branch feature
 
 # Force sync
 gh repo sync --force
-```
-
-### Set Default Repository
-
-```bash
+```### デフォルトのリポジトリを設定する```bash
 # Set default repository for current directory
 gh repo set-default
 
@@ -629,11 +542,7 @@ gh repo set-default owner/repo
 
 # Unset default
 gh repo set-default --unset
-```
-
-### Repository Autolinks
-
-```bash
+```### リポジトリの自動リンク```bash
 # List autolinks
 gh repo autolink list
 
@@ -644,11 +553,7 @@ gh repo autolink add \
 
 # Delete autolink
 gh repo autolink delete 12345
-```
-
-### Repository Deploy Keys
-
-```bash
+```### リポジトリ デプロイ キー```bash
 # List deploy keys
 gh repo deploy-key list
 
@@ -659,11 +564,7 @@ gh repo deploy-key add ~/.ssh/id_rsa.pub \
 
 # Delete deploy key
 gh repo deploy-key delete 12345
-```
-
-### Gitignore and License
-
-```bash
+```### Gitignore とライセンス```bash
 # View gitignore template
 gh repo gitignore
 
@@ -672,13 +573,9 @@ gh repo license mit
 
 # License with full name
 gh repo license mit --fullname "John Doe"
-```
+```## 問題 (GH 問題)
 
-## Issues (gh issue)
-
-### Create Issue
-
-```bash
+### 問題の作成```bash
 # Create issue interactively
 gh issue create
 
@@ -704,11 +601,7 @@ gh issue create --repo owner/repo --title "Issue title"
 
 # Create issue from web
 gh issue create --web
-```
-
-### List Issues
-
-```bash
+```### 問題のリストを作成する```bash
 # List all open issues
 gh issue list
 
@@ -745,11 +638,7 @@ gh issue list --json number,title,comments --jq '.[] | [.number, .title, .commen
 
 # Sort by
 gh issue list --sort created --order desc
-```
-
-### View Issue
-
-```bash
+```### 問題を表示```bash
 # View issue
 gh issue view 123
 
@@ -764,11 +653,7 @@ gh issue view 123 --json title,body,state,labels,comments
 
 # View specific fields
 gh issue view 123 --json title --jq '.title'
-```
-
-### Edit Issue
-
-```bash
+```### 問題を編集```bash
 # Edit interactively
 gh issue edit 123
 
@@ -792,11 +677,7 @@ gh issue edit 123 --remove-assignee user1
 
 # Set milestone
 gh issue edit 123 --milestone "v1.0"
-```
-
-### Close/Reopen Issue
-
-```bash
+```### 問題を閉じる/再度開く```bash
 # Close issue
 gh issue close 123
 
@@ -805,11 +686,7 @@ gh issue close 123 --comment "Fixed in PR #456"
 
 # Reopen issue
 gh issue reopen 123
-```
-
-### Comment on Issue
-
-```bash
+```### 問題に関するコメント```bash
 # Add comment
 gh issue comment 123 --body "This looks good!"
 
@@ -818,31 +695,19 @@ gh issue comment 123 --edit 456789 --body "Updated comment"
 
 # Delete comment
 gh issue comment 123 --delete 456789
-```
-
-### Issue Status
-
-```bash
+```### 問題のステータス```bash
 # Show issue status summary
 gh issue status
 
 # Status for specific repository
 gh issue status --repo owner/repo
-```
-
-### Pin/Unpin Issues
-
-```bash
+```### 固定/固定解除の問題```bash
 # Pin issue (pinned to repo dashboard)
 gh issue pin 123
 
 # Unpin issue
 gh issue unpin 123
-```
-
-### Lock/Unlock Issue
-
-```bash
+```### ロック/ロック解除の問題```bash
 # Lock conversation
 gh issue lock 123
 
@@ -851,28 +716,16 @@ gh issue lock 123 --reason off-topic
 
 # Unlock
 gh issue unlock 123
-```
-
-### Transfer Issue
-
-```bash
+```### 転送の問題```bash
 # Transfer to another repository
 gh issue transfer 123 --repo owner/new-repo
-```
-
-### Delete Issue
-
-```bash
+```### 問題の削除```bash
 # Delete issue
 gh issue delete 123
 
 # Confirm without prompt
 gh issue delete 123 --yes
-```
-
-### Develop Issue (Draft PR)
-
-```bash
+```### 問題の作成 (PR 案)```bash
 # Create draft PR from issue
 gh issue develop 123
 
@@ -881,13 +734,9 @@ gh issue develop 123 --branch fix/issue-123
 
 # Create with base branch
 gh issue develop 123 --base main
-```
+```## プル リクエスト (gh pr)
 
-## Pull Requests (gh pr)
-
-### Create Pull Request
-
-```bash
+### プルリクエストを作成する```bash
 # Create PR interactively
 gh pr create
 
@@ -928,11 +777,7 @@ gh pr create --repo owner/repo
 
 # Open in browser after creation
 gh pr create --web
-```
-
-### List Pull Requests
-
-```bash
+```### プルリクエストの一覧表示```bash
 # List open PRs
 gh pr list
 
@@ -975,11 +820,7 @@ gh pr list --json number,title,statusCheckRollup --jq '.[] | [.number, .title, .
 
 # Sort by
 gh pr list --sort created --order desc
-```
-
-### View Pull Request
-
-```bash
+```### プルリクエストを表示```bash
 # View PR
 gh pr view 123
 
@@ -997,11 +838,7 @@ gh pr view 123 --json files --jq '.files[].path'
 
 # View with jq query
 gh pr view 123 --json title,state --jq '"\(.title): \(.state)"'
-```
-
-### Checkout Pull Request
-
-```bash
+```### チェックアウト プル リクエスト```bash
 # Checkout PR branch
 gh pr checkout 123
 
@@ -1010,11 +847,7 @@ gh pr checkout 123 --branch name-123
 
 # Force checkout
 gh pr checkout 123 --force
-```
-
-### Diff Pull Request
-
-```bash
+```### 差分プルリクエスト```bash
 # View PR diff
 gh pr diff 123
 
@@ -1026,11 +859,7 @@ gh pr diff 123 > pr-123.patch
 
 # View diff of specific files
 gh pr diff 123 --name-only
-```
-
-### Merge Pull Request
-
-```bash
+```### プルリクエストをマージする```bash
 # Merge PR
 gh pr merge 123
 
@@ -1050,28 +879,16 @@ gh pr merge 123 --admin
 
 # Force merge (skip checks)
 gh pr merge 123 --admin
-```
-
-### Close Pull Request
-
-```bash
+```### プルリクエストを閉じる```bash
 # Close PR (as draft, not merge)
 gh pr close 123
 
 # Close with comment
 gh pr close 123 --comment "Closing due to..."
-```
-
-### Reopen Pull Request
-
-```bash
+```### プルリクエストを再開する```bash
 # Reopen closed PR
 gh pr reopen 123
-```
-
-### Edit Pull Request
-
-```bash
+```### プルリクエストを編集```bash
 # Edit interactively
 gh pr edit 123
 
@@ -1101,18 +918,10 @@ gh pr edit 123 --remove-reviewer user1
 
 # Mark as ready for review
 gh pr edit 123 --ready
-```
-
-### Ready for Review
-
-```bash
+```### レビューの準備ができました```bash
 # Mark draft PR as ready
 gh pr ready 123
-```
-
-### Pull Request Checks
-
-```bash
+```### プルリクエストのチェック```bash
 # View PR checks
 gh pr checks 123
 
@@ -1121,11 +930,7 @@ gh pr checks 123 --watch
 
 # Watch interval (seconds)
 gh pr checks 123 --watch --interval 5
-```
-
-### Comment on Pull Request
-
-```bash
+```### プルリクエストへのコメント```bash
 # Add comment
 gh pr comment 123 --body "Looks good!"
 
@@ -1139,11 +944,7 @@ gh pr comment 123 --edit 456789 --body "Updated"
 
 # Delete comment
 gh pr comment 123 --delete 456789
-```
-
-### Review Pull Request
-
-```bash
+```### プルリクエストをレビューする```bash
 # Review PR (opens editor)
 gh pr review 123
 
@@ -1159,11 +960,7 @@ gh pr review 123 --comment --body "Some thoughts..."
 
 # Dismiss review
 gh pr review 123 --dismiss
-```
-
-### Update Branch
-
-```bash
+```### ブランチを更新```bash
 # Update PR branch with latest base branch
 gh pr update-branch 123
 
@@ -1172,11 +969,7 @@ gh pr update-branch 123 --force
 
 # Use merge strategy
 gh pr update-branch 123 --merge
-```
-
-### Lock/Unlock Pull Request
-
-```bash
+```### プルリクエストのロック/ロック解除```bash
 # Lock PR conversation
 gh pr lock 123
 
@@ -1185,33 +978,21 @@ gh pr lock 123 --reason off-topic
 
 # Unlock
 gh pr unlock 123
-```
-
-### Revert Pull Request
-
-```bash
+```### プルリクエストを取り消す```bash
 # Revert merged PR
 gh pr revert 123
 
 # Revert with specific branch name
 gh pr revert 123 --branch revert-pr-123
-```
-
-### Pull Request Status
-
-```bash
+```### プルリクエストのステータス```bash
 # Show PR status summary
 gh pr status
 
 # Status for specific repository
 gh pr status --repo owner/repo
-```
+```## GitHub アクション
 
-## GitHub Actions
-
-### Workflow Runs (gh run)
-
-```bash
+### ワークフローの実行 (gh run)```bash
 # List workflow runs
 gh run list
 
@@ -1265,11 +1046,7 @@ gh run download 123456789 --name build
 
 # Download to directory
 gh run download 123456789 --dir ./artifacts
-```
-
-### Workflows (gh workflow)
-
-```bash
+```### ワークフロー (gh ワークフロー)```bash
 # List workflows
 gh workflow list
 
@@ -1299,11 +1076,7 @@ gh workflow run ci.yml \
 
 # Run from specific branch
 gh workflow run ci.yml --ref develop
-```
-
-### Action Caches (gh cache)
-
-```bash
+```### アクション キャッシュ (gh キャッシュ)```bash
 # List caches
 gh cache list
 
@@ -1318,11 +1091,7 @@ gh cache delete 123456789
 
 # Delete all caches
 gh cache delete --all
-```
-
-### Action Secrets (gh secret)
-
-```bash
+```### アクション シークレット (gh シークレット)```bash
 # List secrets
 gh secret list
 
@@ -1343,11 +1112,7 @@ gh secret delete MY_SECRET
 
 # Delete from environment
 gh secret delete MY_SECRET --env production
-```
-
-### Action Variables (gh variable)
-
-```bash
+```### アクション変数 (gh 変数)```bash
 # List variables
 gh variable list
 
@@ -1368,11 +1133,7 @@ gh variable delete MY_VAR
 
 # Delete from environment
 gh variable delete MY_VAR --env production
-```
-
-## Projects (gh project)
-
-```bash
+```## プロジェクト (GH プロジェクト)```bash
 # List projects
 gh project list
 
@@ -1447,11 +1208,7 @@ gh project unlink 123 --id 456 --link-id 789
 
 # View project in browser
 gh project view 123 --web
-```
-
-## Releases (gh release)
-
-```bash
+```## リリース (GH リリース)```bash
 # List releases
 gh release list
 
@@ -1521,11 +1278,7 @@ gh release verify v1.0.0
 
 # Verify specific asset
 gh release verify-asset v1.0.0 file.tar.gz
-```
-
-## Gists (gh gist)
-
-```bash
+```## 要点 (gh 要点)```bash
 # List gists
 gh gist list
 
@@ -1570,11 +1323,7 @@ gh gist clone abc123
 
 # Clone to directory
 gh gist clone abc123 my-directory
-```
-
-## Codespaces (gh codespace)
-
-```bash
+```## コードスペース (gh コードスペース)```bash
 # List codespaces
 gh codespace list
 
@@ -1637,11 +1386,7 @@ gh codespace jupyter
 # Copy files to/from codespace
 gh codespace cp file.txt :/workspaces/file.txt
 gh codespace cp :/workspaces/file.txt ./file.txt
-```
-
-## Organizations (gh org)
-
-```bash
+```## 組織 (gh org)```bash
 # List organizations
 gh org list
 
@@ -1656,11 +1401,7 @@ gh org view orgname
 
 # View organization members
 gh org view orgname --json members --jq '.members[] | .login'
-```
-
-## Search (gh search)
-
-```bash
+```## 検索 (gh 検索)```bash
 # Search code
 gh search code "TODO"
 
@@ -1693,11 +1434,7 @@ gh search code "import" --extension py
 
 # Web search (open in browser)
 gh search prs "is:open" --web
-```
-
-## Labels (gh label)
-
-```bash
+```## ラベル (gh ラベル)```bash
 # List labels
 gh label list
 
@@ -1718,11 +1455,7 @@ gh label clone owner/repo
 
 # Clone to specific repository
 gh label clone owner/repo --repo target/repo
-```
-
-## SSH Keys (gh ssh-key)
-
-```bash
+```## SSH キー (gh ssh-key)```bash
 # List SSH keys
 gh ssh-key list
 
@@ -1737,11 +1470,7 @@ gh ssh-key delete 12345
 
 # Delete by title
 gh ssh-key delete --title "My laptop"
-```
-
-## GPG Keys (gh gpg-key)
-
-```bash
+```## GPG キー (gh gpg-key)```bash
 # List GPG keys
 gh gpg-key list
 
@@ -1753,11 +1482,7 @@ gh gpg-key delete 12345
 
 # Delete by key ID
 gh gpg-key delete ABCD1234
-```
-
-## Status (gh status)
-
-```bash
+```## ステータス (gh ステータス)```bash
 # Show status overview
 gh status
 
@@ -1766,11 +1491,7 @@ gh status --repo owner/repo
 
 # JSON output
 gh status --json
-```
-
-## Configuration (gh config)
-
-```bash
+```## 設定 (gh config)```bash
 # List all config
 gh config list
 
@@ -1789,11 +1510,7 @@ gh config clear-cache
 # Set prompt behavior
 gh config set prompt disabled
 gh config set prompt enabled
-```
-
-## Extensions (gh extension)
-
-```bash
+```## 拡張子 (gh 拡張子)```bash
 # List installed extensions
 gh extension list
 
@@ -1820,11 +1537,7 @@ gh extension browse
 
 # Execute extension command
 gh extension exec my-extension --arg value
-```
-
-## Aliases (gh alias)
-
-```bash
+```## エイリアス (gh エイリアス)```bash
 # List aliases
 gh alias list
 
@@ -1839,11 +1552,7 @@ gh alias delete prview
 
 # Import aliases
 gh alias import ./aliases.sh
-```
-
-## API Requests (gh api)
-
-```bash
+```## API リクエスト (gh API)```bash
 # Make API request
 gh api /user
 
@@ -1893,11 +1602,7 @@ gh api graphql \
       }
     }
   }'
-```
-
-## Rulesets (gh ruleset)
-
-```bash
+```## ルールセット (gh ルールセット)```bash
 # List rulesets
 gh ruleset list
 
@@ -1909,11 +1614,7 @@ gh ruleset check --branch feature
 
 # Check specific repository
 gh ruleset check --repo owner/repo --branch main
-```
-
-## Attestations (gh attestation)
-
-```bash
+```## 証明書 (GH 証明書)```bash
 # Download attestation
 gh attestation download owner/repo \
   --artifact-id 123456
@@ -1923,11 +1624,7 @@ gh attestation verify owner/repo
 
 # Get trusted root
 gh attestation trusted-root
-```
-
-## Completion (gh completion)
-
-```bash
+```## 完了 (gh 完了)```bash
 # Generate shell completion
 gh completion -s bash > ~/.gh-complete.bash
 gh completion -s zsh > ~/.gh-complete.zsh
@@ -1937,21 +1634,13 @@ gh completion -s powershell > ~/.gh-complete.ps1
 # Shell-specific instructions
 gh completion --shell=bash
 gh completion --shell=zsh
-```
-
-## Preview (gh preview)
-
-```bash
+```## プレビュー (gh プレビュー)```bash
 # List preview features
 gh preview
 
 # Run preview script
 gh preview prompter
-```
-
-## Agent Tasks (gh agent-task)
-
-```bash
+```## エージェントタスク (gh エージェントタスク)```bash
 # List agent tasks
 gh agent-task list
 
@@ -1960,31 +1649,27 @@ gh agent-task view 123
 
 # Create agent task
 gh agent-task create --description "My task"
-```
+```## グローバル フラグ
 
-## Global Flags
+|旗 |説明 |
+| ------------------------ | -------------------------------------- |
+| `--help` / `-h` |コマンドのヘルプを表示 |
+| `--version` | gh バージョンを表示 |
+| `--repo [HOST/]OWNER/REPO` |別のリポジトリを選択 |
+| `--hostname HOST` | GitHub ホスト名 |
+| `--jq EXPRESSION` | JSON 出力をフィルターする |
+| `--json FIELDS` |指定されたフィールドを含む JSON を出力する |
+| `--template STRING` | Go テンプレートを使用して JSON をフォーマットする |
+| `--web` |ブラウザで開く |
+| `--paginate` |追加の API 呼び出しを行う |
+| `--verbose` |詳細な出力を表示 |
+| `--debug` |デバッグ出力を表示 |
+| `--timeout SECONDS` | API リクエストの最大期間 |
+| `--cache CACHE` |キャッシュ制御 (デフォルト、強制、バイパス) |
 
-| Flag                       | Description                            |
-| -------------------------- | -------------------------------------- |
-| `--help` / `-h`            | Show help for command                  |
-| `--version`                | Show gh version                        |
-| `--repo [HOST/]OWNER/REPO` | Select another repository              |
-| `--hostname HOST`          | GitHub hostname                        |
-| `--jq EXPRESSION`          | Filter JSON output                     |
-| `--json FIELDS`            | Output JSON with specified fields      |
-| `--template STRING`        | Format JSON using Go template          |
-| `--web`                    | Open in browser                        |
-| `--paginate`               | Make additional API calls              |
-| `--verbose`                | Show verbose output                    |
-| `--debug`                  | Show debug output                      |
-| `--timeout SECONDS`        | Maximum API request duration           |
-| `--cache CACHE`            | Cache control (default, force, bypass) |
+## 出力フォーマット
 
-## Output Formatting
-
-### JSON Output
-
-```bash
+### JSON 出力```bash
 # Basic JSON
 gh repo view --json name,description
 
@@ -1997,11 +1682,7 @@ gh pr list --json number,title --jq '.[] | select(.number > 100)'
 # Complex queries
 gh issue list --json number,title,labels \
   --jq '.[] | {number, title: .title, tags: [.labels[].name]}'
-```
-
-### Template Output
-
-```bash
+```### テンプレートの出力```bash
 # Custom template
 gh repo view \
   --template '{{.name}}: {{.description}}'
@@ -2012,13 +1693,9 @@ gh pr view 123 \
 Author: {{.author.login}}
 State: {{.state}}
 '
-```
+```## 一般的なワークフロー
 
-## Common Workflows
-
-### Create PR from Issue
-
-```bash
+### 課題から PR を作成```bash
 # Create branch from issue
 gh issue develop 123 --branch feature/issue-123
 
@@ -2029,11 +1706,7 @@ git push
 
 # Create PR linking to issue
 gh pr create --title "Fix #123" --body "Closes #123"
-```
-
-### Bulk Operations
-
-```bash
+```### 一括操作```bash
 # Close multiple issues
 gh issue list --search "label:stale" \
   --json number \
@@ -2045,11 +1718,7 @@ gh pr list --search "review:required" \
   --json number \
   --jq '.[].number' | \
   xargs -I {} gh pr edit {} --add-label needs-review
-```
-
-### Repository Setup Workflow
-
-```bash
+```### リポジトリ設定ワークフロー```bash
 # Create repository with initial setup
 gh repo create my-project --public \
   --description "My awesome project" \
@@ -2067,11 +1736,7 @@ git push -u origin develop
 gh label create bug --color "d73a4a" --description "Bug report"
 gh label create enhancement --color "a2eeef" --description "Feature request"
 gh label create documentation --color "0075ca" --description "Documentation"
-```
-
-### CI/CD Workflow
-
-```bash
+```### CI/CD ワークフロー```bash
 # Run workflow and wait
 RUN_ID=$(gh workflow run ci.yml --ref main --jq '.databaseId')
 
@@ -2080,11 +1745,7 @@ gh run watch "$RUN_ID"
 
 # Download artifacts on completion
 gh run download "$RUN_ID" --dir ./artifacts
-```
-
-### Fork Sync Workflow
-
-```bash
+```### フォーク同期ワークフロー```bash
 # Fork repository
 gh repo fork original/repo --clone
 
@@ -2101,13 +1762,9 @@ git fetch upstream
 git checkout main
 git merge upstream/main
 git push origin main
-```
+```## 環境セットアップ
 
-## Environment Setup
-
-### Shell Integration
-
-```bash
+### シェルの統合```bash
 # Add to ~/.bashrc or ~/.zshrc
 eval "$(gh completion -s bash)"  # or zsh/fish
 
@@ -2116,11 +1773,7 @@ alias gs='gh status'
 alias gpr='gh pr view --web'
 alias gir='gh issue view --web'
 alias gco='gh pr checkout'
-```
-
-### Git Configuration
-
-```bash
+```### Git 構成```bash
 # Use gh as credential helper
 gh auth setup-git
 
@@ -2129,42 +1782,19 @@ git config --global credential.helper 'gh !gh auth setup-git'
 
 # Or manually
 git config --global credential.helper github
-```
+```## ベストプラクティス
 
-## Best Practices
-
-1. **Authentication**: Use environment variables for automation
-
-   ```bash
+1. **認証**: 自動化に環境変数を使用する```bash
    export GH_TOKEN=$(gh auth token)
-   ```
-
-2. **Default Repository**: Set default to avoid repetition
-
-   ```bash
+   ```2. **デフォルト リポジトリ**: 繰り返しを避けるためにデフォルトを設定します。```bash
    gh repo set-default owner/repo
-   ```
-
-3. **JSON Parsing**: Use jq for complex data extraction
-
-   ```bash
+   ```3. **JSON 解析**: 複雑なデータ抽出には jq を使用します```bash
    gh pr list --json number,title --jq '.[] | select(.title | contains("fix"))'
-   ```
-
-4. **Pagination**: Use --paginate for large result sets
-
-   ```bash
+   ```4. **ページネーション**: 大きな結果セットには --paginate を使用します```bash
    gh issue list --state all --paginate
-   ```
-
-5. **Caching**: Use cache control for frequently accessed data
-   ```bash
+   ```5. **キャッシュ**: 頻繁にアクセスされるデータにはキャッシュ制御を使用します```bash
    gh api /user --cache force
-   ```
-
-## Getting Help
-
-```bash
+   ```## 助けを求める```bash
 # General help
 gh --help
 
@@ -2177,11 +1807,9 @@ gh help formatting
 gh help environment
 gh help exit-codes
 gh help accessibility
-```
+```## 参考文献
 
-## References
-
-- Official Manual: https://cli.github.com/manual/
-- GitHub Docs: https://docs.github.com/en/github-cli
+- 公式マニュアル: https://cli.github.com/manual/
+- GitHub ドキュメント: https://docs.github.com/en/github-cli
 - REST API: https://docs.github.com/en/rest
 - GraphQL API: https://docs.github.com/en/graphql

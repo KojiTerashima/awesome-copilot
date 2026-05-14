@@ -1,106 +1,98 @@
-# Validating Evaluators (TypeScript)
+# エバリュエーターの検証 (TypeScript)
 
-Validate an LLM evaluator against human-labeled examples before deploying it.
-Target: **>80% TPR and >80% TNR**.
+LLM エバリュエーターをデプロイする前に、人間がラベルを付けたサンプルに対して検証します。
+目標: **>80% TPR および >80% TNR**。
 
-Roles are inverted compared to a normal task experiment:
+通常のタスク実験と比べて役割が逆転します。
 
-| Normal experiment | Evaluator validation |
+|通常の実験 |評価者の検証 |
 |---|---|
-| Task = agent logic | Task = run the evaluator under test |
-| Evaluator = judge output | Evaluator = exact-match vs human ground truth |
-| Dataset = agent examples | Dataset = golden hand-labeled examples |
+|タスク = エージェント ロジック |タスク = テスト中のエバリュエーターを実行します |
+|評価者 = 出力を判断する |評価者 = 完全一致 vs 人間のグラウンド トゥルース |
+|データセット = エージェントの例 |データセット = 手動でラベル付けされた黄金の例 |
 
-## Golden Dataset
+## ゴールデン データセット
 
-Use a separate dataset name so validation experiments don't mix with task experiments in Phoenix.
-Store human ground truth in `metadata.groundTruthLabel`. Aim for ~50/50 balance:
-
-```typescript
+検証実験が Phoenix でのタスク実験と混合しないように、別のデータセット名を使用します。
+人間のグラウンド トゥルースを `metadata.groundTruthLabel` に保存します。 ~50/50 のバランスを目指します:```タイプスクリプト
 import type { Example } from "@arizeai/phoenix-client/types/datasets";
 
-const goldenExamples: Example[] = [
-  { input: { q: "Capital of France?" }, output: { answer: "Paris" },       metadata: { groundTruthLabel: "correct" } },
-  { input: { q: "Capital of France?" }, output: { answer: "Lyon" },        metadata: { groundTruthLabel: "incorrect" } },
-  { input: { q: "Capital of France?" }, output: { answer: "Major city..." }, metadata: { groundTruthLabel: "incorrect" } },
+const gold例: 例[] = [
+  { input: { q: 「フランスの首都？」 }、出力: { 回答: "パリ" }、メタデータ: { groundTruthLabel: "正しい" } }、
+  { input: { q: 「フランスの首都？」 }、出力: { 回答: "リヨン" }、メタデータ: { groundTruthLabel: "不正" } }、
+  { input: { q: 「フランスの首都？」 }、出力: { 回答: "主要都市..." }、メタデータ: { groundTruthLabel: "不正" } }、
 ];
 
-const VALIDATOR_DATASET = "my-app-qa-evaluator-validation"; // separate from task dataset
-const POSITIVE_LABEL = "correct";
-const NEGATIVE_LABEL = "incorrect";
-```
-
-## Validation Experiment
-
-```typescript
-import { createClient } from "@arizeai/phoenix-client";
+const VALIDATOR_DATASET = "my-app-qa-evaluator-validation"; // タスク データセットから分離する
+const POSITIVE_LABEL = "正しい";
+const NEGATIVE_LABEL = "間違っています";
+「」## 検証実験```タイプスクリプト
+import { createClient } から "@arizeai/phoenix-client";
 import { createOrGetDataset, getDatasetExamples } from "@arizeai/phoenix-client/datasets";
 import { asExperimentEvaluator, runExperiment } from "@arizeai/phoenix-client/experiments";
-import { myEvaluator } from "./myEvaluator.js";
+import { myEvaluator } から "./myEvaluator.js";
 
 const client = createClient();
 
-const { datasetId } = await createOrGetDataset({ client, name: VALIDATOR_DATASET, examples: goldenExamples });
-const { examples } = await getDatasetExamples({ client, dataset: { datasetId } });
+const { datasetId } = await createOrGetDataset({ クライアント、名前: VALIDATOR_DATASET、例: goldExamples });
+const { 例 } = await getDatasetExamples({ client, dataset: { datasetId } });
 const groundTruth = new Map(examples.map((ex) => [ex.id, ex.metadata?.groundTruthLabel as string]));
 
-// Task: invoke the evaluator under test
-const task = async (example: (typeof examples)[number]) => {
-  const result = await myEvaluator.evaluate({ input: example.input, output: example.output, metadata: example.metadata });
-  return result.label ?? "unknown";
+// タスク: テスト対象のエバリュエーターを呼び出します
+const task = async (例: (例の種類)[数値]) => {
+  const result = await myEvaluator.evaluate({ 入力: example.input, 出力: example.output, メタデータ: example.metadata });
+  result.labelを返す ?? "未知";
 };
 
-// Evaluator: exact-match against human ground truth
-const exactMatch = asExperimentEvaluator({
-  name: "exact-match", kind: "CODE",
-  evaluate: ({ output, metadata }) => {
-    const expected = metadata?.groundTruthLabel as string;
-    const predicted = typeof output === "string" ? output : "unknown";
-    return { score: predicted === expected ? 1 : 0, label: predicted, explanation: `Expected: ${expected}, Got: ${predicted}` };
-  },
+// 評価者: 人間のグラウンド トゥルースとの完全一致
+const strictMatch = asExperimentEvaluator({
+  名前: "完全一致"、種類: "CODE"、
+  評価: ({ 出力, メタデータ }) => {
+    const Expected = 文字列としてのメタデータ?.groundTruthLabel;
+    const 予測 = 出力のタイプ === "文字列" ?出力: "不明";
+    return { スコア: 予測 === 期待される ? 1 : 0、ラベル: 予測、説明: `Expected: ${expected}, Got: ${predicted}` };
+  }、
 });
 
-const experiment = await runExperiment({
-  client, experimentName: `evaluator-validation-${Date.now()}`,
-  dataset: { datasetId }, task, evaluators: [exactMatch],
+const 実験 = await runExperiment({
+  クライアント、実験名: `evaluator-validation-${Date.now()}`、
+  データセット: { datasetId }、タスク、評価子: [exactMatch]、
 });
 
-// Compute confusion matrix
-const runs = Object.values(experiment.runs);
-const predicted = new Map((experiment.evaluationRuns ?? [])
-  .filter((e) => e.name === "exact-match")
+// 混同行列を計算する
+const 実行 = Object.values(experiment.runs);
+const予測 = new Map((experiment.evaluationRuns ?? [])
+  .filter((e) => e.name === "完全一致")
   .map((e) => [e.experimentRunId, e.result?.label ?? null]));
 
-let tp = 0, fp = 0, tn = 0, fn = 0;
-for (const run of runs) {
-  if (run.error) continue;
-  const p = predicted.get(run.id), a = groundTruth.get(run.datasetExampleId);
-  if (!p || !a) continue;
+tp = 0、fp = 0、tn = 0、fn = 0 とします。
+for (実行の定数実行) {
+  if (run.error) 続行;
+  const p =predicted.get(run.id), a = groundTruth.get(run.datasetExampleId);
+  if (!p || !a) 続行;
   if (a === POSITIVE_LABEL && p === POSITIVE_LABEL) tp++;
   else if (a === NEGATIVE_LABEL && p === POSITIVE_LABEL) fp++;
   else if (a === NEGATIVE_LABEL && p === NEGATIVE_LABEL) tn++;
   else if (a === POSITIVE_LABEL && p === NEGATIVE_LABEL) fn++;
 }
-const total = tp + fp + tn + fn;
+const 合計 = tp + fp + tn + fn;
 const tpr = tp + fn > 0 ? (tp / (tp + fn)) * 100 : 0;
 const tnr = tn + fp > 0 ? (tn / (tn + fp)) * 100 : 0;
 console.log(`TPR: ${tpr.toFixed(1)}%  TNR: ${tnr.toFixed(1)}%  Accuracy: ${((tp + tn) / total * 100).toFixed(1)}%`);
-```
+「」## 結果と品質ルール
 
-## Results & Quality Rules
-
-| Metric | Target | Low value means |
+|メトリック |ターゲット |低い値は | を意味します。
 |---|---|---|
-| TPR (sensitivity) | >80% | Misses real failures (false negatives) |
-| TNR (specificity) | >80% | Flags good outputs (false positives) |
-| Accuracy | >80% | General weakness |
+| TPR（感度） | >80% |本当の失敗 (偽陰性) を見逃す |
+| TNR (特異性) | >80% |正常な出力にフラグを立てます (偽陽性)。
+|精度 | >80% |一般的な弱点 |
 
-**Golden dataset rules:** ~50/50 balance · include edge cases · human-labeled only · never mutate (append new versions) · 20–50 examples is enough.
+**データセットのゴールデン ルール:** ~50/50 バランス · エッジ ケースを含む · 人間によるラベルのみ · 変異しない (新しいバージョンを追加する) · 20 ～ 50 個のサンプルで十分。
 
-**Re-validate when:** prompt template changes · judge model changes · criteria updated · production FP/FN spike.
+**次の場合に再検証します。** テンプレートの変更を促す、モデルの変更を判断する、基準を更新する、実稼働 FP/FN のスパイク。
 
-## See Also
+## 関連項目
 
-- `validation.md` — Metric definitions and concepts
+- `validation.md` — メトリクスの定義と概念
 - `experiments-running-typescript.md` — `runExperiment` API
 - `experiments-datasets-typescript.md` — `createOrGetDataset` / `getDatasetExamples`

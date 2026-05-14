@@ -1,367 +1,337 @@
-# Platform Design Guidelines Reference
+# プラットフォーム設計ガイドラインのリファレンス
 
-## Mobile Design Fundamentals
+## モバイルデザインの基礎
 
-### Screen Sizes
+### 画面サイズ
 
-| Device | Size | Design At |
+|デバイス |サイズ |デザインアット |
 | ------ | ---- | --------- |
-| iPhone SE | 375×667 | Small mobile |
-| iPhone 14/15 | 390×844 | Standard mobile |
-| iPhone 14 Pro Max | 430×932 | Large mobile |
-| Android small | 360×640 | Minimum target |
-| Android large | 412×915 | Large Android |
+| iPhone SE | 375×667 |小型モバイル |
+| iPhone 14/15 | 390×844 |標準モバイル |
+| iPhone 14 Pro Max | 430×932 |大型モバイル |
+|アンドロイド小型 | 360×640 |最小目標 |
+|アンドロイド大 | 412×915 |大型アンドロイド |
 
-### Safe Areas
+### 安全なエリア```テキスト
+┌───────────────────┐
+│ ▓▓▓▓▓▓▓ ステータスバー ▓▓▓▓▓▓▓▓▓▓ │ 44-47px
+------------------------------------------------------------------------------------┤
+│ │
+│ 安全なコンテンツエリア │
+│ │
+│ │
+------------------------------------------------------------------------------------┤
+│ ▓▓▓▓▓▓ ホームインジケーター ▓▓▓▓▓▓▓ │ 34px
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────┐
-│ ▓▓▓▓▓▓▓ Status Bar ▓▓▓▓▓▓▓▓▓▓ │ 44-47px
-├─────────────────────────────────┤
-│                                 │
-│      Safe Content Area          │
-│                                 │
-│                                 │
-├─────────────────────────────────┤
-│ ▓▓▓▓▓▓ Home Indicator ▓▓▓▓▓▓▓ │ 34px
-└─────────────────────────────────┘
+「」### タッチターゲット
 
-```
-
-### Touch Targets
-
-- **Minimum:** 44×44pt (iOS) / 48×48dp (Android)
-- **Recommended:** 48×48px for all platforms
-- **Spacing:** Minimum 8px between targets
+- **最小:** 44×44pt (iOS) / 48×48dp (Android)
+- **推奨:** すべてのプラットフォームで 48×48px
+- **間隔:** ターゲット間の最小 8 ピクセル
 
 ---
 
-## iOS Human Interface Guidelines (HIG)
+## iOS ヒューマン インターフェイス ガイドライン (HIG)
 
-### Design Philosophy
+### 設計哲学
 
-- **Clarity:** Text is legible, icons precise, adornments subtle
-- **Deference:** UI helps people understand content, never competes
-- **Depth:** Distinct visual layers convey hierarchy
+- **明瞭さ:** テキストは読みやすく、アイコンは正確で、装飾は微妙です
+- **敬意:** UI は人々がコンテンツを理解するのに役立ちますが、競合することはありません
+- **深さ:** 明確なビジュアルレイヤーが階層を伝える
 
-### Navigation Patterns
+### ナビゲーション パターン
 
-| Pattern | When to Use |
+|パターン |いつ使用するか |
 | ------- | ----------- |
-| Tab Bar | 3-5 top-level destinations |
-| Navigation Bar | Hierarchical content |
-| Sidebar | iPad, rich content apps |
-| Search | Content discovery |
+|タブバー | 3 ～ 5 つのトップレベルの宛先 |
+|ナビゲーションバー |階層コンテンツ |
+|サイドバー | iPad、リッチコンテンツアプリ |
+|検索 |コンテンツの発見 |
 
-### Tab Bar Specifications
+### タブバーの仕様```テキスト
+┌───────────────────┐
+│ 🏠 🔍 ➕ 💬 👤 │
+│ ホーム検索 チャットプロフィールの追加 │ 高さ 49pt
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────┐
-│  🏠    🔍    ➕    💬    👤    │
-│ Home  Search Add  Chat  Profile │ 49pt height
-└─────────────────────────────────┘
+「」- 最大 5 つのタブ
+- アイコン 25×25pt、ラベル 10pt
+- アクティブなタブは塗りつぶし/色合いの色を使用します
+- 非アクティブなタブには灰色が使用されます
 
-```
+### ナビゲーションバー```テキスト
+┌───────────────────┐
+│ « バックページのタイトルアクション │ 最小 44 ポイント
+━━━━━━━━━━━━━━┘
 
-- Max 5 tabs
-- Icons 25×25pt with 10pt labels
-- Active tab uses fill/tint color
-- Inactive tabs use gray
+「」- 左: 戻るボタンまたはキャンセル
+- 中央: タイトル
+- 右: 主要なアクション (テキストまたはアイコン)
 
-### Navigation Bar
+### タイポグラフィー (SF Pro)
 
-```text
-┌─────────────────────────────────┐
-│ ‹ Back    Page Title    Action │ 44pt minimum
-└─────────────────────────────────┘
-
-```
-
-- Left: Back button or cancel
-- Center: Title
-- Right: Primary action (text or icon)
-
-### Typography (SF Pro)
-
-| Style | Size | Weight |
+|スタイル |サイズ |重量 |
 | ----- | ---- | ------ |
-| Large Title | 34pt | Bold |
-| Title 1 | 28pt | Bold |
-| Title 2 | 22pt | Bold |
-| Title 3 | 20pt | Semibold |
-| Headline | 17pt | Semibold |
-| Body | 17pt | Regular |
-| Callout | 16pt | Regular |
-| Subhead | 15pt | Regular |
-| Footnote | 13pt | Regular |
-| Caption | 12pt | Regular |
+|大きいタイトル | 34pt |太字 |
+|タイトル 1 | 28pt |太字 |
+|タイトル 2 | 22pt |太字 |
+|タイトル 3 | 20pt |半太字 |
+|見出し | 17pt |半太字 |
+|本文 | 17pt |レギュラー |
+|吹き出し | 16pt |レギュラー |
+|小見出し | 15pt |レギュラー |
+|脚注 | 13pt |レギュラー |
+|キャプション | 12pt |レギュラー |
 
-### iOS Colors (System)
+### iOS カラー (システム)
 
-| Color | Light | Dark |
+|色 |ライト |ダーク |
 | ----- | ----- | ---- |
-| Label | #000000 | #FFFFFF |
-| Secondary Label | #3C3C43 @ 60% | #EBEBF5 @ 60% |
-| Tertiary Label | #3C3C43 @ 30% | #EBEBF5 @ 30% |
-| System Blue | #007AFF | #0A84FF |
-| System Green | #34C759 | #30D158 |
-| System Red | #FF3B30 | #FF453A |
-| System Orange | #FF9500 | #FF9F0A |
+|ラベル | #000000 | #FFFFFF |
+|二次ラベル | #3C3C43 @ 60% | #EBEBF5 @ 60% |
+|三次ラベル | #3C3C43 @ 30% | #EBEBF5 @ 30% |
+|システムブルー | #007AFF | #0A84FF |
+|システムグリーン | #34C759 | #30D158 |
+|システムレッド | #FF3B30 | #FF453A |
+|システムオレンジ | #FF9500 | #FF9F0A |
 
-### iOS-Specific Patterns
+### iOS 固有のパターン
 
-- **Swipe gestures:** Delete, archive, actions
-- **Pull to refresh:** Standard list refresh
-- **Long press:** Context menus
-- **Haptic feedback:** Confirm actions
-- **Edge swipe:** Back navigation
+- **スワイプ ジェスチャ:** 削除、アーカイブ、アクション
+- **プルして更新:** 標準リスト更新
+- **長押し:** コンテキスト メニュー
+- **触覚フィードバック:** アクションを確認します
+- **エッジ スワイプ:** 戻るナビゲーション
 
 ---
 
-## Android Material Design
+## Android マテリアル デザイン
 
-### Android Design Philosophy
+### Android の設計哲学
 
-- **Material as metaphor:** Physical properties, elevation
-- **Bold, graphic, intentional:** Deliberate color, typography, space
-- **Motion provides meaning:** Feedback and continuity
+- **比喩としての材料:** 物理的特性、高さ
+- **大胆、グラフィック、意図的:** 意図的な色、タイポグラフィー、スペース
+- **動きは意味を提供します:** フィードバックと継続性
 
-### Android Navigation Patterns
+### Android ナビゲーション パターン
 
-| Pattern | When to Use |
+|パターン |いつ使用するか |
 | ------- | ----------- |
-| Bottom Navigation | 3-5 top destinations |
-| Navigation Drawer | 5+ destinations, less frequent |
-| Navigation Rail | Tablet landscape |
-| Tabs | Related content groups |
+|下部ナビゲーション |上位 3 ～ 5 の目的地 |
+|ナビゲーションドロワー | 5 か所以上の目的地、頻度は少ない |
+|ナビゲーションレール |タブレットの風景 |
+|タブ |関連コンテンツグループ |
 
-### Bottom Navigation
+### 下部ナビゲーション```テキスト
+┌───────────────────┐
+│ 🏠 🔍 📷 💬 👤 │
+│ ホーム検索カメラチャットアカウント│ 80dp 高さ
+━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────┐
-│  🏠    🔍    📷    💬    👤    │
-│ Home  Search Camera Chat Account│ 80dp height
-└─────────────────────────────────┘
+「」- 3 ～ 5 つの目的地
+- アイコン 24dp、12sp ラベル
+- アクティブ: 塗りつぶされたアイコン + 原色
+- 非アクティブ: 輪郭付きアイコン + 表面上
 
-```
+### アプリバー```テキスト
+┌───────────────────┐
+│ ≡ アプリタイトル 🔍 │ 高さ 64dp
+━━━━━━━━━━━━━━┘
 
-- 3-5 destinations
-- Icons 24dp with 12sp labels
-- Active: filled icon + primary color
-- Inactive: outlined icon + on-surface
+「」- 左: ナビゲーション アイコン (メニューまたは戻る)
+- 中央：タイトル（左寄せ可能）
+- 右：アクションアイコン（最大3つ）
 
-### App Bar
+### フローティング アクション ボタン (FAB)
 
-```text
-┌─────────────────────────────────┐
-│ ≡  App Title                🔍 │ 64dp height
-└─────────────────────────────────┘
+- **サイズ:** 56 dp 標準、40 dp ミニ
+- **位置:** 右下、端から 16 dp
+- **目的:** 主なアクションのみ
+- **動作:** スクロール時に非表示にすることができます
 
-```
+### タイポグラフィー (ロボト)
 
-- Left: Navigation icon (menu or back)
-- Center: Title (can be left-aligned)
-- Right: Action icons (max 3)
-
-### Floating Action Button (FAB)
-
-- **Size:** 56dp standard, 40dp mini
-- **Position:** Bottom right, 16dp from edges
-- **Purpose:** Primary action only
-- **Behavior:** Can hide on scroll
-
-### Typography (Roboto)
-
-| Style | Size | Weight | Tracking |
+|スタイル |サイズ |重量 |追跡 |
 | ----- | ---- | ------ | -------- |
-| Display Large | 57sp | Regular | -0.25 |
-| Display Medium | 45sp | Regular | 0 |
-| Display Small | 36sp | Regular | 0 |
-| Headline Large | 32sp | Regular | 0 |
-| Headline Medium | 28sp | Regular | 0 |
-| Headline Small | 24sp | Regular | 0 |
-| Title Large | 22sp | Regular | 0 |
-| Title Medium | 16sp | Medium | 0.15 |
-| Title Small | 14sp | Medium | 0.1 |
-| Body Large | 16sp | Regular | 0.5 |
-| Body Medium | 14sp | Regular | 0.25 |
-| Body Small | 12sp | Regular | 0.4 |
-| Label Large | 14sp | Medium | 0.1 |
-| Label Medium | 12sp | Medium | 0.5 |
-| Label Small | 11sp | Medium | 0.5 |
+|大きく表示 | 57sp |レギュラー | -0.25 |
+|表示媒体 | 45sp |レギュラー | 0 |
+|小さい表示 | 36sp |レギュラー | 0 |
+|見出し大 | 32sp |レギュラー | 0 |
+|見出し媒体 | 28sp |レギュラー | 0 |
+|見出し小 | 24sp |レギュラー | 0 |
+|タイトル大 | 22sp |レギュラー | 0 |
+|タイトル 媒体 | 16sp |中 | 0.15 |
+|タイトル小 | 14sp |中 | 0.1 |
+|ボディ大 | 16sp |レギュラー | 0.5 |
+|ボディミディアム | 14sp |レギュラー | 0.25 |
+|体が小さい | 12sp |レギュラー | 0.4 |
+|ラベル大 | 14sp |中 | 0.1 |
+|ラベル媒体 | 12sp |中 | 0.5 |
+|ラベル小 | 11sp |中 | 0.5 |
 
-### Material Colors
+### 素材の色
 
-| Role | Purpose |
+|役割 |目的 |
 | ---- | ------- |
-| Primary | Main brand color |
-| On Primary | Text/icons on primary |
-| Primary Container | Filled buttons, active states |
-| Secondary | Less prominent components |
-| Tertiary | Contrast, balance |
-| Error | Error states |
-| Surface | Card backgrounds |
-| On Surface | Text on surfaces |
-| Outline | Borders, dividers |
+|プライマリー |主要ブランドカラー |
+|プライマリ上 |プライマリのテキスト/アイコン |
+|プライマリコンテナ |塗りつぶされたボタン、アクティブな状態 |
+|二次 |あまり目立たないコンポーネント |
+|三次 |コントラスト、バランス |
+|エラー |エラー状態 |
+|表面 |カードの背景 |
+|表面上 |表面上のテキスト |
+|概要 |ボーダー、ディバイダー |
 
-### Elevation (Shadows)
+### 標高 (影)
 
-| Level | Elevation | Use Case |
+|レベル |標高 |使用例 |
 | ----- | --------- | -------- |
-| 0 | 0dp | Flat surfaces |
-| 1 | 1dp | Cards, raised buttons |
-| 2 | 3dp | Elevated cards |
-| 3 | 6dp | FAB resting |
-| 4 | 8dp | Dialogs, pickers |
-| 5 | 12dp | FAB pressed |
+| 0 | 0dp |平面 |
+| 1 | 1dp |カード、隆起ボタン | 写真 カード、隆起ボタン
+| 2 | 3dp |強化されたカード |
+| 3 | 6dp | FAB休憩 |
+| 4 | 8dp |ダイアログ、ピッカー |
+| 5 | 12dp | FAB が押されました |
 
-### Android-Specific Patterns
+### Android 固有のパターン
 
-- **Snackbar:** Brief feedback at bottom
-- **Bottom sheet:** Additional content/actions
-- **Chips:** Filter, input, choice, action
-- **Speed dial FAB:** Multiple related actions
+- **スナックバー:** 下部に簡単なフィードバック
+- **下のシート:** 追加のコンテンツ/アクション
+- **チップ:** フィルター、入力、選択、アクション
+- **スピード ダイヤル FAB:** 複数の関連アクション
 
 ---
 
-## Responsive Web Design
+## レスポンシブ Web デザイン
 
-### Breakpoints
+### ブレークポイント
 
-| Name | Width | Typical Device |
+|名前 |幅 |代表的なデバイス |
 | ---- | ----- | -------------- |
-| xs | <576px | Mobile portrait |
-| sm | 576-767px | Mobile landscape |
-| md | 768-991px | Tablet |
-| lg | 992-1199px | Small desktop |
-| xl | 1200-1399px | Desktop |
-| xxl | ≥1400px | Large desktop |
+| xs | <576ピクセル |モバイルポートレート |
+| sm | 576-767ピクセル |モバイルの風景 |
+| MD | 768-991ピクセル |タブレット |
+| LG | 992-1199ピクセル |小型デスクトップ |
+| XL | 1200-1399ピクセル |デスクトップ |
+| xxl | ≥1400ピクセル |大型デスクトップ |
 
-### Grid System
+### グリッドシステム
 
-- **Columns:** 12-column grid standard
-- **Gutters:** 16-24px between columns
-- **Margins:** 16px (mobile) to 64px (desktop)
-- **Max content width:** 1200-1440px
+- **列:** 12 列グリッド標準
+- **ガター:** 列間は 16 ～ 24 ピクセル
+- **マージン:** 16 ピクセル (モバイル) ～ 64 ピクセル (デスクトップ)
+- **コンテンツの最大幅:** 1200-1440px
 
-### Responsive Typography
-
-```text
-Mobile (base):
-  Body: 16px
+### レスポンシブ タイポグラフィ```テキスト
+モバイル (ベース):
+  本体: 16px
   H1: 28-32px
   H2: 22-24px
   
-Tablet:
-  Body: 16px
-  H1: 32-40px
+タブレット:
+  本体: 16px
+  H1: 32-40ピクセル
   H2: 24-28px
   
-Desktop:
-  Body: 16-18px
+デスクトップ:
+  本体: 16-18px
   H1: 40-56px
   H2: 28-36px
 
-```
+「」### モバイルファーストのアプローチ
 
-### Mobile-First Approach
+1. 最初に最小画面を設計します。
+2. 画面が大きくなるにつれて複雑さが増す
+3. コンテンツの優先順位: 何が重要ですか?
+4. パフォーマンス: モバイル用に最小化
+5. タッチファーストのインタラクション
 
-1. Design for smallest screen first
-2. Add complexity for larger screens
-3. Content priority: What's essential?
-4. Performance: Minimize for mobile
-5. Touch-first interactions
+### 応答パターン
 
-### Responsive Patterns
-
-| Pattern | Description |
+|パターン |説明 |
 | ------- | ----------- |
-| Stack | Columns become rows on mobile |
-| Reflow | Content reorders based on priority |
-| Reveal | More content shown at larger sizes |
-| Off-canvas | Navigation slides in on mobile |
-| Scale | Elements scale proportionally |
+|スタック |モバイルでは列が行になります |
+|リフロー |優先度に基づいてコンテンツを並べ替える |
+|明らかにする |大きなサイズでより多くのコンテンツが表示される |
+|オフキャンバス |モバイルではナビゲーションがスライドイン |
+|スケール |要素は比例的に拡大縮小します |
 
 ---
 
-## Desktop Applications
+## デスクトップ アプリケーション
 
-### Window Chrome
+### ウィンドウクローム```テキスト
+┌─────────────────────┐
+│ ● ● ● アプリタイトル ─ □ × │ タイトルバー
+├───┬───────────────┤
+│ サイドバー│ コンテンツエリア │
+│ │ │
+│ │ │
+│ │ │
+│ ----------------------------------------------------------------------┤
+│ │ ステータスバー │
+━━━━━━━━━━━━━━━━━━━━━━┘
 
-```text
-┌─────────────────────────────────────────┐
-│ ● ● ●   App Title              ─ □ ×  │ Title bar
-├────────┬────────────────────────────────┤
-│ Sidebar│ Content Area                   │
-│        │                                │
-│        │                                │
-│        │                                │
-│        ├────────────────────────────────┤
-│        │ Status Bar                     │
-└────────┴────────────────────────────────┘
+「」### キーボードファーストのデザイン
 
-```
+- すべてのアクションはキーボードからアクセス可能
+- 表示されるキーボード ショートカット
+- タブオーダーのフォーカス管理
+- 検索/コマンドパレット(Cmd/Ctrl+K)
 
-### Keyboard-First Design
+### ホバー状態
 
-- All actions accessible via keyboard
-- Visible keyboard shortcuts
-- Focus management for tab order
-- Search/command palette (Cmd/Ctrl+K)
+デスクトップにはホバーがあります (モバイルにはありません):
 
-### Hover States
+- ホバー時に追加情報を表示します
+- クリックする前にアクションをプレビューする
+- アイコンのみのボタンのツールチップ
+- ホバー時のドロップダウン メニュー
 
-Desktop has hover (mobile doesn't):
+### 高密度の情報
 
-- Show additional info on hover
-- Preview actions before click
-- Tooltips for icon-only buttons
-- Dropdown menus on hover
+デスクトップでは次のことが可能になります。
 
-### Dense Information
-
-Desktop allows for:
-
-- Smaller touch targets (32px min)
-- More visible information
-- Complex tables and data grids
-- Multi-column layouts
-- Side-by-side comparisons
+- より小さいタッチ ターゲット (最小 32 ピクセル)
+- より多くの目に見える情報
+- 複雑なテーブルとデータグリッド
+- 複数列のレイアウト
+- 並べて比較
 
 ---
 
-## Cross-Platform Considerations
+## クロスプラットフォームの考慮事項
 
-### Shared Principles
+### 共有原則
 
-- Consistent brand identity
-- Same core user flows
-- Synchronized data/state
-- Familiar information architecture
+- 一貫したブランドアイデンティティ
+- 同じコアユーザーフロー
+- 同期されたデータ/状態
+- 使い慣れた情報アーキテクチャ
 
-### Platform-Specific Adaptations
+### プラットフォーム固有の適応
 
-| Aspect | iOS | Android | Web |
+|側面 | iOS |アンドロイド |ウェブ |
 | ------ | --- | ------- | --- |
-| Back | Left nav | Left or gesture | Browser back |
-| Primary action | Right nav | FAB | Top right button |
-| Lists | Swipe actions | Long press | Hover actions |
-| Menus | Action sheets | Bottom sheet | Dropdown/context |
-| Alerts | Centered modal | Centered modal | Various positions |
+|戻る |左ナビゲーション |左またはジェスチャー |ブラウザ戻る |
+|主なアクション |右ナビゲーション | FAB |右上のボタン |
+|リスト |スワイプアクション |長押し |ホバーアクション |
+|メニュー |アクションシート |ボトムシート |ドロップダウン/コンテキスト |
+|アラート |中央揃えのモーダル |中央揃えのモーダル |さまざまなポジション |
 
-### Design Tokens Across Platforms
+### プラットフォーム全体でトークンを設計する
 
-Create platform-agnostic tokens:
+プラットフォームに依存しないトークンを作成します。```テキスト
+// 間隔
+間隔-sm: 8
+間隔-MD: 16
+間隔-lg: 24
 
-```text
-// Spacing
-spacing-sm: 8
-spacing-md: 16
-spacing-lg: 24
+// これらはプラットフォーム単位にマッピングされます
+iOS：ポイント（pt）
+Android: 密度に依存しないピクセル (dp)
+ウェブ: ピクセル (px) または rem
 
-// These map to platform units
-iOS: points (pt)
-Android: density-independent pixels (dp)
-Web: pixels (px) or rem
-
-```
+「」

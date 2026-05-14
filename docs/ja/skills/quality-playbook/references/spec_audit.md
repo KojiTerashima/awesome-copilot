@@ -1,144 +1,138 @@
-# Council of Three Spec Audit Protocol (File 5)
+# 三者協議会仕様監査プロトコル (ファイル 5)
 
-This is a static analysis protocol — AI models read the code and compare it to specifications. No code is executed. It catches a different class of problem than testing: spec-code divergence, undocumented features, phantom specs, and missing implementations.
+これは静的分析プロトコルであり、AI モデルがコードを読み取り、仕様と比較します。コードは実行されません。これは、仕様とコードの相違、文書化されていない機能、架空の仕様、実装の欠落など、テストとは異なる種類の問題を検出します。
 
-## Why Three Models?
+## なぜ 3 つのモデルがあるのでしょうか?
 
-Different AI models have different blind spots — they're confident about different things and miss different things. Cross-referencing three independent reviews catches defects that any single model would miss.
+AI モデルが異なれば、盲点も異なります。さまざまな点について自信を持ち、異なる点を見逃します。 3 つの独立したレビューを相互参照することで、単一のモデルでは見逃してしまう欠陥を発見します。
 
-## Template
+＃＃ テンプレート```マークダウン
+# 仕様監査プロトコル: [プロジェクト名]
 
-```markdown
-# Spec Audit Protocol: [Project Name]
+## 最終的な監査プロンプト
 
-## The Definitive Audit Prompt
-
-Give this prompt identically to three independent AI tools (e.g., Claude, GPT, Gemini).
+このプロンプトを 3 つの独立した AI ツール (Claude、GPT、Gemini など) に同じように与えます。
 
 ---
 
-**Context files to read:**
-1. [List all spec/intent documents with paths]
-2. [Architecture docs]
-3. [Design decision records]
+**読み取るコンテキスト ファイル:**
+1. [すべての仕様/意図ドキュメントをパスとともにリストする]
+2. [アーキテクチャドキュメント]
+3. 【設計決定記録】
 
-**Task:** Act as the Tester. Read the actual code in [source directories] and compare it against the specifications listed above.
+**タスク:** テスターとして行動します。 [ソース ディレクトリ] 内の実際のコードを読み取り、上記の仕様と比較します。
 
-**Requirement confidence tiers:**
-Requirements are tagged with `[Req: tier — source]`. Weight your findings by tier:
-- **formal** — written by humans in a spec document. Authoritative. Divergence is a real finding.
-- **user-confirmed** — stated by the user but not in a formal doc. Treat as authoritative unless contradicted by other evidence.
-- **inferred** — deduced from code behavior. Lower confidence. Report divergence as NEEDS REVIEW, not as a definitive defect.
+**要件の信頼度層:**
+要件は `[Req: tier — source]` でタグ付けされます。結果を層ごとに重み付けします。
+- **正式** — 人間によって仕様書に書かれます。権威ある。ダイバージェンスは実際の発見です。
+- **ユーザー確認済み** — ユーザーによって述べられていますが、正式な文書には記載されていません。他の証拠に矛盾しない限り、権威あるものとして扱います。
+- **推論** — コードの動作から推定されます。自信が低くなります。相違点は決定的な欠陥としてではなく、要検討として報告してください。
 
-**Rules:**
-- ONLY list defects. Do not summarize what matches.
-- For EVERY defect, cite specific file and line number(s).
-  If you cannot cite a line number, do not include the finding.
-- Before claiming missing, grep the codebase.
-- Before claiming exists, read the actual function body.
-- Classify each finding: MISSING / DIVERGENT / UNDOCUMENTED / PHANTOM
-- For findings against inferred requirements, add: NEEDS REVIEW
+**ルール:**
+- 欠陥のみを列挙します。一致するものを要約しないでください。
+- すべての欠陥について、特定のファイルと行番号を引用します。
+  行番号を引用できない場合は、結果を含めないでください。
+- 不足していると主張する前に、コードベースを grep してください。
+- 存在を主張する前に、実際の関数本体を読み取ります。
+- 各発見を分類: 欠落 / 発散 / 文書化されていない / 幻覚
+- 推測された要件に対する所見については、NEEDS REVIEW を追加します。
 
-**Defect classifications:**
-- **MISSING** — Spec requires it, code doesn't implement it
-- **DIVERGENT** — Both spec and code address it, but they disagree
-- **UNDOCUMENTED** — Code does it, spec doesn't mention it
-- **PHANTOM** — Spec describes it, but it's actually implemented differently than described
+**欠陥分類:**
+- **欠落** — 仕様ではそれが必要ですが、コードでは実装されていません
+- **DIVERGENT** — 仕様とコードの両方がこれに対処していますが、意見が一致していません
+- **非公開** — コードにはそれが含まれていますが、仕様には言及されていません
+- **PHANTOM** — 仕様には説明されていますが、実際には説明とは異なる方法で実装されています
 
-**Project-specific scrutiny areas:**
+**プロジェクト固有の精査領域:**
 
-[5–10 specific questions that force the auditor to read the most critical code. Target:]
+[監査人に最も重要なコードの読み取りを強制する 5 ～ 10 個の具体的な質問。対象:]
 
-1. [The most fragile module — force the auditor to read specific functions]
-2. [External data handling — validation, normalization, error recovery]
-3. [Assumptions that might not hold — field presence, value ranges, format consistency]
-4. [Features that cross module boundaries]
-5. [The gap between documentation and implementation]
-6. [Specific edge cases from the QUALITY.md scenarios]
+1. [最も脆弱なモジュール - 監査人に特定の関数の読み取りを強制する]
+2. [外部データ処理 - 検証、正規化、エラー回復]
+3. [当てはまらない可能性のある仮定 - フィールドの存在、値の範囲、形式の一貫性]
+4. 【モジュールの境界を越えた機能】
+5. [文書化と実装の間のギャップ]
+6. [QUALITY.md シナリオからの特定のエッジ ケース]
 
-**Output format:**
+**出力形式:**
 
-### [filename.ext]
-- **Line NNN:** [MISSING / DIVERGENT / UNDOCUMENTED / PHANTOM] [Req: tier — source] Description.
-  Spec says: [quote or reference]. Code does: [what actually happens].
-  *(Include the `[Req: tier — source]` tag so findings can be traced back to their requirement and confidence level.)*
+### [ファイル名.拡張子]
+- **NNN 行:** [欠落 / 分岐 / 文書化されていない / 幻] [要求: 階層 — ソース] 説明。
+  仕様には次のように記載されています: [引用または参照]。コードは次のように実行します: [実際に何が起こるか]。
+  *(`[Req: tier — source]` タグを含めると、結果を要件と信頼レベルまで追跡できます。)*
 
 ---
 
-## Running the Audit
+## 監査の実行
 
-1. Give the identical prompt to three AI tools
-2. Each auditor works independently — no cross-contamination
-3. Collect all three reports
+1. 3 つの AI ツールに同じプロンプトを与える
+2. 各監査人は独立して作業します - 相互汚染はありません
+3. 3 つのレポートをすべて収集します
 
-## Triage Process
+## トリアージプロセス
 
-After all three models report, merge findings:
+3 つのモデルすべてがレポートしたら、結果をマージします。
 
-| Confidence | Found By | Action |
-|------------|----------|--------|
-| Highest | All three | Almost certainly real — fix or update spec |
-| High | Two of three | Likely real — verify and fix |
-| Needs verification | One only | Could be real or hallucinated — deploy verification probe |
+|自信 |見つけた人 |アクション |
+|-----------|----------|----------|
+|最高 | 3 つすべて |ほぼ確実に現実です - 仕様を修正または更新します |
+|高 | 3 つのうち 2 つ |本物の可能性が高い — 検証して修正する |
+|検証が必要 | 1 つだけ |本物か幻覚の可能性がある — 検証プローブを展開する |### 検証プローブ
 
-### The Verification Probe
+モデルが事実の主張に同意しない場合は、読み取り専用のプローブを展開します。つまり、1 つのモデルに異議のある主張を与え、コードを読み取ってグランド トゥルースを報告するように依頼します。事実に関する論争を多数決で決して解決しないでください。コードが実際に何を行うかについて多数派が間違っている可能性があります。
 
-When models disagree on factual claims, deploy a read-only probe: give one model the disputed claim and ask it to read the code and report ground truth. Never resolve factual disputes by majority vote — the majority can be wrong about what code actually does.
+### 確認された各所見を分類する
 
-### Categorize Each Confirmed Finding
+- **仕様のバグ** — 仕様は間違っていますが、コードは正常です → 仕様を更新します
+- **設計上の決定** — 人間の判断が必要 → 議論して決定
+- **実際のコードのバグ** — サブシステムごとに小さなバッチで修正します
+- **ドキュメントのギャップ** — 機能は存在しますがドキュメント化されていません → ドキュメントを更新してください
+- **テストがありません** — コードは正しいが、それを検証するテストはありません → 機能テスト ファイルに追加します
+- **推測された要件が間違っています** - 推測された要件は実際の意図と一致しません → QUALITY.md で削除または修正します
 
-- **Spec bug** — Spec is wrong, code is fine → update spec
-- **Design decision** — Human judgment needed → discuss and decide
-- **Real code bug** — Fix in small batches by subsystem
-- **Documentation gap** — Feature exists but undocumented → update docs
-- **Missing test** — Code is correct but no test verifies it → add to the functional test file
-- **Inferred requirement wrong** — The inferred requirement doesn't match actual intent → remove or correct it in QUALITY.md
+最後のカテゴリは、仕様監査とテスト スイートの間のブリッジです。テストでまだカバーされていないすべての確認された所見が 1 つになる必要があります。
 
-That last category is the bridge between the spec audit and the test suite. Every confirmed finding not already covered by a test should become one.
+## 実行ルールを修正する
 
-## Fix Execution Rules
+- 修正を欠陥番号ではなくサブシステムごとにグループ化します
+- すべての修正に対して 1 つの大きなプロンプトが表示されることはありません
+- 各バッチ: 実装、テスト、3 人のレビュー担当者全員に差分を検証してもらいます
+- 完了とマークする前に、少なくとも 2 人の監査人が修正に合格したことを確認する必要があります
 
-- Group fixes by subsystem, not by defect number
-- Never one mega-prompt for all fixes
-- Each batch: implement, test, have all three reviewers verify the diff
-- At least two auditors must confirm fixes pass before marking complete
+## 出力
 
-## Output
+監査レポートを `quality/spec_audits/YYYY-MM-DD-[model].md` に保存します
+トリアージの概要を `quality/spec_audits/YYYY-MM-DD-triage.md` に保存します
+「」## 4 つのガードレール (すべての監査人にとって重要)
 
-Save audit reports to `quality/spec_audits/YYYY-MM-DD-[model].md`
-Save triage summary to `quality/spec_audits/YYYY-MM-DD-triage.md`
-```
+一部のモデルは、コードをチェックせずに機能が欠落していると自信を持って主張しています。監査に組み込まれたこれら 4 つのルールは、漠然とした幻覚的な所見を減らすことで、出力の品質を大幅に向上させます。
 
-## The Four Guardrails (Critical for All Auditors)
+1. **行番号必須** — 行番号を引用できない場合は、結果を含めないでください。これにより、曖昧な主張が排除されます。
+2. **欠落していると主張する前に Grep を実行します** — 機能が欠落していると主張する前に、コードベースを検索します。別のファイルにある可能性があります。
+3. **シグネチャだけでなく関数本体を読む** — 関数がその名前に基づいて正しく動作すると仮定しないでください。
+4. **欠陥タイプの分類** — 漠然とした「これは間違っている」ではなく、構造化された思考 (欠落/発散/文書化されていない/幻覚) を強制します。
 
-Some models confidently claim features are missing without checking code. These four rules embedded in the audit prompt materially improve output quality by reducing vague and hallucinated findings:
+これらのガードレールは、上記のテンプレートにすでに埋め込まれています。これらは、自信を持って主張する傾向があるが確認されていないモデルにとって最も重要です。
 
-1. **Mandatory line numbers** — If you cannot cite a line number, do not include the finding. This eliminates vague claims.
-2. **Grep before claiming missing** — Before saying a feature is absent, search the codebase. It may be in a different file.
-3. **Read function bodies, not just signatures** — Don't assume a function works correctly based on its name.
-4. **Classify defect type** — Forces structured thinking (MISSING/DIVERGENT/UNDOCUMENTED/PHANTOM) instead of vague "this looks wrong."
+## モデル選択に関する注意事項
 
-These guardrails are already embedded in the template above. They matter most for models that tend toward confident but unchecked claims.
+モデルが異なれば、監査の強度も異なります。実際には:
 
-## Model Selection Notes
+- **アーキテクチャに重点を置いたモデル** (クロードなど) は、誤検知を最小限に抑えてほとんどの問題を検出する傾向があり、サイレント データ損失、機能間のデータ フロー、およびステート マシンのバグに優れています。
+- **エッジケースに焦点を当てたモデル** (GPT ベースのツールなど) は、他のモデルが見逃す境界条件 (長さゼロの入力、ファイルの衝突、オフバイワン エラー) をキャッチする傾向があり、効果的な検証クロスチェッカーとして機能します。
+- **構造が必要なモデル** (例: 一部の Gemini バリアント) は、無制限の監査プロンプトではパフォーマンスが低下する可能性がありますが、上記の 4 つのガードレールには劇的に応答します。
 
-Different models have different audit strengths. In practice:
+優れた特定のモデルは時間の経過とともに変化します。原則は、強度の異なる複数のモデルを使用し、常に 4 つのガードレールを含めることです。
 
-- **Architecture-focused models** (e.g., Claude) tend to find the most issues with fewest false positives, excelling at silent data loss, cross-function data flow, and state machine bugs.
-- **Edge-case focused models** (e.g., GPT-based tools) tend to catch boundary conditions other models miss (zero-length inputs, file collisions, off-by-one errors) and serve as effective verification cross-checkers.
-- **Models that need structure** (e.g., some Gemini variants) may perform poorly on open-ended audit prompts but respond dramatically to the four guardrails above.
+## 精査領域を記述するためのヒント
 
-The specific models that excel will change over time. The principle holds: use multiple models with different strengths, and always include the four guardrails.
+精査領域は、プロンプトの最も重要な部分です。 「コードが仕様と一致するかどうかを確認してください」のような一般的な質問では、一般的な答えが得られます。関数、ファイル、およびエッジケースに名前を付ける具体的な質問により、具体的な結果が得られます。
 
-## Tips for Writing Scrutiny Areas
+優れた精査領域:
+- "`pipeline.py` 行 45 ～ 120 の `process_input()` を読んでください。仕様には、デフォルトを置き換えることによって不足しているフィールドを処理する必要があると記載されています。そうなりますか? どのフィールドにデフォルトがあり、どのフィールドが黙って null を生成するのでしょうか?"
+- 「アーキテクチャのドキュメントには、モジュール A が検証済みのデータをモジュール B に渡すと書かれています。両方のモジュールを読んでください。未検証のデータがモジュール B に到達するパスはありますか?」
 
-The scrutiny areas are the most important part of the prompt. Generic questions like "check if the code matches the spec" produce generic answers. Specific questions that name functions, files, and edge cases produce specific findings.
-
-Good scrutiny areas:
-- "Read `process_input()` in `pipeline.py` lines 45–120. The spec says it should handle missing fields by substituting defaults. Does it? Which fields have defaults and which silently produce null?"
-- "The architecture doc says Module A passes validated data to Module B. Read both modules. Is there any path where unvalidated data reaches Module B?"
-
-Bad scrutiny areas:
-- "Check if the code is correct"
-- "Look for bugs"
-- "Verify the implementation matches the spec"
+悪い精査領域:
+- 「コードが正しいか確認してください」
+- 「バグを探してください」
+- 「実装が仕様と一致していることを確認してください」

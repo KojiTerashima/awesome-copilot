@@ -2,25 +2,22 @@
 name: what-context-needed
 description: 'Ask Copilot what files it needs to see before answering a question'
 ---
+# どのようなコンテキストが必要ですか?
 
-# What Context Do You Need?
+私の質問に答える前に、どのファイルを見る必要があるのか​​教えてください。
 
-Before answering my question, tell me what files you need to see.
+## 私の質問
 
-## My Question
+{{質問}}
 
-{{question}}
+## 指示
 
-## Instructions
+1. 私の質問に基づいて、調査する必要があるファイルをリストします。
+2. 各ファイルが関連する理由を説明する
+3. この会話ですでに見たファイルを書き留めます
+4. 不明な点を特定する
 
-1. Based on my question, list the files you would need to examine
-2. Explain why each file is relevant
-3. Note any files you've already seen in this conversation
-4. Identify what you're uncertain about
-
-## Output Format
-
-```markdown
+## 出力フォーマット```markdown
 ## Files I Need
 
 ### Must See (required for accurate answer)
@@ -34,6 +31,4 @@ Before answering my question, tell me what files you need to see.
 
 ### Uncertainties
 - [What I'm not sure about without seeing the code]
-```
-
-After I provide these files, I'll ask my question again.
+```これらのファイルを提供した後、もう一度質問します。

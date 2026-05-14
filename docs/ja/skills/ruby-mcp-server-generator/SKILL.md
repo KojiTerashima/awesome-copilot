@@ -2,16 +2,13 @@
 name: ruby-mcp-server-generator
 description: 'Generate a complete Model Context Protocol server project in Ruby using the official MCP Ruby SDK gem.'
 ---
+# Ruby MCP サーバー ジェネレーター
 
-# Ruby MCP Server Generator
+公式の Ruby SDK を使用して、Ruby で完全な本番環境に対応した MCP サーバーを生成します。
 
-Generate a complete, production-ready MCP server in Ruby using the official Ruby SDK.
+## プロジェクトの生成
 
-## Project Generation
-
-When asked to create a Ruby MCP server, generate a complete project with this structure:
-
-```
+Ruby MCP サーバーを作成するように求められたら、次の構造を持つ完全なプロジェクトを生成します。```
 my-mcp-server/
 ├── Gemfile
 ├── Rakefile
@@ -34,11 +31,7 @@ my-mcp-server/
 │       ├── greet_tool_test.rb
 │       └── calculate_tool_test.rb
 └── README.md
-```
-
-## Gemfile Template
-
-```ruby
+```## Gemfile テンプレート```ruby
 source 'https://rubygems.org'
 
 gem 'mcp', '~> 0.4.0'
@@ -48,11 +41,7 @@ group :development, :test do
   gem 'rake', '~> 13.0'
   gem 'rubocop', '~> 1.50'
 end
-```
-
-## Rakefile Template
-
-```ruby
+```## Rakefile テンプレート```ruby
 require 'rake/testtask'
 require 'rubocop/rake_task'
 
@@ -65,11 +54,7 @@ end
 RuboCop::RakeTask.new
 
 task default: %i[test rubocop]
-```
-
-## lib/my_mcp_server.rb Template
-
-```ruby
+```## lib/my_mcp_server.rb テンプレート```ruby
 # frozen_string_literal: true
 
 require 'mcp'
@@ -82,11 +67,7 @@ require_relative 'my_mcp_server/resources/example_resource'
 module MyMcpServer
   VERSION = '1.0.0'
 end
-```
-
-## lib/my_mcp_server/server.rb Template
-
-```ruby
+```## lib/my_mcp_server/server.rb テンプレート```ruby
 # frozen_string_literal: true
 
 module MyMcpServer
@@ -131,11 +112,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## lib/my_mcp_server/tools/greet_tool.rb Template
-
-```ruby
+```## lib/my_mcp_server/tools/greet_tool.rb テンプレート```ruby
 # frozen_string_literal: true
 
 module MyMcpServer
@@ -184,11 +161,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## lib/my_mcp_server/tools/calculate_tool.rb Template
-
-```ruby
+```## lib/my_mcp_server/tools/calculate_tool.rb テンプレート```ruby
 # frozen_string_literal: true
 
 module MyMcpServer
@@ -261,11 +234,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## lib/my_mcp_server/prompts/code_review_prompt.rb Template
-
-```ruby
+```## lib/my_mcp_server/prompts/code_review_prompt.rb テンプレート```ruby
 # frozen_string_literal: true
 
 module MyMcpServer
@@ -323,11 +292,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## lib/my_mcp_server/resources/example_resource.rb Template
-
-```ruby
+```## lib/my_mcp_server/resources/example_resource.rb テンプレート```ruby
 # frozen_string_literal: true
 
 module MyMcpServer
@@ -362,11 +327,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## bin/mcp-server Template
-
-```ruby
+```## bin/mcp-server テンプレート```ruby
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
@@ -383,26 +344,15 @@ rescue StandardError => e
   warn e.backtrace.join("\n")
   exit 1
 end
-```
-
-Make the file executable:
-```bash
+```ファイルを実行可能にします。```bash
 chmod +x bin/mcp-server
-```
-
-## test/test_helper.rb Template
-
-```ruby
+```## test/test_helper.rb テンプレート```ruby
 # frozen_string_literal: true
 
 $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'my_mcp_server'
 require 'minitest/autorun'
-```
-
-## test/tools/greet_tool_test.rb Template
-
-```ruby
+```## test/tools/greet_tool_test.rb テンプレート```ruby
 # frozen_string_literal: true
 
 require 'test_helper'
@@ -436,11 +386,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## test/tools/calculate_tool_test.rb Template
-
-```ruby
+```## test/tools/calculate_tool_test.rb テンプレート```ruby
 # frozen_string_literal: true
 
 require 'test_helper'
@@ -522,11 +468,7 @@ module MyMcpServer
     end
   end
 end
-```
-
-## README.md Template
-
-```markdown
+```## README.md テンプレート```markdown
 # My MCP Server
 
 A Model Context Protocol server built with Ruby and the official MCP Ruby SDK.
@@ -547,9 +489,8 @@ A Model Context Protocol server built with Ruby and the official MCP Ruby SDK.
 
 ## Installation
 
-```bash
-bundle install
-```
+```バッシュ
+バンドルインストール```
 
 ## Usage
 
@@ -557,52 +498,46 @@ bundle install
 
 Run the server:
 
-```bash
-bundle exec bin/mcp-server
-```
+```バッシュ
+バンドル実行 bin/mcp-server```
 
 Then send JSON-RPC requests:
 
-```bash
-{"jsonrpc":"2.0","id":"1","method":"ping"}
-{"jsonrpc":"2.0","id":"2","method":"tools/list"}
-{"jsonrpc":"2.0","id":"3","method":"tools/call","params":{"name":"greet","arguments":{"name":"Ruby"}}}
-```
+```バッシュ
+{"jsonrpc":"2.0","id":"1","メソッド":"ping"}
+{"jsonrpc":"2.0","id":"2","メソッド":"ツール/リスト"}
+{"jsonrpc":"2.0","id":"3","method":"tools/call","params":{"name":"greet","arguments":{"name":"Ruby"}}}```
 
 ### Rails Integration
 
 Add to your Rails controller:
 
-```ruby
-class McpController < ApplicationController
-  def index
-    server = MyMcpServer::Server.new(
-      server_context: { user_id: current_user.id }
+```ルビー
+クラスMcpController < ApplicationController
+  デフォルトインデックス
+    サーバー = MyMcpServer::Server.new(
+      サーバーコンテキスト: { ユーザー ID: current_user.id }
     )
-    render json: server.handle_json(request.body.read)
-  end
-end
-```
+    レンダリングjson:server.handle_json(request.body.read)
+  終わり
+終わり```
 
 ## Testing
 
 Run tests:
 
-```bash
-bundle exec rake test
-```
+```バッシュ
+バンドル実行レーキテスト```
 
 Run linter:
 
-```bash
-bundle exec rake rubocop
-```
+```バッシュ
+バンドル実行 rake rubocop```
 
 Run all checks:
 
-```bash
-bundle exec rake
-```
+```バッシュ
+バンドル実行レーキ```
 
 ## Integration with Claude Desktop
 
@@ -610,51 +545,46 @@ Add to `claude_desktop_config.json`:
 
 ```json
 {
-  "mcpServers": {
+  "mcpサーバー": {
     "my-mcp-server": {
-      "command": "bundle",
+      "コマンド": "バンドル",
       "args": ["exec", "bin/mcp-server"],
-      "cwd": "/path/to/my-mcp-server"
+      "cwd": "/パス/to/my-mcp-server"
     }
   }
-}
-```
+}```
 
 ## Project Structure
 
-```
-my-mcp-server/
-├── Gemfile              # Dependencies
-├── Rakefile             # Build tasks
-├── lib/                 # Source code
-│   ├── my_mcp_server.rb # Main entry point
-│   └── my_mcp_server/   # Module namespace
-│       ├── server.rb    # Server setup
-│       ├── tools/       # Tool implementations
-│       ├── prompts/     # Prompt templates
-│       └── resources/   # Resource handlers
-├── bin/                 # Executables
-│   └── mcp-server       # Stdio server
-├── test/                # Test suite
-│   ├── test_helper.rb   # Test configuration
-│   └── tools/           # Tool tests
-└── README.md            # This file
-```
+```私のmcpサーバー/
+§── Gemfile # 依存関係
+§── Rakefile # ビルドタスク
+§── lib/ # ソースコード
+│ §── my_mcp_server.rb # メインエントリポイント
+│ └── my_mcp_server/ # モジュール名前空間
+│ §──server.rb # サーバーのセットアップ
+│ §── tools/ # ツールの実装
+│ §── プロンプト/ # プロンプト テンプレート
+│ └── リソース/ # リソースハンドラ
+§── bin/ # 実行可能ファイル
+│ └── mcp-server # Stdio サーバー
+§── test/ # テストスイート
+│ §── test_helper.rb # テスト構成
+│ └── tools/ # ツールのテスト
+━── README.md # このファイル```
 
 ## License
 
 MIT
-```
+```## 生成命令
 
-## Generation Instructions
-
-1. **Ask for project name and description**
-2. **Generate all files** with proper naming and module structure
-3. **Use classes for tools and prompts** for better organization
-4. **Include input/output schemas** for type safety
-5. **Add tool annotations** for behavior hints
-6. **Include structured content** in responses
-7. **Implement comprehensive tests** for all tools
-8. **Follow Ruby conventions** (snake_case, modules, frozen_string_literal)
-9. **Add proper error handling** with is_error flag
-10. **Provide both stdio and HTTP** usage examples
+1. **プロジェクト名と説明を尋ねます**
+2. **すべてのファイルを適切な名前とモジュール構造で生成**
+3. **ツールとプロンプトにクラスを使用して**より適切に整理する
+4. **型安全性のために入力/出力スキーマを含める**
+5. 動作のヒントとして **ツールの注釈を追加**
+6. **構造化コンテンツを応答に含める**
+7. すべてのツールに対して **包括的なテストを実装**
+8. **Ruby の規則に従ってください** (snake_case、モジュール、frozen_string_literal)
+9. is_error フラグを使用して **適切なエラー処理を追加**
+10. **stdio と HTTP の両方の使用例を提供します**

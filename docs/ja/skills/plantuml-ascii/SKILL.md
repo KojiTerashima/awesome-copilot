@@ -4,302 +4,241 @@ description: "Generate ASCII art diagrams using PlantUML text mode. Use when use
 license: MIT
 allowed-tools: Bash, Write, Read
 ---
+# PlantUML ASCII アート図ジェネレーター
 
-# PlantUML ASCII Art Diagram Generator
+## 概要
 
-## Overview
+PlantUML を使用してテキストベースの ASCII アート図を作成します。ターミナル環境でのドキュメント、README ファイル、電子メール、またはグラフィカルな図が適さないシナリオに最適です。
 
-Create text-based ASCII art diagrams using PlantUML. Perfect for documentation in terminal environments, README files, emails, or any scenario where graphical diagrams aren't suitable.
+## PlantUML アスキーアートとは何ですか?
 
-## What is PlantUML ASCII Art?
+PlantUML は、画像ではなくプレーンテキスト (ASCII アート) として図を生成できます。これは次の場合に役立ちます。
 
-PlantUML can generate diagrams as plain text (ASCII art) instead of images. This is useful for:
+- ターミナルベースのワークフロー
+- イメージをサポートしない Git コミット/PR
+- バージョン管理が必要なドキュメント
+- グラフィカルツールが利用できない環境
 
-- Terminal-based workflows
-- Git commits/PRs without image support
-- Documentation that needs to be version-controlled
-- Environments where graphical tools aren't available
-
-## Installation
-
-```bash
+## インストール「」バッシュ
 # macOS
-brew install plantuml
+醸造インストールplantuml
 
-# Linux (varies by distro)
-sudo apt-get install plantuml  # Ubuntu/Debian
-sudo yum install plantuml      # RHEL/CentOS
+# Linux (ディストリビューションによって異なります)
+sudo apt-get install plantuml # Ubuntu/Debian
+sudo yum install plantuml # RHEL/CentOS
 
-# Or download JAR directly
+# または JAR を直接ダウンロードする
 wget https://github.com/plantuml/plantuml/releases/download/v1.2024.0/plantuml-1.2024.0.jar
-```
+「」## 出力形式
 
-## Output Formats
-
-| Flag    | Format        | Description                          |
+|旗 |フォーマット |説明 |
 | ------- | ------------- | ------------------------------------ |
-| `-txt`  | ASCII         | Pure ASCII characters                |
-| `-utxt` | Unicode ASCII | Enhanced with box-drawing characters |
+| `-txt` |アスキー |純粋な ASCII 文字 |
+| `-utxt` |ユニコード ASCII |ボックス描画文字で強化 |
 
-## Basic Workflow
+## 基本的なワークフロー
 
-### 1. Create PlantUML Diagram File
-
-```plantuml
+### 1. PlantUML ダイアグラム ファイルを作成する「」プランタムル
 @startuml
-participant Bob
-actor Alice
+参加者のボブ
+俳優アリス
 
-Bob -> Alice : hello
-Alice -> Bob : Is it ok?
+ボブ -> アリス : こんにちは
+アリス→ボブ：いいですか？
 @enduml
-```
+「」### 2. アスキーアートを生成する「」バッシュ
+# 標準 ASCII 出力
+plantuml -txt 図.puml
 
-### 2. Generate ASCII Art
+# Unicode で強化された出力 (見栄えが良くなります)
+plantuml -utxt 図.puml
 
-```bash
-# Standard ASCII output
-plantuml -txt diagram.puml
+# JAR を直接使用する
+java -jar plantuml.jar -txt 図.puml
+java -jar plantuml.jar -utxt 図.puml
+「」### 3. 出力を表示する
 
-# Unicode-enhanced output (better looking)
-plantuml -utxt diagram.puml
+出力は `diagram.atxt` (ASCII) または `diagram.utxt` (Unicode) として保存されます。
 
-# Using JAR directly
-java -jar plantuml.jar -txt diagram.puml
-java -jar plantuml.jar -utxt diagram.puml
-```
+## サポートされる図の種類
 
-### 3. View Output
-
-Output is saved as `diagram.atxt` (ASCII) or `diagram.utxt` (Unicode).
-
-## Diagram Types Supported
-
-### Sequence Diagram
-
-```plantuml
+### シーケンス図「」プランタムル
 @startuml
-actor User
-participant "Web App" as App
-database "Database" as DB
+アクターユーザー
+参加者「Web アプリ」をアプリとして
+データベース DBとしての「データベース」
 
-User -> App : Login Request
-App -> DB : Validate Credentials
-DB --> App : User Data
-App --> User : Auth Token
+ユーザー -> アプリ : ログイン要求
+アプリ -> DB : 資格情報の検証
+DB --> アプリ : ユーザーデータ
+アプリ --> ユーザー : 認証トークン
 @enduml
-```
-
-### Class Diagram
-
-```plantuml
+「」### クラス図「」プランタムル
 @startuml
-class User {
-  +id: int
-  +name: string
-  +email: string
-  +login(): bool
+クラス ユーザー {
+  +id: 整数
+  +名前: 文字列
+  +メールアドレス: 文字列
+  +login(): ブール値
 }
 
-class Order {
-  +id: int
-  +total: float
-  +items: List
-  +calculateTotal(): float
+クラスの順序 {
+  +id: 整数
+  +合計: 浮動小数点
+  +アイテム: リスト
+  +calculateTotal(): 浮動小数点
 }
 
-User "1" -- "*" Order : places
+ユーザー "1" -- "*" 順序 : 位
 @enduml
-```
-
-### Activity Diagram
-
-```plantuml
+「」### アクティビティ図「」プランタムル
 @startuml
-start
-:Initialize;
-if (Is Valid?) then (yes)
-  :Process Data;
-  :Save Result;
-else (no)
-  :Log Error;
-  stop
-endif
-:Complete;
-stop
+始める
+:初期化;
+if (有効ですか?) then (はい)
+  :データを処理します。
+  :結果を保存;
+それ以外（いいえ）
+  :ログエラー;
+  停止
+エンドイフ
+:完了;
+停止
 @enduml
-```
-
-### State Diagram
-
-```plantuml
+「」### 状態図「」プランタムル
 @startuml
-[*] --> Idle
-Idle --> Processing : start
-Processing --> Success : complete
-Processing --> Error : fail
-Success --> [*]
-Error --> Idle : retry
+[*] --> アイドル状態
+アイドル --> 処理中: 開始
+処理中 --> 成功 : 完了
+処理中 --> エラー: 失敗しました
+成功 --> [*]
+エラー --> アイドル状態: 再試行
 @enduml
-```
-
-### Component Diagram
-
-```plantuml
+「」### コンポーネント図「」プランタムル
 @startuml
-[Client] as client
-[API Gateway] as gateway
-[Service A] as svcA
-[Service B] as svcB
-[Database] as db
+[クライアント] クライアントとして
+ゲートウェイとして[APIゲートウェイ]
+[サービスA] svcAとして
+[サービス B] svcB として
+[データベース] データベースとして
 
-client --> gateway
-gateway --> svcA
-gateway --> svcB
-svcA --> db
-svcB --> db
+クライアント --> ゲートウェイ
+ゲートウェイ --> svcA
+ゲートウェイ --> svcB
+svcA --> データベース
+svcB --> データベース
 @enduml
-```
-
-### Use Case Diagram
-
-```plantuml
+「」### ユースケース図「」プランタムル
 @startuml
-actor "User" as user
-actor "Admin" as admin
+ユーザーとしてのアクター「ユーザー」
+俳優「Admin」を管理者として
 
-rectangle "System" {
-  user -- (Login)
-  user -- (View Profile)
-  user -- (Update Settings)
-  admin -- (Manage Users)
-  admin -- (Configure System)
+四角形「システム」{
+  ユーザー -- (ログイン)
+  ユーザー -- (プロフィールの表示)
+  ユーザー -- (設定の更新)
+  admin -- (ユーザーの管理)
+  管理者 -- (システムの構成)
 }
 @enduml
-```
-
-### Deployment Diagram
-
-```plantuml
+「」### 展開図「」プランタムル
 @startuml
-actor "User" as user
-node "Load Balancer" as lb
-node "Web Server 1" as ws1
-node "Web Server 2" as ws2
-database "Primary DB" as db1
-database "Replica DB" as db2
+ユーザーとしてのアクター「ユーザー」
+ノード「ロードバランサー」をポンドとして指定
+ノード「Web サーバー 1」を ws1 として指定
+ノード「Web サーバー 2」を ws2 として指定
+データベース「プライマリ DB」を db1 として指定
+データベース「レプリカ DB」（db2）
 
-user --> lb
-lb --> ws1
-lb --> ws2
+ユーザー --> ポンド
+ポンド --> ws1
+ポンド --> ws2
 ws1 --> db1
 ws2 --> db1
-db1 --> db2 : replicate
+db1 --> db2 : レプリケート
 @enduml
-```
+「」## コマンドラインオプション「」バッシュ
+# 出力ディレクトリを指定
+plantuml -txt -o ./出力ダイアグラム.puml
 
-## Command-Line Options
+# ディレクトリ内のすべてのファイルを処理します
+plantuml -txt ./図/
 
-```bash
-# Specify output directory
-plantuml -txt -o ./output diagram.puml
+# ドットファイル（隠しファイル）を含める
+plantuml -txt -includeドット図/
 
-# Process all files in directory
-plantuml -txt ./diagrams/
+# 詳細な出力
+plantuml -txt -v 図.puml
 
-# Include dot files (hidden files)
-plantuml -txt -includeDot diagrams/
-
-# Verbose output
-plantuml -txt -v diagram.puml
-
-# Specify charset
-plantuml -txt -charset UTF-8 diagram.puml
-```
-
-## Ant Task Integration
-
-```xml
+# 文字セットを指定する
+plantuml -txt -charset UTF-8 図.puml
+「」## Ant タスクの統合```xml
 <target name="generate-ascii">
   <plantuml dir="./src" format="txt" />
-</target>
+</ターゲット>
 
 <target name="generate-unicode-ascii">
   <plantuml dir="./src" format="utxt" />
-</target>
-```
+</ターゲット>
+「」## より良い ASCII 図のためのヒント
 
-## Tips for Better ASCII Diagrams
+1. **シンプルにしてください**: 複雑な図は ASCII ではうまく表示されません
+2. **短いラベル**: 長いテキストは ASCII 配置を壊します
+3. **Unicode を使用する (`-utxt`)**: ボックス描画文字による視覚的な品質の向上
+4. **共有前のテスト**: 固定幅フォントを使用して端末で確認します
+5. **代替案を検討します**: 複雑な図の場合は、Mermaid.js またはgraphviz を使用します。
 
-1. **Keep it simple**: Complex diagrams don't render well in ASCII
-2. **Short labels**: Long text breaks ASCII alignment
-3. **Use Unicode (`-utxt`)**: Better visual quality with box-drawing chars
-4. **Test before sharing**: Verify in terminal with fixed-width font
-5. **Consider alternatives**: For complex diagrams, use Mermaid.js or graphviz
+## 出力の比較例
 
-## Example Output Comparison
-
-**Standard ASCII (`-txt`)**:
-
-```
-     ,---.          ,---.
-     |Bob|          |Alice|
+**標準 ASCII (`-txt`)**:「」
+     、---。          、---。
+     |ボブ|          |アリス|
      `---'          `---'
-      |   hello      |
-      |------------->|
+      |   こんにちは |
+      |----------->|
       |              |
-      |  Is it ok?   |
+      |  大丈夫ですか？   |
       |<-------------|
       |              |
-```
-
-**Unicode ASCII (`-utxt`)**:
-
-```
-┌─────┐        ┌─────┐
-│ Bob │        │Alice│
-└─────┘        └─────┘
-  │   hello      │
-  │─────────────>│
-  │              │
-  │  Is it ok?   │
-  │<─────────────│
-  │              │
-```
-
-## Quick Reference
-
-```bash
-# Create sequence diagram in ASCII
+「」**Unicode ASCII (`-utxt`)**:「」
+┌─────┐ ┌─────┐
+│ ボブ │ │アリス│
+━━━━┘ ━━━━┘
+  │ こんにちは │
+  │─────────>│
+  │ │
+  │大丈夫ですか？   │
+  │<─────────│
+  │ │
+「」## クイックリファレンス「」バッシュ
+# シーケンス図をASCIIで作成
 cat > seq.puml << 'EOF'
 @startuml
-Alice -> Bob: Request
-Bob --> Alice: Response
+アリス -> ボブ: リクエスト
+ボブ --> アリス: 応答
 @enduml
-EOF
+終了後
 
 plantuml -txt seq.puml
-cat seq.atxt
+猫のシーケンスatxt
 
-# Create with Unicode
+# Unicode で作成する
 plantuml -utxt seq.puml
-cat seq.utxt
-```
+猫のシーケンスutxt
+「」## トラブルシューティング
 
-## Troubleshooting
+**問題**: Unicode 文字化け
 
-**Problem**: Garbled Unicode characters
+- **解決策**: 端末が UTF-8 をサポートし、適切なフォントを備えていることを確認してください。
 
-- **Solution**: Ensure terminal supports UTF-8 and has proper font
+**問題**: 図の位置がずれて見える
 
-**Problem**: Diagram looks misaligned
+- **解決策**: 固定幅フォントを使用します (Courier、Monaco、Consolas)
 
-- **Solution**: Use fixed-width font (Courier, Monaco, Consolas)
+**問題**: コマンドが見つかりません
 
-**Problem**: Command not found
+- **解決策**: PlantUML をインストールするか、Java JAR を直接使用します
 
-- **Solution**: Install PlantUML or use Java JAR directly
+**問題**: 出力ファイルが作成されません
 
-**Problem**: Output file not created
-
-- **Solution**: Check file permissions, ensure PlantUML has write access
+- **解決策**: ファイルのアクセス許可を確認し、PlantUML に書き込みアクセス権があることを確認してください。

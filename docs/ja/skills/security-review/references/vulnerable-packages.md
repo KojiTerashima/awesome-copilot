@@ -1,111 +1,109 @@
-# Vulnerable & High-Risk Package Watchlist
+# 脆弱で高リスクのパッケージのウォッチリスト
 
-Load this during Step 2 (Dependency Audit). Check versions in the project's lock files.
+これをステップ 2 (依存関係の監査) 中にロードします。プロジェクトのロック ファイルのバージョンを確認します。
 
 ---
 
 ## npm / Node.js
 
-| Package | Vulnerable Versions | Issue | Safe Version |
-|---------|-------------------|-------|--------------|
-| lodash | < 4.17.21 | Prototype pollution (CVE-2021-23337) | >= 4.17.21 |
-| axios | < 1.6.0 | SSRF, open redirect | >= 1.6.0 |
-| jsonwebtoken | < 9.0.0 | Algorithm confusion bypass | >= 9.0.0 |
-| node-jose | < 2.2.0 | Key confusion | >= 2.2.0 |
-| shelljs | < 0.8.5 | ReDoS | >= 0.8.5 |
-| tar | < 6.1.9 | Path traversal | >= 6.1.9 |
-| minimist | < 1.2.6 | Prototype pollution | >= 1.2.6 |
-| qs | < 6.7.3 | Prototype pollution | >= 6.7.3 |
-| express | < 4.19.2 | Open redirect | >= 4.19.2 |
-| multer | < 1.4.4 | DoS | >= 1.4.4-lts.1 |
-| xml2js | < 0.5.0 | Prototype pollution | >= 0.5.0 |
-| fast-xml-parser | < 4.2.4 | ReDoS | >= 4.2.4 |
-| semver | < 7.5.2 | ReDoS | >= 7.5.2 |
-| tough-cookie | < 4.1.3 | Prototype pollution | >= 4.1.3 |
-| word-wrap | < 1.2.4 | ReDoS | >= 1.2.4 |
-| vm2 | ANY | Sandbox escape (deprecated) | Use isolated-vm instead |
-| serialize-javascript | < 3.1.0 | XSS | >= 3.1.0 |
-| node-fetch | < 2.6.7 | Open redirect | >= 2.6.7 or 3.x |
+|パッケージ |脆弱なバージョン |問題 |安全版 |
+|----------|--------|----------|--------------|
+|ロダッシュ | < 4.17.21 |プロトタイプ汚染 (CVE-2021-23337) | >= 4.17.21 |
+|アクシオス | < 1.6.0 | SSRF、オープンリダイレクト | >= 1.6.0 |
+| jsonウェブトークン | < 9.0.0 |アルゴリズムの混乱を回避する | >= 9.0.0 |
+|ノードホセ | < 2.2.0 |重要な混乱 | >= 2.2.0 |
+|シェルjs | < 0.8.5 |リドス | >= 0.8.5 |
+|タール | < 6.1.9 |パストラバーサル | >= 6.1.9 |
+|ミニミスト | < 1.2.6 |プロトタイプの汚染 | >= 1.2.6 |
+|質問 | < 6.7.3 |プロトタイプの汚染 | >= 6.7.3 |
+|急行 | < 4.19.2 |リダイレクトを開く | >= 4.19.2 |
+|マルター | < 1.4.4 |サービス妨害 | >= 1.4.4-lts.1 |
+| xml2js | < 0.5.0 |プロトタイプの汚染 | >= 0.5.0 |
+|高速 XML パーサー | < 4.2.4 |リドス | >= 4.2.4 |
+|セムバー | < 7.5.2 |リドス | >= 7.5.2 |
+|タフクッキー | < 4.1.3 |プロトタイプの汚染 | >= 4.1.3 |
+|ワードラップ | < 1.2.4 |リドス | >= 1.2.4 |
+| vm2 |どれでも |サンドボックス エスケープ (非推奨) |代わりに孤立した VM を使用してください。
+|シリアライズ-javascript | < 3.1.0 | XSS | >= 3.1.0 |
+|ノードフェッチ | < 2.6.7 |リダイレクトを開く | >= 2.6.7 または 3.x |
 
-### Patterns to flag (regardless of version):
-- `eval` or `vm.runInContext` in dependencies
-- Any package pulling in `node-gyp` native addons from unknown publishers
-- Packages with < 1000 weekly downloads but required in production code (supply chain risk)
-
----
-
-## Python / pip
-
-| Package | Vulnerable Versions | Issue | Safe Version |
-|---------|-------------------|-------|--------------|
-| Pillow | < 10.0.1 | Multiple CVEs, buffer overflow | >= 10.0.1 |
-| cryptography | < 41.0.0 | OpenSSL vulnerabilities | >= 41.0.0 |
-| PyYAML | < 6.0 | Arbitrary code via yaml.load() | >= 6.0 |
-| paramiko | < 3.4.0 | Authentication bypass | >= 3.4.0 |
-| requests | < 2.31.0 | Proxy auth info leak | >= 2.31.0 |
-| urllib3 | < 2.0.7 | Header injection | >= 2.0.7 |
-| Django | < 4.2.16 | Various | >= 4.2.16 |
-| Flask | < 3.0.3 | Various | >= 3.0.3 |
-| Jinja2 | < 3.1.4 | HTML attribute injection | >= 3.1.4 |
-| sqlalchemy | < 2.0.28 | Various | >= 2.0.28 |
-| aiohttp | < 3.9.4 | SSRF, path traversal | >= 3.9.4 |
-| werkzeug | < 3.0.3 | Various | >= 3.0.3 |
+### フラグを付けるパターン (バージョンに関係なく):
+- 依存関係内の `eval` または `vm.runInContext`
+- 不明な発行元から `node-gyp` ネイティブ アドオンを取り込むパッケージ
+- 毎週のダウンロード数が 1000 未満であるが、実稼働コードで必要なパッケージ (サプライ チェーンのリスク)
 
 ---
 
-## Java / Maven
+## Python / ピップ
 
-| Package | Vulnerable Versions | Issue |
-|---------|-------------------|-------|
-| log4j-core | 2.0-2.14.1 | Log4Shell RCE (CVE-2021-44228) — CRITICAL |
-| log4j-core | 2.15.0 | Incomplete fix — still vulnerable |
-| Spring Framework | < 5.3.28, < 6.0.13 | Various CVEs |
-| Spring Boot | < 3.1.4 | Various |
-| Jackson-databind | < 2.14.0 | Deserialization |
-| Apache Commons Text | < 1.10.0 | Text4Shell RCE (CVE-2022-42889) |
-| Apache Struts | < 6.3.0 | Various RCE |
-| Netty | < 4.1.94 | HTTP request smuggling |
-
----
-
-## Ruby / Gems
-
-| Gem | Vulnerable Versions | Issue |
-|-----|-------------------|-------|
-| rails | < 7.1.3 | Various | 
-| nokogiri | < 1.16.2 | XXE, various |
-| rexml | < 3.2.7 | ReDoS |
-| rack | < 3.0.9 | Various |
-| devise | < 4.9.3 | Various |
+|パッケージ |脆弱なバージョン |問題 |安全版 |
+|----------|--------|----------|--------------|
+|枕 | < 10.0.1 |複数の CVE、バッファ オーバーフロー | >= 10.0.1 |
+|暗号化 | < 41.0.0 | OpenSSL の脆弱性 | >= 41.0.0 |
+| PyYAML | < 6.0 | yaml.load() 経由の任意のコード | >= 6.0 |
+|パラミコ | < 3.4.0 |認証バイパス | >= 3.4.0 |
+|リクエスト | < 2.31.0 |プロキシ認証情報の漏洩 | >= 2.31.0 |
+| urllib3 | < 2.0.7 |ヘッダーインジェクション | >= 2.0.7 |
+|ジャンゴ | < 4.2.16 |いろいろ | >= 4.2.16 |
+|フラスコ | < 3.0.3 |いろいろ | >= 3.0.3 |
+|ジンジャ2 | < 3.1.4 | HTML 属性の挿入 | >= 3.1.4 |
+|スクラルケミー | < 2.0.28 |いろいろ | >= 2.0.28 |
+| aiohttp | < 3.9.4 | SSRF、パストラバーサル | >= 3.9.4 |
+|ヴェルクツォウク | < 3.0.3 |いろいろ | >= 3.0.3 |
 
 ---
 
-## Rust / Cargo
-
-| Crate | Issue |
-|-------|-------|
-| openssl | Check advisory db for current version |
-| hyper | Check advisory db for current version |
-
-Reference: https://rustsec.org/advisories/
-
----
-
-## Go
-
-Reference: https://pkg.go.dev/vuln/ and https://vuln.go.dev
-
-Common risky patterns:
-- `golang.org/x/crypto` — check if version is within 6 months of current
-- Any dependency using `syscall` package directly — review carefully
+## Java / Maven|パッケージ |脆弱なバージョン |問題 |
+|-------|-------|------|
+|ログ4j-コア | 2.0-2.14.1 | Log4Shell RCE (CVE-2021-44228) — 重大 |
+|ログ4j-コア | 2.15.0 |不完全な修正 - まだ脆弱です |
+| Spring フレームワーク | < 5.3.28、< 6.0.13 |さまざまな CVE |
+|スプリングブーツ | < 3.1.4 |いろいろ |
+|ジャクソンデータバインド | < 2.14.0 |デシリアライズ |
+| Apache Commons テキスト | < 1.10.0 | Text4Shell RCE (CVE-2022-42889) |
+| Apache Struts | < 6.3.0 |各種RCE |
+|ネッティ | < 4.1.94 | HTTP リクエストの密輸 |
 
 ---
 
-## General Red Flags (Any Ecosystem)
+## ルビー / 宝石
 
-Flag any dependency that:
-1. Has not been updated in > 2 years AND has > 10 open security issues
-2. Has been deprecated by its maintainer with a security advisory
-3. Is a fork of a known package from an unknown publisher (typosquatting)
-4. Has a name that's one character off from a popular package (e.g., `lodash` vs `1odash`)
-5. Was recently transferred to a new owner (check git history / npm transfer notices)
+|宝石 |脆弱なバージョン |問題 |
+|-----|--------|------|
+|レール | < 7.1.3 |いろいろ | 
+|のこぎり | < 1.16.2 | XXE、さまざま |
+|レクミル | < 3.2.7 |リドス |
+|ラック | < 3.0.9 |いろいろ |
+|工夫する | < 4.9.3 |いろいろ |
+
+---
+
+## 錆び/貨物
+
+|木箱 |問題 |
+|------|------|
+|オープンSSL |現在のバージョンについてはアドバイザリ データベースを確認してください |
+|ハイパー |現在のバージョンについてはアドバイザリ データベースを確認してください |
+
+参考: https://rustsec.org/advisories/
+
+---
+
+## 行きます
+
+参考: https://pkg.go.dev/vuln/ および https://vuln.go.dev
+
+よくある危険なパターン:
+- `golang.org/x/crypto` — バージョンが現在のバージョンから 6 か月以内であるかどうかを確認します
+- `syscall` パッケージを直接使用する依存関係 - 慎重に確認してください
+
+---
+
+## 一般的な危険信号 (あらゆるエコシステム)
+
+次のような依存関係にフラグを立てます。
+1. 2 年以上更新されておらず、未解決のセキュリティ問題が 10 件以上ある
+2. メンテナによってセキュリティ勧告が出され非推奨になりました
+3. 未知の発行元からの既知のパッケージのフォークである (タイポスクワッティング)
+4. 人気のあるパッケージから 1 文字離れた名前が付いています (例: `lodash` と `1odash`)
+5. 最近新しい所有者に譲渡されました (git 履歴/npm 譲渡通知を確認してください)

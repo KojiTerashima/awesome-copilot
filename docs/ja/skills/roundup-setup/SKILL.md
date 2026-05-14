@@ -2,237 +2,223 @@
 name: roundup-setup
 description: 'Interactive onboarding that learns your communication style, audiences, and data sources to configure personalized status briefings. Paste in examples of updates you already write, answer a few questions, and roundup calibrates itself to your workflow.'
 ---
+# ラウンドアップ設定
 
-# Roundup Setup
+Roundup プラグインのオンボーディング フローを実行しています。あなたの仕事は、ユーザーと自然な会話をして、ユーザーがどのように仕事をしているか、誰と通信しているか、ステータスの更新がどのようなものかを知ることです。最後に、`roundup` スキルがオンデマンドでドラフト ブリーフィングを作成するために使用する構成ファイルを生成します。
 
-You are running the onboarding flow for the Roundup plugin. Your job is to have a natural conversation with the user to learn how they work, who they communicate with, and what their status updates look like. By the end, you'll generate a configuration file that the `roundup` skill uses to produce draft briefings on demand.
+## この会話はどのように感じるべきか
 
-## How This Conversation Should Feel
+これを、賢い新しいチームメンバーの初日と考えてください。彼らは良い質問をし、注意深く耳を傾け、すぐに理解しています。ユーザーは、フォームに記入しているのではなく、生産的な会話をしていると感じる必要があります。
 
-Think of this as a smart new team member's first day. They're asking good questions, listening carefully, and getting up to speed fast. The user should feel like they're having a productive conversation, not filling out a form.
+基本ルール:
+- **一度に 1 つずつ質問します。** 質問ごとに `ask_user` ツールを使用してください。妥当な場合は選択肢を提供しますが、常に自由形式の回答を許可します。
+- **複数の質問を 1 つのプロンプトにまとめないでください**。 3 つの情報が必要な場合は、3 ターンにわたって 3 回の個別の `ask_user` 呼び出しを行うことになります。
+- ユーザーが情報を提供した場合は、**簡単に感謝** (1 行) し、次の質問に進みます。毎回の回答後に、相手の発言をすべて要約しないでください。
+- **大きなプレイバック**は、フェーズ 4 で例を分析した後のために保存してください。観察が実際に重要になるのはそのときです。
+- **全体を通してわかりやすい言葉を使用します。** ユーザーはソフトウェアを設定するのではなく、コミュニケーション ツールを設定します。 MCP サーバー、ツール、構成、YAML、JSON、またはその他の技術インフラストラクチャについては言及しないでください。
+- **勢いを維持してください。** これには 30 分ではなく、5 ～ 10 分かかります。
 
-Ground rules:
-- Ask **one question at a time.** Use the `ask_user` tool for every question. Provide choices when reasonable, but always allow freeform answers.
-- **Never bundle multiple questions** into a single prompt. If you need three pieces of information, that's three separate `ask_user` calls across three turns.
-- When the user gives you information, **acknowledge it briefly** (one line) and move to the next question. Don't summarize everything they've said after every answer.
-- **Save the big playback** for after you analyze their examples in Phase 4 -- that's when your observations actually matter.
-- Use **plain language throughout.** The user is setting up a communication tool, not configuring software. Don't mention MCP servers, tools, configs, YAML, JSON, or any technical infrastructure.
-- **Keep momentum.** This should take 5-10 minutes, not 30.
+## オンボーディングの流れ
 
-## The Onboarding Flow
-
-Work through these phases in order. Compress or skip phases when the user's answers make them unnecessary. Read the room -- if someone is impatient, move faster. If someone is thoughtful and detailed, give them space.
-
----
-
-### Phase 1: Welcome
-
-Start with this (adapt to feel natural, don't read it verbatim):
-
-> I'm going to learn how you communicate so I can draft status updates and briefings for you on demand. Takes about 5 minutes. I'll ask some questions about your role and your audiences, and I'll have you paste in an example or two of updates you've already written. After that, I'll be calibrated to your style.
-
-Move directly to Phase 2 after the welcome. Don't ask "Ready to begin?" or wait for permission -- just go.
+これらのフェーズを順番に実行してください。ユーザーの回答によりフェーズが不要になった場合は、フェーズを圧縮またはスキップします。部屋を読んでください。誰かがせっかちなら、より早く行動してください。誰かが思慮深く、詳しい人であれば、スペースを与えてください。
 
 ---
 
-### Phase 2: Your Role
+### フェーズ 1: ようこそ
 
-Ask these one at a time with `ask_user`:
+まずはこれから始めてください (自然な感じになるように調整してください。そのまま読まないでください)。
 
-1. **"What's your role?"** -- Let them describe it however they want. Title, responsibilities, domain -- however they think about what they do. Don't force a specific format.
+> あなたのコミュニケーション方法を学び、必要に応じて状況の最新情報や説明の草案を作成できるようにします。所要時間は約5分です。あなたの役割と対象者についていくつか質問します。そして、あなたがすでに書いた更新情報の例を 1 つか 2 つ貼り付けてもらいます。その後、あなたのスタイルに合わせて調整させていただきます。
 
-2. **"Who do you report to?"** -- Some people manage teams, some coordinate across teams, some are ICs who still communicate status. The skill works for all of them. Don't assume hierarchy.
-
-3. **"Who's on your team?"** -- Direct reports, close collaborators, whoever they work with regularly.
-
-4. **"In one sentence, what does your team work on?"** -- This calibrates domain vocabulary. A legal team writes differently from an engineering team, and the tool should match.
+歓迎の後、直接フェーズ 2 に進みます。 「始める準備はできましたか?」と尋ねないでください。または許可を待つか、そのまま行ってください。
 
 ---
 
-### Phase 3: Show Me What Good Looks Like
+### フェーズ 2: あなたの役割
 
-This is the most important phase. The examples are what make the calibration actually work.
+`ask_user` で一度に 1 つずつ質問してください。
 
-**First example:**
+1. **「あなたの役割は何ですか?」** -- 好きなように説明してもらいます。肩書き、責任、領域 -- 彼らは自分が何をするかについてどのように考えていますか。特定の形式を強制しないでください。2. **「誰に報告しますか?」** -- チームを管理する人もいれば、チーム全体を調整する人もいますし、ステータスを連絡する IC もいます。スキルはそれらすべてに有効です。階層構造を想定しないでください。
 
-Ask: "Paste in a recent status update, roundup email, or briefing you've written. Don't overthink which one -- whatever you sent most recently is perfect. Just paste the whole thing right here. The more examples you give me, the better my output will be, so feel free to paste a few if you have them."
+3. **「あなたのチームには誰がいますか?」** -- 直属の部下、親しい協力者、定期的に一緒に仕事をしている人。
 
-Accept whatever they paste. It might be a formal email, a Slack message, a bullet list, a narrative paragraph, meeting notes. Long or short. Messy formatting is fine -- you're reading for patterns, not presentation. All valid.
-
-After they paste, don't analyze yet. Just acknowledge receipt and confirm you got it: "Got it -- grabbed all of that, thanks."
-
-**Additional examples (optional):**
-
-Ask: "Want to paste another one? More examples mean better output -- especially if you write different updates for different audiences. Otherwise, one is plenty."
-
-If they paste a second, acknowledge it the same way. Then offer one more: "One more if you have it, or we can move on."
-
-Accept up to 3 total. Each additional example strengthens the calibration. If they decline at any point, move on without pressure. Don't ask more than twice after the first example.
+4. **「あなたのチームは何に取り組んでいますか?」** -- これにより、ドメインの語彙が調整されます。法務チームはエンジニアリング チームとは異なる書き方をしており、ツールは一致している必要があります。
 
 ---
 
-### Phase 4: Style Analysis and Playback
+### フェーズ 3: 良いものを見せてください
 
-This is where you earn the user's trust. Analyze their examples carefully and play back what you observed. Be specific -- not "you write clearly" but "you group items by project area, lead each bullet with what shipped, and flag risks in a separate section at the end."
+これが最も重要なフェーズです。サンプルは、キャリブレーションを実際に機能させるものです。
 
-Show your analysis structured like this (adjust based on what you actually observed):
+**最初の例:**
 
-**What I picked up from your examples:**
+質問: 「最近の近況報告、まとめのメール、または作成した説明を貼り付けてください。どれを考えすぎないでください。最近送信したものであれば何でも完璧です。ここにすべてを貼り付けてください。例が多ければ多いほど、私の出力はより良くなりますので、いくつかある場合は自由に貼り付けてください。」
 
-- **Format:** [What you observed about structure -- bullets, prose, headers, sub-sections, length, whitespace usage]
-- **Organization:** [How they group information -- by project, by theme, chronologically, by priority, by audience relevance]
-- **Tone:** [How formal, how direct, how much context they provide, whether they use first person, whether they name people]
-- **What they include:** [Content categories present -- accomplishments, blockers, risks, decisions, upcoming items, asks of the reader, metrics, people updates]
-- **What they skip:** [Things conspicuously absent -- minor items, routine maintenance, process details, emotional language, hedging]
-- **Distinctive patterns:** [Anything that's clearly a personal style choice -- e.g., always starts with a one-line summary, uses bold for action items, ends with "let me know if questions," uses specific emoji or formatting conventions]
+彼らが貼り付けたものは何でも受け入れます。それは、正式なメール、Slack メッセージ、箇条書き、説明文、会議メモなどです。長いか短いか。乱雑な書式設定は問題ありません。プレゼンテーションではなく、パターンを読んでいるのです。すべて有効です。
 
-Then ask with `ask_user`: "Does this look right? Anything I'm missing or got wrong?"
+貼り付けた後は、まだ分析しないでください。受領通知を受け取り、受け取ったことを確認するだけです。「わかりました。すべて受け取りました、ありがとう。」
 
-**This is collaborative calibration.** If they correct you, update your understanding. If they add nuance ("yeah but I only do the risk section when writing for leadership"), capture that as audience-specific behavior. Ask a follow-up question if their correction raises new questions.
+**追加の例 (オプション):**
 
----
+「別のサンプルを貼り付けますか? 例が増えると、より良い出力が得られます。特に、異なる対象者向けに異なる更新を作成する場合はそうです。それ以外の場合は、1 つで十分です。」
 
-### Phase 5: Your Audiences
+2 番目を貼り付けた場合は、同じ方法で承認します。次に、もう 1 つ提案します。「もし持っているなら、もう 1 つ、そうでなければ次に進みます。」
 
-Before starting this phase, give a quick progress signal: "Almost done -- a couple more topics after this one."
-
-Ask: "Who reads these updates? For example: your leadership, your team, cross-functional partners, external stakeholders -- anyone you write status-type communications for."
-
-**If they name one audience:** Ask three follow-up questions (one at a time): what does that audience care about, how much detail do they want, any format preferences.
-
-**If they name two or more audiences:** Compress the profiling to avoid a long string of repetitive questions. After they list their audiences:
-
-1. Ask one combined detail-level question: "Quick one -- for each of those, how much detail do they want?" and list the audiences with choices like "Big picture only / Moderate detail / Full play-by-play" so they can assign a level to each in one answer.
-
-2. Then ask one open-ended question: "Any of those audiences need a notably different format or focus? For example, some people's leadership wants three bullets max while their team prefers a longer narrative."
-
-3. Only ask audience-specific follow-ups if their answer flags a real difference. Don't interrogate every audience separately.
-
-If an audience gets a notably different version than what the user showed in their examples, ask: "Is the style you showed me more for [audience X], or is it pretty similar across all your audiences?" This helps map examples to audience profiles.
+合計3個まで受け付けます。サンプルを追加するたびに、キャリブレーションが強化されます。いずれかの時点で彼らが拒否した場合は、プレッシャーをかけずに先に進んでください。最初の例の後は 2 回以上質問しないでください。
 
 ---
 
-### Phase 6: Information Sources
+### フェーズ 4: スタイルの分析と再生
 
-Do NOT ask about "MCP tools," "data sources," or "integrations." Ask about their workflow.
+ここでユーザーの信頼を獲得します。それらの例を注意深く分析し、観察した内容を再生してください。具体的にしてください。「明確に書く」のではなく、「項目をプロジェクト領域ごとにグループ化し、各箇条書きに何が出荷されたかを示し、最後に別のセクションでリスクにフラグを立てます」。
 
-**Where work happens:**
+次のように構造化された分析を表示します (実際に観察した内容に基づいて調整します)。
 
-Ask: "Where does your team's actual work happen day-to-day? GitHub repos, project boards, shared documents, ticketing systems -- wherever the work product lives."
+**あなたの例から私が拾ったもの:**- **形式:** [構造について観察したこと -- 箇条書き、散文、ヘッダー、サブセクション、長さ、空白の使用]
+- **組織:** [情報をグループ化する方法 -- プロジェクト別、テーマ別、時系列別、優先度別、視聴者の関連性別]
+- **トーン:** [どの程度形式的か、どの程度直接的か、どの程度の文脈を提供しているか、一人称を使用しているかどうか、人物の名前を使用しているかどうか]
+- **内容:** [存在するコンテンツ カテゴリ - 成果、阻害要因、リスク、意思決定、今後の項目、読者への要望、指標、人々の最新情報]
+- **彼らがスキップするもの:** [著しく欠如しているもの -- 些細な項目、日常的なメンテナンス、プロセスの詳細、感情的な言葉遣い、ヘッジ]
+- **特徴的なパターン:** [明らかに個人的なスタイルの選択であるもの -- 例: 常に 1 行の概要で始まり、アクション項目に太字を使用、「質問があればお知らせください」で終わる、特定の絵文字または書式設定規則を使用する]
 
-Based on their answer, probe for specifics:
-- If GitHub: "Which repos or orgs should I keep an eye on?"
-- If project boards: "Which boards or projects are most relevant?"
-- If documents: "Where do you keep shared docs -- SharePoint, Google Drive, Notion, somewhere else?"
+次に、`ask_user` で質問します。「これは正しいですか? 足りないものや間違っているものはありますか?」
 
-**Where conversations happen:**
-
-Ask: "Where do the important conversations and decisions happen? Email, Teams, Slack, meetings, a group chat -- wherever context gets shared."
-
-Probe for specifics:
-- If email: "Any specific distribution lists or recurring threads I should watch?"
-- If Teams/Slack: "Which channels or group chats have the most signal?"
-- If meetings: "Any recurring meetings where key decisions land?"
-
-**Map to available tools silently:**
-
-After gathering their answers, check what tools you actually have access to in the current environment. Map their workflow to your capabilities. Be honest about gaps:
-
-- If you can access their data source (e.g., GitHub via MCP tools, M365 via WorkIQ): note it in the config as an active source.
-- If you CAN'T access something they mentioned: tell them directly. "I don't have a connection to [Jira / Slack / whatever], so for that one you'd need to paste in any relevant updates when you ask me to generate. I'll note that in your config."
-
-Don't make this a big deal. Just be matter-of-fact about what's wired up and what isn't. If they add connections later, they can re-run setup.
+**これは共同校正です。** 修正された場合は、理解を更新してください。彼らがニュアンスを加えた場合（「はい、しかし、私はリーダーシップのために執筆するときのみリスクセクションを行います」）、それを聴衆固有の行動として捉えます。修正によって新たな疑問が生じた場合は、フォローアップの質問をしてください。
 
 ---
 
-### Phase 7: Preferences and Guardrails
+### フェーズ 5: 視聴者
 
-Ask these one at a time with `ask_user`:
+このフェーズを開始する前に、「ほぼ完了しました。このトピックのあと、あと 2 つほどトピックがあります。」と簡単な進捗合図を出します。
 
-1. **"Anything you always want included?"** -- Standing sections, recurring themes, specific metrics they track, required disclaimers. If they're unsure, offer examples: "Some people always include a 'needs input' section, or a 'looking ahead' paragraph, or track specific OKRs."
+「これらの最新情報を読むのは誰ですか? たとえば、あなたのリーダーシップ、チーム、部門横断的なパートナー、外部の利害関係者など、ステータスに関するコミュニケーションを書く人なら誰でも構いません。」
 
-2. **"Anything you never want included?"** -- Noise to filter out. Certain repos full of bot PRs, internal process chatter, specific channels that are too noisy, types of activity that aren't worth mentioning.
+**視聴者が 1 人いる場合:** 3 つのフォローアップの質問を (一度に 1 つずつ) 行います: その視聴者は何に関心があるのか​​、どの程度詳細を望んでいるのか、形式の好みはありますか。
 
-3. **"Any hard constraints I should know about?"** -- Maximum length, formatting rules their org expects, required sections, anything like that. If they say no, that's fine -- move on.
+**2 人以上の聴衆の名前がある場合:** 長い一連の繰り返しの質問を避けるために、プロファイリングを圧縮します。視聴者をリストアップしたら、次のようにします。
+
+1. 詳細レベルの質問を 1 つ組み合わせて尋ねます。「簡単に質問します。それぞれについて、どの程度の詳細が必要ですか?」そして、「全体像のみ / 中程度の詳細 / 完全な実況」などの選択肢を付けて視聴者をリストし、1 つの回答でそれぞれにレベルを割り当てることができます。
+
+2. 次に、自由形式の質問を 1 つ尋ねます。「これらの聴衆の中に、著しく異なる形式や焦点を必要としている人はいますか? たとえば、ある人々のリーダーは最大 3 つの箇条書きを望んでいますが、チームは長い物語を好みます。」3. 聴衆の回答が実際の違いを示している場合にのみ、聴衆固有のフォローアップを依頼します。すべての聴衆に個別に尋問しないでください。
+
+ユーザーが例で示したものと著しく異なるバージョンを視聴者が受け取った場合は、「あなたが私に示したスタイルは、[視聴者 X] 向けですか? それとも、すべての視聴者でかなり似ていますか?」と尋ねます。これは、例を視聴者のプロファイルにマッピングするのに役立ちます。
 
 ---
 
-### Phase 8: Generate the Configuration
+### フェーズ 6: 情報源
 
-Now write the configuration file. Follow these steps exactly:
+「MCP ツール」、「データ ソース」、「統合」については質問しないでください。ワークフローについて尋ねます。
 
-1. Use `bash` to create the directory:
-   ```
+**作業が行われる場所:**
+
+「チームの実際の作業は日々どこで行われていますか? GitHub リポジトリ、プロジェクト ボード、共有ドキュメント、チケット発行システムなど、作業成果物が存在する場所ならどこでも構いません。」
+
+回答に基づいて、詳細を調べます。
+- GitHub の場合: 「どのリポジトリまたは組織に注目すべきですか?」
+- プロジェクトボードの場合: 「どのボードまたはプロジェクトが最も関連性がありますか?」
+- ドキュメントの場合: 「共有ドキュメントをどこに保管していますか -- SharePoint、Google Drive、Notion、その他の場所ですか?」
+
+**会話が行われる場所:**
+
+「重要な会話や意思決定はどこで行われますか? 電子メール、Teams、Slack、会議、グループ チャットなど、コンテキストが共有される場所ならどこでも。」
+
+詳細を調べる:
+- 電子メールの場合: 「特定の配信リストまたは定期的なスレッドを視聴する必要がありますか?」
+- Teams/Slack の場合: 「どのチャネルまたはグループ チャットが最も信号が多いですか?」
+- 会議の場合: 「重要な決定が下される定期的な会議はありますか?」
+
+**利用可能なツールにサイレントにマッピングします:**
+
+回答を集めたら、現在の環境で実際にどのツールにアクセスできるかを確認してください。彼らのワークフローをあなたの能力にマッピングします。ギャップについては正直に考えてください。
+
+- データ ソースにアクセスできる場合 (例: MCP ツール経由の GitHub、WorkIQ 経由の M365): アクティブなソースとして構成にメモします。
+- 彼らが言及したものにアクセスできない場合は、直接彼らに伝えてください。 「私は [Jira / Slack など] に接続していないので、その更新については、生成を依頼されたときに関連する更新を貼り付ける必要があります。そのことを設定にメモしておきます。」
+
+これを大した事にしないでください。何が接続されていて、何が接続されていないのかについては、事実を踏まえてください。後で接続を追加した場合は、セットアップを再実行できます。
+
+---
+
+### フェーズ 7: 設定とガードレール
+
+`ask_user` で一度に 1 つずつ質問してください。
+
+1. **「常に含めておきたいものはありますか?」** -- 継続的なセクション、繰り返しのテーマ、追跡する特定の指標、必須の免責事項。よくわからない場合は、例を示します。「常に『入力が必要』セクションや『今後の検討』段落を含めたり、特定の OKR を追跡したりする人もいます。」2. **「絶対に含めたくないものはありますか?」** -- フィルタリングして除去するノイズ。ボット PR でいっぱいの特定のリポジトリ、内部プロセスの雑談、ノイズが多すぎる特定のチャネル、言及する価値のない種類のアクティビティ。
+
+3. **「知っておくべき厳しい制約はありますか?」** -- 最大長、組織が期待する書式設定ルール、必須セクションなど。彼らがノーと言ったとしても、それは問題ありません。次に進みましょう。
+
+---
+
+### フェーズ 8: 構成の生成
+
+次に、設定ファイルを書き込みます。次の手順を正確に実行してください。
+
+1. `bash` を使用してディレクトリを作成します。```
    mkdir -p ~/.config/roundup
-   ```
+   ```2. `create` ツールを使用して、`~/.config/roundup/config.md` に構成ファイルを書き込みます。
 
-2. Use the `create` tool to write the config file at `~/.config/roundup/config.md`.
+3. `references/config-template.md` のテンプレートに従って構成を構造化します。主要なセクション:
+   - **あなたの役割** -- 役割、チーム、報告体制、チームの使命
+   - **あなたのスタイル** -- 形式、トーン、構成、コンテンツ カテゴリ、スキップする内容 (すべて例から抜粋)
+   - **視聴者** -- 視聴者ごとに 1 つのサブセクションとそのプロフィール
+   - **情報ソース** -- 利用可能なツール、監視する特定のリポジトリ/チャネル/リスト、既知のギャップ
+   - **設定** -- 常に含める、決して含めない、ハード制約
+   - **あなたの例** -- コードフェンスで囲んで、元の例をそのまま貼り付けます。
 
-3. Structure the config following the template in `references/config-template.md`. The key sections:
-   - **Your Role** -- role, team, reporting structure, team mission
-   - **Your Style** -- format, tone, organization, content categories, what they skip (all extracted from their examples)
-   - **Audiences** -- one subsection per audience with their profile
-   - **Information Sources** -- tools available, specific repos/channels/lists to monitor, known gaps
-   - **Preferences** -- always include, never include, hard constraints
-   - **Your Examples** -- paste their original examples verbatim, wrapped in code fences
+4. ユーザーがテキスト エディタで開いた場合に理解できる言語で構成を記述します。内部短縮表現、コード、技術的なメタデータはありません。開発者ではない人がこのファイルを読んでも、それを理解できるはずです。
 
-4. Write the config in language the user would understand if they opened it in a text editor. No internal shorthand, no codes, no technical metadata. If someone who isn't a developer reads this file, they should be able to follow it.
+5. ファイルの先頭にメモを追加します。
+   > ラウンドアップセットアップによって生成されます。このファイルはいつでも開いて編集できます。変更は反映されます。
+   > 場所: ~/.config/roundup/config.md
 
-5. Add a note at the top of the file:
-   > Generated by roundup-setup. You can open and edit this file anytime -- your changes will be respected.
-   > Location: ~/.config/roundup/config.md
+書いた後は、今後のラウンドアップの使用方法について、明確で記憶に残る要約をユーザーに提供します。次のようなもの:
 
-After writing, give the user a clear, memorable summary of how to use roundup going forward. Something like:
-
-> You're all set. Here's what to remember:
+> 準備は完了です。覚えておくべきことは次のとおりです。
 >
-> **To generate a briefing:** Just say `use roundup` in any Copilot CLI session. You can add specifics like "leadership briefing for this week" or "team update since Monday."
+> **ブリーフィングを生成するには:** Copilot CLI セッションで `use roundup` と言うだけです。 「今週のリーダーシップ説明会」や「月曜日以降のチームの最新情報」などの詳細を追加できます。
 >
-> **To change your setup:** Say `use roundup-setup` to redo the onboarding, or open `~/.config/roundup/config.md` directly -- it's plain text, easy to edit.
+> **設定を変更するには:** `use roundup-setup` と言ってオンボーディングをやり直すか、`~/.config/roundup/config.md` を直接開きます -- プレーン テキストなので編集が簡単です。
 >
-> **Your config is saved at:** `~/.config/roundup/config.md`
+> **設定は次の場所に保存されます:** `~/.config/roundup/config.md`
 
-Keep this summary short and concrete. The user should walk away knowing exactly two commands: `use roundup` and `use roundup-setup`.
+この要約は短く、具体的なものにしてください。ユーザーは、`use roundup` と `use roundup-setup` という 2 つのコマンドを正確に理解して立ち去る必要があります。
 
 ---
 
-### Phase 9: Offer a Test Run
+### フェーズ 9: テスト実行の提案
 
-Ask with `ask_user`: "Want to do a test run? I can generate a sample briefing right now using your config so you can see how it looks."
+`ask_user` に質問してください: 「テスト実行を行いたいですか? 構成を使用してサンプル ブリーフィングを今すぐ生成できるので、どのように見えるか確認できます。」
 
-Choices: "Yes, let's try it" / "No, I'm good for now"
+選択肢：「はい、やってみましょう」/「いいえ、今は大丈夫です」
 
-If yes:
-- Ask which audience to generate for (if they defined multiple)
-- Pull available data from their configured sources
-- Generate a draft following their style guide
-- Present it and ask for feedback
-- If they want adjustments, update the config file accordingly
+「はい」の場合:
+- どのオーディエンスに対して生成するかを尋ねます (複数のオーディエンスが定義されている場合)
+- 構成されたソースから利用可能なデータを取得します
+- スタイルガイドに従ってドラフトを生成します
+- 提示してフィードバックを求める
+- 調整が必要な場合は、それに応じて構成ファイルを更新します
 
-If no:
-- Let them know they can invoke the `roundup` skill anytime: "Whenever you're ready, just say 'use roundup' and I'll generate a briefing from your config."
+いいえの場合:
+- `roundup` スキルをいつでも呼び出せることを伝えます。「準備ができたら、『ラウンドアップを使用』と言ってください。構成からブリーフィングを生成します。」
 
 ---
 
-## Edge Cases
+## 特殊なケース### ユーザーには貼り付けるサンプルがありません
+彼らが最近の例がないと言った場合は、ピボットします。「心配しないでください。フォーマット、長さ、何を含めるのかなど、更新がどのように理想的であるかを説明してください。代わりに、その説明に基づいて作業します。」
 
-### User doesn't have examples to paste
-If they say they don't have any recent examples, pivot: "No worries. Describe how you'd ideally want your updates to look -- format, length, what you'd include. I'll work from that description instead."
+次に、的を絞った質問をして、スタイル ガイドを手動で作成します。
+- 「箇条書きですか、それとも段落ですか?」
+- 「長さはどのくらいですか? 数行ですか、それともページ全体ですか?」
+- 「形式的なものですか、それとも会話的なものですか?」
+- 「情報のどのセクションまたはカテゴリを含めますか?」
 
-Then ask targeted questions to build the style guide manually:
-- "Bullets or paragraphs?"
-- "How long -- a few lines or a full page?"
-- "Formal or conversational?"
-- "What sections or categories of information would you include?"
+### ユーザーがフローの途中で何かを変更したいと考えています
+どこかの時点でユーザーが後戻りした場合（「実は、視聴者についての答えを変更したいのですが」）、それに対応します。メモを調整して次に進みます。最初からやり直さないでください。
 
-### User wants to change something mid-flow
-If at any point the user backtracks ("actually, I want to change my answer about audiences"), accommodate it. Adjust your notes and move on. Don't restart from the beginning.
+### ユーザーは急いでいるように見えます
+ユーザーが非常に短い答えを返すか、せっかちに見える場合は、残りのフェーズを圧縮します。必要不可欠なもの (例 + 対象者 + ソース) を取得し、あれば便利なもの (設定、ガードレール) をスキップします。これらは、構成を編集することで、後でいつでも追加できます。
 
-### User seems rushed
-If the user is giving very short answers or seems impatient, compress the remaining phases. Get the essentials (examples + audiences + sources) and skip the nice-to-haves (preferences, guardrails). You can always add those later by editing the config.
+### ユーザーはこれまでにステータス更新を書いたことがありません
+事前のパターンを持たずにゼロから始める場合は、自分の役割にとって適切なアップデートに何が含まれるかをじっくり考えるのを手伝ってください。視聴者の期待について尋ね、シンプルな構造を提案し、例からではなく共同でスタイル ガイドを構築します。彼らが反応できる最初の草案を作成するように申し出ます。「あなたが私に言ったことに基づいて何かを作成します。何を変更するかを教えてください。」
 
-### User has never written a status update before
-If they're starting from scratch with no prior pattern, help them think through what a good update would include for their role. Ask about their audience's expectations, suggest a simple structure, and build the style guide collaboratively rather than from examples. Offer to generate a first draft they can react to: "I'll create something based on what you've told me, and you can tell me what to change."
-
-### Config file already exists
-If `~/.config/roundup/config.md` already exists, ask before overwriting: "You already have a roundup config. Want to start fresh, or keep your current setup?" If they want to keep it, offer to open it for manual editing instead.
+### 構成ファイルはすでに存在します
+`~/.config/roundup/config.md` がすでに存在する場合は、上書きする前に「ラウンドアップ設定がすでにあります。新しく始めますか、それとも現在の設定を維持しますか?」と尋ねます。保存しておきたい場合は、手動で編集するために開くことを申し出てください。

@@ -1,147 +1,123 @@
-# Observe: Sampling Strategies (TypeScript)
+# 観察: サンプリング戦略 (TypeScript)
 
-How to efficiently sample production traces for review.
+レビューのために実稼働トレースを効率的にサンプリングする方法。
 
-## Strategies
+## 戦略
 
-### 1. Failure-Focused (Highest Priority)
+### 1. 失敗重視 (最優先)
 
-Use server-side filters to fetch only what you need:
+サーバー側フィルターを使用して、必要なものだけを取得します。```タイプスクリプト
+import { getSpans } から "@arizeai/phoenix-client/spans";
 
-```typescript
-import { getSpans } from "@arizeai/phoenix-client/spans";
-
-// Server-side filter — only ERROR spans are returned
-const { spans: errors } = await getSpans({
-  project: { projectName: "my-project" },
-  statusCode: "ERROR",
-  limit: 100,
+// サーバー側フィルター — エラー スパンのみが返されます
+const { スパン: エラー } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  ステータスコード: "エラー"、
+  制限: 100、
 });
 
-// Fetch only LLM spans
-const { spans: llmSpans } = await getSpans({
-  project: { projectName: "my-project" },
-  spanKind: "LLM",
-  limit: 100,
+// LLM スパンのみを取得します
+const { スパン: llmSpans } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  スパン種類: "LLM"、
+  制限: 100、
 });
 
-// Filter by span name
-const { spans: chatSpans } = await getSpans({
-  project: { projectName: "my-project" },
-  name: "chat_completion",
-  limit: 100,
+// スパン名でフィルタリングします
+const { スパン: chatSpans } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  名前: "チャット_コンプリート",
+  制限: 100、
 });
-```
-
-### 2. Outliers
-
-```typescript
-const { spans } = await getSpans({
-  project: { projectName: "my-project" },
-  limit: 200,
+「」### 2. 外れ値```タイプスクリプト
+const { スパン } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  制限: 200、
 });
-const latency = (s: (typeof spans)[number]) =>
-  new Date(s.end_time).getTime() - new Date(s.start_time).getTime();
-const sorted = [...spans].sort((a, b) => latency(b) - latency(a));
-const slowResponses = sorted.slice(0, 50);
-```
-
-### 3. Stratified (Coverage)
-
-```typescript
-// Sample equally from each category
-function stratifiedSample<T>(items: T[], groupBy: (item: T) => string, perGroup: number): T[] {
+const latency = (s: (スパンの種類)[数値]) =>
+  新しい日付(s.end_time).getTime() - 新しい日付(s.start_time).getTime();
+constsorted = [...spans].sort((a, b) => latency(b) - latency(a));
+const lowResponses =sorted.slice(0, 50);
+「」### 3. 階層化 (カバレッジ)```タイプスクリプト
+// 各カテゴリから均等にサンプリングします
+function stratifiedSample<T>(items: T[], groupBy: (item: T) => string, perGroup:number): T[] {
   const groups = new Map<string, T[]>();
-  for (const item of items) {
-    const key = groupBy(item);
+  for (項目の定数項目) {
+    const key = groupBy(項目);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(item);
   }
-  return [...groups.values()].flatMap((g) => g.slice(0, perGroup));
+  return [...groups.values()]. flatMap((g) => g.slice(0, perGroup));
 }
 
-const { spans } = await getSpans({
-  project: { projectName: "my-project" },
-  limit: 500,
+const { スパン } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  制限: 500、
 });
 const byQueryType = stratifiedSample(spans, (s) => s.attributes?.["metadata.query_type"] ?? "unknown", 20);
-```
+「」### 4. 指標に基づく```タイプスクリプト
+import { getSpanAnnotations } から "@arizeai/phoenix-client/spans";
 
-### 4. Metric-Guided
-
-```typescript
-import { getSpanAnnotations } from "@arizeai/phoenix-client/spans";
-
-// Fetch annotations for your spans, then filter by label
-const { annotations } = await getSpanAnnotations({
-  project: { projectName: "my-project" },
-  spanIds: spans.map((s) => s.context.span_id),
-  includeAnnotationNames: ["hallucination"],
+// スパンのアノテーションを取得し、ラベルでフィルターします
+const { アノテーション } = await getSpanAnnotations({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  spanIds:spans.map((s) => s.context.span_id),
+  includeAnnotationNames: ["幻覚"],
 });
 
 const flaggedSpanIds = new Set(
-  annotations.filter((a) => a.result?.label === "hallucinated").map((a) => a.span_id)
+  annotations.filter((a) => a.result?.label === "幻覚").map((a) => a.span_id)
 );
 const flagged = spans.filter((s) => flaggedSpanIds.has(s.context.span_id));
-```
+「」## トレースレベルのサンプリング
 
-## Trace-Level Sampling
+リクエスト全体 (トレース内のすべてのスパン) が必要な場合は、`getTraces` を使用します。```タイプスクリプト
+import { getTraces } から "@arizeai/phoenix-client/traces";
 
-When you need whole requests (all spans in a trace), use `getTraces`:
-
-```typescript
-import { getTraces } from "@arizeai/phoenix-client/traces";
-
-// Recent traces with full span trees
-const { traces } = await getTraces({
-  project: { projectName: "my-project" },
-  limit: 100,
-  includeSpans: true,
+// フルスパンツリーを含む最近のトレース
+const { トレース } = await getTraces({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  制限: 100、
+  includeSpans: true、
 });
 
-// Filter by session (e.g., multi-turn conversations)
-const { traces: sessionTraces } = await getTraces({
-  project: { projectName: "my-project" },
-  sessionId: "user-session-abc",
-  includeSpans: true,
+// セッションごとにフィルタリングします (例: マルチターン会話)
+const { トレース: sessionTraces } = await getTraces({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  セッションID: "ユーザーセッション-abc",
+  includeSpans: true、
 });
 
-// Time-windowed sampling
-const { traces: recentTraces } = await getTraces({
-  project: { projectName: "my-project" },
-  startTime: new Date(Date.now() - 60 * 60 * 1000), // last hour
-  limit: 50,
-  includeSpans: true,
+// 時間窓サンプリング
+const { トレース: 最近のトレース } = await getTraces({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  startTime: new Date(Date.now() - 60 * 60 * 1000), // 過去 1 時間
+  制限: 50、
+  includeSpans: true、
 });
-```
-
-## Building a Review Queue
-
-```typescript
-// Combine server-side filters into a review queue
-const { spans: errorSpans } = await getSpans({
-  project: { projectName: "my-project" },
-  statusCode: "ERROR",
-  limit: 30,
+「」## レビューキューの構築```タイプスクリプト
+// サーバー側フィルターをレビューキューに結合します
+const { スパン: errorSpans } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  ステータスコード: "エラー"、
+  制限: 30、
 });
-const { spans: allSpans } = await getSpans({
-  project: { projectName: "my-project" },
-  limit: 100,
+const { スパン: allSpans } = await getSpans({
+  プロジェクト: { プロジェクト名: "私のプロジェクト" },
+  制限: 100、
 });
-const random = allSpans.sort(() => Math.random() - 0.5).slice(0, 30);
+const ランダム = allSpans.sort(() => Math.random() - 0.5).slice(0, 30);
 
-const combined = [...errorSpans, ...random];
+const combed = [...errorSpans, ...random];
 const unique = [...new Map(combined.map((s) => [s.context.span_id, s])).values()];
 const reviewQueue = unique.slice(0, 100);
-```
+「」## サンプルサイズのガイドライン
 
-## Sample Size Guidelines
-
-| Purpose | Size |
+|目的 |サイズ |
 | ------- | ---- |
-| Initial exploration | 50-100 |
-| Error analysis | 100+ (until saturation) |
-| Golden dataset | 100-500 |
-| Judge calibration | 100+ per class |
+|初期の探索 | 50-100 |
+|エラー分析 | 100+ (飽和するまで) |
+|ゴールデン データセット | 100-500 |
+|ジャッジキャリブレーション |クラスごとに 100 名以上 |
 
-**Saturation:** Stop when new traces show the same failure patterns.
+**飽和:** 新しいトレースが同じ失敗パターンを示した場合に停止します。

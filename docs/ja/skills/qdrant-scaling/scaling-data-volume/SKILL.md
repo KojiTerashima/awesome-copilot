@@ -6,44 +6,43 @@ allowed-tools:
   - Grep
   - Glob
 ---
+# データ量のスケーリング
 
-# Scaling Data Volume
+このドキュメントでは、データ ボリュームのスケーリング シナリオについて説明します。
+ここで、データセットの合計サイズは単一ノードの容量を超えます。
 
-This document covers data volume scaling scenarios,
-where the total size of the dataset exceeds the capacity of a single node.
+## テナントのスケーリング
 
-## Tenant Scaling
+ユースケースがマルチテナントの場合、つまり各ユーザーがデータのサブセットにのみアクセスできることを意味します。
+すべてのデータに対してクエリを実行する必要はなく、マルチテナント パターンを使用して拡張できます。
 
-If the use case is multi-tenant, meaning that each user only has access to a subset of the data,
-and we never need to query across all the data, then we can use multi-tenancy patterns to scale.
+推奨される方法は、ペイロード パーティショニング、テナントごとのインデックス、階層型マルチテナンシーを備えたマルチテナント ワークロードを使用することです。
 
-The recommended way is to use multi-tenant workloads with payload partitioning, per-tenant indexes, and tiered multitenancy.
+詳細はこちら [テナント スケーリング](tenant-scaling/SKILL.md)
 
-Learn more [Tenant Scaling](tenant-scaling/SKILL.md)
+## スライディング タイム ウィンドウ
 
-## Sliding Time Window
+一部のユースケースはスライディング タイム ウィンドウに基づいており、最新のデータのみが関連します。
+たとえば、ソーシャル メディア投稿のインデックスでは、過去 6 か月のデータのみを高速検索する必要があります。
 
-Some use-cases are based on a sliding time window, where only the most recent data is relevant.
-For example an index for social media posts, where only the last 6 months of data require fast search.
+さらに詳しく [スライディングタイムウィンドウ](sliding-time-window/SKILL.md)
 
-Learn more [Sliding Time Window](sliding-time-window/SKILL.md)
+## グローバル検索
 
-## Global Search
-
-Most general use-cases require global search across all data.
-In these situations, we might need to fall back to vertical scaling,
-and then horizontal scaling when we reach the limits of vertical scaling.
+ほとんどの一般的なユースケースでは、すべてのデータにわたるグローバル検索が必要です。
+このような状況では、垂直スケーリングに戻す必要があるかもしれません。
+そして垂直方向のスケーリングの限界に達すると水平方向のスケーリングになります。
 
 
-### Vertical Scaling
+### 垂直スケーリング
 
-When data doesn't fit in a single node, the first approach is to scale the node itself — more RAM, better disk, quantization, mmap.
-Exhaust vertical options before going horizontal, as horizontal scaling adds permanent operational complexity.
+データが 1 つのノードに収まらない場合、最初のアプローチはノード自体を拡張することです (RAM の増設、ディスクの改善、量子化、mmap など)。
+水平方向のスケーリングにより操作が永続的に複雑になるため、水平方向に移行する前に垂直方向のオプションをすべて検討してください。
 
-Learn more [Vertical Scaling](vertical-scaling/SKILL.md)
+さらに詳しく [垂直スケーリング](vertical-scaling/SKILL.md)
 
-### Horizontal Scaling
+### 水平方向のスケーリング
 
-When a single node can't hold the data even with quantization and mmap, distribute data across multiple nodes via sharding.
+量子化や mmap を使用しても単一ノードでデータを保持できない場合は、シャーディングによって複数のノードにデータを分散します。
 
-Learn more [Horizontal Scaling](horizontal-scaling/SKILL.md)
+さらに詳しく [水平スケーリング](horizo​​ntal-scaling/SKILL.md)

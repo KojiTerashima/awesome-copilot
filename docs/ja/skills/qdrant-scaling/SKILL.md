@@ -6,46 +6,45 @@ allowed-tools:
   - Grep
   - Glob
 ---
+# Qdrant スケーリング
 
-# Qdrant Scaling
+まず、何のためにスケーリングするのかを決定します。
 
-First determine what you're scaling for:
+- データ量
+- クエリ スループット (QPS)
+- クエリのレイテンシ
+- クエリ量
 
-- data volume
-- query throughput (QPS)
-- query latency
-- query volume
-
-After determining the scaling goal, we can choose scaling strategy based on tradeoffs and assumptions.
-Each pulls toward different strategies. Scaling for throughput and latency are opposite tuning directions.
-
-
-## Scaling Data Volume
-
-This becomes relevant when volume of the dataset exceeds the capacity of a single node.
-Read more about scaling for data volume in [Scaling Data Volume](scaling-data-volume/SKILL.md)
+スケーリングの目標を決定したら、トレードオフと仮定に基づいてスケーリング戦略を選択できます。
+それぞれが異なる戦略に向かって進みます。スループットとレイテンシのスケーリングは、調整の方向が逆です。
 
 
-## Scaling for Query Throughput
+## データ量のスケーリング
 
-If your system needs to handle more parallel queries than a single node can handle,
- then you need to scale for query throughput.
-
-Read more about scaling for query throughput in [Scaling for Query Throughput](scaling-qps/SKILL.md)
-
-## Scaling for Query Latency
-
-Latency of a single query is determined by the slowest component in the query execution path.
-It is in sometimes correlated with throughput, but not always. It might require different strategies for scaling.
-
-Read more about scaling for query latency in [Scaling for Query Latency](minimize-latency/SKILL.md)
+これは、データセットの量が単一ノードの容量を超える場合に関係します。
+データ ボリュームのスケーリングの詳細については、[データ ボリュームのスケーリング](scaling-data-volume/SKILL.md) を参照してください。
 
 
-## Scaling for Query Volume
+## クエリ スループットのスケーリング
 
-By query volume we understand the amount of results that a single query returns. 
-If the query volume is too high, it can cause performance issues and increase latency.
+システムが単一ノードで処理できるよりも多くの並列クエリを処理する必要がある場合は、
+ その場合は、クエリのスループットを拡張する必要があります。
 
-Tuning for query volume is opposite might require special strategies. 
+クエリ スループットのスケーリングの詳細については、[クエリ スループットのスケーリング](scaling-qps/SKILL.md) を参照してください。
 
-Read more about scaling for query volume in [Scaling for Query Volume](scaling-query-volume/SKILL.md)
+## クエリレイテンシのスケーリング
+
+単一クエリのレイテンシは、クエリ実行パス内の最も遅いコンポーネントによって決まります。
+スループットと相関がある場合もありますが、常に相関しているわけではありません。スケーリングにはさまざまな戦略が必要になる場合があります。
+
+クエリ レイテンシのスケーリングの詳細については、[クエリ レイテンシのスケーリング](minimize-latency/SKILL.md) を参照してください。
+
+
+## クエリボリュームのスケーリング
+
+クエリの量によって、1 つのクエリが返す結果の量がわかります。 
+クエリ量が多すぎると、パフォーマンスの問題が発生し、待ち時間が長くなる可能性があります。
+
+逆にクエリ量を調整するには、特別な戦略が必要になる場合があります。 
+
+クエリ ボリュームのスケーリングの詳細については、[クエリ ボリュームのスケーリング](scaling-query-volume/SKILL.md) を参照してください。

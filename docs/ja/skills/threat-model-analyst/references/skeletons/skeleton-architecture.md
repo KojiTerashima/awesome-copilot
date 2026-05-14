@@ -1,13 +1,11 @@
-# Skeleton: 0.1-architecture.md
+# スケルトン: 0.1-architecture.md
 
-> **⛔ Copy the template content below VERBATIM (excluding the outer code fence). Replace `[FILL]` placeholders. Do NOT add/rename/reorder sections.**
-> **⛔ Key Components table columns are EXACTLY: `Component | Type | Description`. DO NOT rename to `Role`, `Change`, `Function`.**
-> **⛔ Technology Stack table columns are EXACTLY: `Layer | Technologies` (2 columns). DO NOT add `Version` column or rename `Layer` to `Category`.**
-> **⛔ Security Infrastructure Inventory and Repository Structure sections are MANDATORY — do NOT omit them.**
+> **⛔ テンプレートの内容を VERBATIM の下にコピーします (外側のコード フェンスを除く)。 `[FILL]` プレースホルダーを置き換えます。セクションを追加/名前変更/並べ替えないでください。**
+> **⛔ キー コンポーネント テーブルの列は正確には `Component | Type | Description` です。名前を `Role`、`Change`、`Function`.** に変更しないでください。
+> **⛔ テクノロジー スタック テーブルの列は正確には: `Layer | Technologies` (2 列) です。 `Version` 列を追加したり、`Layer` を `Category` に名前変更したりしないでください。**
+> **⛔ セキュリティ インフラストラクチャ インベントリとリポジトリ構造のセクションは必須です。省略しないでください。**
 
----
-
-````markdown
+---````markdown
 # Architecture Overview
 
 ## System Purpose
@@ -30,9 +28,8 @@
 
 ## Component Diagram
 
-```mermaid
-[FILL: Architecture diagram using service/external/datastore styles — NOT DFD circles]
-```
+```人魚
+[FILL: サービス/外部/データストア スタイルを使用したアーキテクチャ図 — DFD サークルではありません]```
 
 ## Top Scenarios
 
@@ -42,10 +39,9 @@
 
 [FILL-PROSE: 2-3 sentence description]
 
-```mermaid
-sequenceDiagram
-    [FILL: participants, messages, alt/opt blocks]
-```
+```人魚
+シーケンス図
+    [FILL: 参加者、メッセージ、alt/opt ブロック]```
 
 [END-REPEAT]
 

@@ -1,208 +1,170 @@
-# Batching Categories - Before/After Patterns
+# バッチ処理カテゴリ - パターンの前/後
 
-## Category A - this.state Read After Await (Silent Bug) {#category-a}
+## カテゴリ A - this.state 待機後の読み取り (サイレント バグ) {#category-a}
 
-The method reads `this.state` after an `await` to make a conditional decision. In React 18, the intermediate setState hasn't flushed yet - `this.state` still holds the pre-update value.
+このメソッドは、`await` の後に `this.state` を読み取り、条件付きの決定を行います。 React 18 では、中間の setState はまだフラッシュされていません。`this.state` はまだ更新前の値を保持しています。
 
-**Before (broken in React 18):**
-
-```jsx
-async handleLoadClick() {
-  this.setState({ loading: true });       // batched - not flushed yet
+**以前 (React 18 で壊れた):**```jsx
+非同期 handleLoadClick() {
+  this.setState({読み込み中: true });       // バッチ処理 - まだフラッシュされていません
   const data = await fetchData();
-  if (this.state.loading) {               // ← still FALSE (old value)
-    this.setState({ data, loading: false });  // ← never called
+  if (this.state.loading) { // ← まだ FALSE (古い値)
+    this.setState({ データ、読み込み: false });  // ← 呼び出されることはありません
   }
 }
-```
-
-**After - remove the this.state read entirely:**
-
-```jsx
-async handleLoadClick() {
-  this.setState({ loading: true });
-  try {
+「」**後 - this.state 読み取り全体を削除します:**```jsx
+非同期 handleLoadClick() {
+  this.setState({読み込み中: true });
+  {を試してください
     const data = await fetchData();
-    this.setState({ data, loading: false }); // always called - no condition needed
-  } catch (err) {
-    this.setState({ error: err, loading: false });
+    this.setState({ データ、読み込み: false }); // 常に呼び出されます - 条件は必要ありません
+  } キャッチ (エラー) {
+    this.setState({ エラー: エラー、読み込み: false });
   }
 }
-```
-
-**Pattern:** If the condition on `this.state` was always going to be true at that point (you just set it to true), remove the condition. The setState you called before `await` will eventually flush - you don't need to check it.
+「」**パターン:** `this.state` の条件がその時点で常に true になる場合 (true に設定しただけです)、条件を削除します。 `await` の前に呼び出した setState は最終的にフラッシュされます。それを確認する必要はありません。
 
 ---
 
-## Category A Variant - Multi-Step Conditional Chain
-
-```jsx
-// Before (broken):
-async initialize() {
-  this.setState({ step: 'auth' });
-  const token = await authenticate();
-  if (this.state.step === 'auth') {        // ← wrong: still initial value
-    this.setState({ step: 'loading', token });
-    const data = await loadData(token);
-    if (this.state.step === 'loading') {   // ← wrong again
-      this.setState({ step: 'ready', data });
+## カテゴリ A バリアント - 複数ステップの条件付きチェーン```jsx
+// 前 (壊れた):
+非同期初期化() {
+  this.setState({ ステップ: '認証' });
+  const トークン = await 認証();
+  if (this.state.step === 'auth') { // ← 間違っています: まだ初期値です
+    this.setState({ ステップ: '読み込み中', トークン });
+    const data = awaitloadData(token);
+    if (this.state.step === 'loading') { // ← また間違っています
+      this.setState({ ステップ: '準備完了', データ });
     }
   }
 }
-```
+「」
 
 ```jsx
-// After - use local variables, not this.state, to track flow:
-async initialize() {
-  this.setState({ step: 'auth' });
-  try {
-    const token = await authenticate();
-    this.setState({ step: 'loading', token });
-    const data = await loadData(token);
-    this.setState({ step: 'ready', data });
-  } catch (err) {
-    this.setState({ step: 'error', error: err });
+// 後 - this.state ではなくローカル変数を使用してフローを追跡します。
+非同期初期化() {
+  this.setState({ ステップ: '認証' });
+  {を試してください
+    const トークン = await 認証();
+    this.setState({ ステップ: '読み込み中', トークン });
+    const data = awaitloadData(token);
+    this.setState({ ステップ: '準備完了', データ });
+  } キャッチ (エラー) {
+    this.setState({ ステップ: 'エラー', エラー: エラー });
   }
 }
-```
+「」---
 
----
+## カテゴリ B - 独立した setState 呼び出し (リファクタリング、flushSync なし) {#category-b}
 
-## Category B - Independent setState Calls (Refactor, No flushSync) {#category-b}
+Promise チェーン内の複数の setState 呼び出し。順序は重要ですが、中間状態の読み取りは発生しません。呼び出しを再構築する必要があるだけです。
 
-Multiple setState calls in a Promise chain where order matters but no intermediate state reading occurs. The calls just need to be restructured.
-
-**Before:**
-
-```jsx
+**前に：**```jsx
 handleSubmit() {
-  this.setState({ submitting: true });
+  this.setState({ 送信中: true });
   submitForm(this.state.formData)
-    .then(result => {
-      this.setState({ result });
-      this.setState({ submitting: false });  // two setState in .then()
+    .then(結果 => {
+      this.setState({ 結果 });
+      this.setState({ 送信中: false });  // .then() 内の 2 つの setState
     });
 }
-```
-
-**After - consolidate setState calls:**
-
-```jsx
-async handleSubmit() {
-  this.setState({ submitting: true, result: null, error: null });
-  try {
+「」**後 - setState 呼び出しを統合します:**```jsx
+非同期ハンドルSubmit() {
+  this.setState({ 送信中: true、結果: null、エラー: null });
+  {を試してください
     const result = await submitForm(this.state.formData);
-    this.setState({ result, submitting: false });
-  } catch (err) {
-    this.setState({ error: err, submitting: false });
+    this.setState({ 結果、送信中: false });
+  } キャッチ (エラー) {
+    this.setState({ エラー: エラー、送信中: false });
   }
 }
-```
-
-Rule: Multiple `setState` calls in the same async context already batch in React 18. Consolidating into fewer calls is cleaner but not strictly required.
+「」ルール: 同じ非同期コンテキスト内の複数の `setState` 呼び出しは、React 18 ですでにバッチ処理されています。より少ない呼び出しに統合する方がクリーンですが、厳密に必要というわけではありません。
 
 ---
 
-## Category C - Intermediate Render Must Be Visible (flushSync) {#category-c}
+## カテゴリ C - 中間レンダリングが表示される必要がある (flushSync) {#category-c}
 
-The user must see an intermediate UI state (loading spinner, progress step) BEFORE an async operation starts. This is the only case where `flushSync` is the right answer.
+ユーザーは、非同期操作を開始する前に、中間の UI 状態 (スピナーの読み込み、進行ステップ) を確認する必要があります。これは、`flushSync` が正しい答えとなる唯一のケースです。
 
-**Diagnostic question:** "If the loading spinner didn't appear until after the fetch returned, would the UX be wrong?"
+**診断の質問:** 「フェッチが返されるまでローディング スピナーが表示されなかった場合、UX は間違っていますか?」
 
-- YES → `flushSync`
-- NO → refactor (Category A or B)
+- はい → `flushSync`
+- いいえ → リファクタリング (カテゴリー A または B)
 
-**Before:**
-
-```jsx
-async processOrder() {
-  this.setState({ status: 'validating' });   // user must see this
+**前:**```jsx
+非同期 processOrder() {
+  this.setState({ ステータス: '検証中' });   // ユーザーはこれを参照する必要があります
   await validateOrder(this.props.order);
-  this.setState({ status: 'charging' });     // user must see this
-  await chargeCard(this.props.card);
-  this.setState({ status: 'complete' });
+  this.setState({ ステータス: '充電中' });     // ユーザーはこれを参照する必要があります
+  ChargeCard(this.props.card)を待ちます;
+  this.setState({ ステータス: '完了' });
 }
-```
+「」**後 - 必要な中間レンダリングごとに flashSync:**```jsx
+'react-dom' から { flashSync } をインポートします。
 
-**After - flushSync for each required intermediate render:**
-
-```jsx
-import { flushSync } from 'react-dom';
-
-async processOrder() {
-  flushSync(() => {
-    this.setState({ status: 'validating' });  // renders immediately
+非同期 processOrder() {
+  flashSync(() => {
+    this.setState({ ステータス: '検証中' });  // すぐにレンダリングされます
   });
   await validateOrder(this.props.order);
 
-  flushSync(() => {
-    this.setState({ status: 'charging' });    // renders immediately
+  flashSync(() => {
+    this.setState({ ステータス: '充電中' });    // すぐにレンダリングされます
   });
-  await chargeCard(this.props.card);
+  ChargeCard(this.props.card)を待ちます;
 
-  this.setState({ status: 'complete' });      // last - no flushSync needed
+  this.setState({ ステータス: '完了' });      // 最後 - flashSync は必要ありません
 }
-```
+「」**シンプルなローディング スピナー ケース** (最も一般的):```jsx
+'react-dom' から { flashSync } をインポートします。
 
-**Simple loading spinner case** (most common):
-
-```jsx
-import { flushSync } from 'react-dom';
-
-async handleSearch() {
-  // User must see spinner before the fetch begins
-  flushSync(() => this.setState({ loading: true }));
+非同期ハンドル検索() {
+  // ユーザーはフェッチを開始する前にスピナーを確認する必要があります
+  lushSync(() => this.setState({読み込み: true }));
   const results = await searchAPI(this.state.query);
-  this.setState({ results, loading: false });
+  this.setState({ 結果、読み込み: false });
 }
-```
+「」---
 
----
-
-## setTimeout Pattern
-
-```jsx
-// Before (React 17 - setTimeout fired immediate re-renders):
+## setTimeout パターン```jsx
+// 前 (React 17 - setTimeout による即時再レンダリング):
 handleAutoSave() {
   setTimeout(() => {
-    this.setState({ saving: true });
-    // React 17: re-render happened here
+    this.setState({保存: true });
+    // React 17: ここで再レンダリングが発生しました
     saveToServer(this.state.formData).then(() => {
-      this.setState({ saving: false, lastSaved: Date.now() });
+      this.setState({ 保存: false, lastSaved: Date.now() });
     });
-  }, 2000);
+  }、2000);
 }
-```
+「」
 
 ```jsx
-// After (React 18 - all setState inside setTimeout batches):
+// 後 (React 18 - setTimeout バッチ内のすべての setState):
 handleAutoSave() {
   setTimeout(async () => {
-    // If loading state must show before fetch - flushSync
-    flushSync(() => this.setState({ saving: true }));
+    // 読み込み状態をフェッチ前に表示する必要がある場合 - flashSync
+    flashSync(() => this.setState({ 保存: true }));
     await saveToServer(this.state.formData);
-    this.setState({ saving: false, lastSaved: Date.now() });
-  }, 2000);
+    this.setState({ 保存: false, lastSaved: Date.now() });
+  }、2000);
 }
-```
+「」---
 
----
-
-## Test Patterns That Break Due to Batching
-
-```jsx
-// Before (React 17 - intermediate state was synchronously visible):
-it('shows saving indicator', () => {
+## バッチ処理により壊れるテスト パターン```jsx
+// 以前 (React 17 - 中間状態が同期的に表示されていました):
+it('保存インジケーターを表示', () => {
   render(<AutoSaveForm />);
-  fireEvent.change(input, { target: { value: 'new text' } });
-  expect(screen.getByText('Saving...')).toBeInTheDocument(); // ← sync check
+  fireEvent.change(input, { target: { value: '新しいテキスト' } });
+  Expect(screen.getByText('保存中...')).toBeInTheDocument(); // ← 同期チェック
 });
 
-// After (React 18 - use waitFor for intermediate states):
-it('shows saving indicator', async () => {
+// 後 (React 18 - 中間状態には waitFor を使用):
+it('保存インジケーターを表示', async () => {
   render(<AutoSaveForm />);
-  fireEvent.change(input, { target: { value: 'new text' } });
-  await waitFor(() => expect(screen.getByText('Saving...')).toBeInTheDocument());
-  await waitFor(() => expect(screen.getByText('Saved')).toBeInTheDocument());
+  fireEvent.change(input, { target: { value: '新しいテキスト' } });
+  await waitFor(() => Expect(screen.getByText('Saving...')).toBeInTheDocument());
+  await waitFor(() => Expect(screen.getByText('Saved')).toBeInTheDocument());
 });
-```
+「」

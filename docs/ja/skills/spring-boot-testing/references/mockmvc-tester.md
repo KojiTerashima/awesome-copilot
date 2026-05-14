@@ -1,14 +1,12 @@
-# MockMvcTester
+#MockMvcTester
 
-AssertJ-style testing for Spring MVC controllers (Spring Boot 3.2+).
+Spring MVC コントローラー (Spring Boot 3.2 以降) の AssertJ スタイルのテスト。
 
-## Overview
+## 概要
 
-MockMvcTester provides fluent, AssertJ-style assertions for web layer testing. More readable and type-safe than traditional MockMvc.
+MockMvcTester は、Web 層テスト用に流暢な AssertJ スタイルのアサーションを提供します。従来の MockMvc よりも読みやすく、タイプセーフです。
 
-**Recommended Pattern**: Convert JSON to real objects and assert with AssertJ:
-
-```java
+**推奨パターン**: JSON を実際のオブジェクトに変換し、AssertJ でアサートします。```java
 assertThat(mvc.get().uri("/orders/1"))
   .hasStatus(HttpStatus.OK)
   .bodyJson()
@@ -17,11 +15,7 @@ assertThat(mvc.get().uri("/orders/1"))
     assertThat(response.getTotalToPay()).isEqualTo(expectedAmount);
     assertThat(response.getItems()).isNotEmpty();
   });
-```
-
-## Basic Usage
-
-```java
+```## 基本的な使い方```java
 @WebMvcTest(OrderController.class)
 class OrderControllerTest {
   
@@ -31,13 +25,9 @@ class OrderControllerTest {
   @MockitoBean
   private OrderService orderService;
 }
-```
+```## 推奨: オブジェクト変換パターン
 
-## Recommended: Object Conversion Pattern
-
-### Single Object Response
-
-```java
+### 単一オブジェクトの応答```java
 @Test
 void shouldGetOrder() {
   given(orderService.findById(1L)).willReturn(new Order(1L, "PENDING", 99.99));
@@ -52,11 +42,7 @@ void shouldGetOrder() {
       assertThat(response.getTotalToPay()).isEqualTo(new BigDecimal("99.99"));
     });
 }
-```
-
-### List Response
-
-```java
+```### リスト応答```java
 @Test
 void shouldGetAllOrders() {
   given(orderService.findAll()).willReturn(Arrays.asList(
@@ -74,11 +60,7 @@ void shouldGetAllOrders() {
       assertThat(orders.get(1).getStatus()).isEqualTo("COMPLETED");
     });
 }
-```
-
-### Nested Objects
-
-```java
+```### ネストされたオブジェクト```java
 @Test
 void shouldGetOrderWithCustomer() {
   assertThat(mvc.get().uri("/orders/1"))
@@ -91,11 +73,7 @@ void shouldGetOrderWithCustomer() {
       assertThat(response.getCustomer().getAddress().getCity()).isEqualTo("Berlin");
     });
 }
-```
-
-### Complex Assertions
-
-```java
+```### 複雑なアサーション```java
 @Test
 void shouldCalculateOrderTotal() {
   assertThat(mvc.get().uri("/orders/1/calculate"))
@@ -109,13 +87,9 @@ void shouldCalculateOrderTotal() {
       assertThat(calc.getItems()).allMatch(item -> item.getPrice().compareTo(BigDecimal.ZERO) > 0);
     });
 }
-```
+```## HTTP メソッド
 
-## HTTP Methods
-
-### POST with Request Body
-
-```java
+### リクエスト本文を含む POST```java
 @Test
 void shouldCreateOrder() {
   given(orderService.create(any())).willReturn(1L);
@@ -126,11 +100,7 @@ void shouldCreateOrder() {
     .hasStatus(HttpStatus.CREATED)
     .hasHeader("Location", "/orders/1");
 }
-```
-
-### PUT Request
-
-```java
+```### PUT リクエスト```java
 @Test
 void shouldUpdateOrder() {
   assertThat(mvc.put().uri("/orders/1")
@@ -138,21 +108,13 @@ void shouldUpdateOrder() {
     .content("{\"status\": \"COMPLETED\"}"))
     .hasStatus(HttpStatus.OK);
 }
-```
-
-### DELETE Request
-
-```java
+```### 削除リクエスト```java
 @Test
 void shouldDeleteOrder() {
   assertThat(mvc.delete().uri("/orders/1"))
     .hasStatus(HttpStatus.NO_CONTENT);
 }
-```
-
-## Status Assertions
-
-```java
+```## ステータス アサーション```java
 assertThat(mvc.get().uri("/orders/1"))
   .hasStatusOk()                    // 200
   .hasStatus(HttpStatus.OK)         // 200
@@ -162,40 +124,24 @@ assertThat(mvc.get().uri("/orders/1"))
   .hasStatusUnauthorized()          // 401
   .hasStatusForbidden()             // 403
   .hasStatus(HttpStatus.CREATED);   // 201
-```
-
-## Content Type Assertions
-
-```java
+```## コンテンツ タイプ アサーション```java
 assertThat(mvc.get().uri("/orders/1"))
   .hasContentType(MediaType.APPLICATION_JSON)
   .hasContentTypeCompatibleWith(MediaType.APPLICATION_JSON);
-```
-
-## Header Assertions
-
-```java
+```## ヘッダー アサーション```java
 assertThat(mvc.post().uri("/orders"))
   .hasHeader("Location", "/orders/123")
   .hasHeader("X-Request-Id", matchesPattern("[a-z0-9-]+"));
-```
+```## 代替: JSON パス (慎重に使用)
 
-## Alternative: JSON Path (Use Sparingly)
-
-Only use when you cannot convert to a typed object:
-
-```java
+型付きオブジェクトに変換できない場合にのみ使用してください。```java
 assertThat(mvc.get().uri("/orders/1"))
   .hasStatusOk()
   .bodyJson()
   .extractingPath("$.customer.address.city")
   .asString()
   .isEqualTo("Berlin");
-```
-
-## Request Parameters
-
-```java
+```## リクエストパラメータ```java
 // Query parameters
 assertThat(mvc.get().uri("/orders?status=PENDING&page=0"))
   .hasStatusOk();
@@ -208,11 +154,7 @@ assertThat(mvc.get().uri("/orders/{id}", 1L))
 assertThat(mvc.get().uri("/orders/1")
   .header("X-Api-Key", "secret"))
   .hasStatusOk();
-```
-
-## Request Body with JacksonTester
-
-```java
+```## JacksonTester を使用したリクエスト本文```java
 @Autowired
 private JacksonTester<OrderRequest> json;
 
@@ -225,11 +167,7 @@ void shouldCreateOrder() {
     .content(json.write(request).getJson()))
     .hasStatus(HttpStatus.CREATED);
 }
-```
-
-## Error Responses
-
-```java
+```## エラー応答```java
 @Test
 void shouldReturnValidationErrors() {
   given(orderService.findById(999L))
@@ -244,11 +182,7 @@ void shouldReturnValidationErrors() {
       assertThat(error.getCode()).isEqualTo("ORDER_NOT_FOUND");
     });
 }
-```
-
-## Validation Error Testing
-
-```java
+```## 検証エラーのテスト```java
 @Test
 void shouldRejectInvalidOrder() {
   OrderRequest invalidRequest = new OrderRequest("", -1);
@@ -266,32 +200,24 @@ void shouldRejectInvalidOrder() {
         .contains("product", "quantity");
     });
 }
-```
+```## 比較: MockMvcTester と Classic MockMvc
 
-## Comparison: MockMvcTester vs Classic MockMvc
-
-| Feature | MockMvcTester | Classic MockMvc |
+|特集 |モックMvcテスター |クラシックモックMVC |
 | ------- | ------------- | --------------- |
-| Style | AssertJ fluent | MockMvc matchers |
-| Readability | High | Medium |
-| Type Safety | Better | Less |
-| IDE Support | Excellent | Good |
-| Object Conversion | Native | Manual |
+|スタイル | AssertJ 流暢 | MockMvc マッチャー |
+|可読性 |高 |中 |
+|タイプセーフティ |より良い |少ない |
+| IDEサポート |素晴らしい |良い |
+|オブジェクト変換 |ネイティブ |マニュアル |
 
-## Migration from Classic MockMvc
+## Classic MockMvc からの移行
 
-### Before (Classic)
-
-```java
+### 前 (クラシック)```java
 mvc.perform(get("/orders/1"))
   .andExpect(status().isOk())
   .andExpect(jsonPath("$.status").value("PENDING"))
   .andExpect(jsonPath("$.totalToPay").value(99.99));
-```
-
-### After (Tester with Object Conversion)
-
-```java
+```### 後 (オブジェクト変換を使用したテスター)```java
 assertThat(mvc.get().uri("/orders/1"))
   .hasStatus(HttpStatus.OK)
   .bodyJson()
@@ -300,12 +226,10 @@ assertThat(mvc.get().uri("/orders/1"))
     assertThat(response.getStatus()).isEqualTo("PENDING");
     assertThat(response.getTotalToPay()).isEqualTo(new BigDecimal("99.99"));
   });
-```
+```## 重要なポイント
 
-## Key Points
-
-1. **Prefer `convertTo()` over `extractingPath()`** - Type-safe, refactorable
-2. **Use `satisfies()` for multiple assertions** - Keeps tests readable
-3. **Import static `org.assertj.core.api.Assertions.assertThat`**
-4. **Works with generics via `TypeReference`** - For `List<T>` responses
-5. **IDE refactoring friendly** - Rename fields, IDE updates tests
+1. **`extractingPath()`** よりも `convertTo()` を優先 - タイプセーフでリファクタリング可能
+2. **複数のアサーションには `satisfies()` を使用します** - テストを読みやすく保ちます
+3. **静的 `org.assertj.core.api.Assertions.assertThat`** をインポートします
+4. **`TypeReference`** を介してジェネリックで動作します - `List<T>` 応答の場合
+5. **IDE リファクタリングに優しい** - フィールド名の変更、IDE のテストの更新

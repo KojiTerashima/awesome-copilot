@@ -6,32 +6,30 @@ allowed-tools:
   - Grep
   - Glob
 ---
+# Qdrant パフォーマンスの最適化
+
+Qdrant のパフォーマンスにはさまざまな側面があります。このドキュメントは、Qdrant のパフォーマンス最適化のさまざまな側面のナビゲーション ハブとして機能します。
 
 
-# Qdrant Performance Optimization
+## 検索速度の最適化
 
-There are different aspects of Qdrant performance, this document serves as a navigation hub for different aspects of performance optimization in Qdrant.
+検索速度には、レイテンシーとスループットという 2 つの異なる基準があります。 
+レイテンシは 1 つのクエリに対する応答を取得するのにかかる時間であり、スループットは特定の時間枠内に処理できるクエリの数です。
+ユースケースに応じて、これらのメトリクスの一方または両方を最適化することが必要になる場合があります。
 
-
-## Search Speed Optimization
-
-There are two different criteria for search speed: latency and throughput. 
-Latency is the time it takes to get a response for a single query, while throughput is the number of queries that can be processed in a given time frame.
-Depending on your use case, you may want to optimize for one or both of these metrics.
-
-More on search speed optimization can be found in the [Search Speed Optimization](search-speed-optimization/SKILL.md) skill.
+検索速度の最適化の詳細については、[検索速度の最適化](search-speed-optimization/SKILL.md) スキルをご覧ください。
 
 
-## Indexing Performance Optimization
+## インデックス作成パフォーマンスの最適化
 
-Qdrant needs to build a vector index to perform efficient similarity search. The time it takes to build the index can vary depending on the size of your dataset, hardware, and configuration.
+Qdrant は、効率的な類似性検索を実行するためにベクトル インデックスを構築する必要があります。インデックスの構築にかかる時間は、データセット、ハードウェア、構成のサイズによって異なります。
 
-More on indexing performance optimization can be found in the [Indexing Performance Optimization](indexing-performance-optimization/SKILL.md) skill.
+インデックス作成パフォーマンスの最適化の詳細については、[インデックス作成パフォーマンスの最適化](indexing-performance-optimization/SKILL.md) スキルを参照してください。
 
 
-## Memory Usage Optimization
+## メモリ使用量の最適化
 
-Vector search can be memory intensive, especially when dealing with large datasets.
-Qdrant has a flexible memory management system, which allows you to precisely control which parts of storage are kept in memory and which are stored on disk. This can help you optimize memory usage without sacrificing performance.
+ベクトル検索は、特に大規模なデータセットを扱う場合、メモリを大量に消費する可能性があります。
+Qdrant には柔軟なメモリ管理システムがあり、ストレージのどの部分をメモリに保存し、どの部分をディスクに保存するかを正確に制御できます。これにより、パフォーマンスを犠牲にすることなくメモリ使用量を最適化できます。
 
-More on memory usage optimization can be found in the [Memory Usage Optimization](memory-usage-optimization/SKILL.md) skill.
+メモリ使用量の最適化の詳細については、[メモリ使用量の最適化](memory-usage-optimization/SKILL.md) スキルを参照してください。

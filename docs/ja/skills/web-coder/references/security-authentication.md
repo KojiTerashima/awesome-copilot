@@ -1,19 +1,17 @@
-# Security & Authentication Reference
+# セキュリティと認証のリファレンス
 
-Comprehensive reference for web security, authentication, encryption, and secure coding practices.
+Web セキュリティ、認証、暗号化、安全なコーディングの実践に関する包括的なリファレンス。
 
-## Web Security Fundamentals
+## Web セキュリティの基礎
 
-### CIA Triad
+### CIA トライアド
 
-Core principles of information security:
-- **Confidentiality**: Data accessible only to authorized parties
-- **Integrity**: Data remains accurate and unmodified
-- **Availability**: Systems and data accessible when needed
+情報セキュリティの中核原則:
+- **機密性**: 許可された当事者のみがデータにアクセス可能
+- **完全性**: データは正確で変更されないままです。
+- **可用性**: 必要なときにシステムとデータにアクセス可能
 
-### Security Headers
-
-```http
+### セキュリティヘッダー```http
 # Content Security Policy
 Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.example.com 'nonce-<random-base64-value>'; style-src 'self' 'nonce-<random-base64-value>'; object-src 'none'
 
@@ -34,83 +32,75 @@ Referrer-Policy: strict-origin-when-cross-origin
 
 # Permissions-Policy
 Permissions-Policy: geolocation=(), microphone=(), camera=()
-```
+```### CSP (コンテンツ セキュリティ ポリシー)
 
-### CSP (Content Security Policy)
+XSS およびデータ インジェクション攻撃を軽減します。
 
-Mitigates XSS and data injection attacks.
+**指示**:
+- `default-src`: 他のディレクティブのフォールバック
+- `script-src`: JavaScript ソース
+- `style-src`: CSS ソース
+- `img-src`: 画像ソース
+- `font-src`: フォントソース
+- `connect-src`: Fetch/XMLHttpRequest の宛先
+- `frame-src`: iframe ソース
+- `object-src`: プラグインのソース
 
-**Directives**:
-- `default-src`: Fallback for other directives
-- `script-src`: JavaScript sources
-- `style-src`: CSS sources
-- `img-src`: Image sources
-- `font-src`: Font sources
-- `connect-src`: Fetch/XMLHttpRequest destinations
-- `frame-src`: iframe sources
-- `object-src`: Plugin sources
+**値**:
+- `'self'`: 同じ起源
+- `'none'`: すべてブロック
+- `'unsafe-inline'`: インライン スクリプト/スタイルを許可します (回避)
+- `'unsafe-eval'`: eval() を許可します (回避します)
+- `https:`: HTTPS ソースのみ
+- `https://example.com`: 特定のドメイン
 
-**Values**:
-- `'self'`: Same origin
-- `'none'`: Block all
-- `'unsafe-inline'`: Allow inline scripts/styles (avoid)
-- `'unsafe-eval'`: Allow eval() (avoid)
-- `https:`: HTTPS sources only
-- `https://example.com`: Specific domain
+## HTTPS と TLS
 
-## HTTPS & TLS
+### TLS (トランスポート層セキュリティ)
 
-### TLS (Transport Layer Security)
+クライアントとサーバーの間で転送されるデータを暗号化します。
 
-Encrypts data in transit between client and server.
+**TLS ハンドシェイク**:
+1. Client Hello (サポートされているバージョン、暗号スイート)
+2. Server Hello (選択したバージョン、暗号スイート)
+3. サーバー証明書
+4. 鍵交換
+5. 完了（接続が確立されました）
 
-**TLS Handshake**:
-1. Client Hello (supported versions, cipher suites)
-2. Server Hello (chosen version, cipher suite)
-3. Server Certificate
-4. Key Exchange
-5. Finished (connection established)
+**バージョン**:
+- TLS 1.0、1.1 (非推奨)
+- TLS 1.2 (現在の標準)
+- TLS 1.3 (最新、高速)
 
-**Versions**:
-- TLS 1.0, 1.1 (deprecated)
-- TLS 1.2 (current standard)
-- TLS 1.3 (latest, faster)
+### SSL証明書
 
-### SSL Certificates
+**タイプ**:
+- **ドメイン検証済み (DV)**: 基本的な検証
+- **組織検証済み (OV)**: ビジネス検証
+- **拡張検証 (EV)**: 厳格な検証
 
-**Types**:
-- **Domain Validated (DV)**: Basic validation
-- **Organization Validated (OV)**: Business verification
-- **Extended Validation (EV)**: Rigorous verification
+**認証局**: 証明書を発行する信頼できるエンティティ
 
-**Certificate Authority**: Trusted entity that issues certificates
-
-**Self-Signed**: Not trusted by browsers (dev/testing only)
+**自己署名**: ブラウザーによって信頼されていません (開発/テストのみ)
 
 ### HSTS (HTTP Strict Transport Security)
 
-Forces browsers to use HTTPS:
-
-```http
+ブラウザに HTTPS の使用を強制します。```http
 Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-```
+```- `max-age`: 持続時間 (秒)
+- `includeSubDomains`: すべてのサブドメインに適用
+- `preload`: ブラウザーのプリロード リストに送信します
 
-- `max-age`: Duration in seconds
-- `includeSubDomains`: Apply to all subdomains
-- `preload`: Submit to browser preload list
+## 認証
 
-## Authentication
+### 認証と認可
 
-### Authentication vs Authorization
+- **認証**: 身元を確認します (「あなたは誰ですか?」)
+- **権限**: 権限を確認します (「何ができますか?」)
 
-- **Authentication**: Verify identity ("Who are you?")
-- **Authorization**: Verify permissions ("What can you do?")
+### 一般的な認証方法
 
-### Common Authentication Methods
-
-#### 1. Session-Based Authentication
-
-```javascript
+#### 1. セッションベースの認証```javascript
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -135,14 +125,10 @@ app.post('/logout', (req, res) => {
   req.session.destroy();
   res.json({ success: true });
 });
-```
+```**長所**: シンプル、サーバー制御セッション  
+**短所**: ステートフル、スケーラビリティの問題、CSRF の脆弱性
 
-**Pros**: Simple, server controls sessions  
-**Cons**: Stateful, scalability issues, CSRF vulnerable
-
-#### 2. Token-Based Authentication (JWT)
-
-```javascript
+#### 2. トークンベースの認証 (JWT)```javascript
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -171,38 +157,34 @@ app.get('/profile', (req, res) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 });
-```
+```**長所**: ステートレス、スケーラブル、ドメイン間で動作します。  
+**短所**: 有効期限が切れる前に取り消すことができず、サイズのオーバーヘッドが発生します
 
-**Pros**: Stateless, scalable, works across domains  
-**Cons**: Can't revoke before expiry, size overhead
+#### 3.OAuth 2.0
 
-#### 3. OAuth 2.0
+委任されたアクセスのための承認フレームワーク。
 
-Authorization framework for delegated access.
+**役割**:
+- **リソース所有者**: エンドユーザー
+- **クライアント**: アクセスを要求しているアプリケーション
+- **認可サーバー**: トークンを発行します。
+- **リソース サーバー**: 保護されたリソースをホストします。
 
-**Roles**:
-- **Resource Owner**: End user
-- **Client**: Application requesting access
-- **Authorization Server**: Issues tokens
-- **Resource Server**: Hosts protected resources
+**フローの例** (認証コード):
+1. クライアントは認証サーバーにリダイレクトします
+2. ユーザーが認証し、許可を与える
+3. 認証サーバーはコードをリダイレクトして返します
+4. クライアントはアクセス トークンのコードを交換します
+5. クライアントはトークンを使用してリソースにアクセスします
 
-**Flow Example** (Authorization Code):
-1. Client redirects to auth server
-2. User authenticates and grants permission
-3. Auth server redirects back with code
-4. Client exchanges code for access token
-5. Client uses token to access resources
+#### 4. 多要素認証 (MFA)
 
-#### 4. Multi-Factor Authentication (MFA)
+複数の検証要素が必要です。
+- **知っていること**: パスワード
+- **お持ちのもの**: 電話機、ハードウェア トークン
+- **あなたそのもの**: 生体認証
 
-Requires multiple verification factors:
-- **Something you know**: Password
-- **Something you have**: Phone, hardware token
-- **Something you are**: Biometric
-
-### Password Security
-
-```javascript
+### パスワードセキュリティ```javascript
 const bcrypt = require('bcrypt');
 
 // Hash password
@@ -215,31 +197,28 @@ async function hashPassword(password) {
 async function verifyPassword(password, hash) {
   return await bcrypt.compare(password, hash);
 }
-```
+```**ベストプラクティス**:
+- ✅ bcrypt、scrypt、または Argon2 を使用する
+- ✅ 最低 8 文字 (12 文字以上を推奨)
+- ✅ 文字の混合が必要です
+- ✅ レート制限を実装する
+- ✅ 失敗後にアカウント ロックアウトを使用する
+- ❌ プレーンテキストのパスワードは決して保存しないでください
+- ❌ パスワードの長さを制限しないでください（正当な範囲内）
+- ❌ パスワードを電子メールで送信しないでください
 
-**Best Practices**:
-- ✅ Use bcrypt, scrypt, or Argon2
-- ✅ Minimum 8 characters (12+ recommended)
-- ✅ Require mix of characters
-- ✅ Implement rate limiting
-- ✅ Use account lockout after failures
-- ❌ Never store plain text passwords
-- ❌ Never limit password length (within reason)
-- ❌ Never email passwords
+## 一般的な脆弱性
 
-## Common Vulnerabilities
+### XSS (クロスサイト スクリプティング)
 
-### XSS (Cross-Site Scripting)
+悪意のあるスクリプトを Web ページに挿入します。
 
-Injecting malicious scripts into web pages.
+**タイプ**:
+1. **保存された XSS**: データベースに保存された悪意のあるスクリプト
+2. **反映された XSS**: URL 内のスクリプトが応答に反映されました
+3. **DOM ベースの XSS**: クライアント側のスクリプト操作
 
-**Types**:
-1. **Stored XSS**: Malicious script stored in database
-2. **Reflected XSS**: Script in URL reflected in response
-3. **DOM-based XSS**: Client-side script manipulation
-
-**Prevention**:
-```javascript
+**予防**:```javascript
 // ❌ Vulnerable
 element.innerHTML = userInput;
 
@@ -263,14 +242,11 @@ function escapeHTML(str) {
 // ✅ Use DOMPurify for rich content
 import DOMPurify from 'dompurify';
 element.innerHTML = DOMPurify.sanitize(userInput);
-```
+```### CSRF (クロスサイト リクエスト フォージェリ)
 
-### CSRF (Cross-Site Request Forgery)
+ユーザーを騙して望ましくないアクションを実行させます。
 
-Tricks user into executing unwanted actions.
-
-**Prevention**:
-```javascript
+**防止**：```javascript
 // CSRF token
 app.get('/form', (req, res) => {
   const csrfToken = generateToken();
@@ -287,14 +263,11 @@ app.post('/transfer', (req, res) => {
 
 // SameSite cookie attribute
 Set-Cookie: sessionId=abc; SameSite=Strict; Secure; HttpOnly
-```
+```### SQL インジェクション
 
-### SQL Injection
+悪意のある SQL コードの挿入。
 
-Injecting malicious SQL code.
-
-**Prevention**:
-```javascript
+**防止**：```javascript
 // ❌ Vulnerable
 const query = `SELECT * FROM users WHERE username = '${username}'`;
 
@@ -304,11 +277,7 @@ db.execute(query, [username]);
 
 // ✅ ORM/Query builder
 const user = await User.findOne({ where: { username } });
-```
-
-### CORS Misconfiguration
-
-```javascript
+```### CORS の構成ミス```javascript
 // ❌ Vulnerable (allows any origin)
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Credentials: true
@@ -319,25 +288,18 @@ if (allowedOrigins.includes(origin)) {
   res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 }
-```
+```### クリックジャッキング
 
-### Clickjacking
+ユーザーをだまして非表示の要素をクリックさせる。
 
-Tricking users into clicking hidden elements.
-
-**Prevention**:
-```http
+**防止**：```http
 X-Frame-Options: DENY
 X-Frame-Options: SAMEORIGIN
 
 # Or with CSP
 Content-Security-Policy: frame-ancestors 'none'
 Content-Security-Policy: frame-ancestors 'self'
-```
-
-### File Upload Vulnerabilities
-
-```javascript
+```### ファイルアップロードの脆弱性```javascript
 // Validate file type
 const allowedTypes = ['image/jpeg', 'image/png'];
 if (!allowedTypes.includes(file.mimetype)) {
@@ -358,20 +320,16 @@ const uploadPath = '/secure/uploads/' + sanitizedName;
 
 // Use random filenames
 const filename = crypto.randomBytes(16).toString('hex') + path.extname(file.name);
-```
+```## 暗号化
 
-## Cryptography
+### 暗号化とハッシュ化
 
-### Encryption vs Hashing
+- **暗号化**: 可逆的 (キーを使用して復号化)
+- **ハッシュ**: 一方向変換
 
-- **Encryption**: Reversible (decrypt with key)
-- **Hashing**: One-way transformation
+### 対称暗号化
 
-### Symmetric Encryption
-
-Same key for encryption and decryption.
-
-```javascript
+暗号化と復号化に同じキーを使用します。```javascript
 const crypto = require('crypto');
 
 function encrypt(text, key) {
@@ -391,20 +349,16 @@ function decrypt(text, key) {
   decrypted += decipher.final('utf8');
   return decrypted;
 }
-```
+```### 公開鍵暗号化
 
-### Public-Key Cryptography
+暗号化 (公開) と復号化 (秘密) に異なるキー。
 
-Different keys for encryption (public) and decryption (private).
+**使用例**:
+- TLS/SSL証明書
+- デジタル署名
+- SSHキー
 
-**Use Cases**:
-- TLS/SSL certificates
-- Digital signatures
-- SSH keys
-
-### Hash Functions
-
-```javascript
+### ハッシュ関数```javascript
 const crypto = require('crypto');
 
 // SHA-256
@@ -412,13 +366,9 @@ const hash = crypto.createHash('sha256').update(data).digest('hex');
 
 // HMAC (keyed hash)
 const hmac = crypto.createHmac('sha256', secretKey).update(data).digest('hex');
-```
+```### デジタル署名
 
-### Digital Signatures
-
-Verify authenticity and integrity.
-
-```javascript
+信頼性と完全性を検証します。```javascript
 const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
   modulusLength: 2048
 });
@@ -432,13 +382,9 @@ const signature = sign.sign(privateKey, 'hex');
 const verify = crypto.createVerify('SHA256');
 verify.update(data);
 const isValid = verify.verify(publicKey, signature, 'hex');
-```
+```## 安全なコーディングの実践
 
-## Secure Coding Practices
-
-### Input Validation
-
-```javascript
+### 入力の検証```javascript
 // Validate email
 function isValidEmail(email) {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -455,19 +401,15 @@ function sanitizeInput(input) {
 function isValidUsername(username) {
   return /^[a-zA-Z0-9_]{3,20}$/.test(username);
 }
-```
+```### 出力エンコーディング
 
-### Output Encoding
+コンテキストに基づいてデータをエンコードします。
+- **HTML コンテキスト**: エスケープ `< > & " '`
+- **JavaScript コンテキスト**: JSON.stringify() を使用します。
+- **URL コンテキスト**: encodeURIComponent() を使用します。
+- **CSS コンテキスト**: 特殊文字をエスケープします
 
-Encode data based on context:
-- **HTML context**: Escape `< > & " '`
-- **JavaScript context**: Use JSON.stringify()
-- **URL context**: Use encodeURIComponent()
-- **CSS context**: Escape special characters
-
-### Secure Storage
-
-```javascript
+### 安全なストレージ```javascript
 // ❌ Don't store sensitive data in localStorage
 localStorage.setItem('token', token); // XSS can access
 
@@ -482,11 +424,7 @@ res.cookie('token', token, {
 // ✅ For sensitive client-side data, encrypt first
 const encrypted = encrypt(sensitiveData, encryptionKey);
 sessionStorage.setItem('data', encrypted);
-```
-
-### Rate Limiting
-
-```javascript
+```### レート制限```javascript
 const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
@@ -505,11 +443,7 @@ const authLimiter = rateLimit({
 });
 
 app.use('/api/login', authLimiter);
-```
-
-### Error Handling
-
-```javascript
+```### エラー処理```javascript
 // ❌ Expose internal details
 catch (error) {
   res.status(500).json({ error: error.message });
@@ -520,84 +454,82 @@ catch (error) {
   console.error(error); // Log internally
   res.status(500).json({ error: 'Internal server error' });
 }
-```
+```## セキュリティテスト
 
-## Security Testing
+### ツール
+- **OWASP ZAP**: セキュリティ スキャナー
+- **Burp Suite**: Web 脆弱性スキャナー
+- **nmap**: ネットワーク スキャナー
+- **SQLMap**: SQL インジェクション テスト
+- **Nikto**: Web サーバー スキャナー
 
-### Tools
-- **OWASP ZAP**: Security scanner
-- **Burp Suite**: Web vulnerability scanner
-- **nmap**: Network scanner
-- **SQLMap**: SQL injection testing
-- **Nikto**: Web server scanner
+### チェックリスト
+- [ ] あらゆる場所で HTTPS が適用される
+- [ ] セキュリティヘッダーが設定されました
+- [ ] 認証は安全に実装されています
+- [ ] すべてのエンドポイントで承認がチェックされました
+- [ ] 入力の検証とサニタイズ
+- [ ] 出力エンコーディング
+- [ ] CSRF保護
+- [ ] SQL インジェクションの防止
+- [ ] XSS 防止
+- [ ] レート制限
+- [ ] 安全なセッション管理
+- [ ] パスワードを安全に保管
+- [ ] ファイルアップロードのセキュリティ
+- [ ] エラー処理により情報が漏洩しない
+- [ ] 依存関係は最新です
+- [ ] セキュリティのログ記録と監視
 
-### Checklist
-- [ ] HTTPS enforced everywhere
-- [ ] Security headers configured
-- [ ] Authentication implemented securely
-- [ ] Authorization checked on all endpoints
-- [ ] Input validation and sanitization
-- [ ] Output encoding
-- [ ] CSRF protection
-- [ ] SQL injection prevention
-- [ ] XSS prevention
-- [ ] Rate limiting
-- [ ] Secure session management
-- [ ] Secure password storage
-- [ ] File upload security
-- [ ] Error handling doesn't leak info
-- [ ] Dependencies up to date
-- [ ] Security logging and monitoring
+## 用語集の用語
 
-## Glossary Terms
-
-**Key Terms Covered**:
-- Authentication
-- Authenticator
-- Certificate authority
-- Challenge-response authentication
+**対象となる重要な用語**:
+- 認証
+- 認証者
+- 認証局
+- チャレンジレスポンス認証
 - CIA
-- Cipher
-- Cipher suite
-- Ciphertext
-- Credential
-- Cross-site request forgery (CSRF)
-- Cross-site scripting (XSS)
-- Cryptanalysis
-- Cryptography
-- Decryption
-- Denial of Service (DoS)
-- Digital certificate
-- Digital signature
-- Distributed Denial of Service (DDoS)
-- Encryption
-- Federated identity
-- Fingerprinting
-- Firewall
+- 暗号
+- 暗号スイート
+- 暗号文
+- 資格情報
+- クロスサイト リクエスト フォージェリ (CSRF)
+- クロスサイトスクリプティング (XSS)
+- 暗号解析
+- 暗号化
+- 復号化
+- サービス拒否 (DoS)
+- デジタル証明書
+- デジタル署名
+- 分散型サービス拒否 (DDoS)
+- 暗号化
+- フェデレーション ID
+- 指紋採取
+- ファイアウォール
 - HSTS
-- Identity provider (IdP)
-- MitM
-- Multi-factor authentication
-- Nonce
-- OWASP
-- Plaintext
-- Principle of least privilege
-- Privileged
-- Public-key cryptography
-- Relying party
-- Replay attack
-- Salt
-- Secure context
-- Secure Sockets Layer (SSL)
-- Session hijacking
-- Signature (security)
-- SQL injection
-- Symmetric-key cryptography
-- Transport Layer Security (TLS)
+- アイデンティティプロバイダー (IdP)
+- ミットM
+- 多要素認証
+- ノンス
+- オワスプ
+- 平文
+- 最小特権の原則
+- 特権付き
+- 公開鍵暗号化
+- 信頼当事者
+- リプレイ攻撃
+- 塩
+- 安全なコンテキスト
+- セキュア ソケット レイヤ (SSL)
+- セッションハイジャック
+- 署名（セキュリティ）
+- SQLインジェクション
+- 対称キー暗号化
+- トランスポート層セキュリティ (TLS)
 
-## Additional Resources
+## 追加のリソース
 
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [MDN Web Security](https://developer.mozilla.org/en-US/docs/Web/Security)
-- [Security Headers](https://securityheaders.com/)
+- [OWASP トップ 10](https://owasp.org/www-project-top-ten/)
+- [MDN Web セキュリティ](https://developer.mozilla.org/en-US/docs/Web/Security)
+- [セキュリティヘッダー](https://securityheaders.com/)
 - [SSL Labs](https://www.ssllabs.com/)

@@ -1,589 +1,559 @@
-# Writing Functional Tests
+# 機能テストの作成
 
-This is the most important deliverable. The Markdown files are documentation. The functional test file is the automated safety net. Name it using the project's conventions: `test_functional.py` (Python/pytest), `FunctionalSpec.scala` (Scala/ScalaTest), `FunctionalTest.java` (Java/JUnit), `functional.test.ts` (TypeScript/Jest), `functional_test.go` (Go), etc.
+これが最も重要な成果物です。 Markdown ファイルはドキュメントです。機能テスト ファイルは自動化されたセーフティ ネットです。プロジェクトの規則に従って名前を付けます: `test_functional.py` (Python/pytest)、`FunctionalSpec.scala` (Scala/ScalaTest)、`FunctionalTest.java` (Java/JUnit)、`functional.test.ts` (TypeScript/Jest)、`functional_test.go` (Go) など。
 
-## Structure: Three Test Groups
+## 構造: 3 つのテスト グループ
 
-Organize tests into three logical groups using whatever structure the test framework provides — classes (Python/Java), describe blocks (TypeScript/Jest), traits (Scala), or subtests (Go):
+テスト フレームワークが提供する構造 (クラス (Python/Java)、記述ブロック (TypeScript/Jest)、特性 (Scala)、またはサブテスト (Go)) を使用して、テストを 3 つの論理グループに編成します。「」
+スペック要件
+    — テスト可能な仕様セクションごとに 1 つのテスト
+    — 各テストのドキュメントには仕様要件が記載されています
 
-```
-Spec Requirements
-    — One test per testable spec section
-    — Each test's documentation cites the spec requirement
+フィットネスのシナリオ
+    — QUALITY.md シナリオごとに 1 つのテスト (1:1 マッピング)
+    — 一致する名前: test_scenario_N_memorable_name (または同等の規則)
 
-Fitness Scenarios
-    — One test per QUALITY.md scenario (1:1 mapping)
-    — Named to match: test_scenario_N_memorable_name (or equivalent convention)
+境界とエッジケース
+    — ステップ 5 の防御パターンごとに 1 つのテスト
+    — null ガード、トライ/キャッチ、正規化、フォールバックをターゲットとします。
+「」## テスト数ヒューリスティック
 
-Boundaries and Edge Cases
-    — One test per defensive pattern from Step 5
-    — Targets null guards, try/catch, normalization, fallbacks
-```
+**ターゲット = (テスト可能な仕様セクション) + (QUALITY.md シナリオ) + (ステップ 5 の防御パターン)**
 
-## Test Count Heuristic
+例: スペックセクション 12 個 + シナリオ 10 個 + 防御パターン 15 個 = 37 個のテストを目標とします。
 
-**Target = (testable spec sections) + (QUALITY.md scenarios) + (defensive patterns from Step 5)**
+中規模のプロジェクト (ソース ファイル 5 ～ 15 個) の場合、通常は 35 ～ 50 個の機能テストが行​​われます。要件が欠落していたり​​、検討が浅かったりすることを示唆するものは大幅に少なくなりました。数値を入力するためにパディングしないでください。すべてのテストで実際のプロジェクト コードを実行し、意味のあるプロパティを検証する必要があります。
 
-Example: 12 spec sections + 10 scenarios + 15 defensive patterns = 37 tests as a target.
+## インポート パターン: 既存のテストと一致する
 
-For a medium-sized project (5–15 source files), this typically yields 35–50 functional tests. Significantly fewer suggests missed requirements or shallow exploration. Don't pad to hit a number — every test should exercise real project code and verify a meaningful property.
+テスト コードを記述する前に、2 ～ 3 の既存のテスト ファイルを読み取り、プロジェクト モジュールがどのようにインポートされるかを特定します。これは重要です。プロジェクトによってインポートの処理方法が異なり、それを誤ると、すべてのテストが解決エラーで失敗することになります。
 
-## Import Pattern: Match the Existing Tests
+言語ごとの一般的なパターン:
 
-Before writing any test code, read 2–3 existing test files and identify how they import project modules. This is critical — projects handle imports differently and getting it wrong means every test fails with resolution errors.
-
-Common patterns by language:
-
-**Python:**
-- `sys.path.insert(0, "src/")` then bare imports (`from module import func`)
-- Package imports (`from myproject.module import func`)
-- Relative imports with conftest.py path manipulation
+**パイソン:**
+- `sys.path.insert(0, "src/")` をそのままインポート (`from module import func`)
+- パッケージのインポート (`from myproject.module import func`)
+- conftest.py パス操作による相対インポート
 
 **Java:**
-- `import com.example.project.Module;` matching the package structure
-- Test source root must mirror main source root
+- `import com.example.project.Module;` パッケージ構造と一致する
+- テスト ソース ルートはメイン ソース ルートをミラーリングする必要があります
 
-**Scala:**
-- `import com.example.project._` or `import com.example.project.{ClassA, ClassB}`
-- SBT project layout: `src/test/scala/` mirrors `src/main/scala/`
+**スカラ:**
+- `import com.example.project._` または `import com.example.project.{ClassA, ClassB}`
+- SBT プロジェクト レイアウト: `src/test/scala/` ミラー `src/main/scala/`
 
 **TypeScript/JavaScript:**
-- `import { func } from '../src/module'` with relative paths
-- Path aliases from `tsconfig.json` (e.g., `@/module`)
+- `import { func } from '../src/module'` と相対パス
+- `tsconfig.json` からのパス エイリアス (例: `@/module`)
 
-**Go:**
-- Same package: test files in the same directory with `package mypackage`
-- Black-box testing: `package mypackage_test` with explicit imports
-- Internal packages may require specific import paths
+**行く:**
+- 同じパッケージ: `package mypackage` と同じディレクトリ内のテスト ファイル
+- ブラックボックス テスト: `package mypackage_test` と明示的なインポート
+- 内部パッケージには特定のインポート パスが必要な場合があります
 
-**Rust:**
-- `use crate::module::function;` for unit tests in the same crate
-- `use myproject::module::function;` for integration tests in `tests/`
+**錆び:**
+- `use crate::module::function;` 同じクレート内の単体テスト用
+- `use myproject::module::function;` `tests/` での統合テスト用
 
-Whatever pattern the existing tests use, copy it exactly. Do not guess or invent a different pattern.
+既存のテストがどのようなパターンを使用していても、それを正確にコピーしてください。推測したり、別のパターンを考え出したりしないでください。
 
-## Create Test Setup BEFORE Writing Tests
+## テストを作成する前にテスト セットアップを作成する
 
-Every test framework has a mechanism for shared setup. If your tests use shared fixtures or test data, you MUST create the setup file before writing tests. Test frameworks do not auto-discover fixtures from other directories.
+すべてのテスト フレームワークには、共有セットアップのメカニズムがあります。テストで共有フィクスチャまたはテスト データを使用する場合は、テストを作成する前にセットアップ ファイルを作成する必要があります。テスト フレームワークは、他のディレクトリからフィクスチャを自動検出しません。
 
-**By language:**
+**言語別:**
 
-**Python (pytest):** Create `quality/conftest.py` defining every fixture. Fixtures in `tests/conftest.py` are NOT available to `quality/test_functional.py`. Preferred: write tests that create data inline using `tmp_path` to eliminate conftest dependency.
+**Python (pytest):** すべてのフィクスチャを定義する `quality/conftest.py` を作成します。 `tests/conftest.py` のフィクスチャは `quality/test_functional.py` では使用できません。推奨: `tmp_path` を使用してデータをインラインで作成するテストを作成し、conftest の依存関係を排除します。
 
-**Java (JUnit):** Use `@BeforeEach`/`@BeforeAll` methods in the test class, or create a shared `TestFixtures` utility class in the same package.
+**Java (JUnit):** テスト クラスで `@BeforeEach`/`@BeforeAll` メソッドを使用するか、同じパッケージ内に共有 `TestFixtures` ユーティリティ クラスを作成します。
 
-**Scala (ScalaTest):** Mix in a trait with `before`/`after` blocks, or use inline data builders. If using SBT, ensure the test file is in the correct source tree.
+**Scala (ScalaTest):** 特性を `before`/`after` ブロックと組み合わせるか、インライン データ ビルダーを使用します。 SBT を使用する場合は、テスト ファイルが正しいソース ツリーに存在することを確認してください。
 
-**TypeScript (Jest):** Use `beforeAll`/`beforeEach` in the test file, or create a `quality/testUtils.ts` with factory functions.
+**TypeScript (Jest):** テスト ファイルで `beforeAll`/`beforeEach` を使用するか、ファクトリ関数を使用して `quality/testUtils.ts` を作成します。
 
-**Go (testing):** Helper functions in the same `_test.go` file with `t.Helper()`. Use `t.TempDir()` for temporary directories. Go convention strongly prefers inline setup — avoid shared test state.
+**Go (テスト):** `t.Helper()` と同​​じ `_test.go` ファイル内のヘルパー関数。一時ディレクトリには `t.TempDir()` を使用します。 Go の規約では、インライン セットアップが強く推奨されており、テスト状態の共有は避けられます。
 
-**Rust (cargo test):** Helper functions in a `#[cfg(test)] mod tests` block or a `test_utils.rs` module. Use builder patterns for constructing test data. For integration tests, place files in `tests/`.
+**Rust (貨物テスト):** `#[cfg(test)] mod tests` ブロックまたは `test_utils.rs` モジュールのヘルパー関数。テスト データの構築にはビルダー パターンを使用します。統合テストの場合は、ファイルを `tests/` に配置します。**ルール: 参照されるすべてのフィクスチャまたはテスト ヘルパーを定義する必要があります。** テストが存在しない共有セットアップに依存している場合、テストはセットアップ中にエラーになります (アサーション中に失敗するわけではありません)。つまり、合格したように見える壊れたテストが生成されます。
 
-**Rule: Every fixture or test helper referenced must be defined.** If a test depends on shared setup that doesn't exist, the test will error during setup (not fail during assertion) — producing broken tests that look like they pass.
-
-**Preferred approach across all languages:** Write tests that create their own data inline. This eliminates cross-file dependencies:
-
-```python
-# Python
+**すべての言語で推奨されるアプローチ:** 独自のデータをインラインで作成するテストを作成します。これにより、ファイル間の依存関係が排除されます。「」パイソン
+# パイソン
 def test_config_validation(tmp_path):
-    config = {"pipeline": {"name": "Test", "steps": [...]}}
-```
+    config = {"パイプライン": {"名前": "テスト", "ステップ": [...]}}
+「」
 
-```java
+```ジャワ
 // Java
-@Test
-void testConfigValidation(@TempDir Path tempDir) {
-    var config = Map.of("pipeline", Map.of("name", "Test"));
+@テスト
+void testConfigValidation(@TempDir パス tempDir) {
+    var config = Map.of("パイプライン", Map.of("名前", "テスト"));
 }
-```
+「」
 
-```typescript
+```タイプスクリプト
 // TypeScript
-test('config validation', () => {
-    const config = { pipeline: { name: 'Test', steps: [] } };
+test('構成の検証', () => {
+    const config = { パイプライン: { 名前: 'テスト'、ステップ: [] } };
 });
-```
+「」
 
-```go
-// Go
+「行く」
+// 行く
 func TestConfigValidation(t *testing.T) {
     tmpDir := t.TempDir()
-    config := Config{Pipeline: Pipeline{Name: "Test"}}
+    config := Config{パイプライン: パイプライン{名前: "テスト"}}
 }
-```
+「」
 
-```rust
-// Rust
-#[test]
+「錆びる」
+// 錆びる
+#[テスト]
 fn test_config_validation() {
-    let config = Config { pipeline: Pipeline { name: "Test".into() } };
+    let config = Config { パイプライン: パイプライン { 名前: "テスト".into() } };
 }
-```
+「」**すべてのテストを作成した後、テスト スイートを実行してセットアップ エラーを確認します。** セットアップ エラー (フィクスチャが見つからない、インポートの失敗) は、フレームワークによる分類方法に関係なく、壊れたテストとしてカウントされます。
 
-**After writing all tests, run the test suite and check for setup errors.** Setup errors (fixture not found, import failures) count as broken tests regardless of how the framework categorizes them.
+## プレースホルダー テストはありません
 
-## No Placeholder Tests
+すべてのテストでは、実際のプロジェクト コードをインポートして呼び出す必要があります。テスト本体が `pass` である場合、またはその唯一のアサーションが `assert isinstance(errors, list)` である場合、または `assert hasattr(cls, 'validate')` のような簡単なプロパティをチェックする場合は、それを削除して実際のテストを作成するか、完全に削除します。プロジェクト コードを実行しないテストは、テストを行わないよりも悪く、カウントが膨らみ、誤った信頼性が生じます。
 
-Every test must import and call actual project code. If a test body is `pass`, or its only assertion is `assert isinstance(errors, list)`, or it checks a trivial property like `assert hasattr(cls, 'validate')`, delete it and write a real test or drop it entirely. A test that doesn't exercise project code is worse than no test — it inflates the count and creates false confidence.
+防御パターンに対して意味のあるテストを本当に作成できない場合 (たとえば、実行中のサーバーまたは外部サービスが必要な場合)、プレースホルダーを記述するのではなく、コメントでテスト不可能であることをメモしてください。
 
-If you genuinely cannot write a meaningful test for a defensive pattern (e.g., it requires a running server or external service), note it as untestable in a comment rather than writing a placeholder.
+## 書く前にお読みください: 関数呼び出しマップ
 
-## Read Before You Write: The Function Call Map
+単一のテストを作成する前に、関数呼び出しマップを作成します。テストする予定の関数ごとに次のことを行います。
 
-Before writing a single test, build a function call map. For every function you plan to test:
+1. **関数/メソッドのシグネチャを読みます** - 名前だけでなく、すべてのパラメータ、その型、デフォルト値も読みます。 Python では、`def` 行を読み、ヒントを入力します。 Java では、メソッド シグネチャとジェネリックを読み取ります。 Scala では、メソッド定義と暗黙的なパラメーターを読み取ります。 TypeScript で、型の注釈を読み取ります。
+2. **ドキュメントを読んでください** - docstrings、Javadoc、TSDoc、ScalaDoc。多くの場合、戻り値の型、例外、およびエッジケースの動作が指定されます。
+3. **それを呼び出す既存のテストを 1 つ読みます** — 既存のテストは、正確な呼び出し規約、フィクスチャの形状、およびアサーション パターンを示します。
+4. **実際のデータ ファイルを読み取る** — 関数が構成、スキーマ、またはデータ ファイルを処理する場合は、プロジェクトから実際のファイルを読み取ります。テスト フィクスチャはこの形状と正確に一致する必要があります。
 
-1. **Read the function/method signature** — not just the name, but every parameter, its type, and default value. In Python, read the `def` line and type hints. In Java, read the method signature and generics. In Scala, read the method definition and implicit parameters. In TypeScript, read the type annotations.
-2. **Read the documentation** — docstrings, Javadoc, TSDoc, ScalaDoc. They often specify return types, exceptions, and edge case behavior.
-3. **Read one existing test that calls it** — existing tests show you the exact calling convention, fixture shape, and assertion pattern.
-4. **Read real data files** — if the function processes configs, schemas, or data files, read an actual file from the project. Your test fixtures must match this shape exactly.
+**一般的な失敗パターン:** エージェントはアーキテクチャを調査し、関数の動作を概念的に理解してから、推測されたパラメーターを使用してテスト呼び出しを作成します。実際の関数が `(items, seed, strategy)` ではなく `(config, items_data, limit)` を取るため、テストは失敗します。実際の署名の読み取りには 5 秒かかりますが、これは完全に防止されます。
 
-**Common failure pattern:** The agent explores the architecture, understands conceptually what a function does, then writes a test call with guessed parameters. The test fails because the real function takes `(config, items_data, limit)` not `(items, seed, strategy)`. Reading the actual signature takes 5 seconds and prevents this entirely.
+**ライブラリのバージョンの認識:** プロジェクトの依存関係マニフェスト (`requirements.txt`、`build.sbt`、`package.json`、`pom.xml`、`build.gradle`、`Cargo.toml`) をチェックして、利用可能なものを確認してください。オプションの依存関係にはテスト フレームワークのスキップ メカニズムを使用します。Python `pytest.importorskip()`、JUnit `Assumptions.assumeTrue()`、ScalaTest `assume()`、Jest 条件付き `describe.skip`、Go `t.Skip()`、Rust `#[ignore]` を前提条件を説明するコメントとともに使用します。
 
-**Library version awareness:** Check the project's dependency manifest (`requirements.txt`, `build.sbt`, `package.json`, `pom.xml`, `build.gradle`, `Cargo.toml`) to verify what's available. Use the test framework's skip mechanism for optional dependencies: Python `pytest.importorskip()`, JUnit `Assumptions.assumeTrue()`, ScalaTest `assume()`, Jest conditional `describe.skip`, Go `t.Skip()`, Rust `#[ignore]` with a comment explaining the prerequisite.
+## 仕様から派生したテストの作成
 
-## Writing Spec-Derived Tests
+各仕様ドキュメントをセクションごとに説明します。各セクションについて、「これにはどのようなテスト可能な要件が記載されていますか?」と尋ねます。次にテストを書きます。
 
-Walk each spec document section by section. For each section, ask: "What testable requirement does this state?" Then write a test.
-
-Each test should:
-1. **Set up** — Load a fixture, create test data, configure the system
-2. **Execute** — Call the function, run the pipeline, make the request
-3. **Assert specific properties** the spec requires
-
-```python
+各テストでは次のことを行う必要があります。
+1. **セットアップ** — フィクスチャをロードし、テスト データを作成し、システムを構成します
+2. **実行** — 関数を呼び出し、パイプラインを実行し、リクエストを実行します。
+3. 仕様に必要な **特定のプロパティをアサート**「」パイソン
 # Python (pytest)
-class TestSpecRequirements:
+クラス TestSpecRequirements:
     def test_requirement_from_spec_section_N(self, fixture):
-        """[Req: formal — Design Doc §N] X should produce Y."""
-        result = process(fixture)
-        assert result.property == expected_value
-```
+        """[要件: 正式な設計文書 §N] X は Y を生成する必要があります。"""
+        結果 = プロセス(フィクスチャ)
+        アサート result.property == Expected_value
+「」
 
-```java
+```ジャワ
 // Java (JUnit 5)
-class SpecRequirementsTest {
-    @Test
-    @DisplayName("[Req: formal — Design Doc §N] X should produce Y")
+クラス SpecRequirementsTest {
+    @テスト
+    @DisplayName("[要件: 正式な設計文書 §N] X は Y を生成する必要があります")
     void testRequirementFromSpecSectionN() {
-        var result = process(fixture);
+        var result = プロセス(フィクスチャ);
         assertEquals(expectedValue, result.getProperty());
     }
 }
-```
+「」
 
-```scala
-// Scala (ScalaTest)
-class SpecRequirements extends FlatSpec with Matchers {
-  // [Req: formal — Design Doc §N] X should produce Y
-  "Section N requirement" should "produce Y from X" in {
-    val result = process(fixture)
-    result.property should equal (expectedValue)
+「スカラ」
+// スカラ (ScalaTest)
+class SpecRequirements は Matchers を使用して FlatSpec を拡張します {
+  // [要求: 正式 — 設計文書 §N] X は Y を生成する必要があります
+  「セクション N の要件」は、{ で「X から Y を生成」する必要があります。
+    val 結果 = プロセス(フィクスチャ)
+    result.property は (expectedValue) と等しくなる必要があります
   }
 }
-```
+「」
 
-```typescript
+```タイプスクリプト
 // TypeScript (Jest)
-describe('Spec Requirements', () => {
-  test('[Req: formal — Design Doc §N] X should produce Y', () => {
-    const result = process(fixture);
-    expect(result.property).toBe(expectedValue);
+description('仕様要件', () => {
+  test('[Req: 正式な設計文書 §N] X は Y を生成する必要があります', () => {
+    const result = プロセス(フィクスチャ);
+    Expect(result.property).toBe(expectedValue);
   });
 });
-```
+「」
 
-```go
-// Go (testing)
+「行く」
+// 実行（テスト）
 func TestSpecRequirement_SectionN_XProducesY(t *testing.T) {
-    // [Req: formal — Design Doc §N] X should produce Y
-    result := Process(fixture)
-    if result.Property != expectedValue {
-        t.Errorf("expected %v, got %v", expectedValue, result.Property)
+    // [要求: 正式 — 設計文書 §N] X は Y を生成する必要があります
+    結果 := プロセス(フィクスチャ)
+    if result.Property != ExpectValue {
+        t.Errorf("expected %v, got %v", ExpectedValue, result.Property)
     }
 }
-```
+「」
 
-```rust
-// Rust (cargo test)
-#[test]
-fn test_spec_requirement_section_n_x_produces_y() {
-    // [Req: formal — Design Doc §N] X should produce Y
+「錆びる」
+// Rust (貨物テスト)
+#[テスト]
+fn test_spec_requirement_section_n_x_Produces_y() {
+    // [要求: 正式 — 設計文書 §N] X は Y を生成する必要があります
     let result = process(&fixture);
-    assert_eq!(result.property, expected_value);
+    assert_eq!(result.property, Expected_value);
 }
-```
+「」## 優れた機能テストの条件
 
-## What Makes a Good Functional Test
+- **追跡可能** — テスト名、表示名、またはドキュメントのコメントは、どの仕様要件を検証するかを示します。
+- **特定** — 「何かが起こった」だけではなく、特定のプロパティをチェックします。
+- **堅牢** — 合成データではなく、実際のデータ (実際のシステムのフィクスチャ) を使用します。
+- **クロスバリアント** — プロジェクトが複数の入力タイプを処理する場合は、それらすべてをテストします
+- **適切なレイヤーでのテスト** — 関心のある *動作* をテストします。 「無効なデータが間違った出力を生成しない」という要件がある場合は、スキーマ検証ツールが入力を拒否することをテストするだけではなく、パイプライン出力をテストします。
 
-- **Traceable** — Test name, display name, or documentation comment says which spec requirement it verifies
-- **Specific** — Checks a specific property, not just "something happened"
-- **Robust** — Uses real data (fixtures from the actual system), not synthetic data
-- **Cross-variant** — If the project handles multiple input types, test all of them
-- **Tests at the right layer** — Test the *behavior* you care about. If the requirement is "invalid data doesn't produce wrong output," test the pipeline output — don't just test that the schema validator rejects the input.
+## クロスバリアント テスト戦略
 
-## Cross-Variant Testing Strategy
+プロジェクトが複数の入力タイプを処理する場合、クロスバリアント カバレッジにはサイレント バグが隠れています。すべてのバリアントを実行するテストの約 30% を目指します。正確な割合は、すべてのバリアントにわたって横断的なプロパティを確実にテストすることよりも重要です。
 
-If the project handles multiple input types, cross-variant coverage is where silent bugs hide. Aim for roughly 30% of tests exercising all variants — the exact percentage matters less than ensuring every cross-cutting property is tested across all variants.
-
-Use your framework's parametrization mechanism:
-
-```python
+フレームワークのパラメータ化メカニズムを使用します。「」パイソン
 # Python (pytest)
-@pytest.mark.parametrize("variant", [variant_a, variant_b, variant_c])
-def test_feature_works(variant):
-    output = process(variant.input)
-    assert output.has_expected_property
-```
+@pytest.mark.parametrize("バリアント", [バリアント_a, バリアント_b, バリアント_c])
+def test_feature_works(バリアント):
+    出力 = プロセス(バリアント.入力)
+    Output.has_expected_property をアサートする
+「」
 
-```java
+```ジャワ
 // Java (JUnit 5)
 @ParameterizedTest
 @MethodSource("variantProvider")
-void testFeatureWorks(Variant variant) {
-    var output = process(variant.getInput());
+void testFeatureWorks(Variant バリアント) {
+    var 出力 = プロセス(variant.getInput());
     assertTrue(output.hasExpectedProperty());
 }
-```
+「」
 
-```scala
-// Scala (ScalaTest)
-Seq(variantA, variantB, variantC).foreach { variant =>
-  it should s"work for ${variant.name}" in {
-    val output = process(variant.input)
-    output should have ('expectedProperty (true))
+「スカラ」
+// スカラ (ScalaTest)
+Seq(バリアント A, バリアント B, バリアント C).foreach { バリアント =>
+  { では「${variant.name} で動作する」はずです
+    val 出力 = プロセス(variant.input)
+    出力には ('expectedProperty (true)) が含まれている必要があります
   }
 }
-```
+「」
 
-```typescript
+```タイプスクリプト
 // TypeScript (Jest)
-test.each([variantA, variantB, variantC])(
-  'feature works for %s', (variant) => {
-    const output = process(variant.input);
-    expect(output).toHaveProperty('expectedProperty');
+test.each([バリアントA, バリアントB, バリアントC])(
+  'この機能は %s で動作します', (バリアント) => {
+    const 出力 = プロセス(variant.input);
+    Expect(output).toHaveProperty('expectedProperty');
 });
-```
+「」
 
-```go
-// Go (testing) — table-driven tests
+「行く」
+// Go (テスト) — テーブル駆動テスト
 func TestFeatureWorksAcrossVariants(t *testing.T) {
-    variants := []Variant{variantA, variantB, variantC}
-    for _, v := range variants {
+    バリアント := []バリアント{バリアント A、バリアント B、バリアント C}
+    for _, v := 範囲のバリアント {
         t.Run(v.Name, func(t *testing.T) {
-            output := Process(v.Input)
+            出力 := プロセス(v.入力)
             if !output.HasExpectedProperty() {
-                t.Errorf("variant %s: missing expected property", v.Name)
+                t.Errorf("バリアント %s: 予期されたプロパティがありません", v.Name)
             }
         })
     }
 }
-```
+「」
 
-```rust
-// Rust (cargo test) — iterate over cases
-#[test]
+「錆びる」
+// Rust (カーゴテスト) — ケースを反復処理します
+#[テスト]
 fn test_feature_works_across_variants() {
-    let variants = [variant_a(), variant_b(), variant_c()];
+    バリアント = [variant_a()、variant_b()、variant_c()]; にします。
     for v in &variants {
-        let output = process(&v.input);
-        assert!(output.has_expected_property(),
-            "variant {}: missing expected property", v.name);
+        let 出力 = process(&v.input);
+        アサート!(output.has_expected_property(),
+            "バリアント {}: 予期されたプロパティがありません", v.name);
     }
 }
-```
+「」パラメータ化が適合しない場合は、単一のテスト内で明示的にループします。
 
-If parametrization doesn't fit, loop explicitly within a single test.
+**どのテストがクロスバリアントである必要がありますか?** エンティティ ID、構造プロパティ、必要なリンク、時間フィールド、ドメイン固有のセマンティクスなど、入力タイプに関係なく保持 * すべき* プロパティを検証するテスト。
 
-**Which tests should be cross-variant?** Any test verifying a property that *should* hold regardless of input type: entity identity, structural properties, required links, temporal fields, domain-specific semantics.
+**すべてのテストを作成した後、クロスバリアント監査を実行します。** クロスバリアント テストの数を合計で割ります。 30% 未満の場合は、さらに変換します。
 
-**After writing all tests, do a cross-variant audit.** Count cross-variant tests divided by total. If below 30%, convert more.
+## 避けるべきアンチパターン
 
-## Anti-Patterns to Avoid
+これらのパターンはテストのように見えますが、実際のバグは検出されません。
 
-These patterns look like tests but don't catch real bugs:
+- **存在のみのチェック** — 1 つの正しい結果が見つかっても、すべてが正しいとは限りません。また、カウントをチェックしたり、総合的に検証したりします。
+- **存在のみのアサーション** — 値が存在することをアサートすることは、正確性ではなく存在を証明するだけです。実際の値をアサートします。
+- **単一バリアント テスト** — 1 つの入力タイプをテストし、他の入力タイプが機能することを期待します。パラメータ化を使用します。
+- **ポジティブのみのテスト** — 無効な入力によって不正な出力が生成されないことをテストする必要があります。
+- **不完全な否定的なアサーション** — 拒否をテストするときは、1 つだけではなく、すべての結果が存在しないことをアサートします。
+- **出力をチェックする代わりに例外をキャッチする** — コードが特定の方法でクラッシュすることをテストすることは、入力が正しく処理されることをテストすることにはなりません。出力をテストします。
 
-- **Existence-only checks** — Finding one correct result doesn't mean all are correct. Also check count or verify comprehensively.
-- **Presence-only assertions** — Asserting a value exists only proves presence, not correctness. Assert the actual value.
-- **Single-variant testing** — Testing one input type and hoping others work. Use parametrization.
-- **Positive-only testing** — You must test that invalid input does NOT produce bad output.
-- **Incomplete negative assertions** — When testing rejection, assert ALL consequences are absent, not just one.
-- **Catching exceptions instead of checking output** — Testing that code crashes in a specific way isn't testing that it handles input correctly. Test the output.
-
-### The Exception-Catching Anti-Pattern in Detail
-
-```java
-// Java — WRONG: tests the validation mechanism
-@Test
+### 例外キャッチのアンチパターンの詳細```ジャワ
+// Java — 誤り: 検証メカニズムをテストします
+@テスト
 void testBadValueRejected() {
-    fixture.setField("invalid");  // Schema rejects this!
+    fixture.setField("無効");  // スキーマはこれを拒否します。
     assertThrows(ValidationException.class, () -> process(fixture));
-    // Tells you nothing about output
+    // 出力については何も伝えません
 }
 
-// Java — RIGHT: tests the requirement
-@Test
+// Java — 右: 要件をテストします
+@テスト
 void testBadValueNotInOutput() {
-    fixture.setField(null);  // Schema accepts null for Optional
-    var output = process(fixture);
-    assertFalse(output.contains(badProperty));  // Bad data absent
-    assertTrue(output.contains(expectedType));   // Rest still works
+    fixture.setField(null);  // スキーマはオプションとして null を受け入れます
+    var 出力 = プロセス (フィクスチャ);
+    assertFalse(output.contains(badProperty));  // 不正なデータが存在しない
+    assertTrue(output.contains(expectedType));   // 残りはまだ機能します
 }
-```
+「」
 
-```scala
-// Scala — WRONG: tests the decoder, not the requirement
-"bad value" should "be rejected" in {
-  val input = fixture.copy(field = "invalid")  // Circe decoder fails!
-  a [DecodingFailure] should be thrownBy process(input)
-  // Tells you nothing about output
+「スカラ」
+// Scala — 誤り: 要件ではなくデコーダをテストします
+「不正な値」は { で「拒否」する必要があります
+  val input = fixture.copy(field = "invalid") // キルケ デコーダが失敗します。
+  プロセス(入力)によって[DecodingFailure]がスローされる必要があります
+  // 出力については何も伝えません
 }
 
-// Scala — RIGHT: tests the requirement
-"missing optional field" should "not produce bad output" in {
-  val input = fixture.copy(field = None)  // Option[String] accepts None
-  val output = process(input)
-  output should not contain badProperty  // Bad data absent
-  output should contain (expectedType)   // Rest still works
+// Scala — 右: 要件をテストします
+{ で「オプションのフィールドが欠落しています」と「不正な出力が生成されることはない」はずです。
+  val input = fixture.copy(field = None) // Option[String] は None を受け入れます
+  val 出力 = プロセス (入力)
+  出力には badProperty を含めないでください // 不正なデータが存在しません
+  出力には (expectedType) が含まれている必要があります // Rest は引き続き機能します
 }
-```
+「」
 
-```typescript
-// TypeScript — WRONG: tests the validation mechanism
-test('bad value rejected', () => {
-    fixture.field = 'invalid';  // Zod schema rejects this!
-    expect(() => process(fixture)).toThrow(ZodError);
-    // Tells you nothing about output
+```タイプスクリプト
+// TypeScript — 誤り: 検証メカニズムをテストします
+test('不正な値が拒否されました', () => {
+    fixture.field = '無効';  // Zod スキーマはこれを拒否します。
+    Expect(() => プロセス(フィクスチャ)).toThrow(ZodError);
+    // 出力については何も伝えません
 });
 
-// TypeScript — RIGHT: tests the requirement
-test('bad value not in output', () => {
-    fixture.field = undefined;  // Schema accepts undefined for optional
-    const output = process(fixture);
-    expect(output).not.toContain(badProperty);  // Bad data absent
-    expect(output).toContain(expectedType);      // Rest still works
+// TypeScript — 右: 要件をテストします
+test('出力に不正な値がありません', () => {
+    fixture.field = 未定義;  // スキーマはオプションとして未定義を受け入れます
+    const 出力 = プロセス (フィクスチャ);
+    Expect(output).not.toContain(badProperty);  // 不正なデータが存在しない
+    Expect(出力).toContain(expectedType);      // 残りはまだ機能します
 });
-```
+「」
 
-```python
-# Python — WRONG: tests the validation mechanism
-def test_bad_value_rejected(fixture):
-    fixture.field = "invalid"  # Schema rejects this!
-    with pytest.raises(ValidationError):
-        process(fixture)
-    # Tells you nothing about output
+「」パイソン
+# Python — 誤り: 検証メカニズムをテストします
+def test_bad_value_rejected(フィクスチャ):
+    fixture.field = "invalid" # スキーマはこれを拒否します。
+    pytest.raises(ValidationError) を使用:
+        プロセス（治具）
+    # 出力については何も説明しません
 
-# Python — RIGHT: tests the requirement
-def test_bad_value_not_in_output(fixture):
-    fixture.field = None  # Schema accepts None for Optional
-    output = process(fixture)
-    assert field_property not in output  # Bad data absent
-    assert expected_type in output  # Rest still works
-```
+# Python — 右: 要件をテストします
+def test_bad_value_not_in_output(フィクスチャ):
+    fixture.field = None # スキーマはオプションとして None を受け入れます
+    出力 = プロセス(フィクスチャ)
+    assert field_property が出力にありません # 不正なデータが存在しません
+    出力で Expected_type をアサート # Rest は引き続き動作します
+「」
 
-```go
-// Go — WRONG: tests the error, not the outcome
+「行く」
+// Go - 間違っています: 結果ではなくエラーをテストします
 func TestBadValueRejected(t *testing.T) {
-    fixture.Field = "invalid"  // Validator rejects this!
-    _, err := Process(fixture)
-    if err == nil { t.Fatal("expected error") }
-    // Tells you nothing about output
+    fixture.Field = "invalid" // バリデーターはこれを拒否します。
+    _, err := プロセス(フィクスチャ)
+    if err == nil { t.Fatal("予期されたエラー") }
+    // 出力については何も伝えません
 }
 
-// Go — RIGHT: tests the requirement
+// Go — 右: 要件をテストします
 func TestBadValueNotInOutput(t *testing.T) {
-    fixture.Field = ""  // Zero value is valid
-    output, err := Process(fixture)
-    if err != nil { t.Fatalf("unexpected error: %v", err) }
-    if containsBadProperty(output) { t.Error("bad data should be absent") }
-    if !containsExpectedType(output) { t.Error("expected data should be present") }
+    fixture.Field = "" // ゼロ値は有効です
+    出力、エラー := プロセス(フィクスチャ)
+    if err != nil { t.Fatalf("予期しないエラー: %v", err) }
+    if containsBadProperty(output) { t.Error("不正なデータは存在しないはずです") }
+    if !containsExpectedType(output) { t.Error("予期されるデータが存在するはずです") }
 }
-```
+「」
 
-```rust
-// Rust — WRONG: tests the error, not the outcome
-#[test]
+「錆びる」
+// Rust — 誤り: 結果ではなくエラーをテストします
+#[テスト]
 fn test_bad_value_rejected() {
-    let input = Fixture { field: "invalid".into(), ..default() };
-    assert!(process(&input).is_err());  // Tells you nothing about output
+    let input = Fixture { フィールド: "invalid".into(), ..default() };
+    アサート!(プロセス(&入力).is_err());  // 出力については何も伝えません
 }
 
-// Rust — RIGHT: tests the requirement
-#[test]
+// Rust — 右: 要件をテストします
+#[テスト]
 fn test_bad_value_not_in_output() {
-    let input = Fixture { field: None, ..default() };  // Option accepts None
-    let output = process(&input).expect("should succeed");
-    assert!(!output.contains(bad_property));  // Bad data absent
-    assert!(output.contains(expected_type));   // Rest still works
+    let input = Fixture { フィールド: なし、..default() };  // オプションは None を受け入れます
+    let Output = process(&input).expect("成功するはずです");
+    アサート!(!output.contains(bad_property));  // 不正なデータが存在しない
+    アサート!(output.contains(expected_type));   // 残りはまだ機能します
 }
-```
+「」突然変異値を選択する前に、必ずステップ 5b のスキーマ マップを確認してください。
 
-Always check your Step 5b schema map before choosing mutation values.
+## 適切なレイヤーでのテスト
 
-## Testing at the Right Layer
+「*仕様* では何が起こるべきだと書かれていますか?」と尋ねます。仕様には、「無効なデータは出力に表示されるべきではない」と記載されており、「検証層がそれを拒否すべき」ではありません。実装ではなく仕様をテストします。
 
-Ask: "What does the *spec* say should happen?" The spec says "invalid data should not appear in output" — not "validation layer should reject it." Test the spec, not the implementation.
+**例外:** 仕様で特定のメカニズムが明示的に義務付けられている場合 (たとえば、「スキーマ層でフェイルファストする必要がある」など)、そのメカニズムをテストするのが適切です。しかし、これはまれです。
 
-**Exception:** When a spec explicitly mandates a specific mechanism (e.g., "must fail-fast at the schema layer"), testing that mechanism is appropriate. But this is rare.
+## 目的に合ったシナリオのテスト
 
-## Fitness-to-Purpose Scenario Tests
-
-For each scenario in QUALITY.md, write a test. This is a 1:1 mapping:
-
-```scala
-// Scala (ScalaTest)
-class FitnessScenarios extends FlatSpec with Matchers {
-  // [Req: formal — QUALITY.md Scenario 1]
-  "Scenario 1: [Name]" should "prevent [failure mode]" in {
-    val result = process(fixture)
-    result.property should equal (expectedValue)
+QUALITY.md のシナリオごとにテストを作成します。これは 1:1 マッピングです。「スカラ」
+// スカラ (ScalaTest)
+class FitnessScenarios は Matchers を使用して FlatSpec を拡張します {
+  // [要件: 正式 — QUALITY.md シナリオ 1]
+  「シナリオ 1: [名前]」は、{ で「[障害モード] を防ぐ」必要があります。
+    val 結果 = プロセス(フィクスチャ)
+    result.property は (expectedValue) と等しくなる必要があります
   }
 }
-```
+「」
 
-```python
+「」パイソン
 # Python (pytest)
-class TestFitnessScenarios:
-    """Tests for fitness-to-purpose scenarios from QUALITY.md."""
+クラス TestFitnessScenarios:
+    """QUALITY.md の目的適合性シナリオのテスト"""
 
     def test_scenario_1_memorable_name(self, fixture):
-        """[Req: formal — QUALITY.md Scenario 1] [Name].
-        Requirement: [What the code must do].
-        """
-        result = process(fixture)
-        assert condition_that_prevents_the_failure
-```
+        """[要求: 正式 — QUALITY.md シナリオ 1] [名前]。
+        要件: [コードが実行する必要があること]。
+        「」
+        結果 = プロセス(フィクスチャ)
+        失敗を防ぐ条件をアサートします
+「」
 
-```java
+```ジャワ
 // Java (JUnit 5)
-class FitnessScenariosTest {
-    @Test
-    @DisplayName("[Req: formal — QUALITY.md Scenario 1] [Name]")
+クラス FitnessScenariosTest {
+    @テスト
+    @DisplayName("[要求: 正式 — QUALITY.md シナリオ 1] [名前]")
     void testScenario1MemorableName() {
-        var result = process(fixture);
+        var result = プロセス(フィクスチャ);
         assertTrue(conditionThatPreventsFailure(result));
     }
 }
-```
+「」
 
-```typescript
+```タイプスクリプト
 // TypeScript (Jest)
-describe('Fitness Scenarios', () => {
-  test('[Req: formal — QUALITY.md Scenario 1] [Name]', () => {
-    const result = process(fixture);
-    expect(conditionThatPreventsFailure(result)).toBe(true);
+description('フィットネス シナリオ', () => {
+  test('[要求: 正式 — QUALITY.md シナリオ 1] [名前]', () => {
+    const result = プロセス(フィクスチャ);
+    Expect(conditionThatPreventsFailure(result)).toBe(true);
   });
 });
-```
+「」
 
-```go
-// Go (testing)
+「行く」
+// 実行（テスト）
 func TestScenario1_MemorableName(t *testing.T) {
-    // [Req: formal — QUALITY.md Scenario 1] [Name]
-    // Requirement: [What the code must do]
-    result := Process(fixture)
+    // [要求: 正式 — QUALITY.md シナリオ 1] [名前]
+    // 要件: [コードが実行する必要があること]
+    結果 := プロセス(フィクスチャ)
     if !conditionThatPreventsFailure(result) {
-        t.Error("scenario 1 failed: [describe expected behavior]")
+        t.Error("シナリオ 1 が失敗しました: [予期される動作について説明]")
     }
 }
-```
+「」
 
-```rust
-// Rust (cargo test)
-#[test]
+「錆びる」
+// Rust (貨物テスト)
+#[テスト]
 fn test_scenario_1_memorable_name() {
-    // [Req: formal — QUALITY.md Scenario 1] [Name]
-    // Requirement: [What the code must do]
+    // [要求: 正式 — QUALITY.md シナリオ 1] [名前]
+    // 要件: [コードが実行する必要があること]
     let result = process(&fixture);
-    assert!(condition_that_prevents_the_failure(&result));
+    アサート!(失敗を防ぐ条件(&結果));
 }
-```
+「」## 境界テストと否定テスト
 
-## Boundary and Negative Tests
-
-One test per defensive pattern from Step 5:
-
-```typescript
+ステップ 5 の防御パターンごとに 1 つのテスト:```タイプスクリプト
 // TypeScript (Jest)
-describe('Boundaries and Edge Cases', () => {
-  test('[Req: inferred — from functionName() guard] guards against X', () => {
-    const input = { ...validFixture, field: null };
-    const result = process(input);
-    expect(result).not.toContainBadOutput();
+description('境界とエッジケース', () => {
+  test('[Req: 推論 — functionName() ガードから] X をガードします', () => {
+    const input = { ...validFixture、フィールド: null };
+    const 結果 = プロセス (入力);
+    Expect(result).not.toContainBadOutput();
   });
 });
-```
+「」
 
-```python
+「」パイソン
 # Python (pytest)
-class TestBoundariesAndEdgeCases:
-    """Tests for boundary conditions, malformed input, error handling."""
+クラス TestBoundariesAndEdgeCases:
+    """境界条件、不正な入力、エラー処理をテストします。"""
 
     def test_defensive_pattern_name(self, fixture):
-        """[Req: inferred — from function_name() guard] guards against X."""
-        # Mutate to trigger defensive code path
-        # Assert graceful handling
-```
+        """[要求: function_name() ガードから推論] は X を防ぎます。"""
+        # 変異して防御コードパスをトリガーする
+        # 適切な処理をアサートします
+「」
 
-```java
+```ジャワ
 // Java (JUnit 5)
-class BoundariesAndEdgeCasesTest {
-    @Test
-    @DisplayName("[Req: inferred — from methodName() guard] guards against X")
+クラス BoundariesAndEdgeCasesTest {
+    @テスト
+    @DisplayName("[要求: メソッド名() ガードから推論] X をガードします")
     void testDefensivePatternName() {
-        fixture.setField(null);  // Trigger defensive code path
-        var result = process(fixture);
-        assertNotNull(result);  // Assert graceful handling
+        fixture.setField(null);  // 防御コードパスをトリガーする
+        var result = プロセス(フィクスチャ);
+        アサートノットヌル(結果);  // 適切な処理をアサートします
         assertFalse(result.containsBadData());
     }
 }
-```
+「」
 
-```scala
-// Scala (ScalaTest)
-class BoundariesAndEdgeCases extends FlatSpec with Matchers {
-  // [Req: inferred — from methodName() guard]
-  "defensive pattern: methodName()" should "guard against X" in {
-    val input = fixture.copy(field = None)  // Trigger defensive code path
-    val result = process(input)
-    result should equal (defined)
-    result.get should not contain badData
+「スカラ」
+// スカラ (ScalaTest)
+class BoundariesAndEdgeCases は Matchers を使用して FlatSpec を拡張します {
+  // [Req: 推論 — methodName() ガードから]
+  「防御パターン:methodName()」は、{ で「X に対して防御」する必要があります。
+    val input = fixture.copy(field = None) // 防御コードパスをトリガーします
+    val 結果 = プロセス(入力)
+    結果は（定義済み）と等しくなる必要があります
+    result.get には badData を含めないでください
   }
 }
-```
+「」
 
-```go
-// Go (testing)
+「行く」
+// 実行（テスト）
 func TestDefensivePattern_FunctionName_GuardsAgainstX(t *testing.T) {
-    // [Req: inferred — from FunctionName() guard] guards against X
-    input := defaultFixture()
-    input.Field = nil  // Trigger defensive code path
-    result, err := Process(input)
-    if err != nil {
-        t.Fatalf("expected graceful handling, got: %v", err)
+    // [Req: 推論 — FunctionName() ガードから] X をガードします
+    入力:=defaultFixture()
+    input.Field = nil // 防御コードパスをトリガーします
+    結果、エラー := プロセス(入力)
+    エラーの場合 != nil {
+        t.Fatalf("予期された正常な処理、取得: %v"、エラー)
     }
-    // Assert result is valid despite edge-case input
+    // エッジケース入力にもかかわらず結果が有効であることをアサートします
 }
-```
+「」
 
-```rust
-// Rust (cargo test)
-#[test]
+「錆びる」
+// Rust (貨物テスト)
+#[テスト]
 fn test_defensive_pattern_function_name_guards_against_x() {
-    // [Req: inferred — from function_name() guard] guards against X
-    let input = Fixture { field: None, ..default_fixture() };
-    let result = process(&input).expect("expected graceful handling");
-    // Assert result is valid despite edge-case input
+    // [Req: 推論 — function_name() ガードから] X をガードします
+    let input = Fixture { フィールド: なし、..default_fixture() };
+    let result = process(&input).expect("期待される正常な処理");
+    // エッジケース入力にもかかわらず結果が有効であることをアサートします
 }
-```
+「」突然変異値を選択するときは、ステップ 5b のスキーマ マップを使用します。すべての変更では、スキーマが受け入れる値を使用する必要があります。
 
-Use your Step 5b schema map when choosing mutation values. Every mutation must use a value the schema accepts.
+体系的なアプローチ:
+- **フィールドがありません** — オプションのフィールドがありませんか? null に設定します。
+- **タイプが間違っています** — フィールドのタイプが異なりますか?スキーマが有効な代替手段を使用してください。
+- **空の値** — 空のリスト?空の文字列?空の辞書?
+- **境界値** — ゼロ、負、最大、最初、最後。
+- **モジュール間の境界** — モジュール A は異常だが有効な出力を生成します — B はそれを処理しますか?
 
-Systematic approach:
-- **Missing fields** — Optional field absent? Set to null.
-- **Wrong types** — Field gets different type? Use schema-valid alternative.
-- **Empty values** — Empty list? Empty string? Empty dict?
-- **Boundary values** — Zero, negative, maximum, first, last.
-- **Cross-module boundaries** — Module A produces unusual but valid output — does B handle it?
-
-If you found 10+ defensive patterns but wrote only 4 boundary tests, go back and write more. Target a 1:1 ratio.
+10 個以上の防御パターンを見つけたものの、境界テストを 4 つしか書いていない場合は、戻ってさらに書いてください。 1:1 の比率を目標にします。
