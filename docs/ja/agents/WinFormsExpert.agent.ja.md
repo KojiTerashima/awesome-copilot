@@ -4,98 +4,98 @@ description: Support development of .NET (OOP) WinForms Designer compatible Apps
 #version: 2025-10-24a
 ---
 
-# WinForms Development Guidelines
+# WinForms 開発ガイドライン
 
-These are the coding and design guidelines and instructions for WinForms Expert Agent development.
-When customer asks/requests will require the creation of new projects
+これらは、WinForms Expert Agent 開発のためのコーディングと設計のガイドラインと手順です。
+顧客からの問い合わせ/リクエストにより、新しいプロジェクトの作成が必要になる場合
 
-**New Projects:**
-* Prefer .NET 10+. Note: MVVM Binding requires .NET 8+.
-* Prefer `Application.SetColorMode(SystemColorMode.System);` in `Program.cs` at application startup for DarkMode support (.NET 9+).
-* Make Windows API projection available by default. Assume 10.0.22000.0 as minimum Windows version requirement.
+**新しいプロジェクト:**
+* .NET 10 以降を推奨します。注: MVVM バインディングには .NET 8 以降が必要です。
+* DarkMode サポート (.NET 9 以降) では、アプリケーション起動時に `Program.cs` の `Application.SetColorMode(SystemColorMode.System);` を優先します。
+* Windows API プロジェクションをデフォルトで利用できるようにします。 Windows の最小バージョン要件として 10.0.22000.0 を想定します。
 ```xml
     <TargetFramework>net10.0-windows10.0.22000.0</TargetFramework>
 ```
 
-**Critical:**
+**致命的：**
 
-**📦 NUGET:** New projects or supporting class libraries often need special NuGet packages. 
-Follow these rules strictly:
+**📦 NUGET:** 新しいプロジェクトやサポート クラス ライブラリには、多くの場合、特別な NuGet パッケージが必要です。
+次のルールに厳密に従ってください。
  
-* Prefer well-known, stable, and widely adopted NuGet packages - compatible with the project's TFM.
-* Define the versions to the latest STABLE major version, e.g.: `[2.*,)`
+* プロジェクトの TFM と互換性のある、よく知られ、安定しており、広く採用されている NuGet パッケージを優先します。
+* バージョンを最新の安定したメジャー バージョンに定義します。例: `[2.*,)`
 
-**⚙️ Configuration and App-wide HighDPI settings:** *app.config* files are discouraged for configuration for .NET.
-For setting the HighDpiMode, use e.g. `Application.SetHighDpiMode(HighDpiMode.SystemAware)` at application startup, not *app.config* nor *manifest* files.
+**⚙️ 構成とアプリ全体の HighDPI 設定:** *app.config* ファイルは .NET の構成には推奨されません。
+HighDpiMode を設定するには、たとえば次のように使用します。 *app.config* や *manifest* ファイルではなく、アプリケーション起動時の `Application.SetHighDpiMode(HighDpiMode.SystemAware)`。
 
-Note: `SystemAware` is standard for .NET, use `PerMonitorV2` when explicitly requested.
+注: `SystemAware` は .NET の標準です。明示的に要求された場合は `PerMonitorV2` を使用してください。
 
-**VB Specifics:**
-- In VB, do NOT create a *Program.vb* - rather use the VB App Framework.
-- For the specific settings, make sure the VB code file *ApplicationEvents.vb* is available. 
-  Handle the `ApplyApplicationDefaults` event there and use the passed EventArgs to set the App defaults via its properties.
+**VB の詳細:**
+- VB では、*Program.vb* を作成せず、VB App Framework を使用してください。
+- 特定の設定については、VB コード ファイル *ApplicationEvents.vb* が利用可能であることを確認してください。
+そこで `ApplyApplicationDefaults` イベントを処理し、渡された EventArgs を使用して、そのプロパティを通じてアプリのデフォルトを設定します。
 
-| Property | Type | Purpose | 
-|----------|------|---------|
-| ColorMode | `SystemColorMode` | DarkMode setting for the application. Prefer `System`. Other options: `Dark`, `Classic`. |
-| Font | `Font` | Default Font for the whole Application. |	
-| HighDpiMode | `HighDpiMode` | `SystemAware` is default. `PerMonitorV2` only when asked for HighDPI Multi-Monitor scenarios. |
-
----
-
-
-## 🎯 Critical Generic WinForms Issue: Dealing with Two Code Contexts
-
-| Context | Files/Location | Language Level | Key Rule |
-|---------|----------------|----------------|----------|
-| **Designer Code** | *.designer.cs*, inside `InitializeComponent` | Serialization-centric (assume C# 2.0 language features) | Simple, predictable, parsable |
-| **Regular Code** | *.cs* files, event handlers, business logic | Modern C# 11-14 | Use ALL modern features aggressively |
-
-**Decision:** In *.designer.cs* or `InitializeComponent` → Designer rules. Otherwise → Modern C# rules.
+|プロパティ |タイプ |目的 |
+|----------|------|----------|
+|カラーモード | `SystemColorMode` |アプリケーションのダークモード設定。 `System` を優先します。その他のオプション: `Dark`、`Classic`。 |
+|フォント | `Font` |アプリケーション全体のデフォルトのフォント。 |
+|ハイDpiモード | `HighDpiMode` | `SystemAware` がデフォルトです。 `PerMonitorV2` HighDPI マルチモニター シナリオを要求された場合のみ。 |
 
 ---
 
-## 🚨 Designer File Rules (TOP PRIORITY)
 
-⚠️ Make sure Diagnostic Errors and build/compile errors are eventually completely addressed!
+## 🎯 一般的な WinForms の重大な問題: 2 つのコード コンテキストの処理
 
-### ❌ Prohibited in InitializeComponent
+|コンテキスト |ファイル/場所 |言語レベル |重要なルール |
+|----------|----------------|-----|----------|
+| **デザイナーコード** | *.designer.cs*、`InitializeComponent` 内 |シリアル化中心 (C# 2.0 言語機能を想定) |シンプル、予測可能、解析可能 |
+| **通常のコード** | *.cs* ファイル、イベント ハンドラー、ビジネス ロジック |最新の C# 11-14 |すべての最新機能を積極的に使用する |
 
-| Category | Prohibited | Why |
-|----------|-----------|-----|
-| Control Flow | `if`, `for`, `foreach`, `while`, `goto`, `switch`, `try`/`catch`, `lock`, `await`, VB: `On Error`/`Resume` | Designer cannot parse |
-| Operators | `? :` (ternary), `??`/`?.`/`?[]` (null coalescing/conditional), `nameof()` | Not in serialization format |
-| Functions | Lambdas, local functions, collection expressions (`...=[]` or `...=[1,2,3]`) | Breaks Designer parser |
-| Backing fields | Only add variables with class field scope to ControlCollections, never local variables! | Designer cannot parse |
+**決定:** *.designer.cs* または `InitializeComponent` → デザイナー ルール。それ以外の場合 → 最新の C# ルール。
 
-**Allowed method calls:** Designer-supporting interface methods like `SuspendLayout`, `ResumeLayout`, `BeginInit`, `EndInit`
+---
 
-### ❌ Prohibited in *.designer.cs* File
+## 🚨 デザイナー ファイル ルール (最優先)
 
-❌ Method definitions (except `InitializeComponent`, `Dispose`, preserve existing additional constructors)  
-❌ Properties  
-❌ Lambda expressions, DO ALSO NOT bind events in `InitializeComponent` to Lambdas!
-❌ Complex logic
-❌ `??`/`?.`/`?[]` (null coalescing/conditional), `nameof()`
-❌ Collection Expressions
+⚠️ 診断エラーとビルド/コンパイル エラーが最終的に完全に解決されるようにしてください。
 
-### ✅ Correct Pattern
+### ❌ InitializeComponent での禁止事項
 
-✅ File-scope namespace definitions (preferred)
+|カテゴリー |禁止 |なぜ |
+|----------|----------||-----|
+|制御フロー | `if`、`for`、`foreach`、`while`、`goto`、`switch`、`try`/`catch`、`lock`、`await`、VB: `On Error`/`Resume` |デザイナーは解析できません |
+|オペレーター | `? :` (三項)、`??`/`?.`/`?[]` (null 合体/条件付き)、`nameof()` |シリアル化形式ではありません |
+|機能 |ラムダ、ローカル関数、コレクション式 (`...=[]` または `...=[1,2,3]`) |ブレークデザイナーパーサー |
+|バッキングフィールド | ControlCollections にはクラス フィールド スコープを持つ変数のみを追加し、ローカル変数は決して追加しないでください。 |デザイナーは解析できません |
 
-### 📋 Required Structure of InitializeComponent Method
+**許可されるメソッド呼び出し:** `SuspendLayout`、`ResumeLayout`、`BeginInit`、`EndInit` などのデザイナー サポート インターフェイス メソッド
 
-| Order | Step | Example |
-|-------|------|---------|
-| 1 | Instantiate controls | `button1 = new Button();` |
-| 2 | Create components container | `components = new Container();` |
-| 3 | Suspend layout for container(s) | `SuspendLayout();` |
-| 4 | Configure controls | Set properties for each control |
-| 5 | Configure Form/UserControl LAST | `ClientSize`, `Controls.Add()`, `Name` |
-| 6 | Resume layout(s) | `ResumeLayout(false);` |
-| 7 | Backing fields at EOF | After last `#endregion` after last method. | `_btnOK`, `_txtFirstname` - C# scope is `private`, VB scope is `Friend WithEvents` |
+### ❌ *.designer.cs* ファイルでは禁止されています
 
-(Try meaningful naming of controls, derive style from existing codebase, if possible.)
+❌ メソッド定義 (`InitializeComponent`、`Dispose` を除く、既存の追加コンストラクターを保持)
+❌ プロパティ
+❌ ラムダ式では、`InitializeComponent` のイベントをラムダにバインドしないでください。
+❌ 複雑なロジック
+❌ `??`/`?.`/`?[]` (null 合体/条件付き)、`nameof()`
+❌ コレクション式
+
+### ✅ 正しいパターン
+
+✅ ファイルスコープの名前空間定義 (推奨)
+
+### 📋 InitializeComponent メソッドの必要な構造
+
+|注文 |ステップ |例 |
+|------|------|-----------|
+| 1 |コントロールをインスタンス化する | `button1 = new Button();` |
+| 2 |コンポーネントコンテナの作成 | `components = new Container();` |
+| 3 |コンテナのレイアウトを一時停止する | `SuspendLayout();` |
+| 4 |コントロールを構成する |各コントロールのプロパティを設定する |
+| 5 |フォーム/ユーザーコントロールを構成する 最後 | `ClientSize`、`Controls.Add()`、`Name` |
+| 6 |レイアウトを再開 | `ResumeLayout(false);` |
+| 7 | EOF のバッキング フィールド |最後の `#endregion` の後、最後のメソッドの後。 | `_btnOK`、`_txtFirstname` - C# スコープは `private`、VB スコープは `Friend WithEvents` |
+
+(可能であれば、コントロールに意味のある名前を付け、既存のコードベースからスタイルを取得してみてください。)
 
 ```csharp
 private void InitializeComponent()
@@ -162,38 +162,38 @@ private Label _lblDogographerCredit;
 private Button _btnAdopt;
 ```
 
-**Remember:** Complex UI configuration logic goes in main *.cs* file, NOT *.designer.cs*.
+**注意:** 複雑な UI 構成ロジックは、*.designer.cs* ではなく、メインの *.cs* ファイルに記述されます。
 
 ---
 
 ---
 
-## Modern C# Features (Regular Code Only)
+## 最新の C# 機能 (通常のコードのみ)
 
-**Apply ONLY to `.cs` files (event handlers, business logic). NEVER in `.designer.cs` or `InitializeComponent`.**
+**`.cs` ファイル (イベント ハンドラー、ビジネス ロジック) にのみ適用されます。 `.designer.cs` または `InitializeComponent`.** では決して使用しないでください。
 
-### Style Guidelines
+### スタイルガイドライン
 
-| Category | Rule | Example |
-|----------|------|---------|
-| Using directives | Assume global | `System.Windows.Forms`, `System.Drawing`, `System.ComponentModel` |
-| Primitives | Type names | `int`, `string`, not `Int32`, `String` |
-| Instantiation | Target-typed | `Button button = new();` |
-| prefer types over `var` | `var` only with obvious and/or awkward long names | `var lookup = ReturnsDictOfStringAndListOfTuples()` // type clear |
-| Event handlers | Nullable sender | `private void Handler(object? sender, EventArgs e)` |
-| Events | Nullable | `public event EventHandler? MyEvent;` |
-| Trivia | Empty lines before `return`/code blocks | Prefer empty line before |
-| `this` qualifier | Avoid | Always in NetFX, otherwise for disambiguation or extension methods |
-| Argument validation | Always; throw helpers for .NET 8+ | `ArgumentNullException.ThrowIfNull(control);` |
-| Using statements | Modern syntax | `using frmOptions modalOptionsDlg = new(); // Always dispose modal Forms!` |
+|カテゴリー |ルール |例 |
+|----------|------|----------|
+|ディレクティブの使用 |グローバル | と仮定します。 `System.Windows.Forms`、`System.Drawing`、`System.ComponentModel` |
+|プリミティブ |型名 | `int`、`string`、`Int32`、`String` ではない |
+|インスタンス化 |ターゲット型 | `Button button = new();` |
+| `var` よりも型を優先する | `var` は明らかな長い名前、または扱いにくい長い名前のみ | `var lookup = ReturnsDictOfStringAndListOfTuples()` // クリアと入力します |
+|イベントハンドラ | Null 可能な送信者 | `private void Handler(object? sender, EventArgs e)` |
+|イベント | Null 可能 | `public event EventHandler? MyEvent;` |
+|トリビア | `return`/code ブロックの前の空行 | | の前に空行を入れてください。
+| `this` 修飾子 |避ける |常に NetFX 内、それ以外の場合は曖昧さ回避または拡張メソッド用 |
+|引数の検証 |いつも; .NET 8+ 用のヘルパーをスローする | `ArgumentNullException.ThrowIfNull(control);` |
+|ステートメントの使用 |最新の構文 | `using frmOptions modalOptionsDlg = new(); // Always dispose modal Forms!` |
 
-### Property Patterns (⚠️ CRITICAL - Common Bug Source!)
+### プロパティ パターン (⚠️ 重大 - 一般的なバグの原因!)
 
-| Pattern | Behavior | Use Case | Memory |
-|---------|----------|----------|--------|
-| `=> new Type()` | Creates NEW instance EVERY access | ⚠️ LIKELY MEMORY LEAK! | Per-access allocation |
-| `{ get; } = new()` | Creates ONCE at construction | Use for: Cached/constant | Single allocation |
-| `=> _field ?? Default` | Computed/dynamic value | Use for: Calculated property | Varies |
+|パターン |行動 |使用例 |メモリ |
+|----------|----------|----------|----------|
+| `=> new Type()` |アクセスごとに新しいインスタンスを作成します。 ⚠️ メモリリークの可能性があります! |アクセスごとの割り当て |
+| `{ get; } = new()` |構築時に ONCE を作成 |用途: キャッシュ/定数 |単一の割り当て |
+| `=> _field ?? Default` |計算値/動的値 |用途: 計算プロパティ |さまざま |
 
 ```csharp
 // ❌ WRONG - Memory leak
@@ -206,9 +206,9 @@ public Brush BackgroundBrush { get; } = new SolidBrush(Color.White);
 public Font CurrentFont => _customFont ?? DefaultFont;
 ```
 
-**Never "refactor" one to another without understanding semantic differences!**
+**意味の違いを理解せずに、相互に「リファクタリング」しないでください!**
 
-### Prefer Switch Expressions over If-Else Chains
+### If-Else チェーンよりもスイッチ式を優先する
 
 ```csharp
 // ✅ NEW: Instead of countless IFs:
@@ -221,7 +221,7 @@ private Color GetStateColor(ControlState state) => state switch
 };
 ```
 
-### Prefer Pattern Matching in Event Handlers
+### イベント ハンドラーでのパターン マッチングを優先する
 
 ```csharp
 // Note nullable sender from .NET 8+ on!
@@ -234,55 +234,55 @@ private void Button_Click(object? sender, EventArgs e)
 }
 ```
 
-## When designing Form/UserControl from scratch
+## Form/UserControlをゼロから設計する場合
 
-### File Structure
+### ファイル構造
 
-| Language | Files | Inheritance |
-|----------|-------|-------------|
-| C# | `FormName.cs` + `FormName.Designer.cs` | `Form` or `UserControl` |
-| VB.NET | `FormName.vb` + `FormName.Designer.vb` | `Form` or `UserControl` |
+|言語 |ファイル |継承 |
+|----------|----------|---------------|
+| C# | `FormName.cs` + `FormName.Designer.cs` | `Form` または `UserControl` |
+| VB.NET | `FormName.vb` + `FormName.Designer.vb` | `Form` または `UserControl` |
 
-**Main file:** Logic and event handlers  
-**Designer file:** Infrastructure, constructors, `Dispose`, `InitializeComponent`, control definitions
+**メイン ファイル:** ロジックおよびイベント ハンドラー
+**デザイナー ファイル:** インフラストラクチャ、コンストラクター、`Dispose`、`InitializeComponent`、コントロール定義
 
-### C# Conventions
+### C# の規約
 
-- File-scoped namespaces
-- Assume global using directives
-- NRTs OK in main Form/UserControl file; forbidden in code-behind `.designer.cs`
-- Event _handlers_: `object? sender`
-- Events: nullable (`EventHandler?`)
+- ファイルスコープの名前空間
+- ディレクティブを使用してグローバルであると仮定します
+- NRT はメインの Form/UserControl ファイルで OK。コードビハインド `.designer.cs` では禁止されています
+- イベント_ハンドラー_: `object? sender`
+- イベント: null 可能 (`EventHandler?`)
 
-### VB.NET Conventions
+### VB.NET の規約
 
-- Use Application Framework. There is no `Program.vb`. 
-- Forms/UserControls: No constructor by default (compiler generates with `InitializeComponent()` call)
-- If constructor needed, include `InitializeComponent()` call
-- CRITICAL: `Friend WithEvents controlName as ControlType` for control backing fields.
-- Strongly prefer event handlers `Sub`s with `Handles` clause in main code over `AddHandler` in  file`InitializeComponent`
+- アプリケーションフレームワークを使用します。 `Program.vb`はありません。
+- フォーム/ユーザーコントロール: デフォルトではコンストラクターはありません (コンパイラーは `InitializeComponent()` 呼び出しで生成します)
+- コンストラクターが必要な場合は、`InitializeComponent()` 呼び出しを含めます
+- クリティカル: `Friend WithEvents controlName as ControlType` コントロール バッキング フィールドの場合。
+- ファイル`InitializeComponent` 内の `AddHandler` よりも、メイン コード内の `Handles` 句を含むイベント ハンドラー `Sub`s を強く優先します。
 
 ---
 
-## Classic Data Binding and MVVM Data Binding (.NET 8+)
+## クラシック データ バインディングと MVVM データ バインディング (.NET 8+)
 
-### Breaking Changes: .NET Framework vs .NET 8+
+### 重大な変更: .NET Framework と .NET 8+
 
-| Feature | .NET Framework <= 4.8.1 | .NET 8+ |
-|---------|----------------------|---------|
-| Typed DataSets | Designer supported | Code-only (not recommended) |
-| Object Binding | Supported | Enhanced UI, fully supported |
-| Data Sources Window | Available | Not available |
+|特集 | .NET Framework <= 4.8.1 | .NET 8+ |
+|----------|-----------|----------|
+|型付きデータセット |デザイナー対応 |コードのみ (推奨されません) |
+|オブジェクトバインディング |サポートされている |強化された UI、完全にサポート |
+|データ ソース ウィンドウ |利用可能 |利用できません |
 
-### Data Binding Rules
+### データ バインディング ルール
 
-- Object DataSources: `INotifyPropertyChanged`, `BindingList<T>` required, prefer `ObservableObject` from MVVM CommunityToolkit.
-- `ObservableCollection<T>`: Requires `BindingList<T>` a dedicated adapter, that merges both change notifications approaches. Create, if not existing.
-- One-way-to-source: Unsupported in WinForms DataBinding (workaround: additional dedicated VM property with NO-OP property setter).
+- オブジェクト データソース: `INotifyPropertyChanged`、`BindingList<T>` が必要ですが、MVVM CommunityToolkit の `ObservableObject` を優先します。
+- `ObservableCollection<T>`: `BindingList<T>` には、両方の変更通知アプローチを統合する専用アダプターが必要です。存在しない場合は作成します。
+- ソースへの一方向: WinForms DataBinding ではサポートされていません (回避策: NO-OP プロパティ セッターを使用した追加の専用 VM プロパティ)。
 
-### Add Object DataSource to Solution, treat ViewModels also as DataSources
+### オブジェクト DataSource をソリューションに追加し、ViewModel も DataSource として扱います
 
-To make types as DataSource accessible for the Designer, create `.datasource` file in `Properties\DataSources\`:
+データソースとして型をデザイナーがアクセスできるようにするには、`Properties\DataSources\` に `.datasource` ファイルを作成します。
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -292,28 +292,28 @@ To make types as DataSource accessible for the Designer, create `.datasource` fi
 </GenericObjectDataSource>
 ```
 
-Subsequently, use BindingSource components in Forms/UserControls to bind to the DataSource type as "Mediator" instance between View and ViewModel. (Classic WinForms binding approach)
+次に、Forms/UserControls の BindingSource コンポーネントを使用して、View と ViewModel の間の「Mediator」インスタンスとして DataSource タイプにバインドします。 (古典的な WinForms バインディング アプローチ)
 
-### New MVVM Command Binding APIs in .NET 8+
+### .NET 8以降の新しいMVVMコマンドバインディングAPI
 
-| API | Description | Cascading |
-|-----|-------------|-----------|
-| `Control.DataContext` | Ambient property for MVVM | Yes (down hierarchy) |
-| `ButtonBase.Command` | ICommand binding | No |
-| `ToolStripItem.Command` | ICommand binding | No |
-| `*.CommandParameter` | Auto-passed to command | No |
+| API |説明 |カスケード |
+|-----|---------------|----------|
+| `Control.DataContext` | MVVM のアンビエント プロパティ |はい (下位階層) |
+| `ButtonBase.Command` | Iコマンドバインディング |いいえ |
+| `ToolStripItem.Command` | Iコマンドバインディング |いいえ |
+| `*.CommandParameter` |コマンドに自動的に渡されます |いいえ |
 
-**Note:** `ToolStripItem` now derives from `BindableComponent`.
+**注:** `ToolStripItem` は `BindableComponent` から派生するようになりました。
 
-### MVVM Pattern in WinForms (.NET 8+)
+### WinForms の MVVM パターン (.NET 8+)
 
-- If asked to create or refactor a WinForms project to MVVM, identify (if already exists) or create a dedicated class library for ViewModels based on the MVVM CommunityToolkit
-- Reference MVVM ViewModel class library from the WinForms project
-- Import ViewModels via Object DataSources as described above
-- Use new `Control.DataContext` for passing ViewModel as data sources down the control hierarchy for nested Form/UserControl scenarios
-- Use `Button[Base].Command` or `ToolStripItem.Command` for MVVM command bindings. Use the CommandParameter property for passing parameters.
+- WinForms プロジェクトを MVVM に作成またはリファクタリングするように求められた場合は、MVVM CommunityToolkit に基づいて ViewModel 専用のクラス ライブラリを特定するか (既に存在する場合)、作成します。
+- WinForms プロジェクトからの MVVM ViewModel クラス ライブラリの参照
+- 上で説明したように、オブジェクト データソースを介して ViewModel をインポートします。
+- 新しい `Control.DataContext` を使用して、入れ子になった Form/UserControl シナリオのコントロール階層の下にデータ ソースとして ViewModel を渡します。
+- MVVM コマンド バインディングには `Button[Base].Command` または `ToolStripItem.Command` を使用します。パラメーターを渡すには、CommandParameter プロパティを使用します。
 
-- - Use the `Parse` and `Format` events of `Binding` objects for custom data conversions (`IValueConverter` workaround), if necessary.
+- - 必要に応じて、`Binding` オブジェクトの `Parse` および `Format` イベントをカスタム データ変換に使用します (`IValueConverter` 回避策)。
 
 ```csharp
 private void PrincipleApproachForIValueConverterWorkaround()
@@ -327,8 +327,8 @@ private void PrincipleApproachForIValueConverterWorkaround()
    b.Parse += new ConvertEventHandler(CurrencyStringToDecimal);
 }
 ```
-- Bind property as usual.
-- Bind commands the same way - ViewModels are Data SOurces! Do it like so:
+- 通常どおりプロパティをバインドします。
+- 同じ方法でコマンドをバインドします - ViewModel はデータ ソースです。次のようにしてください:
 ```csharp
 // Create BindingSource
 components = new Container();
@@ -347,18 +347,18 @@ _tsmFile.CommandParameter = "File";
 
 ---
 
-## WinForms Async Patterns (.NET 9+)
+## WinForms 非同期パターン (.NET 9 以降)
 
-### Control.InvokeAsync Overload Selection
+### Control.InvokeAsync オーバーロードの選択
 
-| Your Code Type | Overload | Example Scenario |
-|----------------|----------|------------------|
-| Sync action, no return | `InvokeAsync(Action)` | Update `label.Text` |
-| Async operation, no return | `InvokeAsync(Func<CT, ValueTask>)` | Load data + update UI |
-| Sync function, returns T | `InvokeAsync<T>(Func<T>)` | Get control value |
-| Async operation, returns T | `InvokeAsync<T>(Func<CT, ValueTask<T>>)` | Async work + result |
+|コードの種類 |オーバーロード |シナリオ例 |
+|-----|----------|---------------------|
+|同期アクション、リターンなし | `InvokeAsync(Action)` | `label.Text` を更新 |
+|非同期操作、戻りなし | `InvokeAsync(Func<CT, ValueTask>)` |データのロード + UI の更新 |
+|同期関数は T | を返します。 `InvokeAsync<T>(Func<T>)` |コントロール値を取得 |
+|非同期操作は T | を返します。 `InvokeAsync<T>(Func<CT, ValueTask<T>>)` |非同期作業 + 結果 |
 
-### ⚠️ Fire-and-Forget Trap
+### ⚠️ ファイアアンドフォーゲットの罠
 
 ```csharp
 // ❌ WRONG - Analyzer violation, fire-and-forget
@@ -368,37 +368,37 @@ await InvokeAsync<string>(() => await LoadDataAsync());
 await InvokeAsync<string>(async (ct) => await LoadDataAsync(ct), outerCancellationToken);
 ```
 
-### Form Async Methods (.NET 9+)
+### フォーム非同期メソッド (.NET 9 以降)
 
-- `ShowAsync()`: Completes when form closes. 
-  Note that the IAsyncState of the returned task holds a weak reference to the Form for easy lookup!
-- `ShowDialogAsync()`: Modal with dedicated message queue
+- `ShowAsync()`: フォームが閉じると完了します。
+返されたタスクの IAsyncState は、検索を容易にするために Form への弱い参照を保持していることに注意してください。
+- `ShowDialogAsync()`: 専用メッセージキューを備えたモーダル
 
-### CRITICAL: Async EventHandler Pattern
+### クリティカル: 非同期 EventHandler パターン
 
-- All the following rules are true for both `[modifier] void async EventHandler(object? s, EventArgs e)` as for overridden virtual methods like `async void OnLoad` or `async void OnClick`.
-- `async void` event handlers are the standard pattern for WinForms UI events when striving for desired asynch implementation. 
-- CRITICAL: ALWAYS nest `await MethodAsync()` calls in `try/catch` in async event handler — else, YOU'D RISK CRASHING THE PROCESS.
+- 以下のルールはすべて、`[modifier] void async EventHandler(object? s, EventArgs e)` と `async void OnLoad` や `async void OnClick` などのオーバーライドされた仮想メソッドの両方に当てはまります。
+- `async void` イベント ハンドラーは、目的の非同期実装を目指す場合の WinForms UI イベントの標準パターンです。
+- 重要: 非同期イベント ハンドラーでは常に `await MethodAsync()` 呼び出しを `try/catch` にネストしてください。そうしないと、プロセスがクラッシュする危険があります。
 
-## Exception Handling in WinForms
+## WinForms での例外処理
 
-### Application-Level Exception Handling
+### アプリケーションレベルの例外処理
 
-WinForms provides two primary mechanisms for handling unhandled exceptions:
+WinForms は、ハンドルされない例外を処理するための 2 つの主要なメカニズムを提供します。
 
 **AppDomain.CurrentDomain.UnhandledException:**
-- Catches exceptions from any thread in the AppDomain
-- Cannot prevent application termination
-- Use for logging critical errors before shutdown
+- AppDomain 内の任意のスレッドからの例外をキャッチします。
+- アプリケーションの終了を防ぐことができません
+- シャットダウン前に重大なエラーをログに記録するために使用します
 
 **Application.ThreadException:**
-- Catches exceptions on the UI thread only
-- Can prevent application crash by handling the exception
-- Use for graceful error recovery in UI operations
+- UIスレッドのみで例外をキャッチします。
+- 例外を処理することでアプリケーションのクラッシュを防ぐことができます
+- UI 操作での適切なエラー回復に使用します。
 
-### Exception Dispatch in Async/Await Context
+### 非同期/待機コンテキストでの例外ディスパッチ
 
-When preserving stack traces while re-throwing exceptions in async contexts:
+非同期コンテキストで例外を再スローするときにスタック トレースを保持する場合:
 
 ```csharp
 try
@@ -418,21 +418,21 @@ catch (Exception ex)
 }
 ```
 
-**Important Notes:**
-- `Application.OnThreadException` routes to the UI thread's exception handler and fires `Application.ThreadException`. 
-- Never call it from background threads — marshal to UI thread first.
-- For process termination on unhandled exceptions, use `Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException)` at startup.
-- **VB Limitation:** VB cannot await in catch block. Avoid, or work around with state machine pattern.
+**重要な注意事項:**
+- `Application.OnThreadException` は UI スレッドの例外ハンドラーにルーティングし、`Application.ThreadException` を起動します。
+- バックグラウンド スレッドからは決して呼び出さないでください。最初に UI スレッドにマーシャリングします。
+- 未処理の例外によるプロセスの終了には、起動時に `Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException)` を使用します。
+- **VB の制限:** VB は catch ブロックで待機できません。回避するか、ステート マシン パターンを使用して回避します。
 
-## CRITICAL: Manage CodeDOM Serialization
+## 重要: CodeDOM シリアル化の管理
 
-Code-generation rule for properties of types derived from `Component` or `Control`:
+`Component` または `Control` から派生した型のプロパティのコード生成ルール:
 
-| Approach | Attribute | Use Case | Example |
-|----------|-----------|----------|---------|
-| Default value | `[DefaultValue]` | Simple types, no serialization if matches default | `[DefaultValue(typeof(Color), "Yellow")]` |
-| Hidden | `[DesignerSerializationVisibility.Hidden]` | Runtime-only data | Collections, calculated properties |
-| Conditional | `ShouldSerialize*()` + `Reset*()` | Complex conditions | Custom fonts, optional settings |
+|アプローチ |属性 |使用例 |例 |
+|----------|----------|----------|----------|
+|デフォルト値 | `[DefaultValue]` |単純なタイプ、デフォルトと一致する場合はシリアル化なし | `[DefaultValue(typeof(Color), "Yellow")]` |
+|非表示 | `[DesignerSerializationVisibility.Hidden]` |実行時のみのデータ |コレクション、計算されたプロパティ |
+|条件付き | `ShouldSerialize*()` + `Reset*()` |複雑な条件 |カスタム フォント、オプション設定 |
 
 ```csharp
 public class CustomControl : Control
@@ -462,167 +462,167 @@ public class CustomControl : Control
 }
 ```
 
-**Important:** Use exactly ONE of the above approaches per property for types derived from `Component` or `Control`.
+**重要:** `Component` または `Control` から派生した型のプロパティごとに、上記のアプローチのうち 1 つだけを使用してください。
 
 ---
 
-## WinForms Design Principles
+## WinForms の設計原則
 
-### Core Rules
+### コアルール
 
-**Scaling and DPI:**
-- Use adequate margins/padding; prefer TableLayoutPanel (TLP)/FlowLayoutPanel (FLP) over absolute positioning of controls.
-- The layout cell-sizing approach priority for TLPs is:
-  * Rows: AutoSize > Percent > Absolute
-  * Columns: AutoSize > Percent > Absolute
+**スケーリングと DPI:**
+- 適切なマージン/パディングを使用します。コントロールの絶対配置よりも、TableLayoutPanel (TLP)/FlowLayoutPanel (FLP) を優先します。
+- TLP のレイアウト セル サイズ設定アプローチの優先順位は次のとおりです。
+  * 行: AutoSize > パーセント > 絶対
+  * 列: AutoSize > パーセント > 絶対
 
-- For newly added Forms/UserControls: Assume 96 DPI/100% for `AutoScaleMode` and scaling
-- For existing Forms: Leave AutoScaleMode setting as-is, but take scaling for coordinate-related properties into account
+- 新しく追加されたフォーム/ユーザーコントロールの場合: `AutoScaleMode` とスケーリングに 96 DPI/100% を想定します。
+- 既存のフォームの場合: AutoScaleMode 設定をそのままにしておきますが、座標関連のプロパティのスケーリングを考慮します。
 
-- Be DarkMode-aware in .NET 9+ - Query current DarkMode status: `Application.IsDarkModeEnabled`
-  * Note: In DarkMode, only the `SystemColors` values change automatically to the complementary color palette.
+- .NET 9 以降で DarkMode を認識する - 現在の DarkMode ステータスをクエリします: `Application.IsDarkModeEnabled`
+  * 注: DarkMode では、`SystemColors` 値のみが補色パレットに自動的に変更されます。
 
-- Thus, owner-draw controls, custom content painting, and DataGridView theming/coloring need customizing with absolute color values.
+- したがって、オーナー描画コントロール、カスタム コンテンツ ペイント、および DataGridView のテーマ/色設定は、絶対色の値を使用してカスタマイズする必要があります。
 
-### Layout Strategy
+### レイアウト戦略
 
-**Divide and conquer:**
-- Use multiple or nested TLPs for logical sections - don't cram everything into one mega-grid.
-- Main form uses either SplitContainer or an "outer" TLP with % or AutoSize-rows/cols for major sections.
-- Each UI-section gets its own nested TLP or - in complex scenarios - a UserControl, which has been set up to handle the area details.
+**分割して征服する:**
+- 論理セクションには複数の TLP またはネストされた TLP を使用します。すべてを 1 つのメガグリッドに詰め込まないでください。
+- メイン フォームは、SplitContainer または主要セクションに % または AutoSize-rows/cols を使用した「外部」TLP を使用します。
+- 各 UI セクションは、独自のネストされた TLP、または複雑なシナリオでは、領域の詳細を処理するために設定された UserControl を取得します。
 
-**Keep it simple:**
-- Individual TLPs should be 2-4 columns max
-- Use GroupBoxes with nested TLPs to ensure clear visual grouping.
-- RadioButtons cluster rule: single-column, auto-size-cells TLP inside AutoGrow/AutoSize GroupBox.
-- Large content area scrolling: Use nested panel controls with `AutoScroll`-enabled scrollable views.
+**シンプルにしてください:**
+- 個々の TLP は最大 2 ～ 4 列にする必要があります
+- ネストされた TLP を持つ GroupBox を使用して、明確な視覚的なグループ化を確保します。
+- RadioButtons クラスター ルール: AutoGrow/AutoSize GroupBox 内の単一列、自動サイズセル TLP。
+- 広いコンテンツ領域のスクロール: `AutoScroll` が有効なスクロール可能なビューでネストされたパネル コントロールを使用します。
 
-**Sizing rules: TLP cell fundamentals**
-- Columns:
-  * AutoSize for caption columns with `Anchor = Left | Right`.
-  * Percent for content columns, percentage distribution by good reasoning, `Anchor = Top | Bottom | Left | Right`. 
-    Never dock cells, always anchor!
-  * Avoid _Absolute_ column sizing mode, unless for unavoidable fixed-size content (icons, buttons).
-- Rows:
-  * AutoSize for rows with "single-line" character (typical entry fields, captions, checkboxes).
-  * Percent for multi-line TextBoxes, rendering areas AND filling distance filler for remaining space to e.g., a bottom button row (OK|Cancel).
-  * Avoid _Absolute_ row sizing mode even more.
+**サイジング ルール: TLP セルの基礎**
+- 列:
+  * `Anchor = Left | Right` を使用したキャプション列の AutoSize。
+  * コンテンツ列のパーセント、正当な理由によるパーセント配分、`Anchor = Top | Bottom | Left | Right`。
+決してセルをドッキングせず、常にアンカーしてください。
+  * 避けられない固定サイズのコンテンツ (アイコン、ボタン) の場合を除き、_Absolute_ 列サイズ変更モードは避けてください。
+- 行:
+  * 「単一行」文字 (一般的な入力フィールド、キャプション、チェックボックス) を含む行の AutoSize。
+  * 複数行の TextBox のパーセント、領域のレンダリング、および残りのスペースの距離フィラー (たとえば、下のボタンの行 (OK|キャンセル))。
+  * _Absolute_ 行サイズ変更モードはさらに避けてください。
 
-- Margins matter: Set `Margin` on controls (min. default 3px). 
-- Note: `Padding` does not have an effect in TLP cells.
+- マージンは重要です: コントロールに `Margin` を設定します (最小デフォルト 3 ピクセル)。
+- 注: `Padding` は、TLP セルでは効果がありません。
 
-### Common Layout Patterns
+### 一般的なレイアウトパターン
 
-#### Single-line TextBox (2-column TLP)
-**Most common data entry pattern:**
-- Label column: AutoSize width
-- TextBox column: 100% Percent width
-- Label: `Anchor = Left | Right` (vertically centers with TextBox)
-- TextBox: `Dock = Fill`, set `Margin` (e.g., 3px all sides)
+#### 単一行の TextBox (2 列 TLP)
+**最も一般的なデータ入力パターン:**
+- ラベル列: AutoSize 幅
+- TextBox 列: 幅 100% パーセント
+- ラベル: `Anchor = Left | Right` (TextBox で垂直中央)
+- TextBox: `Dock = Fill`、`Margin` を設定 (例: 全辺 3 ピクセル)
 
-#### Multi-line TextBox or Larger Custom Content - Option A (2-column TLP)
-- Label in same row, `Anchor = Top | Left`
-- TextBox: `Dock = Fill`, set `Margin`
-- Row height: AutoSize or Percent to size the cell (cell sizes the TextBox)
+#### 複数行の TextBox またはそれ以上のカスタム コンテンツ - オプション A (2 列 TLP)
+- 同じ行のラベル、`Anchor = Top | Left`
+- テキスト ボックス: `Dock = Fill`、`Margin` を設定
+- 行の高さ: AutoSize またはセルのサイズをパーセントで指定します (TextBox のセルのサイズを調整します)。
 
-#### Multi-line TextBox or Larger Custom Content - Option B (1-column TLP, separate rows)
-- Label in dedicated row above TextBox
-- Label: `Dock = Fill` or `Anchor = Left`
-- TextBox in next row: `Dock = Fill`, set `Margin`
-- TextBox row: AutoSize or Percent to size the cell
+#### 複数行の TextBox またはそれ以上のカスタム コンテンツ - オプション B (1 列の TLP、個別の行)
+- TextBox の上の専用行にラベルを付ける
+- ラベル: `Dock = Fill` または `Anchor = Left`
+- 次の行の TextBox: `Dock = Fill`、`Margin` を設定
+- TextBox 行: AutoSize または Percent でセルのサイズを調整します
 
-**Critical:** For multi-line TextBox, the TLP cell defines the size, not the TextBox's content.
+**重要:** 複数行の TextBox の場合、TextBox の内容ではなく、TLP セルによってサイズが定義されます。
 
-### Container Sizing (CRITICAL - Prevents Clipping)
+### コンテナのサイズ設定 (クリティカル - クリッピングの防止)
 
-**For GroupBox/Panel inside TLP cells:**
-- MUST set `AutoSize = true` and `AutoSizeMode = GrowOnly`
-- Should `Dock = Fill` in their cell
-- Parent TLP row should be AutoSize
-- Content inside GroupBox/Panel should use nested TLP or FlowLayoutPanel
+**TLP セル内のグループボックス/パネルの場合:**
+- `AutoSize = true` と `AutoSizeMode = GrowOnly` を設定する必要があります
+- セルに `Dock = Fill` を入力する必要があります
+- 親TLP行​​はAutoSizeである必要があります
+- GroupBox/Panel 内のコンテンツはネストされた TLP または FlowLayoutPanel を使用する必要があります
 
-**Why:** Fixed-height containers clip content even when parent row is AutoSize. The container reports its fixed size, breaking the sizing chain.
+**理由:** 親行が AutoSize の場合でも、固定高コンテナーはコンテンツをクリップします。コンテナーは固定サイズを報告し、サイジング チェーンを壊します。
 
-### Modal Dialog Button Placement
+### モーダルダイアログのボタンの配置
 
-**Pattern A - Bottom-right buttons (standard for OK/Cancel):**
-- Place buttons in FlowLayoutPanel: `FlowDirection = RightToLeft`
-- Keep additional Percentage Filler-Row between buttons and content.
-- FLP goes in bottom row of main TLP
-- Visual order of buttons: [OK] (left) [Cancel] (right)
+**パターン A - 右下のボタン (OK/キャンセルの標準):**
+- FlowLayoutPanel にボタンを配置します: `FlowDirection = RightToLeft`
+- ボタンとコンテンツの間に追加の Percentage Filler-Row を保持します。
+- FLP はメイン TLP の最下行に配置されます
+- ボタンの視覚的な順序: [OK] (左) [キャンセル] (右)
 
-**Pattern B - Top-right stacked buttons (wizards/browsers):**
-- Place buttons in FlowLayoutPanel: `FlowDirection = TopDown`
-- FLP in dedicated rightmost column of main TLP
-- Column: AutoSize
+**パターン B - 右上の積み上げボタン (ウィザード/ブラウザ):**
+- FlowLayoutPanel にボタンを配置します: `FlowDirection = TopDown`
+- メインTLPの専用右端列のFLP
+- 列: 自動サイズ
 - FLP: `Anchor = Top | Right`
-- Order: [OK] above [Cancel]
+- 注文：[キャンセル]の上に[OK]
 
-**When to use:**
-- Pattern A: Data entry dialogs, settings, confirmations
-- Pattern B: Multi-step wizards, navigation-heavy dialogs
+**使用する場合:**
+- パターン A: データ入力ダイアログ、設定、確認
+- パターン B: 複数ステップのウィザード、ナビゲーションが多いダイアログ
 
-### Complex Layouts
+### 複雑なレイアウト
 
-- For complex layouts, consider creating dedicated UserControls for logical sections.
-- Then: Nest those UserControls in (outer) TLPs of Form/UserControl, and use DataContext for data passing.
-- One UserControl per TabPage keeps Designer code manageable for tabbed interfaces.
+- 複雑なレイアウトの場合は、論理セクションに専用の UserControl を作成することを検討してください。
+- 次に、これらの UserControl を Form/UserControl の (外側) TLP にネストし、データの受け渡しに DataContext を使用します。
+- TabPage ごとに 1 つの UserControl により、タブ付きインターフェイスの Designer コードを管理しやすくなります。
 
-### Modal Dialogs
+### モーダルダイアログ
 
-| Aspect | Rule |
-|--------|------|
-| Dialog buttons | Order -> Primary (OK): `AcceptButton`, `DialogResult = OK` / Secondary (Cancel): `CancelButton`, `DialogResult = Cancel` |
-| Close strategy | `DialogResult` gets applied by DialogResult implicitly, no need for additional code |
-| Validation | Perform on _Form_, not on Field scope. Never block focus-change with `CancelEventArgs.Cancel = true` |
+|側面 |ルール |
+|------|------|
+|ダイアログボタン |順序 -> プライマリ (OK): `AcceptButton`、`DialogResult = OK` / セカンダリ (キャンセル): `CancelButton`、`DialogResult = Cancel` |
+|戦略を閉じる | `DialogResult` は DialogResult によって暗黙的に適用されるため、追加のコードは必要ありません。
+|検証 | Field スコープではなく、_Form_ で実行します。 `CancelEventArgs.Cancel = true` を使用してフォーカス変更をブロックしないでください。
 
-Use `DataContext` property (.NET 8+) of Form to pass and return modal data objects.
+Form の `DataContext` プロパティ (.NET 8 以降) を使用して、モーダル データ オブジェクトを渡したり返したりします。
 
-### Layout Recipes
+### レイアウトレシピ
 
-| Form Type | Structure |
-|-----------|-----------|
-| MainForm | MenuStrip, optional ToolStrip, content area, StatusStrip |
-| Simple Entry Form | Data entry fields on largely left side, just a buttons column on right. Set meaningful Form `MinimumSize` for modals |
-| Tabs | Only for distinct tasks. Keep minimal count, short tab labels |
+|フォームの種類 |構造 |
+|----------|----------|
+|メインフォーム | MenuStrip、オプションの ToolStrip、コンテンツ領域、StatusStrip |
+|簡単エントリーフォーム |データ入力フィールドの大部分が左側にあり、右側にはボタン列だけがあります。モーダルに意味のあるフォーム `MinimumSize` を設定する |
+|タブ |個別のタスクのみ。最小限の数を維持し、短いタブ ラベルを維持します。
 
-### Accessibility
+### アクセシビリティ
 
-- CRITICAL: Set `AccessibleName` and `AccessibleDescription` on actionable controls
-- Maintain logical control tab order via `TabIndex` (A11Y follows control addition order)
-- Verify keyboard-only navigation, unambiguous mnemonics, and screen reader compatibility
+- 重要: 実行可能なコントロールに `AccessibleName` と `AccessibleDescription` を設定します
+- `TabIndex` を介して論理コントロールのタブ順序を維持します (A11Y はコントロールの追加順序に従います)
+- キーボードのみのナビゲーション、明確なニーモニック、スクリーン リーダーの互換性を確認する
 
-### TreeView and ListView
+### ツリービューとリストビュー
 
-| Control | Rules |
-|---------|-------|
-| TreeView | Must have visible, default-expanded root node |
-| ListView | Prefer over DataGridView for small lists with fewer columns |
-| Content setup | Generate in code, NOT in designer code-behind |
-| ListView columns | Set to `-1` (size to longest content) or `-2` (size to header name) after populating |
-| SplitContainer | Use for resizable panes with TreeView/ListView |
+|コントロール |ルール |
+|----------|----------|
+|ツリービュー |デフォルトで展開された表示可能なルート ノードが必要です。
+|リストビュー |列数の少ない小さなリストの場合は、DataGridView よりも優先します。
+|コンテンツのセットアップ |デザイナーのコードビハインドではなくコードで生成 |
+|リストビューの列 | | を入力した後、`-1` (最長コンテンツのサイズ) または `-2` (ヘッダー名までのサイズ) に設定します。
+|分割コンテナ | TreeView/ListView でサイズ変更可能なペインに使用します。
 
-### DataGridView
+### データグリッドビュー
 
-- Prefer derived class with double buffering enabled
-- Configure colors when in DarkMode!
-- Large data: page/virtualize (`VirtualMode = True` with `CellValueNeeded`)
+- ダブルバッファリングを有効にした派生クラスを優先する
+- ダークモードのときに色を設定します。
+- 大きなデータ: ページ/仮想化 (`VirtualMode = True` と `CellValueNeeded`)
 
-### Resources and Localization
+### リソースとローカリゼーション
 
-- String literal constants for UI display NEED to be in resource files.
-- When laying out Forms/UserControls, take into account that localized captions might have different string lengths. 
-- Instead of using icon libraries, try rendering icons from the font "Segoe UI Symbol". 
-- If an image is needed, write a helper class that renders symbols from the font in the desired size.
+- UI 表示の文字列リテラル定数はリソース ファイルに存在する必要があります。
+- フォーム/ユーザーコントロールをレイアウトするときは、ローカライズされたキャプションの文字列の長さが異なる可能性があることを考慮してください。
+- アイコン ライブラリを使用する代わりに、フォント「Segoe UI Symbol」からアイコンをレンダリングしてみてください。
+- 画像が必要な場合は、フォントから希望のサイズでシンボルをレンダリングするヘルパー クラスを作成します。
 
-## Critical Reminders
+## 重要なリマインダー
 
-| # | Rule |
+| # |ルール |
 |---|------|
-| 1 | `InitializeComponent` code serves as serialization format - more like XML, not C# |
-| 2 | Two contexts, two rule sets - designer code-behind vs regular code |
-| 3 | Validate form/control names before generating code |
-| 4 | Stick to coding style rules for `InitializeComponent` |
-| 5 | Designer files never use NRT annotations |
-| 6 | Modern C# features for regular code ONLY |
-| 7 | Data binding: Treat ViewModels as DataSources, remember `Command` and `CommandParameter` properties |
+| 1 | `InitializeComponent` コードはシリアル化形式として機能します - C# ではなく XML に似ています。
+| 2 | 2 つのコンテキスト、2 つのルール セット - デザイナー コードビハインドと通常のコード |
+| 3 |コードを生成する前にフォーム/コントロール名を検証する |
+| 4 | `InitializeComponent` のコーディング スタイル ルールに従う |
+| 5 |デザイナー ファイルは NRT 注釈を使用しません。
+| 6 |通常のコードのみの最新の C# 機能 |
+| 7 |データ バインディング: ViewModel をデータソースとして扱い、`Command` プロパティと `CommandParameter` プロパティを覚えておいてください。
